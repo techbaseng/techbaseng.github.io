@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block head_css %}
+<link rel="stylesheet" href="{{ root }}assets/css/lesson.css?v={{ asset_v }}">{% endblock %}
+{% block after_header %}
+{%- if lesson.interactive %}<div class="lesson-progress c-{{ course.key }}" aria-hidden="true"><i id="lesson-bar"></i></div>{% endif %}
+{% endblock %}
+{% block body %}
+<div class="c-{{ course.key }}">
+<section class="lesson-hero">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ root }}index.html">Academy</a><span class="sep" aria-hidden="true">/</span><a href="{{ root }}{{ course.slug }}/index.html">{{ course.title }}</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">{{ course.noun|capitalize }} {{ lesson.num }}</span></nav>
+    <div class="kicker">{{ lesson.kicker|safe }}{% if lesson.level_label %}<span class="level-badge {{ lesson.level_class }}">{{ lesson.level_label }}</span>{% endif %}</div>
+    <h1>{{ lesson.h1 }}</h1>
+    {%- if lesson.tagline %}<p class="tagline">{{ lesson.tagline }}</p>{% endif %}
+    {%- if lesson.chips %}<div class="meta">{% for c in lesson.chips %}<span class="meta-chip">{{ c }}</span>{% endfor %}</div>{% endif %}
+    {%- if lesson.ext %}
+    <a class="btn btn--course btn--lg" href="{{ lesson.ext.href }}" target="_blank" rel="noopener noreferrer">{{ lesson.ext.label }} {{ icon('external') }}</a>
+    {%- if lesson.ext.note %}<span class="rpi-note">{{ lesson.ext.note }}</span>{% endif %}
+    {%- endif %}
+  </div>
+</section>
+
+{%- if lesson.interactive %}
+<div class="wrap lesson-layout">
+  <main id="main" class="lesson-main" data-course="{{ course.slug }}"><div id="lesson-main" data-course="{{ course.slug }}" data-file="{{ lesson.file }}" data-title="{{ lesson.h1 }}" data-num="{{ course.noun|capitalize }} {{ lesson.num }}" data-url="{{ course.slug }}/lessons/{{ lesson.file }}" data-total="{{ lesson.phases|length }}" data-key="{{ lesson.key }}">
+    {{ lesson.body|safe }}
+    {{ lesson.pager|safe }}
+  </div></main>
+  <aside class="rail" aria-label="In this lesson">
+    <h2>In this lesson</h2>
+    <ol>{% for p in lesson.phases %}<li><a href="#phase{{ loop.index }}">{{ p }}</a></li>{% endfor %}</ol>
+  </aside>
+</div>
+{%- else %}
+<div class="wrap project-layout">
+  <main id="main"><div id="lesson-main" class="lesson-body" data-course="{{ course.slug }}" data-file="{{ lesson.file }}" data-title="{{ lesson.h1 }}" data-num="{{ course.noun|capitalize }} {{ lesson.num }}" data-url="{{ course.slug }}/lessons/{{ lesson.file }}">
+    {{ lesson.body|safe }}
+    {{ lesson.pager|safe }}
+  </div></main>
+  <aside class="sidebar" aria-label="Project details">
+    {{ lesson.sidebar|safe }}
+    <button class="mark-done" id="mark-done" type="button" aria-pressed="false">{{ icon('check') }}<span data-label>Mark as done</span></button>
+  </aside>
+</div>
+{%- endif %}
+<div class="wrap"><div class="lesson-foot">
+  <a href="{{ root }}{{ course.slug }}/index.html">All {{ course.total }} {{ course.noun }}s in {{ course.title }}</a>
+  {%- if course.next_course %}<span>·</span><a href="{{ root }}{{ course.next_course.slug }}/index.html">Next course: {{ course.next_course.title }}</a>{% endif %}
+  <span>·</span><a href="{{ root }}index.html">Techbase Academy</a>
+  <span>·</span><span>© {{ site.copyright_years }} {{ site.org }}, Ibadan</span>
+</div></div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/lesson.js?v={{ asset_v }}" defer></script>{% endblock %}

@@ -1,0 +1,111 @@
+{%- from "_macros.html" import icon -%}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ canonical }}">
+<meta name="robots" content="{{ robots|default('index, follow') }}">
+<meta name="theme-color" content="#fafaf8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0e17" media="(prefers-color-scheme: dark)">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="{{ csp }}">
+<meta property="og:site_name" content="{{ site.full_name }}">
+<meta property="og:type" content="{{ og_type|default('website') }}">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ og_alt }}">
+<meta property="og:locale" content="en_NG">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ description }}">
+<meta name="twitter:image" content="{{ og_image }}">
+<link rel="icon" href="{{ abs_root }}favicon.ico" sizes="32x32">
+<link rel="icon" href="{{ abs_root }}assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{ abs_root }}assets/img/apple-touch-icon.png">
+<link rel="manifest" href="{{ abs_root }}manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap">
+<script>{{ theme_script|safe }}</script>
+<link rel="stylesheet" href="{{ root }}assets/css/app.css?v={{ asset_v }}">
+{%- block head_css %}{% endblock %}
+{%- if jsonld %}
+<script type="application/ld+json">{{ jsonld|safe }}</script>
+{%- endif %}
+</head>
+<body class="{{ body_class|default('') }}" data-root="{{ root }}">
+<a class="skip-link" href="#main">Skip to content</a>
+{% include "_sprite.html" %}
+<noscript><div class="noscript-note">JavaScript is off. Lessons still read in full; progress saving, search and the theme switch need JavaScript.</div></noscript>
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="{{ root }}index.html" aria-label="Techbase Academy home">
+      <img src="{{ root }}assets/img/logo-mark.svg" width="34" height="34" alt="">
+      <span>Tech<b>base</b> <small>Academy</small></span>
+    </a>
+    <nav aria-label="Main">
+      <ul class="nav-links" id="site-menu">
+        <li><a href="{{ root }}index.html#courses"{% if nav_active=='courses' %} aria-current="page"{% endif %}>Courses</a></li>
+        {%- if course %}<li><a href="{{ root }}{{ course.slug }}/index.html"{% if nav_active=='course' %} aria-current="page"{% endif %}>{{ course.short }}</a></li>{% endif %}
+        <li><a href="{{ root }}index.html#paths">Learning paths</a></li>
+        <li><a href="{{ root }}index.html#about">About</a></li>
+        <li><a href="{{ site.links.website }}" target="_blank" rel="noopener noreferrer">Website</a></li>
+      </ul>
+    </nav>
+    <div class="nav-tools">
+      <button class="search-btn" type="button" data-open-search aria-label="Search lessons" aria-keyshortcuts="Control+K Meta+K">{{ icon('search') }}<span>Search lessons</span><kbd class="kbd">Ctrl K</kbd></button>
+      <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="Switch between light and dark theme">{{ icon('sun','i-sun') }}{{ icon('moon','i-moon') }}</button>
+      <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-label="Menu" aria-expanded="false" aria-controls="site-menu">{{ icon('menu') }}</button>
+    </div>
+  </div>
+</header>
+{% block after_header %}{% endblock %}
+{% block body %}{% endblock %}
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="brand" href="{{ root }}index.html"><img src="{{ root }}assets/img/logo-mark.svg" width="34" height="34" alt=""><span>Tech<b>base</b> <small>Academy</small></span></a>
+        <p>Free STEM education for everyone. Built by {{ site.org }}, {{ site.location }}.</p>
+      </div>
+      <div>
+        <h2>Web courses</h2>
+        <ul>{% for c in courses if c.key in ('html','css','js') %}<li><a href="{{ root }}{{ c.slug }}/index.html">{{ c.title }}</a></li>{% endfor %}</ul>
+      </div>
+      <div>
+        <h2>More courses</h2>
+        <ul>{% for c in courses if c.key not in ('html','css','js') %}<li><a href="{{ root }}{{ c.slug }}/index.html">{{ c.title }}</a></li>{% endfor %}</ul>
+      </div>
+      <div>
+        <h2>Techbase</h2>
+        <ul>
+          <li><a href="{{ site.links.website }}" target="_blank" rel="noopener noreferrer">techbasengr.com.ng</a></li>
+          <li><a href="{{ site.links.github }}" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          <li><a href="{{ site.links.youtube }}" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+          <li><a href="{{ site.links.scratch }}" target="_blank" rel="noopener noreferrer">Scratch profile</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom"><span>© {{ site.copyright_years }} {{ site.org }} · {{ site.location }}</span><span>MIT Licence · Made in Ibadan</span></div>
+  </div>
+</footer>
+
+<dialog class="palette" id="palette" aria-label="Search lessons">
+  <form method="dialog" class="palette-input">{{ icon('search') }}<input type="search" placeholder="Search all {{ total_lessons }} lessons…" aria-label="Search lessons" autocomplete="off" spellcheck="false"><kbd class="kbd">Esc</kbd></form>
+  <ul class="palette-list" role="listbox" aria-label="Results"></ul>
+  <div class="palette-hint"><span>↑ ↓ to move</span><span>Enter to open</span><span>Esc to close</span></div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button class="icon-btn to-top" type="button" aria-label="Back to top">{{ icon('up') }}</button>
+<script src="{{ root }}assets/js/app.js?v={{ asset_v }}" defer></script>
+{%- block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 37: JavaScript Typed Arrays, ArrayBuffers, DataView &amp; Atomics — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="57" data-key="techbase_js_l37">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 37 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 37</div>
+      <h1>JavaScript Typed Arrays, ArrayBuffers, DataView &amp; Atomics</h1>
+      <div class="l-hero-sub">57 phases &nbsp;·&nbsp; Build: Lesson 37 Project</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 37</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 57 phases</span><span>🏗️ Lesson 37 Project</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 57</div><div class="pt">What Is a Typed Array?</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">A <strong>Typed Array</strong> is a fixed-length, fixed-type view into a block of raw binary memory. Unlike regular JavaScript arrays · which can hold any mix of values (<code>[1, "hello", true, null]</code>) and resize freely · a typed array holds only one specific numeric type and never changes size.</p>
+<p class="v2-p"><strong>Real-world analogy · a spreadsheet column:</strong> Imagine a spreadsheet where one column is declared as "integers only, no more than 255". Every cell in that column can only hold a whole number from 0 · 255. The computer can pack those values tightly together in memory because it knows exactly how big each one is. A regular JS array is like a column with no rules · flexible but wasteful.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is a Typed Array?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 57</div><div class="pt">1.1 · Why Typed Arrays Exist: The Performance Problem</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Regular JavaScript arrays have a major performance drawback for numerical computation:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Regular array — each element is a full JavaScript value object
+// Every number is stored as a 64-bit float with type metadata
+// Elements can be non-contiguous in memory
+const nums = [1, 2, 3, 4, 5];
+
+// Operations on regular arrays:
+// - Each read/write involves type checking and boxing/unboxing
+// - No guarantee of contiguous memory (hard for CPU cache)
+// - Can&#x27;t pass directly to WebGL, WebAssembly, AudioContext, etc.</code></pre></div></div>
+<p class="v2-p">Typed arrays fix all three problems:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th>Regular Array</th><th>Typed Array</th></tr></thead><tbody><tr><td>Element type</td><td>Any mixed type</td><td>Fixed single numeric type</td></tr><tr><td>Memory layout</td><td>Non-contiguous, heap-allocated</td><td>Contiguous, raw binary buffer</td></tr><tr><td>Size</td><td>Dynamic (can push/pop)</td><td>Fixed at creation time</td></tr><tr><td>Direct API use</td><td>Cannot pass to WebGL, WASM etc.</td><td>Designed for binary APIs</td></tr><tr><td>Performance (numeric)</td><td>Slower (type checks every element)</td><td>Much faster (hardware-level ops)</td></tr><tr><td>Index access</td><td>Bounds-checked JS object</td><td>Direct memory offset arithmetic</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Real-world uses of typed arrays:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Domain</th><th>Use</th></tr></thead><tbody><tr><td>WebGL / Three.js</td><td>Vertex positions, colours, normals (Float32Array)</td></tr><tr><td>Web Audio API</td><td>Audio sample buffers (Float32Array)</td></tr><tr><td>WebSockets / Fetch</td><td>Binary protocol data (Uint8Array)</td></tr><tr><td>Canvas / Image processing</td><td>Pixel RGBA data (Uint8ClampedArray)</td></tr><tr><td>File reading</td><td>Raw file bytes (Uint8Array)</td></tr><tr><td>WebAssembly</td><td>Shared memory with WASM modules</td></tr><tr><td>Cryptography (SubtleCrypto)</td><td>Keys, signatures, encrypted data</td></tr><tr><td>SharedArrayBuffer + Workers</td><td>Shared state between threads</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.1 · Why Typed Arrays Exist: The Performance Problem</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 57</div><div class="pt">1.2 · The Memory Architecture: Buffer + View</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Typed arrays use a two-layer architecture:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>┌─────────────────────────────────────────────┐
+│            ArrayBuffer (raw bytes)          │
+│  [ 00 ] [ 00 ] [ 00 ] [ 00 ] [ 00 ] [ 00 ] │  ← 6 bytes of raw memory
+└────────────────────┬────────────────────────┘
+                     │  interpreted by
+          ┌──────────┼──────────────┐
+          ▼          ▼              ▼
+   Int8Array    Uint16Array    Float32Array
+   (6 values)   (3 values)     (1.5 values!)</code></pre></div></div>
+<p class="v2-p">The same raw bytes can be viewed as different types simultaneously. The buffer doesn't care · it's just bytes.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.2 · The Memory Architecture: Buffer + View</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 57</div><div class="pt">1.3 · Creating Typed Arrays: Three Ways</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p"><strong>Method 1 · Specify a length (fills with zeros):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = new Int32Array(4);    // 4 elements × 4 bytes = 16 bytes of memory
+console.log(arr);                 // Output: Int32Array(4) [0, 0, 0, 0]
+console.log(arr.length);          // Output: 4
+console.log(arr.byteLength);      // Output: 16  (4 elements × 4 bytes each)</code></pre></div></div>
+<p class="v2-p"><strong>Method 2 · From an array or iterable (copies values in):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fromArray = new Uint8Array([10, 20, 30, 255]);
+console.log(fromArray);           // Output: Uint8Array(4) [10, 20, 30, 255]
+
+const fromSet = new Float32Array(new Set([1.1, 2.2, 3.3]));
+console.log(fromSet);             // Output: Float32Array(3) [1.1, 2.2, 3.3]</code></pre></div></div>
+<p class="v2-p"><strong>Method 3 · From an existing ArrayBuffer (most powerful · shared memory):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(8);   // 8 bytes of raw memory
+
+// Two different views into the SAME 8 bytes:
+const int32View  = new Int32Array(buffer);    // 2 elements (8 ÷ 4 bytes each)
+const uint8View  = new Uint8Array(buffer);    // 8 elements (8 ÷ 1 byte each)
+
+int32View[0] = 256;    // Write 256 as a 32-bit integer
+
+// The bytes changed — and both views see the change:
+console.log(int32View[0]);   // Output: 256
+console.log(uint8View[0]);   // Output: 0    ← first byte of 256 in little-endian
+console.log(uint8View[1]);   // Output: 1    ← second byte of 256 (0x00 0x01 0x00 0x00)</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.3 · Creating Typed Arrays: Three Ways</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 57</div><div class="pt">1.4 · Reading and Writing Elements</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Typed arrays use the same index notation as regular arrays:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const scores = new Uint8Array(5);
+
+scores[0] = 95;
+scores[1] = 88;
+scores[2] = 72;
+scores[3] = 100;
+scores[4] = 61;
+
+console.log(scores[2]);    // Output: 72
+console.log(scores);       // Output: Uint8Array(5) [95, 88, 72, 100, 61]
+
+// Iterate like a regular array:
+for (const score of scores) {
+  process.stdout.write(score + &quot; &quot;);
+}
+// Output: 95 88 72 100 61</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.4 · Reading and Writing Elements</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 57</div><div class="pt">1.5 · Type Overflow: What Happens at the Boundaries</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">This is one of the most important concepts for typed arrays. Each type can only hold values within its range. What happens when you exceed the range depends on the type:</p>
+<p class="v2-p"><strong>Unsigned integers wrap around (modular arithmetic):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const u8 = new Uint8Array(1);   // Range: 0 to 255
+
+u8[0] = 255;
+console.log(u8[0]);   // Output: 255
+
+u8[0] = 256;          // 256 mod 256 = 0 (wraps to 0)
+console.log(u8[0]);   // Output: 0
+
+u8[0] = 257;          // 257 mod 256 = 1
+console.log(u8[0]);   // Output: 1
+
+u8[0] = -1;           // -1 mod 256 = 255
+console.log(u8[0]);   // Output: 255</code></pre></div></div>
+<p class="v2-p"><strong>Signed integers also wrap (two's complement):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i8 = new Int8Array(1);   // Range: -128 to 127
+
+i8[0] = 127;
+console.log(i8[0]);   // Output: 127
+
+i8[0] = 128;          // Wraps to -128
+console.log(i8[0]);   // Output: -128
+
+i8[0] = 129;          // Wraps to -127
+console.log(i8[0]);   // Output: -127</code></pre></div></div>
+<p class="v2-p"><strong><code>Uint8ClampedArray</code> clamps instead of wrapping (used for pixel data):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const clamped = new Uint8ClampedArray(3);
+
+clamped[0] = 300;    // Clamped to 255 (max)
+clamped[1] = -50;    // Clamped to 0 (min)
+clamped[2] = 128;    // In range — stays 128
+
+console.log(clamped);   // Output: Uint8ClampedArray(3) [255, 0, 128]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Why <code>Uint8ClampedArray</code> for pixels?</strong> An RGBA pixel has each channel (red, green, blue, alpha) stored as a value 0 · 255. If a calculation produces 300 (which could happen when brightening an image), you want 255 (full brightness), not 44 (the wrapped value). Clamping is the correct behaviour for colour channels.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>Thinking question:</strong> What would happen if pixel processing used <code>Uint8Array</code> instead of <code>Uint8ClampedArray</code> for an image brightening operation? What visual artefact would result?</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.5 · Type Overflow: What Happens at the Boundaries</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 57</div><div class="pt">1.6 · Key Properties of Typed Arrays</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = new Float32Array(10);
+
+console.log(arr.length);         // Output: 10  — number of elements
+console.log(arr.byteLength);     // Output: 40  — total bytes (10 × 4 bytes per float32)
+console.log(arr.byteOffset);     // Output: 0   — starting byte offset within the buffer
+console.log(arr.BYTES_PER_ELEMENT); // Output: 4  — bytes per element (Float32 = 4)
+console.log(arr.buffer);         // Output: ArrayBuffer { byteLength: 40 }
+console.log(arr.buffer === arr.buffer); // Output: true — reference to underlying buffer</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>.length</code></td><td>number</td><td>Number of elements</td></tr><tr><td><code>.byteLength</code></td><td>number</td><td>Total bytes occupied</td></tr><tr><td><code>.byteOffset</code></td><td>number</td><td>Byte offset from start of buffer</td></tr><tr><td><code>.BYTES_PER_ELEMENT</code></td><td>number</td><td>Bytes per single element</td></tr><tr><td><code>.buffer</code></td><td>ArrayBuffer</td><td>The underlying raw memory</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 2 · TYPED ARRAY METHODS</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.6 · Key Properties of Typed Arrays</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 57</div><div class="pt">Overview</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Typed arrays share most of the regular <code>Array</code> methods · but with important constraints. They always return a new typed array of the <strong>same type</strong> (not a regular array), and they operate on fixed-size contiguous memory.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Overview</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 57</div><div class="pt">2.1 · `set()` · Bulk Copy Into a Typed Array</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p"><code>set(array, offset?)</code> copies values from any array or typed array into this typed array, starting at the optional offset:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dest = new Uint8Array(8);
+
+dest.set([10, 20, 30, 40]);         // Copy to positions 0–3
+console.log(dest);
+// Output: Uint8Array(8) [10, 20, 30, 40, 0, 0, 0, 0]
+
+dest.set([50, 60], 4);              // Copy to positions 4–5 (offset = 4)
+console.log(dest);
+// Output: Uint8Array(8) [10, 20, 30, 40, 50, 60, 0, 0]
+
+// Efficient bulk copy from another typed array:
+const src  = new Uint8Array([1, 2, 3]);
+const dest2 = new Uint8Array(6);
+dest2.set(src, 3);
+console.log(dest2);
+// Output: Uint8Array(6) [0, 0, 0, 1, 2, 3]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong><code>set()</code> is highly optimised.</strong> When copying between typed arrays of the same type, it uses <code>memcpy</code> at the C level · the fastest possible byte copy. Use it instead of element-by-element assignment whenever you need bulk data transfer.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.1 · <code>set()</code> · Bulk Copy Into a Typed Array</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 57</div><div class="pt">2.2 · `subarray()` · Create a View Without Copying</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><code>subarray(begin, end?)</code> returns a new typed array that views a slice of the <strong>same underlying buffer</strong>. No data is copied.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const full = new Uint8Array([10, 20, 30, 40, 50, 60, 70, 80]);
+
+const slice = full.subarray(2, 5);   // Elements at index 2, 3, 4
+console.log(slice);   // Output: Uint8Array(3) [30, 40, 50]
+
+// Modifying the subarray modifies the original:
+slice[0] = 99;
+console.log(full);
+// Output: Uint8Array(8) [10, 20, 99, 40, 50, 60, 70, 80]  ← position 2 changed!</code></pre></div></div>
+<p class="v2-p"><strong><code>subarray()</code> vs <code>slice()</code> · crucial distinction:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = new Uint8Array([1, 2, 3, 4, 5]);
+
+const sub   = arr.subarray(1, 4);  // View — same buffer, no copy
+const copy  = arr.slice(1, 4);     // Copy — new buffer
+
+sub[0] = 99;
+copy[0] = 77;
+
+console.log(arr[1]);   // Output: 99  ← subarray mutation visible
+console.log(arr[1]);   // Output: 99  ← copy mutation NOT visible</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Copies data?</th><th>Shares buffer?</th><th>Modifying affects original?</th></tr></thead><tbody><tr><td><code>subarray(start, end)</code></td><td>❌ No</td><td>✅ Yes</td><td>✅ Yes</td></tr><tr><td><code>slice(start, end)</code></td><td>✅ Yes</td><td>❌ No</td><td>❌ No</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.2 · <code>subarray()</code> · Create a View Without Copying</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 57</div><div class="pt">2.3 · `copyWithin()` · Copy Within the Same Array</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Copies a section of the array to another position within the same array:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = new Uint8Array([1, 2, 3, 4, 5, 6]);
+
+// copyWithin(target, start, end?)
+// Copy elements at [1,3) to position 3:
+arr.copyWithin(3, 1, 3);
+console.log(arr);   // Output: Uint8Array(6) [1, 2, 3, 2, 3, 6]
+//                                                      ↑   ↑
+//                                             positions 3,4 got values from positions 1,2</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Scrolling a circular buffer · instead of allocating new memory, shift data within the existing buffer.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.3 · <code>copyWithin()</code> · Copy Within the Same Array</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 57</div><div class="pt">2.4 · `fill()` · Fill With a Value</div><div class="pc" id="chk12"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = new Int32Array(5);
+arr.fill(7);                     // Fill all with 7
+console.log(arr);   // Output: Int32Array(5) [7, 7, 7, 7, 7]
+
+arr.fill(0, 2, 4);               // Fill positions 2–3 with 0
+console.log(arr);   // Output: Int32Array(5) [7, 7, 0, 0, 7]</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.4 · <code>fill()</code> · Fill With a Value</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 57</div><div class="pt">2.5 · Iteration Methods (Shared with Array)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p">All standard array iteration methods work on typed arrays and return <strong>typed arrays of the same type</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const pixels = new Uint8Array([100, 150, 200, 250]);
+
+// map — transform each element (returns same typed array type):
+const brightened = pixels.map(p =&gt; Math.min(255, p + 50));
+console.log(brightened);   // Output: Uint8Array(4) [150, 200, 250, 255]
+
+// filter — select elements (returns same typed array type):
+const bright = pixels.filter(p =&gt; p &gt; 150);
+console.log(bright);   // Output: Uint8Array(2) [200, 250]
+
+// reduce — aggregate:
+const total = pixels.reduce((sum, p) =&gt; sum + p, 0);
+console.log(total);    // Output: 700
+
+// find / findIndex:
+const first  = pixels.find(p =&gt; p &gt; 180);
+const firstI = pixels.findIndex(p =&gt; p &gt; 180);
+console.log(first, firstI);   // Output: 200  2
+
+// every / some:
+console.log(pixels.every(p =&gt; p &gt; 0));    // Output: true
+console.log(pixels.some(p =&gt; p &gt; 240));   // Output: true
+
+// forEach:
+pixels.forEach((val, idx) =&gt; console.log(`[${idx}]: ${val}`));</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong><code>map()</code> on a typed array returns a typed array, not a regular array.</strong> <code>Uint8Array.map(fn)</code> returns a <code>Uint8Array</code>. If the mapping function returns fractional values, they'll be truncated. Use <code>Array.from(typedArr).map(fn)</code> if you need a regular array back.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.5 · Iteration Methods (Shared with Array)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 57</div><div class="pt">2.6 · `from()` and `of()` · Static Creation Methods</div><div class="pc" id="chk14"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// TypedArray.from() — like Array.from, with an optional map function:
+const doubled = Int16Array.from([1, 2, 3, 4, 5], x =&gt; x * 2);
+console.log(doubled);   // Output: Int16Array(5) [2, 4, 6, 8, 10]
+
+// TypedArray.of() — create from arguments:
+const vals = Float32Array.of(1.1, 2.2, 3.3);
+console.log(vals);   // Output: Float32Array(3) [1.1, 2.2, 3.3]</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.6 · <code>from()</code> and <code>of()</code> · Static Creation Methods</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 57</div><div class="pt">2.7 · Sorting Typed Arrays</div><div class="pc" id="chk15"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const nums = new Int16Array([40, -10, 5, 100, -3]);
+nums.sort();
+console.log(nums);   // Output: Int16Array(5) [-10, -3, 5, 40, 100]
+
+// Custom comparator:
+const desc = new Int16Array([40, -10, 5, 100, -3]);
+desc.sort((a, b) =&gt; b - a);
+console.log(desc);   // Output: Int16Array(5) [100, 40, 5, -3, -10]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Unlike regular arrays, typed array numeric sort is correct by default.</strong> Regular <code>Array.sort()</code> uses lexicographic (string) order unless given a comparator · <code>[10, 9, 80].sort()</code> gives <code>[10, 80, 9]</code>. Typed arrays always sort numerically.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.7 · Sorting Typed Arrays</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase16"><div class="ph"><div class="pn">Phase 16 of 57</div><div class="pt">2.8 · Conversion Methods</div><div class="pc" id="chk16"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = new Float32Array([1.5, 2.7, 3.14]);
+
+// To regular array:
+const regular = Array.from(arr);
+console.log(regular);   // Output: [1.5, 2.700000047683716, 3.140000104904175]
+// Note: Float32 has limited precision — values are approximate
+
+// To string:
+console.log(arr.join(&quot; | &quot;));   // Output: 1.5 | 2.700000047683716 | 3.1400001049...
+console.log(arr.toString());    // Output: 1.5,2.700000047683716,3.1400001049...</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 3 · TYPED ARRAY REFERENCE</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.8 · Conversion Methods</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(16)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase17"><div class="ph"><div class="pn">Phase 17 of 57</div><div class="pt">3.1 · All Typed Array Types</div><div class="pc" id="chk17"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Constructor</th><th>Element Size</th><th>Value Range</th><th>Description</th></tr></thead><tbody><tr><td><code>Int8Array</code></td><td>1 byte</td><td>−128 to 127</td><td>8-bit signed integer</td></tr><tr><td><code>Uint8Array</code></td><td>1 byte</td><td>0 to 255</td><td>8-bit unsigned integer</td></tr><tr><td><code>Uint8ClampedArray</code></td><td>1 byte</td><td>0 to 255 (clamped)</td><td>8-bit unsigned, clamped at boundaries</td></tr><tr><td><code>Int16Array</code></td><td>2 bytes</td><td>−32,768 to 32,767</td><td>16-bit signed integer</td></tr><tr><td><code>Uint16Array</code></td><td>2 bytes</td><td>0 to 65,535</td><td>16-bit unsigned integer</td></tr><tr><td><code>Int32Array</code></td><td>4 bytes</td><td>−2,147,483,648 to 2,147,483,647</td><td>32-bit signed integer</td></tr><tr><td><code>Uint32Array</code></td><td>4 bytes</td><td>0 to 4,294,967,295</td><td>32-bit unsigned integer</td></tr><tr><td><code>Float32Array</code></td><td>4 bytes</td><td>~±3.4 × 10³⁸</td><td>32-bit IEEE 754 float</td></tr><tr><td><code>Float64Array</code></td><td>8 bytes</td><td>~±1.8 × 10³⁰⁸</td><td>64-bit IEEE 754 float (JS <code>number</code>)</td></tr><tr><td><code>BigInt64Array</code></td><td>8 bytes</td><td>−2⁶³ to 2⁶³−1</td><td>64-bit signed BigInt</td></tr><tr><td><code>BigUint64Array</code></td><td>8 bytes</td><td>0 to 2⁶⁴−1</td><td>64-bit unsigned BigInt</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.1 · All Typed Array Types</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(17)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase18"><div class="ph"><div class="pn">Phase 18 of 57</div><div class="pt">3.2 · Choosing the Right Type</div><div class="pc" id="chk18"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Use Case</th><th>Best Type</th><th>Why</th></tr></thead><tbody><tr><td>Pixel/colour data</td><td><code>Uint8ClampedArray</code></td><td>0 · 255 per channel, clamping prevents artefacts</td></tr><tr><td>Raw bytes (network, file)</td><td><code>Uint8Array</code></td><td>Standard byte representation</td></tr><tr><td>Audio samples</td><td><code>Float32Array</code></td><td>Normalised −1.0 to 1.0 range</td></tr><tr><td>3D vertex data (WebGL)</td><td><code>Float32Array</code></td><td>GPU expects 32-bit floats</td></tr><tr><td>Indices (3D meshes)</td><td><code>Uint16Array</code> or <code>Uint32Array</code></td><td>Counts of vertices; 16-bit for small meshes</td></tr><tr><td>General integer computation</td><td><code>Int32Array</code></td><td>Good range, no surprises</td></tr><tr><td>High-precision calculation</td><td><code>Float64Array</code></td><td>Same as JS <code>number</code></td></tr><tr><td>64-bit integer IDs</td><td><code>BigInt64Array</code></td><td>When IDs exceed 2⁵³</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.2 · Choosing the Right Type</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(18)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase19"><div class="ph"><div class="pn">Phase 19 of 57</div><div class="pt">3.3 · Static Properties</div><div class="pc" id="chk19"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(Int8Array.BYTES_PER_ELEMENT);      // Output: 1
+console.log(Float32Array.BYTES_PER_ELEMENT);   // Output: 4
+console.log(Float64Array.BYTES_PER_ELEMENT);   // Output: 8
+
+console.log(Int8Array.name);    // Output: Int8Array</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.3 · Static Properties</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(19)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase20"><div class="ph"><div class="pn">Phase 20 of 57</div><div class="pt">3.4 · Complete Instance Method Reference</div><div class="pc" id="chk20"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Description</th><th>Returns</th></tr></thead><tbody><tr><td><code>set(array, offset?)</code></td><td>Bulk copy values from array into this</td><td><code>undefined</code></td></tr><tr><td><code>subarray(begin?, end?)</code></td><td>New view of slice · same buffer</td><td>TypedArray</td></tr><tr><td><code>slice(begin?, end?)</code></td><td>New typed array with copied data</td><td>TypedArray</td></tr><tr><td><code>copyWithin(target, start, end?)</code></td><td>Copy elements within array</td><td>TypedArray</td></tr><tr><td><code>fill(value, start?, end?)</code></td><td>Fill with a constant value</td><td>TypedArray</td></tr><tr><td><code>sort(compareFn?)</code></td><td>Sort in-place</td><td>TypedArray</td></tr><tr><td><code>reverse()</code></td><td>Reverse in-place</td><td>TypedArray</td></tr><tr><td><code>indexOf(value, fromIndex?)</code></td><td>First index of value</td><td>number</td></tr><tr><td><code>lastIndexOf(value, fromIndex?)</code></td><td>Last index of value</td><td>number</td></tr><tr><td><code>includes(value, fromIndex?)</code></td><td>Whether value exists</td><td>boolean</td></tr><tr><td><code>find(predicate)</code></td><td>First matching element</td><td>element or <code>undefined</code></td></tr><tr><td><code>findIndex(predicate)</code></td><td>Index of first match</td><td>number</td></tr><tr><td><code>every(predicate)</code></td><td>All elements satisfy?</td><td>boolean</td></tr><tr><td><code>some(predicate)</code></td><td>Any element satisfies?</td><td>boolean</td></tr><tr><td><code>forEach(callback)</code></td><td>Iterate without return</td><td><code>undefined</code></td></tr><tr><td><code>map(callback)</code></td><td>Transform each element</td><td>TypedArray (same type)</td></tr><tr><td><code>filter(predicate)</code></td><td>Keep matching elements</td><td>TypedArray (same type)</td></tr><tr><td><code>reduce(callback, initial?)</code></td><td>Aggregate to single value</td><td>any</td></tr><tr><td><code>reduceRight(callback, initial?)</code></td><td>Aggregate from right</td><td>any</td></tr><tr><td><code>join(separator?)</code></td><td>Concatenate as string</td><td>string</td></tr><tr><td><code>keys()</code></td><td>Iterator over indices</td><td>Iterator</td></tr><tr><td><code>values()</code></td><td>Iterator over values</td><td>Iterator</td></tr><tr><td><code>entries()</code></td><td>Iterator over [index, value] pairs</td><td>Iterator</td></tr><tr><td><code>at(index)</code></td><td>Element at index (supports negative)</td><td>element</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 4 · ARRAYBUFFERS</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.4 · Complete Instance Method Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(20)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase21"><div class="ph"><div class="pn">Phase 21 of 57</div><div class="pt">What Is an ArrayBuffer?</div><div class="pc" id="chk21"></div></div><div class="pb2"><p class="v2-p">An <strong><code>ArrayBuffer</code></strong> is a fixed-size block of raw binary memory. It is the actual storage · the bytes themselves. You cannot read from or write to an <code>ArrayBuffer</code> directly. You must create a <strong>view</strong> (a Typed Array or DataView) to interact with its contents.</p>
+<p class="v2-p"><strong>Real-world analogy · a warehouse floor:</strong> The <code>ArrayBuffer</code> is an empty warehouse floor. You can't do anything with just the floor. To work in the warehouse, you need to define zones: "Zone A is for boxes (Int32Array), Zone B is for envelopes (Uint8Array)." The zones are views · they define how to interpret the space.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is an ArrayBuffer?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(21)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase22"><div class="ph"><div class="pn">Phase 22 of 57</div><div class="pt">4.1 · Creating an ArrayBuffer</div><div class="pc" id="chk22"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(16);   // Allocate 16 bytes of memory
+
+console.log(buffer.byteLength);       // Output: 16
+console.log(buffer instanceof ArrayBuffer);  // Output: true</code></pre></div></div>
+<p class="v2-p">The buffer is zeroed out automatically · all bytes start as <code>0x00</code>.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong><code>ArrayBuffer</code> size is fixed at creation.</strong> You cannot resize it after the fact. If you need more space, you must create a new (larger) buffer and copy the data.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.1 · Creating an ArrayBuffer</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(22)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase23"><div class="ph"><div class="pn">Phase 23 of 57</div><div class="pt">4.2 · ArrayBuffer Is Not Directly Readable</div><div class="pc" id="chk23"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(4);
+console.log(buffer[0]);   // Output: undefined  ← can&#x27;t read directly!
+
+// You must create a view:
+const view = new Uint8Array(buffer);
+view[0] = 42;
+console.log(view[0]);     // Output: 42</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.2 · ArrayBuffer Is Not Directly Readable</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(23)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase24"><div class="ph"><div class="pn">Phase 24 of 57</div><div class="pt">4.3 · Multiple Views on the Same Buffer</div><div class="pc" id="chk24"></div></div><div class="pb2"><p class="v2-p">The same <code>ArrayBuffer</code> can be viewed through multiple typed arrays simultaneously. They all share the same underlying bytes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(4);   // 4 bytes
+
+const u8   = new Uint8Array(buffer);    // 4 elements (1 byte each)
+const u16  = new Uint16Array(buffer);   // 2 elements (2 bytes each)
+const u32  = new Uint32Array(buffer);   // 1 element  (4 bytes each)
+
+// Write a single 32-bit value:
+u32[0] = 0x01020304;
+
+// Observe how it&#x27;s stored in bytes (little-endian on most systems):
+console.log(u8[0].toString(16));  // Output: 4  (least significant byte first)
+console.log(u8[1].toString(16));  // Output: 3
+console.log(u8[2].toString(16));  // Output: 2
+console.log(u8[3].toString(16));  // Output: 1  (most significant byte last)
+
+// The 16-bit view sees two 16-bit numbers:
+console.log(u16[0].toString(16)); // Output: 304
+console.log(u16[1].toString(16)); // Output: 102</code></pre></div></div>
+<p class="v2-p">This illustrates <strong>endianness</strong> · the order in which bytes are stored for multi-byte values.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.3 · Multiple Views on the Same Buffer</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(24)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase25"><div class="ph"><div class="pn">Phase 25 of 57</div><div class="pt">4.4 · Endianness Explained</div><div class="pc" id="chk25"></div></div><div class="pb2"><p class="v2-p"><strong>Endianness</strong> describes whether the <strong>most significant byte</strong> (the "big end") or <strong>least significant byte</strong> (the "little end") is stored first in memory.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Value: 0x01020304 (decimal: 16909060)
+
+Big-endian (network byte order):
+Byte 0: 01   Byte 1: 02   Byte 2: 03   Byte 3: 04
+(most significant first)
+
+Little-endian (most CPUs: x86, ARM):
+Byte 0: 04   Byte 1: 03   Byte 2: 02   Byte 3: 01
+(least significant first)</code></pre></div></div>
+<p class="v2-p">Most modern CPUs (x86, ARM) use <strong>little-endian</strong>. Network protocols and file formats often use <strong>big-endian</strong> (also called "network byte order"). When reading/writing binary files or network data, you must handle endianness explicitly · this is what <code>DataView</code> (Chapter 5) is designed for.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.4 · Endianness Explained</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(25)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase26"><div class="ph"><div class="pn">Phase 26 of 57</div><div class="pt">4.5 · Typed Array Views with Offset</div><div class="pc" id="chk26"></div></div><div class="pb2"><p class="v2-p">You can create a typed array that starts at a specific byte offset within the buffer:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(16);
+
+// First Int32 view — covers bytes 0–3:
+const view1 = new Int32Array(buffer, 0, 1);
+
+// Second Int32 view — covers bytes 4–7:
+const view2 = new Int32Array(buffer, 4, 1);
+
+// Third Int32 view — covers bytes 8–15:
+const view3 = new Int32Array(buffer, 8, 2);
+
+view1[0] = 100;
+view2[0] = 200;
+view3[0] = 300;
+view3[1] = 400;
+
+// Read all through a full view:
+const all = new Int32Array(buffer);
+console.log(all);   // Output: Int32Array(4) [100, 200, 300, 400]</code></pre></div></div>
+<p class="v2-p"><strong>Constructor signature:</strong> <code>new TypedArray(buffer, byteOffset?, length?)</code></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Parameter</th><th>Description</th></tr></thead><tbody><tr><td><code>buffer</code></td><td>The ArrayBuffer to view</td></tr><tr><td><code>byteOffset</code></td><td>Starting byte (must be aligned to element size)</td></tr><tr><td><code>length</code></td><td>Number of elements (not bytes!)</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Alignment requirement:</strong> <code>byteOffset</code> must be a multiple of <code>BYTES_PER_ELEMENT</code>. Trying to create <code>new Int32Array(buffer, 1)</code> (offset 1 is not a multiple of 4) throws a <code>RangeError</code>.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.5 · Typed Array Views with Offset</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(26)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase27"><div class="ph"><div class="pn">Phase 27 of 57</div><div class="pt">4.6 · Copying an ArrayBuffer: `slice()`</div><div class="pc" id="chk27"></div></div><div class="pb2"><p class="v2-p"><code>ArrayBuffer.prototype.slice(begin, end?)</code> returns a new <code>ArrayBuffer</code> with a <strong>copy</strong> of the bytes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const original = new ArrayBuffer(8);
+const view = new Uint8Array(original);
+view.set([1, 2, 3, 4, 5, 6, 7, 8]);
+
+// Copy bytes 2–5:
+const copy = original.slice(2, 6);
+const copyView = new Uint8Array(copy);
+console.log(copyView);   // Output: Uint8Array(4) [3, 4, 5, 6]
+
+// Modifying the copy does NOT affect the original:
+copyView[0] = 99;
+console.log(view[2]);    // Output: 3  ← original unchanged</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.6 · Copying an ArrayBuffer: <code>slice()</code></strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(27)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase28"><div class="ph"><div class="pn">Phase 28 of 57</div><div class="pt">4.7 · Transferable ArrayBuffers</div><div class="pc" id="chk28"></div></div><div class="pb2"><p class="v2-p">In web Workers (parallel threads), <code>ArrayBuffer</code> objects can be <strong>transferred</strong> · zero-copy move of ownership from one thread to another:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Main thread:
+const buffer = new ArrayBuffer(1024 * 1024);  // 1MB
+const view   = new Uint8Array(buffer);
+view.fill(42);
+
+// Transfer to Worker (zero-copy — buffer becomes unusable in main thread):
+worker.postMessage({ data: buffer }, [buffer]);   // buffer in transfer list
+
+// After transfer, buffer is detached:
+console.log(buffer.byteLength);   // Output: 0  ← detached!
+// console.log(view[0]);          // ❌ TypeError: buffer is detached</code></pre></div></div>
+<p class="v2-p"><strong>Transferring</strong> moves the underlying memory to the worker · avoiding the cost of copying 1MB of data. The original thread can no longer access it.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.7 · Transferable ArrayBuffers</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(28)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase29"><div class="ph"><div class="pn">Phase 29 of 57</div><div class="pt">4.8 · `SharedArrayBuffer` · Shared Memory Between Threads</div><div class="pc" id="chk29"></div></div><div class="pb2"><p class="v2-p"><code>SharedArrayBuffer</code> is a special buffer type that can be <strong>shared</strong> (not just transferred) between the main thread and Workers · both can read and write the same memory simultaneously:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Main thread:
+const shared = new SharedArrayBuffer(4);   // 4 bytes, shared
+const view   = new Int32Array(shared);
+view[0] = 0;   // Initial value: 0
+
+// Send to Worker (shared — NOT transferred, original still accessible):
+worker.postMessage({ buffer: shared });
+
+// Both threads can now read/write view[0] simultaneously
+// (Use Atomics for safe concurrent access — see Chapter 6!)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong><code>SharedArrayBuffer</code> requires specific HTTP headers</strong> (<code>Cross-Origin-Opener-Policy: same-origin</code> and <code>Cross-Origin-Embedder-Policy: require-corp</code>) due to Spectre security concerns. These prevent cross-origin timing attacks.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 5 · DATAVIEW</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.8 · <code>SharedArrayBuffer</code> · Shared Memory Between Threads</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(29)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase30"><div class="ph"><div class="pn">Phase 30 of 57</div><div class="pt">What Is DataView?</div><div class="pc" id="chk30"></div></div><div class="pb2"><p class="v2-p"><code>DataView</code> is a flexible, low-level interface for reading and writing multiple numeric types from any byte position in an <code>ArrayBuffer</code>, with <strong>explicit control over endianness</strong>. While typed arrays interpret the entire buffer as one homogeneous type, <code>DataView</code> lets you read a byte here, a 32-bit float there, a 16-bit integer somewhere else · in any byte order you need.</p>
+<p class="v2-p"><strong>Real-world analogy · a multi-format file parser:</strong> Binary file formats (images, audio files, 3D models) often have headers with mixed types: a 2-byte magic number, a 4-byte integer for file size, a 1-byte version flag, a 4-byte float for a scale factor. <code>DataView</code> is the tool for parsing such heterogeneous binary data.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is DataView?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(30)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase31"><div class="ph"><div class="pn">Phase 31 of 57</div><div class="pt">5.1 · Creating a DataView</div><div class="pc" id="chk31"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(16);
+const view   = new DataView(buffer);
+
+// Optional offset and length:
+const subView = new DataView(buffer, 4, 8);   // Start at byte 4, 8 bytes long</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.1 · Creating a DataView</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(31)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase32"><div class="ph"><div class="pn">Phase 32 of 57</div><div class="pt">5.2 · Writing Data with DataView</div><div class="pc" id="chk32"></div></div><div class="pb2"><p class="v2-p"><code>DataView</code> provides individual setter methods for every numeric type:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(16);
+const view   = new DataView(buffer);
+
+view.setUint8(0, 0xFF);               // Write byte 0xFF at byte offset 0
+view.setInt16(1, -1000, true);        // Write int16 at offset 1 (little-endian)
+view.setInt16(3, -1000, false);       // Write int16 at offset 3 (big-endian)
+view.setFloat32(5, 3.14, true);       // Write float32 at offset 5 (little-endian)
+view.setUint32(9, 0xDEADBEEF, true);  // Write uint32 at offset 9 (little-endian)</code></pre></div></div>
+<p class="v2-p"><strong>Setter signature:</strong> <code>view.setTypeName(byteOffset, value, littleEndian?)</code></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Parameter</th><th>Description</th></tr></thead><tbody><tr><td><code>byteOffset</code></td><td>Byte position to write at (no alignment requirement · unlike typed arrays)</td></tr><tr><td><code>value</code></td><td>The value to write</td></tr><tr><td><code>littleEndian</code></td><td><code>true</code> = little-endian, <code>false</code> or omitted = big-endian</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.2 · Writing Data with DataView</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(32)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase33"><div class="ph"><div class="pn">Phase 33 of 57</div><div class="pt">5.3 · Reading Data with DataView</div><div class="pc" id="chk33"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(16);
+const view   = new DataView(buffer);
+
+// Write some values:
+view.setUint8(0, 255);
+view.setInt32(1, -1, false);          // Big-endian
+view.setFloat64(5, Math.PI, true);    // Little-endian
+
+// Read them back:
+console.log(view.getUint8(0));         // Output: 255
+console.log(view.getInt32(1, false));  // Output: -1  (big-endian)
+console.log(view.getFloat64(5, true)); // Output: 3.141592653589793  (little-endian)</code></pre></div></div>
+<p class="v2-p"><strong>Getter signature:</strong> <code>view.getTypeName(byteOffset, littleEndian?)</code></p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.3 · Reading Data with DataView</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(33)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase34"><div class="ph"><div class="pn">Phase 34 of 57</div><div class="pt">5.4 · Complete DataView Method Reference</div><div class="pc" id="chk34"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Getter</th><th>Setter</th><th>Bytes Read/Written</th><th>Description</th></tr></thead><tbody><tr><td><code>getInt8(offset)</code></td><td><code>setInt8(offset, value)</code></td><td>1</td><td>Signed 8-bit integer</td></tr><tr><td><code>getUint8(offset)</code></td><td><code>setUint8(offset, value)</code></td><td>1</td><td>Unsigned 8-bit integer</td></tr><tr><td><code>getInt16(offset, le?)</code></td><td><code>setInt16(offset, value, le?)</code></td><td>2</td><td>Signed 16-bit integer</td></tr><tr><td><code>getUint16(offset, le?)</code></td><td><code>setUint16(offset, value, le?)</code></td><td>2</td><td>Unsigned 16-bit integer</td></tr><tr><td><code>getInt32(offset, le?)</code></td><td><code>setInt32(offset, value, le?)</code></td><td>4</td><td>Signed 32-bit integer</td></tr><tr><td><code>getUint32(offset, le?)</code></td><td><code>setUint32(offset, value, le?)</code></td><td>4</td><td>Unsigned 32-bit integer</td></tr><tr><td><code>getFloat32(offset, le?)</code></td><td><code>setFloat32(offset, value, le?)</code></td><td>4</td><td>32-bit float</td></tr><tr><td><code>getFloat64(offset, le?)</code></td><td><code>setFloat64(offset, value, le?)</code></td><td>8</td><td>64-bit float (JS <code>number</code>)</td></tr><tr><td><code>getBigInt64(offset, le?)</code></td><td><code>setBigInt64(offset, value, le?)</code></td><td>8</td><td>64-bit signed BigInt</td></tr><tr><td><code>getBigUint64(offset, le?)</code></td><td><code>setBigUint64(offset, value, le?)</code></td><td>8</td><td>64-bit unsigned BigInt</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.4 · Complete DataView Method Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(34)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase35"><div class="ph"><div class="pn">Phase 35 of 57</div><div class="pt">5.5 · No Alignment Requirement (Key Advantage)</div><div class="pc" id="chk35"></div></div><div class="pb2"><p class="v2-p">Typed arrays require byte offsets to be aligned to the element size:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(8);
+
+// ❌ Typed array at odd offset:
+const ta = new Int32Array(buffer, 1);   // RangeError: offset must be multiple of 4
+
+// ✅ DataView at any offset:
+const dv = new DataView(buffer);
+dv.setInt32(1, 42);   // Perfectly fine — byte offset 1
+console.log(dv.getInt32(1));   // Output: 42</code></pre></div></div>
+<p class="v2-p">This makes <code>DataView</code> essential for parsing binary formats where fields are not naturally aligned.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.5 · No Alignment Requirement (Key Advantage)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(35)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase36"><div class="ph"><div class="pn">Phase 36 of 57</div><div class="pt">5.6 · Parsing a Binary File Header</div><div class="pc" id="chk36"></div></div><div class="pb2"><p class="v2-p">A practical example · parsing a hypothetical binary file format:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Simulate a binary file header:
+// Bytes 0–1:  Magic number (0x4A53 = &quot;JS&quot; in ASCII)
+// Bytes 2–5:  File version (uint32, big-endian)
+// Bytes 6–9:  Data length in bytes (uint32, little-endian)
+// Bytes 10–13: Scale factor (float32, little-endian)
+// Byte  14:   Flags (uint8 bitmask)
+
+const buffer = new ArrayBuffer(15);
+const dv     = new DataView(buffer);
+
+// Write (simulate file creation):
+dv.setUint16(0,  0x4A53, false);       // Big-endian magic
+dv.setUint32(2,  2,      false);       // Version 2, big-endian
+dv.setUint32(6,  1024,   true);        // 1024 bytes of data, little-endian
+dv.setFloat32(10, 1.5,   true);        // Scale 1.5x, little-endian
+dv.setUint8(14, 0b00000101);           // Flags: bit 0 and bit 2 set
+
+// Read (simulate file parsing):
+const magic    = dv.getUint16(0, false);
+const version  = dv.getUint32(2, false);
+const dataLen  = dv.getUint32(6, true);
+const scale    = dv.getFloat32(10, true);
+const flags    = dv.getUint8(14);
+
+console.log(&quot;Magic:&quot;,   magic.toString(16).toUpperCase()); // Output: 4A53
+console.log(&quot;Version:&quot;, version);          // Output: 2
+console.log(&quot;Data len:&quot;,dataLen);           // Output: 1024
+console.log(&quot;Scale:&quot;,   scale);            // Output: 1.5
+console.log(&quot;Flags:&quot;,   flags.toString(2).padStart(8, &quot;0&quot;)); // Output: 00000101
+console.log(&quot;Flag 0 set?&quot;, !!(flags &amp; 0b00000001));  // Output: true
+console.log(&quot;Flag 1 set?&quot;, !!(flags &amp; 0b00000010));  // Output: false
+console.log(&quot;Flag 2 set?&quot;, !!(flags &amp; 0b00000100));  // Output: true</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.6 · Parsing a Binary File Header</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(36)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase37"><div class="ph"><div class="pn">Phase 37 of 57</div><div class="pt">5.7 · DataView Properties</div><div class="pc" id="chk37"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(32);
+const view   = new DataView(buffer, 8, 16);   // Start at byte 8, 16 bytes long
+
+console.log(view.buffer);       // Output: ArrayBuffer { byteLength: 32 }  ← the full buffer
+console.log(view.byteOffset);   // Output: 8    ← starting byte
+console.log(view.byteLength);   // Output: 16   ← length of this view</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 6 · ATOMICS</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.7 · DataView Properties</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(37)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase38"><div class="ph"><div class="pn">Phase 38 of 57</div><div class="pt">What Are Atomics?</div><div class="pc" id="chk38"></div></div><div class="pb2"><p class="v2-p"><code>Atomics</code> is a built-in object that provides <strong>atomic operations</strong> on <code>SharedArrayBuffer</code>s · operations that complete fully without being interrupted by other threads. No method can be called with <code>new</code>; all methods are static.</p>
+<p class="v2-p"><strong>The concurrency problem:</strong> When multiple threads access shared memory simultaneously, operations that look "simple" in JavaScript are actually multiple CPU instructions. Another thread can interrupt between those instructions, causing <strong>race conditions</strong> · corrupted data from concurrent, interleaved writes.</p>
+<p class="v2-p"><strong>Real-world analogy · a shared bank account:</strong> Imagine two bank tellers (threads) updating the same account simultaneously. Teller 1 reads the balance: £500. Teller 2 reads the balance: £500. Teller 1 adds £100 and writes £600. Teller 2 adds £200 and writes £700. The final balance is £700 · but it should be £800. Both tellers read the same old value before either wrote their update. This is a race condition.</p>
+<p class="v2-p">An <strong>atomic operation</strong> is like a single transaction: read, modify, write as one uninterruptible action. No other teller can read or write until the whole operation is done.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Are Atomics?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(38)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase39"><div class="ph"><div class="pn">Phase 39 of 57</div><div class="pt">6.1 · When Do You Need Atomics?</div><div class="pc" id="chk39"></div></div><div class="pb2"><p class="v2-p">Atomics are <strong>only needed with <code>SharedArrayBuffer</code></strong> (shared between threads). Regular <code>ArrayBuffer</code> is accessible from only one thread at a time, so no concurrency issues exist.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Single thread — no atomics needed:
+const arr = new Int32Array(new ArrayBuffer(4));
+arr[0]++;   // Safe — no other thread can see this
+
+// Multi-thread — atomics required:
+const shared = new SharedArrayBuffer(4);
+const sarr   = new Int32Array(shared);
+// ❌ sarr[0]++ — NOT safe if multiple workers do this simultaneously
+// ✅ Atomics.add(sarr, 0, 1)  — safe</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.1 · When Do You Need Atomics?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(39)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase40"><div class="ph"><div class="pn">Phase 40 of 57</div><div class="pt">6.2 · `Atomics.add()` and `Atomics.sub()` · Atomic Arithmetic</div><div class="pc" id="chk40"></div></div><div class="pb2"><p class="v2-p">Returns the value <strong>before</strong> the operation:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const shared = new SharedArrayBuffer(4);
+const sarr   = new Int32Array(shared);
+sarr[0] = 10;
+
+const before = Atomics.add(sarr, 0, 5);   // Atomically: sarr[0] += 5
+console.log(before);     // Output: 10   ← value BEFORE the add
+console.log(sarr[0]);    // Output: 15   ← value AFTER
+
+const before2 = Atomics.sub(sarr, 0, 3);  // Atomically: sarr[0] -= 3
+console.log(before2);    // Output: 15
+console.log(sarr[0]);    // Output: 12</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.2 · <code>Atomics.add()</code> and <code>Atomics.sub()</code> · Atomic Arithmetic</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(40)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase41"><div class="ph"><div class="pn">Phase 41 of 57</div><div class="pt">6.3 · `Atomics.load()` and `Atomics.store()` · Safe Read and Write</div><div class="pc" id="chk41"></div></div><div class="pb2"><p class="v2-p">Reading or writing a value with a guaranteed memory fence · no reordering:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const shared = new SharedArrayBuffer(4);
+const sarr   = new Int32Array(shared);
+
+Atomics.store(sarr, 0, 42);        // Write 42 atomically
+const value = Atomics.load(sarr, 0); // Read atomically
+console.log(value);   // Output: 42</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Why not just use <code>sarr[0] = 42</code>?</strong> In a single-threaded context, <code>sarr[0] = 42</code> is fine. But in a multi-threaded context, the CPU may reorder memory operations for performance optimisation. <code>Atomics.store()</code> includes a <strong>memory fence</strong> that prevents reordering · ensuring other threads see writes in the correct order.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.3 · <code>Atomics.load()</code> and <code>Atomics.store()</code> · Safe Read and Write</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(41)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase42"><div class="ph"><div class="pn">Phase 42 of 57</div><div class="pt">6.4 · `Atomics.exchange()` · Atomic Set and Return Old Value</div><div class="pc" id="chk42"></div></div><div class="pb2"><p class="v2-p">Writes a new value and returns the previous value, atomically:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const shared = new SharedArrayBuffer(4);
+const sarr   = new Int32Array(shared);
+sarr[0] = 100;
+
+const old = Atomics.exchange(sarr, 0, 999);
+console.log(old);      // Output: 100  ← previous value
+console.log(sarr[0]);  // Output: 999  ← new value</code></pre></div></div>
+<p class="v2-p"><strong>Use case:</strong> Implementing a "take" operation · grab a value and replace it with a sentinel like <code>0</code> or <code>-1</code>, atomically.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.4 · <code>Atomics.exchange()</code> · Atomic Set and Return Old Value</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(42)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase43"><div class="ph"><div class="pn">Phase 43 of 57</div><div class="pt">6.5 · `Atomics.compareExchange()` · The Lock Primitive</div><div class="pc" id="chk43"></div></div><div class="pb2"><p class="v2-p">This is the most powerful Atomics method · the foundation of lock-free algorithms. It writes a new value <strong>only if</strong> the current value equals an expected value:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Atomics.compareExchange(typedArray, index, expectedValue, replacementValue)
+// Returns the ACTUAL value before the operation
+// If actual === expected → replaces with replacement → returns expected
+// If actual !== expected → does nothing → returns actual</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const shared = new SharedArrayBuffer(4);
+const sarr   = new Int32Array(shared);
+sarr[0] = 5;
+
+// Try to change 5 → 10 (should succeed):
+const result1 = Atomics.compareExchange(sarr, 0, 5, 10);
+console.log(result1);   // Output: 5   ← old value (5 === expected, so swap happened)
+console.log(sarr[0]);   // Output: 10  ← updated!
+
+// Try to change 5 → 20 (should fail — current value is 10, not 5):
+const result2 = Atomics.compareExchange(sarr, 0, 5, 20);
+console.log(result2);   // Output: 10  ← actual value (10 !== 5, so no swap)
+console.log(sarr[0]);   // Output: 10  ← unchanged</code></pre></div></div>
+<p class="v2-p"><strong><code>compareExchange</code> for implementing a mutex (lock):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Lock convention: 0 = unlocked, 1 = locked
+
+function lock(sarr, index) {
+  // Spin until we successfully change 0 → 1 (acquire the lock):
+  while (Atomics.compareExchange(sarr, index, 0, 1) !== 0) {
+    Atomics.wait(sarr, index, 1);   // Sleep while locked (see 6.7)
+  }
+}
+
+function unlock(sarr, index) {
+  Atomics.store(sarr, index, 0);     // Release the lock
+  Atomics.notify(sarr, index, 1);    // Wake one waiting thread
+}</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.5 · <code>Atomics.compareExchange()</code> · The Lock Primitive</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(43)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase44"><div class="ph"><div class="pn">Phase 44 of 57</div><div class="pt">6.6 · Bitwise Atomic Operations</div><div class="pc" id="chk44"></div></div><div class="pb2"><p class="v2-p">Perform bitwise operations atomically · returning the old value:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const shared = new SharedArrayBuffer(4);
+const sarr   = new Uint32Array(shared);
+sarr[0] = 0b00001111;
+
+// AND — keep only bits that are set in both:
+console.log(Atomics.and(sarr, 0, 0b00110011));
+console.log(sarr[0].toString(2));   // Output: 11  (0b00001111 &amp; 0b00110011)
+
+sarr[0] = 0b00001111;
+// OR — set all bits that are set in either:
+console.log(Atomics.or(sarr, 0, 0b00110011));
+console.log(sarr[0].toString(2));   // Output: 111111  (0b00001111 | 0b00110011)
+
+sarr[0] = 0b00001111;
+// XOR — flip bits that differ:
+console.log(Atomics.xor(sarr, 0, 0b00110011));
+console.log(sarr[0].toString(2));   // Output: 111100  (0b00001111 ^ 0b00110011)</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Atomic flag manipulation · safely set, clear, or toggle individual bits in a shared flags register without read-modify-write races.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.6 · Bitwise Atomic Operations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(44)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase45"><div class="ph"><div class="pn">Phase 45 of 57</div><div class="pt">6.7 · `Atomics.wait()` and `Atomics.notify()` · Thread Synchronisation</div><div class="pc" id="chk45"></div></div><div class="pb2"><p class="v2-p">These two methods implement a <strong>futex</strong> (fast userspace mutex) · an efficient way for threads to sleep and be woken:</p>
+<p class="v2-p"><strong><code>Atomics.wait(sarr, index, value, timeout?)</code>:</strong></p>
+<ul class="v2-ul"><li>Checks if <code>sarr[index] === value</code></li><li>If yes: puts the thread to sleep (blocks execution), returns <code>"ok"</code> when woken</li><li>If no: returns <code>"not-equal"</code> immediately (value already changed)</li><li>If timeout expires: returns <code>"timed-out"</code></li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Worker thread code:
+const shared = new SharedArrayBuffer(4);
+const sarr   = new Int32Array(shared);
+
+// Worker sleeps until sarr[0] is no longer 0:
+const result = Atomics.wait(sarr, 0, 0);
+// (Thread sleeps here until notify() is called)
+console.log(&quot;Woken up! Result:&quot;, result);   // Output: Woken up! Result: ok</code></pre></div></div>
+<p class="v2-p"><strong><code>Atomics.notify(sarr, index, count?)</code>:</strong> Wakes up <code>count</code> threads waiting on <code>sarr[index]</code> (default: wake all):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Main thread wakes up waiting workers:
+Atomics.store(sarr, 0, 1);           // Change the value first
+Atomics.notify(sarr, 0, 1);          // Wake 1 waiting thread</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong><code>Atomics.wait()</code> cannot be called on the main browser thread</strong> · it would block the UI completely. Use it only in Web Workers. The main thread can use <code>Atomics.waitAsync()</code> (returns a Promise) instead.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.7 · <code>Atomics.wait()</code> and <code>Atomics.notify()</code> · Thread Synchronisation</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(45)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase46"><div class="ph"><div class="pn">Phase 46 of 57</div><div class="pt">6.8 · `Atomics.isLockFree()` · Performance Hint</div><div class="pc" id="chk46"></div></div><div class="pb2"><p class="v2-p">Returns whether atomic operations on a given element size are implemented as truly hardware-atomic operations (vs. a software lock):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(Atomics.isLockFree(1));   // Output: true  — hardware atomic for 1-byte values
+console.log(Atomics.isLockFree(2));   // Output: true
+console.log(Atomics.isLockFree(4));   // Output: true  — most important (Int32Array)
+console.log(Atomics.isLockFree(8));   // Output: true on 64-bit systems, false on 32-bit</code></pre></div></div>
+<p class="v2-p">If <code>isLockFree(n)</code> returns <code>true</code>, atomic operations on n-byte elements use a single CPU instruction and are very fast. If <code>false</code>, they fall back to a slower software mechanism.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.8 · <code>Atomics.isLockFree()</code> · Performance Hint</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(46)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase47"><div class="ph"><div class="pn">Phase 47 of 57</div><div class="pt">6.9 · Complete Atomics Reference</div><div class="pc" id="chk47"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Signature</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>add</code></td><td><code>(sarr, i, val)</code></td><td>Old value</td><td><code>sarr[i] += val</code> atomically</td></tr><tr><td><code>sub</code></td><td><code>(sarr, i, val)</code></td><td>Old value</td><td><code>sarr[i] -= val</code> atomically</td></tr><tr><td><code>and</code></td><td><code>(sarr, i, val)</code></td><td>Old value</td><td><code>sarr[i] &amp;= val</code> atomically</td></tr><tr><td><code>or</code></td><td><code>(sarr, i, val)</code></td><td>Old value</td><td>`sarr[i] \</td><td>= val` atomically</td></tr><tr><td><code>xor</code></td><td><code>(sarr, i, val)</code></td><td>Old value</td><td><code>sarr[i] ^= val</code> atomically</td></tr><tr><td><code>load</code></td><td><code>(sarr, i)</code></td><td>Current value</td><td>Read with memory fence</td></tr><tr><td><code>store</code></td><td><code>(sarr, i, val)</code></td><td>Stored value</td><td>Write with memory fence</td></tr><tr><td><code>exchange</code></td><td><code>(sarr, i, val)</code></td><td>Old value</td><td>Write and return old value</td></tr><tr><td><code>compareExchange</code></td><td><code>(sarr, i, exp, rep)</code></td><td>Old value</td><td>Replace only if <code>sarr[i] === exp</code></td></tr><tr><td><code>wait</code></td><td><code>(sarr, i, val, timeout?)</code></td><td><code>"ok"</code> / <code>"not-equal"</code> / <code>"timed-out"</code></td><td>Sleep until <code>sarr[i] !== val</code></td></tr><tr><td><code>waitAsync</code></td><td><code>(sarr, i, val, timeout?)</code></td><td>Promise</td><td>Async version of wait (main thread)</td></tr><tr><td><code>notify</code></td><td><code>(sarr, i, count?)</code></td><td>Threads woken</td><td>Wake sleeping threads</td></tr><tr><td><code>isLockFree</code></td><td><code>(byteSize)</code></td><td>boolean</td><td>Whether ops are hardware-atomic</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 2 · APPLIED EXERCISES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6.9 · Complete Atomics Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(47)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase48"><div class="ph"><div class="pn">Phase 48 of 57</div><div class="pt">Exercise 1 · Typed Array Fundamentals: Image Brightness Adjustment</div><div class="pc" id="chk48"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Use <code>Uint8ClampedArray</code> to simulate adjusting image brightness without overflow artefacts.</p>
+<p class="v2-p"><strong>Scenario:</strong> A photo editing app needs a brighten/darken function that operates directly on pixel data.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 1 · Typed Array Fundamentals: Image Brightness Adjustment</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Simulated 2×2 RGBA image (16 bytes: R G B A for each pixel):
+const pixels = new Uint8ClampedArray([
+  100, 150, 200, 255,   // Pixel 1: R=100, G=150, B=200, A=255
+  50,  80,  120, 255,   // Pixel 2: R=50,  G=80,  B=120, A=255
+  200, 210, 220, 255,   // Pixel 3: R=200, G=210, B=220, A=255
+  30,  40,  50,  128,   // Pixel 4: R=30,  G=40,  B=50,  A=128
+]);</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Write <code>brighten(pixels, amount)</code> that adds <code>amount</code> to every R, G, B channel (skipping every 4th byte · alpha). Returns a new <code>Uint8ClampedArray</code>. Clamping should prevent overflow.</li><li>Write <code>darken(pixels, amount)</code> that subtracts <code>amount</code> from every R, G, B channel.</li><li>Write <code>grayscale(pixels)</code> that converts each pixel to grayscale: <code>gray = 0.299<em>R + 0.587</em>G + 0.114*B</code>, setting R=G=B=gray.</li><li>Write <code>invert(pixels)</code> that computes <code>255 - value</code> for each R, G, B channel.</li><li>Test each function and confirm values stay within 0 · 255.</li></ol>
+<p class="v2-p"><strong>Hint · iterating only RGB channels (skip alpha every 4th byte):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (let i = 0; i &lt; pixels.length; i += 4) {
+  pixels[i]     = /* R */;
+  pixels[i + 1] = /* G */;
+  pixels[i + 2] = /* B */;
+  // pixels[i + 3] = alpha — skip this
+}</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>What would happen to pixel value 220 when brightened by 50 with <code>Uint8Array</code> vs <code>Uint8ClampedArray</code>?</li><li>Why does grayscale use weights 0.299, 0.587, 0.114 rather than simply <code>(R + G + B) / 3</code>?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(48)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase49"><div class="ph"><div class="pn">Phase 49 of 57</div><div class="pt">Exercise 2 · ArrayBuffer and Multiple Views: Binary Packet Encoder</div><div class="pc" id="chk49"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Build a binary network packet encoder/decoder using ArrayBuffer with multiple views.</p>
+<p class="v2-p"><strong>Scenario:</strong> A multiplayer game sends compact binary packets containing a player ID (uint16), position X (float32), position Y (float32), and health (uint8).</p>
+<p class="v2-p"><strong>Packet layout (11 bytes total):</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 2 · ArrayBuffer and Multiple Views: Binary Packet Encoder</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Byte 0–1:  Player ID  (Uint16, little-endian)
+Byte 2–5:  Position X (Float32, little-endian)
+Byte 6–9:  Position Y (Float32, little-endian)
+Byte 10:   Health     (Uint8)</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Write <code>encodePlayerPacket(id, x, y, health)</code> using <code>DataView</code> to write each field.</li><li>Write <code>decodePlayerPacket(buffer)</code> using <code>DataView</code> to read each field back.</li><li>Verify round-trip: <code>decodePlayerPacket(encodePlayerPacket(42, 100.5, -200.75, 87))</code> returns the original values.</li><li>Write <code>encodeBatch(players)</code> that accepts an array of player objects and packs all their packets into one larger buffer (no gaps between packets).</li><li>Write <code>decodeBatch(buffer, playerCount)</code> to read them all back.</li></ol>
+<p class="v2-p"><strong>Expected usage:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const packet = encodePlayerPacket(42, 100.5, -200.75, 87);
+console.log(packet.byteLength);   // Output: 11
+
+const player = decodePlayerPacket(packet);
+console.log(player);
+// { id: 42, x: 100.5, y: -200.75, health: 87 }</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why is <code>DataView</code> used here rather than creating multiple typed arrays over the buffer?</li><li>What is the memory saving of using this 11-byte packet compared to a JSON string like <code>{"id":42,"x":100.5,"y":-200.75,"health":87}</code> (25 bytes)?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(49)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase50"><div class="ph"><div class="pn">Phase 50 of 57</div><div class="pt">Exercise 3 · subarray vs slice: Memory-Efficient Ring Buffer</div><div class="pc" id="chk50"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Use <code>subarray()</code> (zero-copy view) to implement a ring buffer for streaming data.</p>
+<p class="v2-p"><strong>Scenario:</strong> An audio streaming pipeline processes data in 256-sample chunks. A larger 1024-sample buffer holds all chunks, and <code>subarray</code> windows are used to process each chunk without copying.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create a <code>Float32Array</code> of 1024 elements (simulating a filled audio buffer).</li><li>Fill it with sample data: <code>Math.sin(i * 0.01)</code> for each element <code>i</code>.</li><li>Write <code>processChunk(buffer, offset, size)</code> that returns a <code>subarray</code> view for the chunk at <code>offset</code>.</li><li>Process all four 256-element chunks using <code>processChunk</code>, computing the RMS (root mean square) value of each chunk: <code>sqrt(sum(x²) / n)</code>.</li><li>Demonstrate that modifying a value through the subarray changes the source buffer.</li><li>Use <code>slice()</code> to create an independent copy of chunk 2. Modify the copy and show the original is unaffected.</li></ol>
+<p class="v2-p"><strong>Expected output pattern:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 3 · subarray vs slice: Memory-Efficient Ring Buffer</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Chunk 0 (bytes 0–255): RMS = 0.707...
+Chunk 1 (bytes 256–511): RMS = 0.707...
+Chunk 2 (bytes 512–767): RMS = 0.707...
+Chunk 3 (bytes 768–1023): RMS = 0.707...</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>How many bytes would be copied total if <code>slice()</code> were used for all four chunks instead of <code>subarray()</code>?</li><li>What is the <code>byteOffset</code> of the subarray for chunk 3?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(50)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase51"><div class="ph"><div class="pn">Phase 51 of 57</div><div class="pt">Exercise 4 · Atomics: Shared Counter with Worker Threads</div><div class="pc" id="chk51"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Implement a race-condition-safe shared counter using <code>SharedArrayBuffer</code> and <code>Atomics</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> A file processing pipeline: the main thread spawns 4 worker threads, each processing 250 files. They all increment a shared counter when a file is done. The main thread displays progress.</p>
+<p class="v2-p"><strong>Step-by-step instructions (conceptual · implement where Workers are available):</strong></p>
+<ol class="v2-ol"><li>Create <code>new SharedArrayBuffer(4)</code> and wrap in <code>new Int32Array(shared)</code>.</li><li>In each worker, loop 250 times: <code>Atomics.add(sarr, 0, 1)</code> for each "file processed."</li><li>In the main thread, poll the counter with <code>Atomics.load(sarr, 0)</code> and display progress.</li><li>Compare with a naive <code>sarr[0]++</code> · demonstrate why it can produce wrong totals (race condition).</li></ol>
+<p class="v2-p"><strong>The race condition demonstrated (without Atomics):</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 4 · Atomics: Shared Counter with Worker Threads</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Without Atomics — two workers running simultaneously:
+// Worker A reads: sarr[0] = 500
+// Worker B reads: sarr[0] = 500  (before A writes!)
+// Worker A writes: sarr[0] = 501
+// Worker B writes: sarr[0] = 501  (overwrote A&#x27;s increment!)
+// Expected: 502. Actual: 501. One increment was LOST.
+
+// With Atomics.add():
+// The read-modify-write is ONE atomic CPU instruction.
+// No other thread can interrupt between read and write.
+// Result is always exactly 1000 after 4 × 250 increments.</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why does <code>Atomics.wait()</code> need to be called in a Worker, not the main thread?</li><li>If <code>Atomics.isLockFree(4)</code> returns <code>false</code> on a device, does <code>Atomics.add()</code> still work correctly? What changes?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(51)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase52"><div class="ph"><div class="pn">Phase 52 of 57</div><div class="pt">Exercise 5 · DataView: BMP File Header Parser</div><div class="pc" id="chk52"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Parse the header of a BMP (bitmap) image file stored in an ArrayBuffer.</p>
+<p class="v2-p"><strong>BMP Header structure (first 14 bytes):</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 5 · DataView: BMP File Header Parser</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Bytes 0–1:  Signature       (&quot;BM&quot; = 0x42 0x4D, Uint8 × 2)
+Bytes 2–5:  File size       (Uint32, little-endian)
+Bytes 6–7:  Reserved 1      (Uint16)
+Bytes 8–9:  Reserved 2      (Uint16)
+Bytes 10–13: Pixel data offset (Uint32, little-endian)</code></pre></div></div>
+<p class="v2-p"><strong>DIB Header (next 40 bytes, starting at byte 14):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Bytes 14–17: Header size     (Uint32, little-endian, always 40 for BITMAPINFOHEADER)
+Bytes 18–21: Image width     (Int32, little-endian)
+Bytes 22–25: Image height    (Int32, little-endian)
+Bytes 26–27: Colour planes   (Uint16, little-endian, always 1)
+Bytes 28–29: Bits per pixel  (Uint16, little-endian: 1, 4, 8, 24, 32)</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create an ArrayBuffer of 54 bytes (header only, no pixel data).</li><li>Write a function <code>writeBMPHeader(dv, width, height, bpp)</code> that fills in all header fields correctly.</li><li>Write a function <code>parseBMPHeader(buffer)</code> using DataView that reads and returns a header object.</li><li>Round-trip test: write a 640×480 24-bit BMP header, parse it back, verify all fields.</li></ol>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>The BMP signature bytes spell "BM". How do you verify this? (<code>String.fromCharCode(dv.getUint8(0), dv.getUint8(1))</code>)</li><li>Why does BMP use little-endian byte order for integers? (Hint: think about which CPU architecture BMP was designed for)</li></ol>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 3 · PROJECT SIMULATION</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(52)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase53"><div class="ph"><div class="pn">Phase 53 of 57</div><div class="pt">Project: High-Performance Binary Data Processing Pipeline</div><div class="pc" id="chk53"></div></div><div class="pb2"><p class="v2-p"><strong>Scenario:</strong> You are building a binary data processing pipeline for a sensor network application. Hundreds of IoT sensors transmit compact binary packets over WebSocket. Your system must:</p>
+<ol class="v2-ol"><li>Parse incoming binary packets from multiple sensors</li><li>Process pixel-level data (simulating sensor image snapshots)</li><li>Share processing state between a main thread and worker threads safely</li><li>Encode processed results back into compact binary format for storage</li><li>Provide a type-safe, validated view layer over raw memory</li></ol>
+<p class="v2-p">This project uses all six chapters: Typed Arrays (Ch.1), Methods (Ch.2), Reference (Ch.3), ArrayBuffers (Ch.4), DataView (Ch.5), Atomics (Ch.6).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Sensor Packet Protocol (DataView + ArrayBuffer)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// --- Sensor packet format (32 bytes) ---
+// Byte 0:     Sensor ID       (Uint8)
+// Byte 1:     Packet type     (Uint8: 0=status, 1=reading, 2=alert)
+// Bytes 2–3:  Sequence number (Uint16, big-endian)
+// Bytes 4–7:  Timestamp       (Uint32, little-endian, Unix ms mod 2³²)
+// Bytes 8–11: Reading value   (Float32, little-endian)
+// Bytes 12–15: Battery level  (Float32, little-endian, 0.0–1.0)
+// Bytes 16–19: Temperature    (Float32, little-endian, Celsius)
+// Bytes 20–23: Latitude       (Float32, little-endian)
+// Bytes 24–27: Longitude      (Float32, little-endian)
+// Bytes 28–29: Status flags   (Uint16, little-endian bitmask)
+// Bytes 30–31: CRC checksum   (Uint16, big-endian)
+
+const PACKET_SIZE = 32;
+
+const PacketType = Object.freeze({ STATUS: 0, READING: 1, ALERT: 2 });
+const StatusFlag = Object.freeze({
+  ONLINE:      0b0000000000000001,
+  LOW_BATTERY: 0b0000000000000010,
+  OVERHEATING: 0b0000000000000100,
+  DATA_ERROR:  0b0000000000001000,
+});
+
+function encodeSensorPacket(sensor) {
+  const buffer = new ArrayBuffer(PACKET_SIZE);
+  const dv     = new DataView(buffer);
+
+  dv.setUint8(0,   sensor.id);
+  dv.setUint8(1,   sensor.type);
+  dv.setUint16(2,  sensor.sequence, false);    // Big-endian sequence
+  dv.setUint32(4,  sensor.timestamp, true);    // Little-endian timestamp
+  dv.setFloat32(8, sensor.reading,   true);
+  dv.setFloat32(12, sensor.battery,  true);
+  dv.setFloat32(16, sensor.temperature, true);
+  dv.setFloat32(20, sensor.latitude,    true);
+  dv.setFloat32(24, sensor.longitude,   true);
+  dv.setUint16(28, sensor.flags,     true);
+
+  // Simple checksum: XOR all bytes 0–29:
+  let crc = 0;
+  const bytes = new Uint8Array(buffer, 0, 30);
+  for (const byte of bytes) crc ^= byte;
+  dv.setUint16(30, crc, false);   // Big-endian CRC
+
+  return buffer;
+}
+
+function decodeSensorPacket(buffer) {
+  const dv = new DataView(buffer);
+
+  // Verify CRC:
+  let crc = 0;
+  const bytes = new Uint8Array(buffer, 0, 30);
+  for (const byte of bytes) crc ^= byte;
+  const storedCRC = dv.getUint16(30, false);
+  if (crc !== storedCRC) throw new Error(&quot;CRC mismatch — packet corrupted&quot;);
+
+  const flags = dv.getUint16(28, true);
+
+  return {
+    id:          dv.getUint8(0),
+    type:        dv.getUint8(1),
+    sequence:    dv.getUint16(2, false),
+    timestamp:   dv.getUint32(4, true),
+    reading:     dv.getFloat32(8, true),
+    battery:     dv.getFloat32(12, true),
+    temperature: dv.getFloat32(16, true),
+    latitude:    dv.getFloat32(20, true),
+    longitude:   dv.getFloat32(24, true),
+    flags,
+    isOnline:    !!(flags &amp; StatusFlag.ONLINE),
+    lowBattery:  !!(flags &amp; StatusFlag.LOW_BATTERY),
+    overheating: !!(flags &amp; StatusFlag.OVERHEATING),
+  };
+}
+
+// Test:
+const packet = encodeSensorPacket({
+  id: 7, type: PacketType.READING, sequence: 1024,
+  timestamp: Date.now() &amp; 0xFFFFFFFF,
+  reading: 23.45, battery: 0.72, temperature: 31.2,
+  latitude: 6.5244, longitude: 3.3792,
+  flags: StatusFlag.ONLINE
+});
+
+const decoded = decodeSensorPacket(packet);
+console.log(`Sensor ${decoded.id}: ${decoded.reading.toFixed(2)} @ ${decoded.battery.toFixed(0) * 100}% battery`);
+// Output: Sensor 7: 23.45 @ 72% battery</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 2 · Batch Packet Ring Buffer (TypedArray Methods)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// A circular ring buffer for sensor packets using a single large ArrayBuffer:
+class SensorRingBuffer {
+  #buffer;
+  #view;
+  #capacity;
+  #writeHead;
+  #count;
+
+  constructor(capacity) {
+    this.#capacity  = capacity;
+    this.#buffer    = new ArrayBuffer(capacity * PACKET_SIZE);
+    this.#view      = new Uint8Array(this.#buffer);
+    this.#writeHead = 0;
+    this.#count     = 0;
+  }
+
+  push(packetBuffer) {
+    const src    = new Uint8Array(packetBuffer);
+    const offset = this.#writeHead * PACKET_SIZE;
+
+    // Use set() for fast bulk copy:
+    this.#view.set(src, offset);
+
+    this.#writeHead = (this.#writeHead + 1) % this.#capacity;
+    if (this.#count &lt; this.#capacity) this.#count++;
+  }
+
+  get(index) {
+    if (index &gt;= this.#count) throw new RangeError(&quot;Index out of bounds&quot;);
+    const offset = index * PACKET_SIZE;
+
+    // Return a subarray view — zero copy:
+    return this.#buffer.slice(offset, offset + PACKET_SIZE);
+  }
+
+  // Get all packets as an array of decoded objects:
+  decodeAll() {
+    const results = [];
+    for (let i = 0; i &lt; this.#count; i++) {
+      try {
+        results.push(decodeSensorPacket(this.get(i)));
+      } catch (e) {
+        results.push({ error: e.message, index: i });
+      }
+    }
+    return results;
+  }
+
+  get size()     { return this.#count; }
+  get isFull()   { return this.#count === this.#capacity; }
+  get byteUsed() { return this.#count * PACKET_SIZE; }
+}
+
+// Test the ring buffer:
+const ringBuffer = new SensorRingBuffer(100);
+
+// Simulate receiving 5 sensor packets:
+for (let i = 0; i &lt; 5; i++) {
+  const pkt = encodeSensorPacket({
+    id: i + 1, type: PacketType.READING, sequence: i,
+    timestamp: (Date.now() + i * 1000) &amp; 0xFFFFFFFF,
+    reading: 20 + Math.random() * 10,
+    battery: 0.5 + Math.random() * 0.5,
+    temperature: 25 + Math.random() * 15,
+    latitude: 6.5 + Math.random() * 0.1,
+    longitude: 3.3 + Math.random() * 0.1,
+    flags: StatusFlag.ONLINE
+  });
+  ringBuffer.push(pkt);
+}
+
+console.log(`Buffer size: ${ringBuffer.size} packets (${ringBuffer.byteUsed} bytes)`);
+// Output: Buffer size: 5 packets (160 bytes)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 3 · Image Processing Pipeline (Uint8ClampedArray)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Simulate a 32×32 grayscale sensor snapshot as RGBA data:
+class SensorImage {
+  #pixels;
+  #width;
+  #height;
+
+  constructor(width, height) {
+    this.#width  = width;
+    this.#height = height;
+    this.#pixels = new Uint8ClampedArray(width * height * 4);
+  }
+
+  static fromGrayscaleData(grayData, width, height) {
+    const img = new SensorImage(width, height);
+    for (let i = 0; i &lt; grayData.length; i++) {
+      const px = i * 4;
+      img.#pixels[px]     = grayData[i];   // R
+      img.#pixels[px + 1] = grayData[i];   // G
+      img.#pixels[px + 2] = grayData[i];   // B
+      img.#pixels[px + 3] = 255;           // A (fully opaque)
+    }
+    return img;
+  }
+
+  // Apply threshold: pixels above threshold → white, below → black:
+  threshold(level) {
+    const result = new SensorImage(this.#width, this.#height);
+    for (let i = 0; i &lt; this.#pixels.length; i += 4) {
+      const gray  = this.#pixels[i];
+      const value = gray &gt;= level ? 255 : 0;
+      result.#pixels.set([value, value, value, 255], i);
+    }
+    return result;
+  }
+
+  // Brighten by delta (clamping handled automatically by Uint8ClampedArray):
+  brighten(delta) {
+    const result = new SensorImage(this.#width, this.#height);
+    for (let i = 0; i &lt; this.#pixels.length; i += 4) {
+      result.#pixels[i]     = this.#pixels[i]     + delta;
+      result.#pixels[i + 1] = this.#pixels[i + 1] + delta;
+      result.#pixels[i + 2] = this.#pixels[i + 2] + delta;
+      result.#pixels[i + 3] = this.#pixels[i + 3];   // Preserve alpha
+    }
+    return result;
+  }
+
+  // Histogram: count pixels in each 0–255 intensity bucket:
+  histogram() {
+    const hist = new Uint32Array(256);
+    for (let i = 0; i &lt; this.#pixels.length; i += 4) {
+      hist[this.#pixels[i]]++;   // Count red channel (R=G=B for grayscale)
+    }
+    return hist;
+  }
+
+  // Compute mean intensity:
+  meanIntensity() {
+    const hist  = this.histogram();
+    let total   = 0;
+    let pixels  = 0;
+    for (let i = 0; i &lt; 256; i++) {
+      total  += i * hist[i];
+      pixels += hist[i];
+    }
+    return total / pixels;
+  }
+
+  get data()   { return this.#pixels; }
+  get width()  { return this.#width; }
+  get height() { return this.#height; }
+}
+
+// Simulate a sensor snapshot:
+const grayValues = new Uint8Array(32 * 32);
+for (let i = 0; i &lt; grayValues.length; i++) {
+  grayValues[i] = Math.floor(50 + 150 * Math.abs(Math.sin(i * 0.1)));
+}
+
+const img = SensorImage.fromGrayscaleData(grayValues, 32, 32);
+const brightened = img.brighten(50);
+const thresholded = img.threshold(128);
+
+console.log(&quot;Original mean:&quot;, img.meanIntensity().toFixed(1));
+console.log(&quot;Brightened mean:&quot;, brightened.meanIntensity().toFixed(1));</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 4 · Shared Processing Stats (SharedArrayBuffer + Atomics)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Shared statistics counters between main thread and workers.
+// Layout (all Int32):
+// Index 0: Total packets received
+// Index 1: Total packets processed
+// Index 2: Total errors
+// Index 3: Lock flag (0=unlocked, 1=locked)
+
+const STAT_RECEIVED   = 0;
+const STAT_PROCESSED  = 1;
+const STAT_ERRORS     = 2;
+const LOCK_INDEX      = 3;
+
+class SharedStats {
+  #sarr;
+
+  constructor(sharedBuffer) {
+    this.#sarr = new Int32Array(sharedBuffer);
+  }
+
+  incrementReceived()  { return Atomics.add(this.#sarr, STAT_RECEIVED, 1); }
+  incrementProcessed() { return Atomics.add(this.#sarr, STAT_PROCESSED, 1); }
+  incrementErrors()    { return Atomics.add(this.#sarr, STAT_ERRORS, 1); }
+
+  getReceived()   { return Atomics.load(this.#sarr, STAT_RECEIVED); }
+  getProcessed()  { return Atomics.load(this.#sarr, STAT_PROCESSED); }
+  getErrors()     { return Atomics.load(this.#sarr, STAT_ERRORS); }
+
+  getReport() {
+    return {
+      received:  this.getReceived(),
+      processed: this.getProcessed(),
+      errors:    this.getErrors(),
+      pending:   this.getReceived() - this.getProcessed() - this.getErrors()
+    };
+  }
+
+  reset() {
+    Atomics.store(this.#sarr, STAT_RECEIVED,  0);
+    Atomics.store(this.#sarr, STAT_PROCESSED, 0);
+    Atomics.store(this.#sarr, STAT_ERRORS,    0);
+  }
+}
+
+// Simulate processing 20 packets with some errors:
+const statsBuffer = new SharedArrayBuffer(4 * 4);   // 4 Int32 values
+const stats       = new SharedStats(statsBuffer);
+
+for (let i = 0; i &lt; 20; i++) {
+  stats.incrementReceived();
+
+  // Simulate 10% error rate:
+  if (Math.random() &lt; 0.1) {
+    stats.incrementErrors();
+  } else {
+    stats.incrementProcessed();
+  }
+}
+
+const report = stats.getReport();
+console.log(&quot;\n=== Processing Report ===&quot;);
+console.log(`Received:  ${report.received}`);
+console.log(`Processed: ${report.processed}`);
+console.log(`Errors:    ${report.errors}`);
+console.log(`Pending:   ${report.pending}`);</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 5 · Full Pipeline Integration</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class SensorPipeline {
+  #ringBuffer;
+  #stats;
+  #imageStore;
+
+  constructor(bufferCapacity = 100) {
+    this.#ringBuffer = new SensorRingBuffer(bufferCapacity);
+    const statsBuffer = new SharedArrayBuffer(4 * 4);
+    this.#stats      = new SharedStats(statsBuffer);
+    this.#imageStore = new Map();
+  }
+
+  // Accept a raw ArrayBuffer (from WebSocket):
+  receivePacket(rawBuffer) {
+    this.#stats.incrementReceived();
+    try {
+      const packet = decodeSensorPacket(rawBuffer);
+      this.#ringBuffer.push(rawBuffer);
+      this.#stats.incrementProcessed();
+      return packet;
+    } catch (e) {
+      this.#stats.incrementErrors();
+      console.warn(&quot;Packet decode failed:&quot;, e.message);
+      return null;
+    }
+  }
+
+  // Process all buffered packets and generate a status report:
+  generateReport() {
+    const packets = this.#ringBuffer.decodeAll();
+    const valid   = packets.filter(p =&gt; !p.error);
+    const stats   = this.#stats.getReport();
+
+    // Aggregate by sensor ID:
+    const bySensor = new Map();
+    for (const packet of valid) {
+      if (!bySensor.has(packet.id)) {
+        bySensor.set(packet.id, { id: packet.id, count: 0, readings: [] });
+      }
+      const sensor = bySensor.get(packet.id);
+      sensor.count++;
+      sensor.readings.push(packet.reading);
+    }
+
+    // Compute averages using Float32Array for efficiency:
+    const summary = [];
+    for (const [id, sensor] of bySensor) {
+      const fa  = new Float32Array(sensor.readings);
+      const avg = fa.reduce((s, v) =&gt; s + v, 0) / fa.length;
+      const max = fa.reduce((m, v) =&gt; Math.max(m, v), -Infinity);
+      const min = fa.reduce((m, v) =&gt; Math.min(m, v),  Infinity);
+      summary.push({ id, count: sensor.count, avg, max, min });
+    }
+
+    return {
+      pipeline: stats,
+      sensors: summary.sort((a, b) =&gt; a.id - b.id),
+      bufferUsage: `${this.#ringBuffer.size} / ${this.#ringBuffer.isFull ? &quot;FULL&quot; : &quot;OK&quot;}`
+    };
+  }
+}
+
+// Run the full pipeline:
+const pipeline = new SensorPipeline(100);
+
+// Simulate 15 incoming packets from 3 sensors:
+for (let seq = 0; seq &lt; 15; seq++) {
+  const sensorId = (seq % 3) + 1;
+  const buf = encodeSensorPacket({
+    id: sensorId, type: PacketType.READING, sequence: seq,
+    timestamp: (Date.now() + seq * 100) &amp; 0xFFFFFFFF,
+    reading: 20 + sensorId * 5 + Math.sin(seq) * 2,
+    battery: 0.8 - seq * 0.01, temperature: 28 + sensorId,
+    latitude: 6.5244 + sensorId * 0.01, longitude: 3.3792,
+    flags: StatusFlag.ONLINE
+  });
+  pipeline.receivePacket(buf);
+}
+
+const report = pipeline.generateReport();
+console.log(&quot;\n========= PIPELINE REPORT =========&quot;);
+console.log(&quot;Buffer:&quot;, report.bufferUsage);
+console.log(&quot;Stats:&quot;, report.pipeline);
+console.log(&quot;\nSensor Summaries:&quot;);
+for (const s of report.sensors) {
+  console.log(`  Sensor ${s.id}: ${s.count} readings | avg=${s.avg.toFixed(2)} min=${s.min.toFixed(2)} max=${s.max.toFixed(2)}`);
+}</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Reflection Questions:</strong></p>
+<ol class="v2-ol"><li>The ring buffer uses <code>Uint8Array.set()</code> for bulk packet copies. Why is this more efficient than copying with a <code>for</code> loop even for small 32-byte packets · and how does the efficiency gain scale with packet size?</li><li>The <code>SensorImage</code> class stores pixel data as <code>Uint8ClampedArray</code>. If images needed to be transferred to a Worker for processing, would you use <code>ArrayBuffer</code> transfer (detach from main thread) or <code>SharedArrayBuffer</code> sharing? What are the trade-offs?</li><li>The <code>SharedStats</code> class uses <code>Atomics.load()</code> to read counters and <code>Atomics.add()</code> to increment them. If the report generation reads three counters (<code>received</code>, <code>processed</code>, <code>errors</code>) in three separate <code>Atomics.load()</code> calls, is the result guaranteed to be a consistent snapshot? What problem could occur, and how would you fix it?</li><li>The CRC checksum in <code>encodeSensorPacket</code> uses XOR across all bytes. What is the computational complexity (<code>O(n)</code> where n = packet bytes)? How does using a single <code>Uint8Array</code> view over the buffer enable this without any data copying?</li><li><code>Float32Array</code> is used to aggregate sensor readings in <code>generateReport</code>. What precision loss occurs when storing <code>reading</code> values (originally JavaScript <code>number</code> = Float64) in a <code>Float32Array</code>? When does this matter, and when is it acceptable?</li></ol>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># QUIZ &amp; COMPLETION CHECKLIST</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Project: High-Performance Binary Data Processing Pipeline</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(53)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase54"><div class="ph"><div class="pn">Phase 54 of 57</div><div class="pt">Self-Assessment Quiz</div><div class="pc" id="chk54"></div></div><div class="pb2"><p class="v2-p"><strong>Q1:</strong> What are the two differences between a <code>Uint8Array</code> and a <code>Uint8ClampedArray</code>?</p>
+<p class="v2-p"><strong>Q2:</strong> What is an <code>ArrayBuffer</code>, and why can't you read data directly from it?</p>
+<p class="v2-p"><strong>Q3:</strong> What is the difference between <code>subarray()</code> and <code>slice()</code> on a typed array?</p>
+<p class="v2-p"><strong>Q4:</strong> Write code that creates a 12-byte <code>ArrayBuffer</code> and reads the 4 bytes at offset 4 as a little-endian <code>Uint32</code>.</p>
+<p class="v2-p"><strong>Q5:</strong> What is endianness, and why does <code>DataView</code> need explicit endianness parameters?</p>
+<p class="v2-p"><strong>Q6:</strong> Why do you need <code>Atomics</code> when working with <code>SharedArrayBuffer</code>? What problem does it solve?</p>
+<p class="v2-p"><strong>Q7:</strong> What does <code>Atomics.compareExchange(sarr, 0, expected, replacement)</code> do, and when does the swap NOT happen?</p>
+<p class="v2-p"><strong>Q8:</strong> What is the difference between transferring an <code>ArrayBuffer</code> to a Worker vs using a <code>SharedArrayBuffer</code>?</p>
+<p class="v2-p"><strong>Q9:</strong> Why does <code>Uint8Array.map()</code> return a <code>Uint8Array</code> rather than a regular array? What issue could this cause?</p>
+<p class="v2-p"><strong>Q10:</strong> In what situations would you choose <code>DataView</code> over a typed array for reading from an <code>ArrayBuffer</code>?</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Self-Assessment Quiz</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(54)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase55"><div class="ph"><div class="pn">Phase 55 of 57</div><div class="pt">Answer Key</div><div class="pc" id="chk55"></div></div><div class="pb2"><p class="v2-p"><strong>A1:</strong> <code>Uint8Array</code> wraps on overflow (256 becomes 0, 257 becomes 1, -1 becomes 255). <code>Uint8ClampedArray</code> clamps · values above 255 become 255, values below 0 become 0. Both hold values in the range 0 · 255 for in-range inputs.</p>
+<p class="v2-p"><strong>A2:</strong> An <code>ArrayBuffer</code> is raw binary memory with no type information. JavaScript cannot know whether bytes represent integers, floats, or characters · that interpretation requires a <strong>view</strong> (typed array or DataView) that defines type, size, and byte offset.</p>
+<p class="v2-p"><strong>A3:</strong> <code>subarray(start, end)</code> returns a new typed array that <strong>shares the same underlying buffer</strong> · no data is copied, and mutations to the subarray affect the original. <code>slice(start, end)</code> returns a new typed array with <strong>a copy of the data</strong> · independent from the original.</p>
+<p class="v2-p"><strong>A4:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const buffer = new ArrayBuffer(12);
+const dv     = new DataView(buffer);
+dv.setUint32(4, 0xDEADBEEF, true);  // Write something first
+console.log(dv.getUint32(4, true).toString(16));  // Read as little-endian Uint32</code></pre></div></div>
+<p class="v2-p"><strong>A5:</strong> Endianness is the byte order for multi-byte values: <strong>little-endian</strong> stores the least significant byte first (most CPUs); <strong>big-endian</strong> stores the most significant byte first (network protocols, some file formats). Typed arrays use the native CPU endianness, which varies by device. <code>DataView</code> requires explicit <code>littleEndian</code> arguments so code produces consistent results on all platforms.</p>
+<p class="v2-p"><strong>A6:</strong> JavaScript is single-threaded normally. With <code>SharedArrayBuffer</code>, multiple threads can read/write the same memory simultaneously. A seemingly simple operation like <code>sarr[0]++</code> is actually three CPU instructions (load, add, store). Another thread can interrupt between them, causing both threads to read the same old value and each write back a value incremented by 1 · net result: only +1 instead of +2. <code>Atomics</code> operations are indivisible · the CPU completes the entire read-modify-write as one uninterruptible unit.</p>
+<p class="v2-p"><strong>A7:</strong> <code>compareExchange</code> atomically checks if <code>sarr[0] === expected</code>. If yes: replaces with <code>replacement</code> and returns the old (expected) value. If no: does nothing and returns the current actual value. The swap does NOT happen when the current value differs from <code>expected</code> · this is used to implement lock-free algorithms and mutexes.</p>
+<p class="v2-p"><strong>A8:</strong> <strong>Transfer</strong> (<code>postMessage(buf, [buf])</code>) moves ownership · the original thread can no longer access the buffer (byteLength becomes 0). <strong>SharedArrayBuffer</strong> allows both threads to read/write the same memory simultaneously, requiring <code>Atomics</code> for safe access. Transfer is "give it away"; sharing is "both have it at once."</p>
+<p class="v2-p"><strong>A9:</strong> TypedArray <code>map()</code> returns the same typed array type to preserve the fixed numeric type contract. If the mapping function returns values outside the type's range (e.g., multiplying <code>Uint8Array</code> values by 10 can exceed 255), they silently overflow or clamp. Use <code>Array.from(typedArr).map(fn)</code> if you need a regular <code>number</code> array with no overflow.</p>
+<p class="v2-p"><strong>A10:</strong> Use <code>DataView</code> when: (1) the buffer contains multiple different numeric types at specific offsets (e.g., file headers, network packets); (2) you need explicit endianness control per field; (3) byte offsets are not aligned to the element size (typed arrays require alignment); (4) you're parsing a binary format defined by an external standard.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Answer Key</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(55)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase56"><div class="ph"><div class="pn">Phase 56 of 57</div><div class="pt">Key Gotchas Summary</div><div class="pc" id="chk56"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Why It Happens</th><th>Fix</th></tr></thead><tbody><tr><td>Using <code>Uint8Array</code> for pixel data</td><td>Values above 255 wrap instead of clamp</td><td>Use <code>Uint8ClampedArray</code> for colour channels</td></tr><tr><td>Reading <code>ArrayBuffer</code> directly</td><td>ArrayBuffer has no accessor methods</td><td>Create a typed array or DataView view</td></tr><tr><td>Misaligned typed array offset</td><td><code>new Int32Array(buf, 1)</code> · 1 is not a multiple of 4</td><td>Ensure <code>byteOffset</code> is multiple of <code>BYTES_PER_ELEMENT</code></td></tr><tr><td>Assuming same endianness</td><td>Typed arrays use native CPU endian · varies by device</td><td>Use <code>DataView</code> with explicit endian flag for cross-platform</td></tr><tr><td>Forgetting <code>subarray</code> shares memory</td><td>Modifying the subarray modifies the source</td><td>Use <code>slice()</code> for an independent copy</td></tr><tr><td>Using <code>sarr[i]++</code> with SharedArrayBuffer</td><td>Non-atomic: read-modify-write can be interrupted</td><td>Use <code>Atomics.add(sarr, i, 1)</code></td></tr><tr><td>Calling <code>Atomics.wait()</code> on main thread</td><td>Blocks the entire UI</td><td>Use <code>Atomics.waitAsync()</code> on main thread; <code>wait()</code> in Workers only</td></tr><tr><td><code>Float32Array</code> map returns Float32Array</td><td>Values may be truncated to 32-bit float precision</td><td>Use <code>Array.from().map()</code> for regular number array</td></tr><tr><td>Forgetting CRC/validation on binary data</td><td>Corrupted packets parsed as valid data</td><td>Always validate checksums before processing</td></tr><tr><td>Not storing interval/transfer IDs</td><td>Cannot cancel intervals; cannot revoke transfer</td><td>Store all IDs; track transferred buffers</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Key Gotchas Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(56)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase57"><div class="ph"><div class="pn">Phase 57 of 57</div><div class="pt">One-Sentence Summary</div><div class="pc" id="chk57"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p">JavaScript's binary data system · TypedArrays for fixed-type numerical storage, ArrayBuffers as the raw memory layer, DataView for heterogeneous and endian-aware parsing, and Atomics for race-condition-free shared memory between threads · brings systems-level performance directly into JavaScript for graphics, audio, networking, and parallel computation.</p></blockquote>
+<hr class="v2-hr">
+<p class="v2-p"><em>Tutorial generated by AI_TUTORIAL_GENERATOR · Source curriculum: W3Schools JavaScript Binary Data (6 pages)</em></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>One-Sentence Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(57)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lesson 37 Project</div><div class="build-req"><p class="v2-p">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code h</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>My Project</title>
+</head>
+<body>
+<!-- Your code here -->
+</body>
+</html>`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-37-lesson-37-project</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 37 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-37-lesson-37-project/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 37 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ What Is a Typed Array?</li><li>✅ 1.1 · Why Typed Arrays Exist: The Performance Problem</li><li>✅ 1.2 · The Memory Architecture: Buffer + View</li><li>✅ 1.3 · Creating Typed Arrays: Three Ways</li><li>✅ 1.4 · Reading and Writing Elements</li><li>✅ 1.5 · Type Overflow: What Happens at the Boundaries</li><li>✅ 1.6 · Key Properties of Typed Arrays</li><li>✅ Overview</li></ul><div class="ln"><a href="lesson_36.html" class="ln-btn">&#8592; Lesson 36</a><a href="lesson_38.html" class="ln-btn primary">Lesson 38 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 37 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

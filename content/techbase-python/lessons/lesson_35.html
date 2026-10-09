@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 35: Python Machine Learning · Regression Deep Dive, Scaling, Train/Test &amp; Decision Trees — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="10" data-key="techbase_python_l35">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 35 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 35</div>
+      <h1>Python Machine Learning · Regression Deep Dive, Scaling, Train/Test &amp; Decision Trees</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Stage 1 · Polynomial Regression: Temperature vs. Attendance</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 35</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 35! This lesson is one of the most exciting in the whole curriculum · you are about to learn how to build real predictive models, properly prepare your data, rigorously test whether your model actually works, and use one of machine learning's most intuitive and powerful tools: the <strong>Decision Tree</strong>.</p>
+<p class="v2-p">By the end of this lesson, you will know how to:</p>
+<ul class="v2-ul"><li>Use <strong>Polynomial Regression</strong> to model curved, non-linear data</li><li>Use <strong>Multiple Regression</strong> to predict outcomes from more than one input</li><li><strong>Scale</strong> your data so that different measurement units do not confuse your model</li><li>Use the <strong>Train/Test</strong> method to measure how accurate your model truly is</li><li>Build and read a <strong>Decision Tree</strong> that makes decisions just like a human would</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world application:</strong> These tools are used every day in Nigerian banks to predict loan defaults, in agricultural research to predict crop yields based on rainfall and temperature, in hospitals to classify patients, and in e-commerce platforms to recommend products.</p></blockquote>
+<hr class="v2-hr"></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Stage 1 · Polynomial Regression: Temperature vs. Attendance</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 35! This lesson is one of the most exciting in the whole curriculum · you are about to learn how to build real predictive models, properly prepare your data, rigorously test whether your model actually works, and use one of machine learning's most intuitive and powerful tools: the <strong>Decision Tree</strong>.</p>
+<p class="v2-p">By the end of this lesson, you will know how to:</p>
+<ul class="v2-ul"><li>Use <strong>Polynomial Regression</strong> to model curved, non-linear data</li><li>Use <strong>Multiple Regression</strong> to predict outcomes from more than one input</li><li><strong>Scale</strong> your data so that different measurement units do not confuse your model</li><li>Use the <strong>Train/Test</strong> method to measure how accurate your model truly is</li><li>Build and read a <strong>Decision Tree</strong> that makes decisions just like a human would</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world application:</strong> These tools are used every day in Nigerian banks to predict loan defaults, in agricultural research to predict crop yields based on rainfall and temperature, in hospitals to classify patients, and in e-commerce platforms to recommend products.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before we start, let us quickly remind ourselves of what we already know:</p>
+<p class="v2-p"><strong>From previous lessons:</strong></p>
+<ul class="v2-ul"><li><strong>Linear Regression</strong> · fitting a straight line through data points to predict future values (e.g., predicting the price of garri based on market trend)</li><li><strong>R-squared (R²)</strong> · a score from 0 to 1 that tells us how well our regression line fits the data (0 = no relationship, 1 = perfect fit)</li><li><strong>NumPy</strong> · Python's library for numerical operations and array mathematics</li><li><strong>Matplotlib</strong> · Python's charting library for drawing scatter plots and graphs</li><li><strong>Pandas</strong> · Python's library for reading and working with tabular data (like spreadsheets or CSV files)</li><li><strong>sklearn</strong> · Python's machine learning library (<code>scikit-learn</code>) that provides ready-made algorithms</li></ul>
+<p class="v2-p">If any of these feel unfamiliar, take a few minutes to review them before continuing. This lesson builds directly on top of them.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Section 1 · Polynomial Regression</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">1.1 What Is It and Why Do We Need It?</h3>
+<p class="v2-p">In Lesson 34, we learned about <strong>linear regression</strong> · which draws a <strong>straight line</strong> through data. That works perfectly when your data increases (or decreases) at a steady, constant rate.</p>
+<p class="v2-p">But what if your data <strong>curves</strong>? What if the pattern bends up and then comes back down?</p>
+<p class="v2-p">Think about this real-life example from Lagos: the number of fuel queues (petrol scarcity) throughout the day. In the early morning, there are very few queues. By mid-morning, queues build up. By afternoon, they peak. In the evening, they reduce again. That pattern is <strong>not</strong> a straight line · it <strong>curves</strong>.</p>
+<p class="v2-p">For curved data patterns, we need <strong>Polynomial Regression</strong>.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Simple analogy:</strong> Linear regression is like drawing a ruler line through your data. Polynomial regression is like bending that ruler into a curve so it follows the ups and downs of the data more closely.</p></blockquote>
+<h3 class="v2-h3">1.2 What Is a Polynomial?</h3>
+<p class="v2-p">Before writing code, let us understand the word "polynomial."</p>
+<p class="v2-p">In maths, a <strong>polynomial</strong> is an equation that uses a variable raised to one or more powers. For example:</p>
+<ul class="v2-ul"><li><code>y = 2x + 3</code> · this is a straight line (degree 1 · linear)</li><li><code>y = x² + 2x + 3</code> · this is a curve (degree 2 · quadratic)</li><li><code>y = x³ + x² + 2x + 3</code> · this is a more complex curve (degree 3 · cubic)</li></ul>
+<p class="v2-p">The <strong>degree</strong> tells you how many times the variable <code>x</code> is multiplied by itself. A higher degree means more bends in the curve.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would happen if the degree is 1? It would just be linear regression!</p></blockquote>
+<h3 class="v2-h3">1.3 The Tollbooth Example</h3>
+<p class="v2-p">We have data about 18 cars passing a tollbooth. We know each car's speed (km/h) and the time of day (hour). Let us see how speed changes throughout the day.</p>
+<p class="v2-p"><strong>Our x values (hours of day):</strong> <code>[1, 2, 3, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18, 19, 21, 22]</code></p>
+<p class="v2-p"><strong>Our y values (speed in km/h):</strong> <code>[100, 90, 80, 60, 60, 55, 60, 65, 70, 70, 75, 76, 78, 79, 90, 99, 99, 100]</code></p>
+<p class="v2-p">Notice that speeds are high in the early morning, slow down mid-day (perhaps rush hour or road congestion), then pick up again in the evening. That is a <strong>curve</strong>, not a straight line!</p>
+<h4 class="v2-h4">Step 1 · Draw a Scatter Plot First</h4>
+<p class="v2-p">Always draw a scatter plot to <em>see</em> your data before fitting a model:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+
+x = [1,2,3,5,6,7,8,9,10,12,13,14,15,16,18,19,21,22]
+y = [100,90,80,60,60,55,60,65,70,70,75,76,78,79,90,99,99,100]
+
+plt.scatter(x, y)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in browser:</strong> A scatter plot where the dots form a U-shape (speeds dip in the middle hours and rise at the ends).</p>
+<h4 class="v2-h4">Step 2 · Fit a Polynomial Regression Line</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+import matplotlib.pyplot as plt
+
+# Our data
+x = [1,2,3,5,6,7,8,9,10,12,13,14,15,16,18,19,21,22]
+y = [100,90,80,60,60,55,60,65,70,70,75,76,78,79,90,99,99,100]
+
+# Step A: Create the polynomial model
+# numpy.polyfit(x, y, 3) — fits a degree-3 (cubic) polynomial
+# numpy.poly1d(...) — turns those fit coefficients into a usable model function
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))
+
+# Step B: Create a smooth line with 100 evenly-spaced points from 1 to 22
+myline = numpy.linspace(1, 22, 100)
+
+# Step C: Draw the original scatter points
+plt.scatter(x, y)
+
+# Step D: Draw the polynomial regression curve through the data
+plt.plot(myline, mymodel(myline))
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in browser:</strong> The scatter plot now has a smooth curved line that follows the U-shape pattern of the dots.</p>
+<p class="v2-p"><strong>Line-by-line breakdown:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Code</th><th>What it does</th></tr></thead><tbody><tr><td><code>numpy.polyfit(x, y, 3)</code></td><td>Calculates the best-fitting polynomial coefficients for degree 3</td></tr><tr><td><code>numpy.poly1d(...)</code></td><td>Wraps those coefficients into a function you can call with any x value</td></tr><tr><td><code>numpy.linspace(1, 22, 100)</code></td><td>Creates 100 evenly spaced numbers from 1 to 22 · used to draw a smooth line</td></tr><tr><td><code>plt.scatter(x, y)</code></td><td>Draws the original data as dots</td></tr><tr><td><code>plt.plot(myline, mymodel(myline))</code></td><td>Draws the curve by passing the 100 line points through our model</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What if we used degree 1 instead of degree 3? Try changing the <code>3</code> to <code>1</code> · you would get a straight line (just like linear regression).</p></blockquote>
+<h3 class="v2-h3">1.4 Checking the Fit · The R-Squared Score</h3>
+<p class="v2-p">How do we know if our polynomial curve is a good fit? We check the <strong>R-squared</strong> score.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+from sklearn.metrics import r2_score
+
+x = [1,2,3,5,6,7,8,9,10,12,13,14,15,16,18,19,21,22]
+y = [100,90,80,60,60,55,60,65,70,70,75,76,78,79,90,99,99,100]
+
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))
+
+# r2_score compares the actual y values against what the model predicts
+print(r2_score(y, mymodel(x)))</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0.94</code></pre></div></div>
+<p class="v2-p"><strong>What does 0.94 mean?</strong> It means our polynomial curve explains <strong>94% of the variation</strong> in the speed data. That is an excellent fit! An R² of 0.94 is very close to 1, meaning we can trust this model to make predictions.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Rule of thumb:</strong> R² above 0.75 is generally considered a good fit. Below 0.3 means poor fit.</p></blockquote>
+<h3 class="v2-h3">1.5 Predicting a Future Value</h3>
+<p class="v2-p">Once we have a good model (R² is high), we can use it to predict values that are NOT in our original data.</p>
+<p class="v2-p"><strong>Question:</strong> What would the speed of a car be at hour 17 (5 PM)?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+from sklearn.metrics import r2_score
+
+x = [1,2,3,5,6,7,8,9,10,12,13,14,15,16,18,19,21,22]
+y = [100,90,80,60,60,55,60,65,70,70,75,76,78,79,90,99,99,100]
+
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))
+
+# Predict speed at hour 17
+speed = mymodel(17)
+print(speed)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>88.87</code></pre></div></div>
+<p class="v2-p">So our model predicts a car would be travelling at approximately <strong>88.87 km/h</strong> at 5 PM. We can verify this by looking at where hour 17 falls on our curve · it falls right around that value.</p>
+<h3 class="v2-h3">1.6 When Polynomial Regression Fails (Bad Fit)</h3>
+<p class="v2-p">Not all data is suitable for polynomial regression. Let us see what a <strong>bad fit</strong> looks like:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+import matplotlib.pyplot as plt
+
+# Random, unrelated data
+x = [89,43,36,36,95,10,66,34,38,20,26,29,48,64,6,5,36,66,72,40]
+y = [21,46,3,35,67,95,53,72,58,10,26,34,90,33,38,20,56,2,47,15]
+
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))
+myline = numpy.linspace(2, 95, 100)
+
+plt.scatter(x, y)
+plt.plot(myline, mymodel(myline))
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in browser:</strong> A scatter plot where the dots are scattered randomly with no clear pattern. The curve barely follows them.</p>
+<p class="v2-p">Now check the R² score:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from sklearn.metrics import r2_score
+
+print(r2_score(y, mymodel(x)))</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0.00995</code></pre></div></div>
+<p class="v2-p">An R² of <strong>0.01</strong> means the model explains almost <strong>nothing</strong> about the data. This data has no useful pattern · polynomial regression is not appropriate here.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Key lesson:</strong> Always check R² before using a model for predictions. A low R² means "do not trust this model."</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Polynomial Regression</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Section 2 · Multiple Regression</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">2.1 What Is It and Why Do We Need It?</h3>
+<p class="v2-p">In linear and polynomial regression, we predict <code>y</code> from a <strong>single</strong> input value <code>x</code>. For example: predicting a car's speed from only the hour of day.</p>
+<p class="v2-p">But in real life, outcomes are often influenced by <strong>multiple factors at the same time</strong>.</p>
+<p class="v2-p"><strong>Everyday example from Nigeria:</strong> The price of tomatoes in Mile 12 Market, Lagos, depends on:</p>
+<ul class="v2-ul"><li>The season (rainy or dry)</li><li>Transport cost from the farm</li><li>The quantity available</li><li>How many days since the tomatoes were harvested</li></ul>
+<p class="v2-p">If we use only <strong>one</strong> of those factors to predict the price, we would miss a lot of the picture. <strong>Multiple regression</strong> lets us use ALL of them together to make a better prediction.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Simple analogy:</strong> Linear regression is like judging a student's final grade only by their test scores. Multiple regression considers test scores, attendance, assignment completion, and class participation · giving a much more accurate prediction.</p></blockquote>
+<h3 class="v2-h3">2.2 The Data Set · Car CO2 Emissions</h3>
+<p class="v2-p">We have a dataset of 36 cars with these columns:</p>
+<ul class="v2-ul"><li><strong>Volume</strong> · engine size in cm³ (how big the engine is)</li><li><strong>Weight</strong> · car weight in kg</li><li><strong>CO2</strong> · how many grams of CO2 the car emits per km driven</li></ul>
+<p class="v2-p">We want to predict <strong>CO2</strong> based on both <strong>Volume</strong> AND <strong>Weight</strong>.</p>
+<p class="v2-p">Here is a sample of the data:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Car</th><th>Volume (cm³)</th><th>Weight (kg)</th><th>CO2 (g/km)</th></tr></thead><tbody><tr><td>Toyota Aygo</td><td>1000</td><td>790</td><td>99</td></tr><tr><td>Mitsubishi Space Star</td><td>1200</td><td>1160</td><td>95</td></tr><tr><td>Skoda Citigo</td><td>1000</td><td>929</td><td>95</td></tr><tr><td>Mini Cooper</td><td>1500</td><td>1140</td><td>105</td></tr><tr><td>Audi A6</td><td>2000</td><td>1725</td><td>114</td></tr><tr><td>Mercedes SLK</td><td>2500</td><td>1395</td><td>120</td></tr></tbody></table></div>
+<p class="v2-p">The pattern: heavier cars with bigger engines generally emit more CO2. But we need both pieces of information together.</p>
+<h3 class="v2-h3">2.3 Installing Prerequisite Libraries</h3>
+<p class="v2-p">Make sure you have these installed:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>pip install pandas scikit-learn</code></pre></div></div>
+<p class="v2-p">You also need to download <code>data.csv</code> · the car dataset. (In a real project, you would have this file in your working directory.)</p>
+<h3 class="v2-h3">2.4 Building the Multiple Regression Model</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas                       # For reading CSV files and handling data tables
+from sklearn import linear_model    # For building regression models
+
+# Step 1: Read the data from a CSV file into a DataFrame
+df = pandas.read_csv(&quot;data.csv&quot;)
+
+# Step 2: Define the independent variables (inputs)
+# We use BOTH Weight and Volume to predict CO2
+# Note: Capital X is convention for the input matrix
+X = df[[&#x27;Weight&#x27;, &#x27;Volume&#x27;]]
+
+# Step 3: Define the dependent variable (what we want to predict)
+# Note: Lowercase y is convention for the output/target
+y = df[&#x27;CO2&#x27;]
+
+# Step 4: Create a linear regression object
+regr = linear_model.LinearRegression()
+
+# Step 5: Train (fit) the model — it learns the relationship between X and y
+regr.fit(X, y)
+
+# Step 6: Predict CO2 for a car with Weight=2300 kg and Volume=1300 cm³
+predictedCO2 = regr.predict([[2300, 1300]])
+print(predictedCO2)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[107.2087328]</code></pre></div></div>
+<p class="v2-p">Our model predicts that a car weighing <strong>2300 kg</strong> with a <strong>1300 cm³</strong> engine emits approximately <strong>107.2 grams</strong> of CO2 per kilometre.</p>
+<p class="v2-p"><strong>Line-by-line breakdown:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Code</th><th>What it does</th></tr></thead><tbody><tr><td><code>df[['Weight', 'Volume']]</code></td><td>Selects two columns · double brackets <code>[[...]]</code> create a 2D table of inputs</td></tr><tr><td><code>df['CO2']</code></td><td>Selects one column · the thing we want to predict</td></tr><tr><td><code>linear_model.LinearRegression()</code></td><td>Creates the regression algorithm object</td></tr><tr><td><code>regr.fit(X, y)</code></td><td>Trains the model · it figures out the mathematical relationship</td></tr><tr><td><code>regr.predict([[2300, 1300]])</code></td><td>Feeds two input values and asks "what is the predicted CO2?"</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> Why do we use <code>[[2300, 1300]]</code> with double brackets? Because the model expects a 2D input (a table with rows and columns), even if we are predicting just one car.</p></blockquote>
+<h3 class="v2-h3">2.5 Coefficients · Understanding What the Model Learned</h3>
+<p class="v2-p">The word <strong>coefficient</strong> in machine learning means: "how much does this input affect the output?"</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas
+from sklearn import linear_model
+
+df = pandas.read_csv(&quot;data.csv&quot;)
+X = df[[&#x27;Weight&#x27;, &#x27;Volume&#x27;]]
+y = df[&#x27;CO2&#x27;]
+
+regr = linear_model.LinearRegression()
+regr.fit(X, y)
+
+# Print the coefficients — one for each input variable
+print(regr.coef_)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[0.00755095 0.00780526]</code></pre></div></div>
+<p class="v2-p"><strong>Interpretation:</strong></p>
+<ul class="v2-ul"><li><strong>Weight coefficient = 0.00755095</strong> · Every time the car weight increases by <strong>1 kg</strong>, the CO2 emission increases by <strong>0.00755 grams/km</strong></li><li><strong>Volume coefficient = 0.00780526</strong> · Every time the engine volume increases by <strong>1 cm³</strong>, the CO2 emission increases by <strong>0.00781 grams/km</strong></li></ul>
+<p class="v2-p"><strong>Let us verify this with a test:</strong> If we increase the weight from 2300 kg to 3300 kg (an increase of 1000 kg), what happens?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>predictedCO2 = regr.predict([[3300, 1300]])
+print(predictedCO2)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[114.75968007]</code></pre></div></div>
+<p class="v2-p">Let us verify mathematically:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>107.2087328 + (1000 × 0.00755095) = 107.2087328 + 7.55095 = 114.75968</code></pre></div></div>
+<p class="v2-p">The maths checks out perfectly! The coefficient is correct.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world connection:</strong> These coefficients are exactly the kind of numbers that Nigerian environmental agencies use when calculating carbon tax on vehicles · the heavier and bigger the engine, the more CO2, and the higher the levy.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Multiple Regression</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Section 3 · Scale (Feature Scaling)</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">3.1 The Problem with Different Units</h3>
+<p class="v2-p">Here is a serious problem that beginners often miss.</p>
+<p class="v2-p">Look at our car dataset again:</p>
+<ul class="v2-ul"><li><strong>Weight</strong> values: 790, 1160, 929, 1725... (values in the hundreds and thousands)</li><li><strong>Volume</strong> values: 1.0, 1.2, 0.9, 2.5... (values between 0 and 3)</li></ul>
+<p class="v2-p">These two columns use <strong>completely different scales</strong>. Weight is in kilograms (large numbers). Volume is in litres (small decimals).</p>
+<p class="v2-p">When a machine learning algorithm looks at these numbers, it might accidentally think that Weight is more important just because its numbers are bigger! That is a measurement bias, not a real pattern.</p>
+<p class="v2-p"><strong>Think about it this way:</strong> Imagine you are comparing a student's score out of 100 (say, 78) and their height in metres (say, 1.75). The height number (1.75) is much smaller than the score (78), but that does not mean height is less important! They are just on different scales.</p>
+<p class="v2-p"><strong>Solution: Scaling!</strong> We transform all our numbers into a common comparable scale.</p>
+<h3 class="v2-h3">3.2 The Standardization Method</h3>
+<p class="v2-p">The most common scaling method in machine learning is <strong>standardization</strong> (also called <strong>z-score normalization</strong>). The formula is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>z = (x - mean) / standard_deviation</code></pre></div></div>
+<p class="v2-p">Where:</p>
+<ul class="v2-ul"><li><code>x</code> = the original value</li><li><code>mean</code> = the average of all values in that column</li><li><code>standard_deviation</code> = how spread out the values are</li><li><code>z</code> = the new scaled value</li></ul>
+<p class="v2-p"><strong>Let us work through an example manually:</strong></p>
+<p class="v2-p">Weight column mean ≈ 1292.23 kg, Standard deviation ≈ 238.74 kg</p>
+<p class="v2-p">For the first car (weight = 790 kg):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>z = (790 - 1292.23) / 238.74 = -2.1</code></pre></div></div>
+<p class="v2-p">Volume column mean ≈ 1.61 litres, Standard deviation ≈ 0.38 litres</p>
+<p class="v2-p">For the first car (volume = 1.0 litres):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>z = (1.0 - 1.61) / 0.38 = -1.59</code></pre></div></div>
+<p class="v2-p">Now we can compare <strong>-2.1 with -1.59</strong> · both are on the same scale! Much easier for the model to work with.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>What do negative values mean?</strong> A negative z-score means the value is <em>below the average</em>. The first car (Toyota Aygo) is lighter than average (-2.1) and has a smaller engine than average (-1.59). Both make sense for a small city car!</p></blockquote>
+<h3 class="v2-h3">3.3 Scaling with Python (The Easy Way)</h3>
+<p class="v2-p">We do not need to calculate this manually. Python's <code>sklearn</code> provides <code>StandardScaler()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas
+from sklearn import linear_model
+from sklearn.preprocessing import StandardScaler  # The scaling tool
+
+# Create a scaler object
+scale = StandardScaler()
+
+# Read the data (this version has Volume in litres, not cm³)
+df = pandas.read_csv(&quot;data.csv&quot;)
+
+# Select our input columns
+X = df[[&#x27;Weight&#x27;, &#x27;Volume&#x27;]]
+
+# fit_transform() does two things at once:
+# 1. &quot;fit&quot; — learns the mean and std deviation of each column
+# 2. &quot;transform&quot; — applies the z-score formula to every value
+scaledX = scale.fit_transform(X)
+
+print(scaledX)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output (first few rows):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[-2.10389253 -1.59336644]
+ [-0.55407235 -1.07190106]
+ [-1.52166278 -1.59336644]
+ ...</code></pre></div></div>
+<p class="v2-p">Notice the very first row is <code>[-2.1, -1.59]</code> · exactly what we calculated manually!</p>
+<h3 class="v2-h3">3.4 Predicting with Scaled Data</h3>
+<p class="v2-p">When we use scaled data to train our model, we <strong>must also scale</strong> any new data before predicting. Here is the full workflow:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas
+from sklearn import linear_model
+from sklearn.preprocessing import StandardScaler
+
+scale = StandardScaler()
+
+df = pandas.read_csv(&quot;data.csv&quot;)
+
+X = df[[&#x27;Weight&#x27;, &#x27;Volume&#x27;]]
+y = df[&#x27;CO2&#x27;]
+
+# Step 1: Scale the training data
+scaledX = scale.fit_transform(X)
+
+# Step 2: Train the model on the SCALED data
+regr = linear_model.LinearRegression()
+regr.fit(scaledX, y)
+
+# Step 3: To predict, we MUST scale the new input using the SAME scaler
+# (scale.transform, NOT scale.fit_transform — we do not re-learn the scale!)
+scaled_new = scale.transform([[2300, 1.3]])
+
+# Step 4: Predict using the scaled new values
+predictedCO2 = regr.predict([scaled_new[0]])
+print(predictedCO2)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[107.2087328]</code></pre></div></div>
+<p class="v2-p">The result is the same as before · but now the model learned from properly scaled data, making it more reliable and fair.</p>
+<p class="v2-p"><strong>Critical distinction:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>When to use</th></tr></thead><tbody><tr><td><code>scale.fit_transform(X)</code></td><td>ONLY on training data · learns the scale parameters AND transforms</td></tr><tr><td><code>scale.transform(new_data)</code></td><td>On new prediction data · uses already-learned parameters to transform</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Common beginner mistake:</strong> Using <code>fit_transform()</code> on new prediction data. This would learn NEW mean and std from the tiny new data, giving wrong results. Always use <code>transform()</code> for new data after training.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Scale (Feature Scaling)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Section 4 · Train/Test</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">4.1 Why Testing Your Model Matters</h3>
+<p class="v2-p">Imagine you are a WAEC examiner. You give students practice questions, they memorise the answers, and then you test them using those <strong>exact same questions</strong>. Of course they score 100%! But that tells you nothing about whether they actually <em>understand</em> the material.</p>
+<p class="v2-p">Machine learning models have the same problem. If you test a model on the same data it was trained on, it might score very well · but that does not mean it will work on <strong>new, unseen data</strong> in the real world.</p>
+<p class="v2-p"><strong>The solution is Train/Test splitting:</strong></p>
+<ul class="v2-ul"><li>Take your data</li><li>Use <strong>80%</strong> to <em>train</em> (teach) the model</li><li>Use the remaining <strong>20%</strong> to <em>test</em> (evaluate) the model</li><li>The model never sees the test data during training, so the test is fair</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Nigerian school analogy:</strong> The 80% training data is like the textbook and class notes. The 20% test data is like the WAEC exam questions · unseen, fair, and revealing of actual competence.</p></blockquote>
+<h3 class="v2-h3">4.2 Setting Up the Data</h3>
+<p class="v2-p">We will use a randomly generated dataset of 100 shoppers. For each customer:</p>
+<ul class="v2-ul"><li><strong>x</strong> = how many minutes they spent in the shop before buying</li><li><strong>y</strong> = how much money they spent (in dollars)</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+import matplotlib.pyplot as plt
+
+# Set a random seed so results are reproducible
+# (Without this, the random data would change every run)
+numpy.random.seed(2)
+
+# Generate 100 random values for &quot;minutes spent in shop&quot;
+# numpy.random.normal(mean, std_deviation, num_samples)
+x = numpy.random.normal(3, 1, 100)    # Average 3 minutes, std dev 1
+
+# Generate 100 random values for &quot;money spent&quot;
+y = numpy.random.normal(150, 40, 100) / x  # Amount divided by time spent
+
+# Visualise the data
+plt.scatter(x, y)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in browser:</strong> A scatter plot showing a downward curve · customers who spend fewer minutes tend to spend more money (perhaps impulsive buyers), while those who take longer spend less per minute.</p>
+<h3 class="v2-h3">4.3 Splitting into Training and Testing Sets</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># The first 80 data points become training data
+train_x = x[:80]   # Elements 0 to 79 (80 items)
+train_y = y[:80]
+
+# The remaining 20 data points become test data
+test_x = x[80:]    # Elements 80 to 99 (20 items)
+test_y = y[80:]</code></pre></div></div>
+<p class="v2-p"><strong>Understanding the slice notation:</strong></p>
+<ul class="v2-ul"><li><code>x[:80]</code> means "give me elements from the start up to (but not including) index 80"</li><li><code>x[80:]</code> means "give me elements from index 80 all the way to the end"</li></ul>
+<p class="v2-p">Let us visualise each set to make sure they look representative:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Visualise training set
+plt.scatter(train_x, train_y)
+plt.title(&quot;Training Set (80%)&quot;)
+plt.show()
+
+# Visualise test set
+plt.scatter(test_x, test_y)
+plt.title(&quot;Test Set (20%)&quot;)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> Both scatter plots should look similar to the full dataset · confirming that neither set is biased or unrepresentative.</p>
+<h3 class="v2-h3">4.4 Fitting and Evaluating the Model</h3>
+<p class="v2-p">The data looks like a curve, so we will use polynomial regression (degree 4):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+from sklearn.metrics import r2_score
+
+numpy.random.seed(2)
+
+x = numpy.random.normal(3, 1, 100)
+y = numpy.random.normal(150, 40, 100) / x
+
+train_x = x[:80]
+train_y = y[:80]
+test_x = x[80:]
+test_y = y[80:]
+
+# Train the model on TRAINING data only
+mymodel = numpy.poly1d(numpy.polyfit(train_x, train_y, 4))
+
+# Evaluate how well it fits the TRAINING data
+r2_train = r2_score(train_y, mymodel(train_x))
+print(&quot;Training R²:&quot;, r2_train)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Training R²: 0.799</code></pre></div></div>
+<p class="v2-p">An R² of 0.80 on training data is acceptable. But this alone tells us very little · the model was trained on this data, so of course it fits it somewhat well.</p>
+<p class="v2-p"><strong>The real test · how does it do on UNSEEN test data?</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Evaluate how well it fits the TEST data (data the model has NEVER seen)
+r2_test = r2_score(test_y, mymodel(test_x))
+print(&quot;Test R²:&quot;, r2_test)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Test R²: 0.809</code></pre></div></div>
+<p class="v2-p">The model scores <strong>0.809 on test data</strong> · nearly the same as the training score of 0.799! This is very good news. It means the model is <strong>not memorising</strong> the training data · it has genuinely learned the underlying pattern and can apply it to new, unseen data.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>What if test R² was much lower than training R²?</strong> That would be a warning sign called <strong>overfitting</strong> · the model memorised the training data but cannot generalise. Imagine a student who memorises specific answers but cannot apply the concept to new questions.</p></blockquote>
+<h3 class="v2-h3">4.5 Making a Prediction with the Validated Model</h3>
+<p class="v2-p">Now that we have confirmed the model works on both training and test data, we can confidently use it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Predict: how much will a customer spend if they stay 5 minutes?
+predicted_amount = mymodel(5)
+print(predicted_amount)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>22.88</code></pre></div></div>
+<p class="v2-p">Our model predicts that a customer who stays <strong>5 minutes</strong> in the shop will spend approximately <strong>$22.88</strong>.</p>
+<p class="v2-p"><strong>Summary of the Train/Test workflow:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Full Data (100 rows)
+        │
+        ├── Training Set (80%) ──► Train the model ──► Get R² on training data
+        │
+        └── Testing Set (20%) ──► Test the model ──► Get R² on test data
+                                                               │
+                                               If training R² ≈ test R²: Model is GOOD ✓
+                                               If test R² &lt;&lt; training R²: Model is OVERFITTING ✗</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Train/Test</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Section 5 · Decision Tree</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">5.1 What Is a Decision Tree?</h3>
+<p class="v2-p">A <strong>Decision Tree</strong> is a machine learning algorithm that makes predictions by asking a series of YES/NO questions · exactly the way a human makes decisions.</p>
+<p class="v2-p">Think about how you decide whether to buy jollof rice or fried rice at a bukka:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Is it Friday? 
+    YES → Is the jollof available?
+              YES → Get jollof rice
+              NO  → Get fried rice
+    NO  → Is it your cheat day?
+              YES → Get anything
+              NO  → Get the vegetable soup</code></pre></div></div>
+<p class="v2-p">That mental process IS a decision tree! Python can build this same kind of tree automatically from your data.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Key difference from regression:</strong> Regression predicts a <strong>number</strong> (like CO2 in grams). A Decision Tree predicts a <strong>category</strong> (like YES or NO, or which class of loan risk, or which product category).</p></blockquote>
+<h3 class="v2-h3">5.2 The Comedy Show Dataset</h3>
+<p class="v2-p">Our example: a person has attended many comedy shows and recorded information about each comedian and whether they went (YES) or didn't go (NO):</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Age</th><th>Experience (yrs)</th><th>Rank (1 · 10)</th><th>Nationality</th><th>Went?</th></tr></thead><tbody><tr><td>36</td><td>10</td><td>9</td><td>UK</td><td>NO</td></tr><tr><td>42</td><td>12</td><td>4</td><td>USA</td><td>NO</td></tr><tr><td>23</td><td>4</td><td>6</td><td>Nigeria</td><td>NO</td></tr><tr><td>43</td><td>21</td><td>8</td><td>USA</td><td>YES</td></tr><tr><td>66</td><td>3</td><td>7</td><td>Nigeria</td><td>YES</td></tr><tr><td>35</td><td>14</td><td>9</td><td>UK</td><td>YES</td></tr><tr><td>52</td><td>13</td><td>7</td><td>Nigeria</td><td>YES</td></tr><tr><td>18</td><td>3</td><td>7</td><td>UK</td><td>YES</td></tr><tr><td>45</td><td>9</td><td>9</td><td>UK</td><td>YES</td></tr></tbody></table></div>
+<p class="v2-p">Given this historical data, we want to build a model that can tell us: "Given a new comedian's details, should I go to their show?"</p>
+<h3 class="v2-h3">5.3 The Full Code · Building the Decision Tree</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas
+from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
+import matplotlib.pyplot as plt
+
+# Step 1: Read the data
+df = pandas.read_csv(&quot;data.csv&quot;)
+
+# Step 2: Convert text columns to numbers
+# Machine learning ONLY works with numbers, not text strings!
+# We create a mapping (dictionary) of text → number
+
+# Nationality: UK=0, USA=1, N(Norway)=2
+d = {&#x27;UK&#x27;: 0, &#x27;USA&#x27;: 1, &#x27;N&#x27;: 2}
+df[&#x27;Nationality&#x27;] = df[&#x27;Nationality&#x27;].map(d)
+
+# Target column: YES=1, NO=0
+d = {&#x27;YES&#x27;: 1, &#x27;NO&#x27;: 0}
+df[&#x27;Go&#x27;] = df[&#x27;Go&#x27;].map(d)
+
+# Step 3: Separate features (inputs) from target (output)
+features = [&#x27;Age&#x27;, &#x27;Experience&#x27;, &#x27;Rank&#x27;, &#x27;Nationality&#x27;]
+X = df[features]   # Input: what we know about the comedian
+y = df[&#x27;Go&#x27;]       # Output: did we go? (1=YES, 0=NO)
+
+# Step 4: Create and train the Decision Tree
+dtree = DecisionTreeClassifier()  # Creates the algorithm
+dtree = dtree.fit(X, y)           # Trains it on our data
+
+# Step 5: Visualise the tree
+tree.plot_tree(dtree, feature_names=features)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in browser:</strong> A tree diagram with boxes and arrows showing the questions the algorithm asks.</p>
+<h3 class="v2-h3">5.4 Reading the Decision Tree · Box by Box</h3>
+<p class="v2-p">The decision tree produces a diagram that looks like a flowchart. Let us read each box carefully.</p>
+<h4 class="v2-h4">Box 1 · The Root (Top of the Tree): "Rank &lt;= 6.5"</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Rank &lt;= 6.5
+gini = 0.497
+samples = 13
+value = [6, 7]</code></pre></div></div>
+<ul class="v2-ul"><li><strong>Rank &lt;= 6.5</strong> · The first question: "Does this comedian have a rank of 6.5 or lower?"</li></ul>
+<p class="v2-p">- If YES → go LEFT (these are lower-ranked comedians)   - If NO → go RIGHT (higher-ranked comedians)</p>
+<ul class="v2-ul"><li><strong>gini = 0.497</strong> · This measures how mixed the current data is. Close to 0.5 means very mixed (almost half say YES, half say NO). Close to 0.0 means one side is clearly dominant.</li><li><strong>samples = 13</strong> · At this point, all 13 comedians are still being evaluated (we haven't split yet)</li><li><strong>value = [6, 7]</strong> · Of these 13 comedians, 6 got "NO" (don't go) and 7 got "YES" (go)</li></ul>
+<p class="v2-p"><strong>Understanding the Gini formula:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Gini = 1 - (x/n)² - (y/n)²
+
+Where:
+  x = number of YES answers = 7
+  n = total samples = 13
+  y = number of NO answers = 6
+
+Gini = 1 - (7/13)² - (6/13)²
+     = 1 - 0.2899 - 0.2130
+     = 0.497</code></pre></div></div>
+<p class="v2-p">A Gini of 0.497 means this node is nearly 50/50 · very uncertain. Good splits reduce uncertainty.</p>
+<h4 class="v2-h4">Box 2 (Left branch) · "Low Rank Comedians"</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>gini = 0.0
+samples = 5
+value = [5, 0]</code></pre></div></div>
+<ul class="v2-ul"><li>5 comedians had Rank &lt;= 6.5</li><li>All 5 got "NO" (value = [5, 0] means 5 NOs, 0 YESs)</li><li>Gini = 0.0 means perfect · no uncertainty. The answer is always NO.</li><li><strong>Decision: If the comedian's rank is 6.5 or lower → Don't go!</strong></li></ul>
+<h4 class="v2-h4">Box 2 (Right branch) · "High Rank Comedians": "Nationality &lt;= 0.5"</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Nationality &lt;= 0.5
+gini = 0.219
+samples = 8
+value = [1, 7]</code></pre></div></div>
+<ul class="v2-ul"><li>8 comedians had Rank &gt; 6.5</li><li>Of these 8, only 1 got "NO" and 7 got "YES"</li><li>Gini = 0.219 · much lower than before, so we are getting clearer</li><li>Next question: Nationality &lt;= 0.5 · since UK=0, this asks "Is the comedian from the UK?" (0 &lt;= 0.5 is TRUE)</li></ul>
+<h4 class="v2-h4">Further Branches · Age and Experience</h4>
+<p class="v2-p">The tree continues splitting, eventually asking about:</p>
+<ul class="v2-ul"><li><strong>Age</strong> · younger UK comedians (≤ 35.5) are more likely to go see</li><li><strong>Experience</strong> · among older UK comedians, those with ≤ 9.5 years experience get a NO</li></ul>
+<p class="v2-p">The tree keeps splitting until every branch has a clear, unambiguous answer (gini = 0.0).</p>
+<h3 class="v2-h3">5.5 Predicting with the Decision Tree</h3>
+<p class="v2-p">Now we can use the trained tree to predict whether to attend a new show:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Predict: Should we go see a comedian with these details?
+# [Age=40, Experience=10, Rank=7, Nationality=USA(1)]
+print(dtree.predict([[40, 10, 7, 1]]))</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1]</code></pre></div></div>
+<p class="v2-p">The tree predicts <strong>1</strong> (YES · go to the show!).</p>
+<p class="v2-p">Let us try another comedian:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># [Age=25, Experience=2, Rank=5, Nationality=UK(0)]
+print(dtree.predict([[25, 2, 5, 0]]))</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[0]</code></pre></div></div>
+<p class="v2-p">Rank of 5 is below 6.5 · the tree says <strong>0</strong> (NO · don't go).</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Decision Tree</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Polynomial Regression with Market Data</h3>
+<p class="v2-p"><strong>Scenario:</strong> Chinwe runs a provision store in Onitsha. She records weekly sales (in units) against average outdoor temperature (°C) for 10 weeks. Hot and cold weeks tend to have different sales patterns for soft drinks.</p>
+<p class="v2-p"><strong>Data:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>temp = [18, 20, 22, 24, 26, 28, 30, 32, 34, 36]
+sales = [80, 95, 110, 130, 145, 150, 142, 128, 100, 85]</code></pre></div></div>
+<p class="v2-p"><strong>Objective:</strong> Find out if sales follow a polynomial curve with temperature.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Draw a scatter plot of temperature vs. sales</li><li>Fit a degree-2 polynomial regression (quadratic)</li><li>Draw the fitted curve on top of the scatter plot</li><li>Check the R² score</li></ol>
+<p class="v2-p"><strong>Expected solution:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+
+temp = [18, 20, 22, 24, 26, 28, 30, 32, 34, 36]
+sales = [80, 95, 110, 130, 145, 150, 142, 128, 100, 85]
+
+# Fit a degree-2 polynomial
+mymodel = numpy.poly1d(numpy.polyfit(temp, sales, 2))
+
+# Create a smooth line
+myline = numpy.linspace(18, 36, 100)
+
+# Plot
+plt.scatter(temp, sales, label=&quot;Actual Sales&quot;)
+plt.plot(myline, mymodel(myline), color=&#x27;red&#x27;, label=&quot;Poly Fit&quot;)
+plt.xlabel(&quot;Temperature (°C)&quot;)
+plt.ylabel(&quot;Sales (units)&quot;)
+plt.title(&quot;Chinwe&#x27;s Store - Sales vs Temperature&quot;)
+plt.legend()
+plt.show()
+
+# Check R² score
+print(&quot;R² score:&quot;, r2_score(sales, mymodel(temp)))</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>R² score: ~0.98</code></pre></div></div>
+<p class="v2-p">An R² of ~0.98 is excellent. The quadratic curve closely matches the real sales data.</p>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>At what temperature are sales highest? (Around 28°C · look at the peak of the curve)</li><li>What would sales be predicted at 25°C? Try <code>mymodel(25)</code></li><li>What does the R² tell us about the relationship between temperature and sales?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Multiple Regression for House Prices</h3>
+<p class="v2-p"><strong>Scenario:</strong> Emeka is a property agent in Abuja. He collects data on houses sold recently. He wants to predict house prices based on size (m²) and number of rooms.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas
+from sklearn import linear_model
+
+# Sample data — 8 houses
+data = {
+    &#x27;Size_m2&#x27;:   [60,  80,  100, 120, 75,  90,  110, 65],
+    &#x27;Rooms&#x27;:     [2,   3,   4,   5,   3,   3,   4,   2],
+    &#x27;Price_M&#x27;:   [18,  25,  34,  45,  22,  29,  38,  20]  # Price in millions of Naira
+}
+
+df = pandas.DataFrame(data)
+
+X = df[[&#x27;Size_m2&#x27;, &#x27;Rooms&#x27;]]
+y = df[&#x27;Price_M&#x27;]
+
+regr = linear_model.LinearRegression()
+regr.fit(X, y)
+
+# Predict price of a 95m² house with 3 rooms
+predicted = regr.predict([[95, 3]])
+print(f&quot;Predicted price: ₦{predicted[0]:.2f} million&quot;)
+
+# Show coefficients
+print(&quot;Coefficients:&quot;, regr.coef_)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Predicted price: ₦28.xx million
+Coefficients: [approximately 0.28, 2.5]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What does the coefficient for <code>Rooms</code> tell you? (Each additional room adds approximately ₦2.5 million to the price)</li><li>What does the coefficient for <code>Size_m2</code> tell you? (Each additional square metre adds approximately ₦280,000 to the price)</li><li>What would happen to the predicted price if we added one more room?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Train/Test on Student Exam Data</h3>
+<p class="v2-p"><strong>Scenario:</strong> A WAEC data analyst wants to build a model predicting exam scores from hours of study. She has data from 50 students. She wants to test whether the model actually generalises.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+from sklearn.metrics import r2_score
+
+numpy.random.seed(10)
+
+# Simulate: hours studied (between 1 and 10 hours)
+hours = numpy.random.uniform(1, 10, 50)
+
+# Simulate: exam scores (roughly: more hours = higher score, with some randomness)
+scores = 40 + (hours * 6) + numpy.random.normal(0, 5, 50)
+
+# Split: 80% train, 20% test
+train_hours = hours[:40]
+train_scores = scores[:40]
+test_hours = hours[40:]
+test_scores = scores[40:]
+
+# Fit polynomial regression on training data
+mymodel = numpy.poly1d(numpy.polyfit(train_hours, train_scores, 2))
+
+# Evaluate
+r2_train = r2_score(train_scores, mymodel(train_hours))
+r2_test = r2_score(test_scores, mymodel(test_hours))
+
+print(f&quot;Training R²: {r2_train:.3f}&quot;)
+print(f&quot;Test R²:     {r2_test:.3f}&quot;)
+
+# Predict score for a student who studies 7 hours
+print(f&quot;Predicted score for 7 hours: {mymodel(7):.1f}&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output (approximate · varies slightly due to randomness):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Training R²: 0.85x
+Test R²:     0.80x
+Predicted score for 7 hours: ~82.0</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Are the training R² and test R² close to each other? (Yes · good sign, no overfitting)</li><li>What would it mean if test R² were 0.20 while training R² were 0.85?</li><li>What does the model predict for a student who studies only 1 hour?</li></ul>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(8)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1 · Using fit_transform() on new prediction data</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — learns new mean/std from just 1 data point
+new_scaled = scale.fit_transform([[2300, 1.3]])</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># CORRECT — uses the mean/std already learned from training data
+new_scaled = scale.transform([[2300, 1.3]])</code></pre></div></div>
+<p class="v2-p"><strong>Why it matters:</strong> <code>fit_transform()</code> calculates a new mean and standard deviation. With only one data point, it would produce completely wrong scaled values, and your prediction would be garbage.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2 · Choosing a polynomial degree that is too high</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Degree 10 polynomial — way too complex, will memorise noise
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 10))</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Start with degree 2 or 3 — usually enough
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))</code></pre></div></div>
+<p class="v2-p"><strong>Why it matters:</strong> A very high degree polynomial will perfectly fit the training data but fail completely on new data. This is called <strong>overfitting</strong> · the model memorises noise instead of learning the real pattern.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3 · Testing the model on training data (not on unseen data)</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — testing on the same data we trained on
+r2 = r2_score(train_y, mymodel(train_x))
+print(&quot;Model accuracy:&quot;, r2)  # This score is misleading!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># CORRECT — train on training data, test on SEPARATE test data
+r2_train = r2_score(train_y, mymodel(train_x))
+r2_test  = r2_score(test_y,  mymodel(test_x))
+print(&quot;Training R²:&quot;, r2_train)
+print(&quot;Test R²:&quot;, r2_test)</code></pre></div></div>
+<p class="v2-p"><strong>Why it matters:</strong> A model that scores 0.99 on training data but 0.3 on test data is useless in real life. Only the test score tells you how the model will perform on new data.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4 · Forgetting to convert text to numbers for Decision Trees</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — decision trees cannot handle text strings
+df[&#x27;Nationality&#x27;] = [&#x27;UK&#x27;, &#x27;USA&#x27;, &#x27;Nigeria&#x27;, ...]   # still text!
+dtree.fit(X, y)   # This will crash with an error</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># CORRECT — convert text to numbers first
+d = {&#x27;UK&#x27;: 0, &#x27;USA&#x27;: 1, &#x27;Nigeria&#x27;: 2}
+df[&#x27;Nationality&#x27;] = df[&#x27;Nationality&#x27;].map(d)
+dtree.fit(X, y)   # Now it works!</code></pre></div></div>
+<p class="v2-p"><strong>Why it matters:</strong> All machine learning algorithms in sklearn only work with numerical data. Text must always be converted to numbers before fitting.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5 · Ignoring R² when checking fit quality</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Building a model and jumping straight to predictions
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))
+print(mymodel(50))  # Predicting without knowing if the model is reliable!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Always check R² BEFORE making predictions
+mymodel = numpy.poly1d(numpy.polyfit(x, y, 3))
+r2 = r2_score(y, mymodel(x))
+print(&quot;R²:&quot;, r2)
+if r2 &gt; 0.75:
+    print(mymodel(50))  # Only predict if the model is trustworthy
+else:
+    print(&quot;Model fit is too weak — do not use for predictions!&quot;)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6 · Using X (capital) and y (lowercase) inconsistently</h3>
+<p class="v2-p">A widely used convention in machine learning:</p>
+<ul class="v2-ul"><li><code>X</code> (capital) = the <strong>input matrix</strong> (multiple columns, 2D)</li><li><code>y</code> (lowercase) = the <strong>target/output</strong> (single column, 1D)</li></ul>
+<p class="v2-p">Mixing them up can cause confusing errors. Stick to this convention always.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Quick Reference Card</div><div class="pc" id="chk10"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Concept</th><th>Key Function(s)</th><th>Purpose</th></tr></thead><tbody><tr><td>Polynomial Regression</td><td><code>numpy.polyfit(x, y, degree)</code> <code>numpy.poly1d(...)</code></td><td>Fit a curved line through data</td></tr><tr><td>R-squared</td><td><code>r2_score(y_actual, y_predicted)</code></td><td>Measure fit quality (0 = bad, 1 = perfect)</td></tr><tr><td>Multiple Regression</td><td><code>LinearRegression()</code> <code>.fit(X, y)</code> <code>.predict([[...]])</code></td><td>Predict from multiple inputs</td></tr><tr><td>Regression Coefficients</td><td><code>regr.coef_</code></td><td>Shows impact of each input variable</td></tr><tr><td>Feature Scaling</td><td><code>StandardScaler()</code> <code>.fit_transform(X)</code> <code>.transform(new_data)</code></td><td>Normalize different-scale features</td></tr><tr><td>Train/Test Split</td><td><code>x[:80]</code> / <code>x[80:]</code></td><td>Honest model evaluation on unseen data</td></tr><tr><td>Decision Tree</td><td><code>DecisionTreeClassifier()</code> <code>.fit(X, y)</code> <code>.predict([[...]])</code></td><td>Classify data into categories</td></tr><tr><td>Gini Impurity</td><td>Displayed in tree nodes</td><td>Measures node purity (0 = pure, 0.5 = mixed)</td></tr><tr><td>Convert text to numbers</td><td><code>df['col'].map({'A': 0, 'B': 1})</code></td><td>Prepare text data for ML algorithms</td></tr></tbody></table></div>
+<p class="v2-p"><strong>R² Interpretation Guide:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>R² Value</th><th>Meaning</th></tr></thead><tbody><tr><td>0.90 · 1.00</td><td>Excellent fit · model is very reliable</td></tr><tr><td>0.75 · 0.90</td><td>Good fit · model is usable for predictions</td></tr><tr><td>0.50 · 0.75</td><td>Moderate fit · use with caution</td></tr><tr><td>0.00 · 0.50</td><td>Poor fit · model not suitable for this data</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Decision Tree Node Key:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Feature &lt;= threshold       ← The question being asked
+gini = X.XXX               ← How mixed the data is at this node
+samples = N                ← How many data points reached this node
+value = [NO_count, YES_count]  ← Breakdown of outcomes at this node</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><em>End of Lesson 35. In Lesson 36, we continue with more advanced machine learning tools: the Confusion Matrix, Hierarchical Clustering, and Logistic Regression.</em></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Quick Reference Card</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Stage 1 · Polynomial Regression: Temperature vs. Attendance</div><div class="build-req"><p class="v2-p">In this mini-project, you will build a complete data analysis and prediction system for a farmers market in Abuja. You will use polynomial regression, feature scaling, train/test validation, and a decision tree · all in one project.</p>
+<p class="v2-p"><strong>Scenario:</strong> Alhaji Musa manages a weekly farmers market. He wants to use past data to:</p>
+<ol class="v2-ol"><li>Predict how many customers will attend based on temperature</li><li>Predict how much revenue per stall based on customer count and day of week</li><li>Decide whether to order extra supplies based on weather and forecast</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Polynomial Regression: Temperature vs. Attendance</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+
+# Historical data: temperature (°C) and customer attendance
+temperature = [20, 22, 24, 25, 27, 28, 30, 32, 33, 35, 37, 38]
+attendance  = [200, 250, 310, 340, 400, 420, 410, 380, 340, 280, 210, 180]
+
+# Milestone 1: Visualise the data
+plt.scatter(temperature, attendance, color=&#x27;green&#x27;)
+plt.xlabel(&quot;Temperature (°C)&quot;)
+plt.ylabel(&quot;Customer Attendance&quot;)
+plt.title(&quot;Abuja Farmers Market — Temperature vs Attendance&quot;)
+plt.show()</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import numpy
+import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
+
+# Historical data: temperature (°C) and customer attendance
+temperature = [20, 22, 24, 25, 27, 28, 30, 32, 33, 35, 37, 38]
+attendance  = [200, 250, 310, 340, 400, 420, 410, 380, 340, 280, 210, 180]
+
+# Milestone 1: Visualise the data
+plt.scatter(temperature, attendance, color='green')
+plt.xlabel(&quot;Temperature (°C)&quot;)
+plt.ylabel(&quot;Customer Attendance&quot;)
+plt.title(&quot;Abuja Farmers Market — Temperature vs Attendance&quot;)
+plt.show()`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-35-stage-1-polynomial-regression-temperatur</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 35 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 35 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Section 1 · Polynomial Regression</li><li>✅ Section 2 · Multiple Regression</li><li>✅ Section 3 · Scale (Feature Scaling)</li><li>✅ Section 4 · Train/Test</li><li>✅ Section 5 · Decision Tree</li><li>✅ Guided Practice Exercises</li></ul><div class="ln"><a href="lesson_34.html" class="ln-btn">&#8592; Lesson 34</a><a href="lesson_36.html" class="ln-btn primary">Lesson 36 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 35 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

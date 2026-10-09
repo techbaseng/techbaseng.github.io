@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 42: Python and MongoDB · Getting Started, Databases, Collections, Inserting, and Finding Data — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="10" data-key="techbase_python_l42">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 42 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 42</div>
+      <h1>Python and MongoDB · Getting Started, Databases, Collections, Inserting, and Finding Data</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Stage 1: Setup and Connection</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 42</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 42! In this lesson you will learn how to connect Python to <strong>MongoDB</strong>, one of the most popular databases used in modern software development. By the end of this lesson you will be able to:</p>
+<ul class="v2-ul"><li>Understand what MongoDB is and why it is useful.</li><li>Install the PyMongo driver so Python can talk to MongoDB.</li><li>Create and check databases and collections.</li><li>Delete (drop) a collection you no longer need.</li><li>Insert one or many documents into a collection.</li><li>Retrieve (find) documents from a collection in several different ways.</li></ul>
+<p class="v2-p">You will also complete guided practice exercises, build a realistic mini-project, and understand the most common mistakes beginners make.</p>
+<p class="v2-p">No database experience is required. If you have never heard the word "database" before, that is perfectly fine · we will start from scratch.</p>
+<hr class="v2-hr"></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Stage 1: Setup and Connection</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 42! In this lesson you will learn how to connect Python to <strong>MongoDB</strong>, one of the most popular databases used in modern software development. By the end of this lesson you will be able to:</p>
+<ul class="v2-ul"><li>Understand what MongoDB is and why it is useful.</li><li>Install the PyMongo driver so Python can talk to MongoDB.</li><li>Create and check databases and collections.</li><li>Delete (drop) a collection you no longer need.</li><li>Insert one or many documents into a collection.</li><li>Retrieve (find) documents from a collection in several different ways.</li></ul>
+<p class="v2-p">You will also complete guided practice exercises, build a realistic mini-project, and understand the most common mistakes beginners make.</p>
+<p class="v2-p">No database experience is required. If you have never heard the word "database" before, that is perfectly fine · we will start from scratch.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">No database experience is required. If you have never heard the word "database" before, that is perfectly fine · we will start from scratch. · </div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before diving into the lesson, here is a quick overview of background ideas you need to understand. Do not skip this section · it will make everything else click into place.</p>
+<h3 class="v2-h3">What is a Database?</h3>
+<p class="v2-p">Imagine you run a small online shop and you store every customer's name and address in a notebook. As your shop grows to 10,000 customers, a paper notebook becomes impossible to search and manage. A <strong>database</strong> is a software system that stores large amounts of information in an organised way so that you can quickly search, add, change, and remove records.</p>
+<h3 class="v2-h3">What is a NoSQL Database?</h3>
+<p class="v2-p">Traditional databases (called <strong>SQL</strong> or <strong>relational</strong> databases) store information in rigid tables · think of a spreadsheet with fixed columns. Every row must match the same columns.</p>
+<p class="v2-p">A <strong>NoSQL</strong> database is more flexible. Instead of fixed rows and columns, it stores data in other formats. MongoDB is a NoSQL database that stores data in a format very similar to Python dictionaries. This means each record can have different fields, making it very easy to work with changing or complex data.</p>
+<h3 class="v2-h3">What is JSON and BSON?</h3>
+<p class="v2-p"><strong>JSON</strong> (JavaScript Object Notation) is a popular way to represent data as text. It looks like a Python dictionary:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">json</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{ &quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;Lagos&quot; }</code></pre></div></div>
+<p class="v2-p">MongoDB stores data in a format called <strong>BSON</strong> (Binary JSON), which is a compressed, binary version of JSON. As a Python programmer, you never need to think about BSON directly · PyMongo handles the conversion automatically.</p>
+<h3 class="v2-h3">What is a Python Dictionary?</h3>
+<p class="v2-p">A Python dictionary stores key-value pairs. Example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>person = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25}
+print(person[&quot;name&quot;])   # Alice
+print(person[&quot;age&quot;])    # 25</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Alice
+25</code></pre></div></div>
+<p class="v2-p">MongoDB documents are essentially Python dictionaries stored in a database. Understanding dictionaries is essential for working with MongoDB.</p>
+<h3 class="v2-h3">What is a Driver?</h3>
+<p class="v2-p">A <strong>driver</strong> is a piece of software that lets one program communicate with another. When you want Python to talk to a MongoDB database, you need a MongoDB driver for Python. That driver is called <strong>PyMongo</strong>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Section 1 · Getting Started with MongoDB and PyMongo</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is MongoDB?</h3>
+<p class="v2-p">MongoDB is a free, open-source NoSQL database. Instead of storing data in tables (like Excel), it stores data in <strong>documents</strong> that look like JSON/Python dictionaries. These documents are grouped into <strong>collections</strong> (which are like tables), and collections live inside <strong>databases</strong>.</p>
+<p class="v2-p">Think of it like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>MongoDB Server
+  └── Database (&quot;mydatabase&quot;)
+        └── Collection (&quot;customers&quot;)
+              ├── Document { &quot;name&quot;: &quot;Alice&quot;, &quot;address&quot;: &quot;Lagos&quot; }
+              ├── Document { &quot;name&quot;: &quot;Bob&quot;, &quot;address&quot;: &quot;Abuja&quot; }
+              └── Document { &quot;name&quot;: &quot;Chidi&quot;, &quot;address&quot;: &quot;Port Harcourt&quot; }</code></pre></div></div>
+<p class="v2-p">MongoDB is used by companies like Uber, Forbes, and Bosch to store huge amounts of flexible data because:</p>
+<ul class="v2-ul"><li>Documents can have different fields · no rigid schema required.</li><li>It scales to millions of records easily.</li><li>It maps naturally to Python dictionaries, making coding fast and intuitive.</li></ul>
+<h3 class="v2-h3">Installing PyMongo</h3>
+<p class="v2-p">Python needs the <strong>PyMongo</strong> library to communicate with a MongoDB database. You install it using PIP, Python's package manager.</p>
+<p class="v2-p">Open your terminal (Command Prompt on Windows, Terminal on Mac/Linux) and type:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>python -m pip install pymongo</code></pre></div></div>
+<p class="v2-p"><strong>What this command does, line by line:</strong></p>
+<ul class="v2-ul"><li><code>python</code> · starts the Python interpreter</li><li><code>-m pip</code> · runs the PIP module (the package manager)</li><li><code>install pymongo</code> · downloads and installs the PyMongo library</li></ul>
+<h3 class="v2-h3">Testing the Installation</h3>
+<p class="v2-p">Once installed, verify it works by running this Python script:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(No output means success!)</code></pre></div></div>
+<p class="v2-p">If there is no error message, PyMongo is installed correctly and ready to use. If you see <code>ModuleNotFoundError</code>, it means the installation did not succeed · run the pip install command again.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Tip:</strong> You can download a free local MongoDB server from <a href="https://www.mongodb.com" target="_blank" rel="noopener">https://www.mongodb.com</a>, or use a free cloud-based MongoDB database at <a href="https://www.mongodb.com/cloud/atlas" target="_blank" rel="noopener">https://www.mongodb.com/cloud/atlas</a>. For this lesson we assume MongoDB is running locally at the default address.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Getting Started with MongoDB and PyMongo</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Section 2 · Creating a Database</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is a MongoDB Database?</h3>
+<p class="v2-p">A MongoDB <strong>database</strong> is a named container that holds one or more <strong>collections</strong>. You can have many databases on the same MongoDB server. For example, one database for your e-commerce app, another for your school management system.</p>
+<h3 class="v2-h3">How to Create a Database</h3>
+<p class="v2-p">To create a database in Python, you:</p>
+<ol class="v2-ol"><li>Create a <code>MongoClient</code> object (this is your connection to the MongoDB server).</li><li>Access the database by name using square bracket notation.</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+# Step 1: Connect to the MongoDB server
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+
+# Step 2: Access (or create) a database called &quot;mydatabase&quot;
+mydb = myclient[&quot;mydatabase&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>import pymongo</code> · loads the PyMongo library so we can use it</li><li><code>pymongo.MongoClient("mongodb://localhost:27017/")</code> · connects to the MongoDB server running on the local machine (<code>localhost</code>) at port <code>27017</code> (the default MongoDB port)</li><li><code>myclient["mydatabase"]</code> · accesses the database named <code>"mydatabase"</code>. If it doesn't exist yet, MongoDB will create it later when you add data.</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Very Important:</strong> In MongoDB, a <strong>database is NOT created until it gets content</strong>. Just writing <code>myclient["mydatabase"]</code> only reserves the name · MongoDB waits until you actually insert a document before it creates the database on disk.</p></blockquote>
+<h3 class="v2-h3">Checking if a Database Exists</h3>
+<p class="v2-p">You can list all existing databases to verify yours was created:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+
+# List all databases on the server
+print(myclient.list_database_names())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (after you have added data):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&#x27;admin&#x27;, &#x27;config&#x27;, &#x27;local&#x27;, &#x27;mydatabase&#x27;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">Note: <code>admin</code>, <code>config</code>, and <code>local</code> are system databases that MongoDB creates automatically. Your <code>mydatabase</code> will only appear after you insert at least one document.</p></blockquote>
+<p class="v2-p">You can also check for a specific database by name:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+
+dblist = myclient.list_database_names()
+if &quot;mydatabase&quot; in dblist:
+    print(&quot;The database exists.&quot;)
+else:
+    print(&quot;The database does not exist yet.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (if data has been added):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>The database exists.</code></pre></div></div>
+<p class="v2-p"><strong>What's happening here:</strong></p>
+<ul class="v2-ul"><li><code>myclient.list_database_names()</code> returns a Python list of all database names</li><li><code>if "mydatabase" in dblist:</code> checks if the string <code>"mydatabase"</code> is inside that list</li><li>Python's <code>in</code> keyword checks for membership inside a list</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What would happen if you ran the database check BEFORE inserting any documents? Try it and see!</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Creating a Database</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Section 3 · Creating a Collection</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">What is a Collection?</h3>
+<p class="v2-p">A <strong>collection</strong> in MongoDB is the same as a <strong>table</strong> in SQL databases. It is a group of related documents stored together. For example:</p>
+<ul class="v2-ul"><li>A <code>customers</code> collection holds all customer records.</li><li>A <code>products</code> collection holds all product records.</li><li>An <code>orders</code> collection holds all order records.</li></ul>
+<p class="v2-p">Unlike SQL tables, MongoDB collections do NOT have a fixed structure (schema). This means one document in the <code>customers</code> collection could have a <code>phone</code> field and another document might not · MongoDB accepts both.</p>
+<h3 class="v2-h3">Creating a Collection</h3>
+<p class="v2-p">To create a collection, access it by name through your database object:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+
+# Create (or access) a collection called &quot;customers&quot;
+mycol = mydb[&quot;customers&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>mydb["customers"]</code> · accesses the collection named <code>"customers"</code> inside <code>mydatabase</code>. If it doesn't exist yet, MongoDB will create it when you insert the first document.</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Very Important:</strong> Just like databases, <strong>collections are NOT created until they receive content</strong>. MongoDB waits until you insert a document.</p></blockquote>
+<h3 class="v2-h3">Checking if a Collection Exists</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+
+# List all collections in the database
+print(mydb.list_collection_names())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (after inserting data):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&#x27;customers&#x27;]</code></pre></div></div>
+<p class="v2-p">Check for a specific collection:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+
+collist = mydb.list_collection_names()
+if &quot;customers&quot; in collist:
+    print(&quot;The collection exists.&quot;)
+else:
+    print(&quot;The collection does not exist yet.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>The collection exists.</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Creating a Collection</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Section 4 · Dropping (Deleting) a Collection</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What Does "Drop" Mean?</h3>
+<p class="v2-p">In database vocabulary, <strong>dropping</strong> a collection means permanently deleting it · including all documents inside it. This is the equivalent of deleting an entire table in SQL.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Warning:</strong> Dropping a collection is irreversible. All data in it is gone. Always double-check before dropping!</p></blockquote>
+<h3 class="v2-h3">The <code>drop()</code> Method</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Delete the &quot;customers&quot; collection permanently
+mycol.drop()</code></pre></div></div>
+<p class="v2-p"><strong>What each line does:</strong></p>
+<ul class="v2-ul"><li><code>mycol.drop()</code> · permanently removes the <code>customers</code> collection and all its documents from the database</li></ul>
+<p class="v2-p"><strong>Return value:</strong> <code>drop()</code> returns <code>True</code> if the collection was dropped successfully. It returns <code>False</code> if the collection did not exist (nothing to drop).</p>
+<h3 class="v2-h3">Practical Example with Check</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+result = mycol.drop()
+
+if result:
+    print(&quot;Collection was dropped successfully.&quot;)
+else:
+    print(&quot;Collection did not exist, nothing was dropped.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (if collection existed):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Collection was dropped successfully.</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> Why do you think MongoDB returns <code>False</code> instead of raising an error when you try to drop a non-existent collection?</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Dropping (Deleting) a Collection</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Section 5 · Inserting Documents</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">What is a Document?</h3>
+<p class="v2-p">A <strong>document</strong> in MongoDB is the same as a <strong>record</strong> in SQL databases. It is a single unit of data, stored as a dictionary-like structure with key-value pairs.</p>
+<p class="v2-p">Example document:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{ &quot;name&quot;: &quot;Alice&quot;, &quot;address&quot;: &quot;12 Market Street, Lagos&quot;, &quot;age&quot;: 30 }</code></pre></div></div>
+<p class="v2-p">Every document automatically gets a special field called <code>_id</code>. Think of this as a unique fingerprint · no two documents in the same collection can have the same <code>_id</code>. If you don't provide one, MongoDB generates a unique one automatically.</p>
+<h3 class="v2-h3">Inserting One Document · <code>insert_one()</code></h3>
+<p class="v2-p">The <code>insert_one()</code> method inserts a single document into a collection.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Create a document as a Python dictionary
+mydict = { &quot;name&quot;: &quot;John&quot;, &quot;address&quot;: &quot;Highway 37&quot; }
+
+# Insert it into the collection
+x = mycol.insert_one(mydict)
+
+print(&quot;Insertion complete!&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Insertion complete!</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>mydict = { "name": "John", "address": "Highway 37" }</code> · creates a Python dictionary with two fields: <code>name</code> and <code>address</code></li><li><code>mycol.insert_one(mydict)</code> · inserts that dictionary as a document into the <code>customers</code> collection</li><li><code>x =</code> · captures the result object returned by <code>insert_one()</code></li></ul>
+<h3 class="v2-h3">Getting the Inserted Document's ID</h3>
+<p class="v2-p">Every document gets a unique <code>_id</code>. You can retrieve it from the result:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+mydict = { &quot;name&quot;: &quot;Peter&quot;, &quot;address&quot;: &quot;Lowstreet 27&quot; }
+x = mycol.insert_one(mydict)
+
+# Print the automatically assigned _id
+print(x.inserted_id)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (your value will differ · it's unique):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ObjectId(&#x27;64a3b7f9d5e4c2a1b0f12345&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>What is <code>inserted_id</code>?</strong></p>
+<p class="v2-p"><code>insert_one()</code> returns an <code>InsertOneResult</code> object. This object has a property called <code>inserted_id</code> that stores the <code>_id</code> of the document that was just inserted. The <code>_id</code> is an <code>ObjectId</code> · a 24-character hexadecimal value that MongoDB generates automatically to guarantee uniqueness.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> Why does MongoDB automatically generate unique IDs? What problem would arise if two documents had the same ID?</p></blockquote>
+<h3 class="v2-h3">Inserting Multiple Documents · <code>insert_many()</code></h3>
+<p class="v2-p">To insert several documents at once, use <code>insert_many()</code>. It takes a Python <strong>list</strong> of dictionaries.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+mylist = [
+    { &quot;name&quot;: &quot;Amy&quot;,     &quot;address&quot;: &quot;Apple st 652&quot;   },
+    { &quot;name&quot;: &quot;Hannah&quot;,  &quot;address&quot;: &quot;Mountain 21&quot;    },
+    { &quot;name&quot;: &quot;Michael&quot;, &quot;address&quot;: &quot;Valley 345&quot;     },
+    { &quot;name&quot;: &quot;Sandy&quot;,   &quot;address&quot;: &quot;Ocean blvd 2&quot;   },
+    { &quot;name&quot;: &quot;Betty&quot;,   &quot;address&quot;: &quot;Green Grass 1&quot;  },
+    { &quot;name&quot;: &quot;Richard&quot;, &quot;address&quot;: &quot;Sky st 331&quot;     },
+    { &quot;name&quot;: &quot;Susan&quot;,   &quot;address&quot;: &quot;One way 98&quot;     },
+    { &quot;name&quot;: &quot;Vicky&quot;,   &quot;address&quot;: &quot;Yellow Garden 2&quot;},
+    { &quot;name&quot;: &quot;Ben&quot;,     &quot;address&quot;: &quot;Park Lane 38&quot;   },
+    { &quot;name&quot;: &quot;William&quot;, &quot;address&quot;: &quot;Central st 954&quot; },
+    { &quot;name&quot;: &quot;Chuck&quot;,   &quot;address&quot;: &quot;Main Road 989&quot;  },
+    { &quot;name&quot;: &quot;Viola&quot;,   &quot;address&quot;: &quot;Sideway 1633&quot;   }
+]
+
+x = mycol.insert_many(mylist)
+
+# Print all the inserted IDs
+print(x.inserted_ids)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (your IDs will differ):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ObjectId(&#x27;64a3b7f9...1&#x27;), ObjectId(&#x27;64a3b7f9...2&#x27;), ObjectId(&#x27;64a3b7f9...3&#x27;), ...]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>mylist = [...]</code> · a Python list containing 12 dictionaries, each representing one customer</li><li><code>mycol.insert_many(mylist)</code> · inserts all 12 documents in one operation</li><li><code>x.inserted_ids</code> · returns a Python list of all the <code>_id</code> values that were assigned</li></ul>
+<h3 class="v2-h3">Inserting Multiple Documents with Custom IDs</h3>
+<p class="v2-p">If you want to control the <code>_id</code> yourself (instead of letting MongoDB generate one), simply include <code>"_id"</code> in each dictionary:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+mylist = [
+    { &quot;_id&quot;: 1,  &quot;name&quot;: &quot;John&quot;,    &quot;address&quot;: &quot;Highway 37&quot;    },
+    { &quot;_id&quot;: 2,  &quot;name&quot;: &quot;Peter&quot;,   &quot;address&quot;: &quot;Lowstreet 27&quot;  },
+    { &quot;_id&quot;: 3,  &quot;name&quot;: &quot;Amy&quot;,     &quot;address&quot;: &quot;Apple st 652&quot;  },
+    { &quot;_id&quot;: 4,  &quot;name&quot;: &quot;Hannah&quot;,  &quot;address&quot;: &quot;Mountain 21&quot;   },
+    { &quot;_id&quot;: 5,  &quot;name&quot;: &quot;Michael&quot;, &quot;address&quot;: &quot;Valley 345&quot;    },
+    { &quot;_id&quot;: 6,  &quot;name&quot;: &quot;Sandy&quot;,   &quot;address&quot;: &quot;Ocean blvd 2&quot;  },
+    { &quot;_id&quot;: 7,  &quot;name&quot;: &quot;Betty&quot;,   &quot;address&quot;: &quot;Green Grass 1&quot; },
+    { &quot;_id&quot;: 8,  &quot;name&quot;: &quot;Richard&quot;, &quot;address&quot;: &quot;Sky st 331&quot;    },
+    { &quot;_id&quot;: 9,  &quot;name&quot;: &quot;Susan&quot;,   &quot;address&quot;: &quot;One way 98&quot;    },
+    { &quot;_id&quot;: 10, &quot;name&quot;: &quot;Vicky&quot;,   &quot;address&quot;: &quot;Yellow Garden 2&quot;},
+    { &quot;_id&quot;: 11, &quot;name&quot;: &quot;Ben&quot;,     &quot;address&quot;: &quot;Park Lane 38&quot;  },
+    { &quot;_id&quot;: 12, &quot;name&quot;: &quot;William&quot;, &quot;address&quot;: &quot;Central st 954&quot;},
+    { &quot;_id&quot;: 13, &quot;name&quot;: &quot;Chuck&quot;,   &quot;address&quot;: &quot;Main Road 989&quot; },
+    { &quot;_id&quot;: 14, &quot;name&quot;: &quot;Viola&quot;,   &quot;address&quot;: &quot;Sideway 1633&quot;  }
+]
+
+x = mycol.insert_many(mylist)
+print(x.inserted_ids)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important:</strong> When specifying your own <code>_id</code> values, they must be unique across all documents in the collection. Trying to insert a document with a duplicate <code>_id</code> will raise an error.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Inserting Documents</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Section 6 · Finding (Reading) Documents</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Now that we know how to store data, let's learn how to get it back out. In MongoDB, you use the <code>find()</code> and <code>find_one()</code> methods to retrieve documents. This is equivalent to the <code>SELECT</code> statement in SQL.</p>
+<h3 class="v2-h3">Finding One Document · <code>find_one()</code></h3>
+<p class="v2-p"><code>find_one()</code> returns the <strong>first</strong> document it finds in the collection.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Get the first document in the collection
+x = mycol.find_one()
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 1, &#x27;name&#x27;: &#x27;John&#x27;, &#x27;address&#x27;: &#x27;Highway 37&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>What's happening:</strong></p>
+<ul class="v2-ul"><li><code>mycol.find_one()</code> · searches the <code>customers</code> collection and returns the very first document as a Python dictionary</li><li><code>print(x)</code> · prints that dictionary</li></ul>
+<p class="v2-p">This is useful when you just want a quick peek at what's in the collection, or when you know there is only one matching document.</p>
+<h3 class="v2-h3">Finding All Documents · <code>find()</code></h3>
+<p class="v2-p"><code>find()</code> returns <strong>all</strong> documents in the collection. It returns a special object called a <strong>Cursor</strong> that you can loop through with a <code>for</code> loop.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Get ALL documents in the collection
+for x in mycol.find():
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 1, &#x27;name&#x27;: &#x27;John&#x27;, &#x27;address&#x27;: &#x27;Highway 37&#x27;}
+{&#x27;_id&#x27;: 2, &#x27;name&#x27;: &#x27;Peter&#x27;, &#x27;address&#x27;: &#x27;Lowstreet 27&#x27;}
+{&#x27;_id&#x27;: 3, &#x27;name&#x27;: &#x27;Amy&#x27;, &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+{&#x27;_id&#x27;: 4, &#x27;name&#x27;: &#x27;Hannah&#x27;, &#x27;address&#x27;: &#x27;Mountain 21&#x27;}
+{&#x27;_id&#x27;: 5, &#x27;name&#x27;: &#x27;Michael&#x27;, &#x27;address&#x27;: &#x27;Valley 345&#x27;}
+... (continues for all 14 documents)</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>mycol.find()</code> · retrieves a cursor pointing to all documents in <code>customers</code></li><li><code>for x in mycol.find():</code> · loops through every document one by one</li><li><code>print(x)</code> · prints each document as a Python dictionary</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Think of <code>find()</code> like asking a librarian to bring you every single book in the library. The cursor is a trolley that carries all the books one by one so you can look at each.</p></blockquote>
+<p class="v2-p">Calling <code>find()</code> with no parameters is equivalent to <code>SELECT *</code> in SQL · it gets everything.</p>
+<h3 class="v2-h3">Returning Only Some Fields (Projection)</h3>
+<p class="v2-p">Sometimes a collection has many fields, but you only care about a few of them. The second parameter of <code>find()</code> lets you specify which fields to include or exclude. This is called a <strong>projection</strong>.</p>
+<p class="v2-p">Use <code>1</code> to include a field, <code>0</code> to exclude it.</p>
+<p class="v2-p"><strong>Example: Show only name and address (exclude <code>_id</code>)</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Include only &quot;name&quot; and &quot;address&quot;, exclude &quot;_id&quot;
+for x in mycol.find({}, { &quot;_id&quot;: 0, &quot;name&quot;: 1, &quot;address&quot;: 1 }):
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;name&#x27;: &#x27;John&#x27;, &#x27;address&#x27;: &#x27;Highway 37&#x27;}
+{&#x27;name&#x27;: &#x27;Peter&#x27;, &#x27;address&#x27;: &#x27;Lowstreet 27&#x27;}
+{&#x27;name&#x27;: &#x27;Amy&#x27;, &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+...</code></pre></div></div>
+<p class="v2-p"><strong>What each part does:</strong></p>
+<ul class="v2-ul"><li><code>{}</code> · the first parameter is the filter (empty <code>{}</code> means "match all documents")</li><li><code>{ "_id": 0, "name": 1, "address": 1 }</code> · the second parameter is the projection:</li></ul>
+<p class="v2-p">- <code>"_id": 0</code> · exclude the <code>_id</code> field   - <code>"name": 1</code> · include the <code>name</code> field   - <code>"address": 1</code> · include the <code>address</code> field</p>
+<p class="v2-p"><strong>Example: Exclude one field (show everything except address)</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Show all fields EXCEPT &quot;address&quot;
+for x in mycol.find({}, { &quot;address&quot;: 0 }):
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 1, &#x27;name&#x27;: &#x27;John&#x27;}
+{&#x27;_id&#x27;: 2, &#x27;name&#x27;: &#x27;Peter&#x27;}
+{&#x27;_id&#x27;: 3, &#x27;name&#x27;: &#x27;Amy&#x27;}
+...</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important Rule:</strong> You cannot mix <code>0</code> and <code>1</code> in the same projection <strong>except</strong> for the <code>_id</code> field. This is because including some fields (1) automatically excludes all others, and excluding some fields (0) automatically includes all others. Mixing them creates an ambiguous instruction. The <code>_id</code> is the only exception to this rule.</p></blockquote>
+<p class="v2-p"><strong>Example of what NOT to do:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This will cause an error!
+for x in mycol.find({}, { &quot;name&quot;: 1, &quot;address&quot;: 0 }):
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Error:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>pymongo.errors.OperationFailure: Projection cannot have a mix of inclusion and exclusion.</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> When would you want to use a projection in a real application? Think about a situation where you have a document with 20 fields but only need 2 of them.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Finding (Reading) Documents</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Setting Up a Book Database</h3>
+<p class="v2-p"><strong>Objective:</strong> Create a database, collection, and insert your first document.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a library management system. You need to store book records in MongoDB.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Connect to MongoDB at <code>localhost:27017</code>.</li><li>Create a database called <code>"library"</code>.</li><li>Create a collection called <code>"books"</code>.</li><li>Insert ONE book with these fields: <code>"title"</code>, <code>"author"</code>, <code>"year"</code>, <code>"genre"</code>.</li><li>Print the <code>inserted_id</code>.</li></ol>
+<p class="v2-p"><strong>Starter code:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;library&quot;]
+mycol = mydb[&quot;books&quot;]
+
+book = {
+    &quot;title&quot;:  &quot;Things Fall Apart&quot;,
+    &quot;author&quot;: &quot;Chinua Achebe&quot;,
+    &quot;year&quot;:   1958,
+    &quot;genre&quot;:  &quot;Fiction&quot;
+}
+
+result = mycol.insert_one(book)
+print(&quot;Inserted ID:&quot;, result.inserted_id)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Inserted ID: ObjectId(&#x27;64a3c...&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>Self-check Questions:</strong></p>
+<ul class="v2-ul"><li>Did you see an <code>ObjectId</code> in the output?</li><li>What would happen if you ran this code twice? (Hint: Would you get two documents or one?)</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Inserting a Full Library Catalogue</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>insert_many()</code> to add multiple books at once.</p>
+<p class="v2-p"><strong>Scenario:</strong> The library has 5 books to add to the database.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;library&quot;]
+mycol = mydb[&quot;books&quot;]
+
+books = [
+    { &quot;_id&quot;: 1, &quot;title&quot;: &quot;Things Fall Apart&quot;,     &quot;author&quot;: &quot;Chinua Achebe&quot;,   &quot;year&quot;: 1958 },
+    { &quot;_id&quot;: 2, &quot;title&quot;: &quot;Half of a Yellow Sun&quot;,  &quot;author&quot;: &quot;Chimamanda Adichie&quot;,&quot;year&quot;: 2006 },
+    { &quot;_id&quot;: 3, &quot;title&quot;: &quot;Purple Hibiscus&quot;,       &quot;author&quot;: &quot;Chimamanda Adichie&quot;,&quot;year&quot;: 2003 },
+    { &quot;_id&quot;: 4, &quot;title&quot;: &quot;Season of Migration&quot;,   &quot;author&quot;: &quot;Tayeb Salih&quot;,     &quot;year&quot;: 1966 },
+    { &quot;_id&quot;: 5, &quot;title&quot;: &quot;So Long a Letter&quot;,      &quot;author&quot;: &quot;Mariama Bâ&quot;,      &quot;year&quot;: 1979 }
+]
+
+result = mycol.insert_many(books)
+print(&quot;Inserted IDs:&quot;, result.inserted_ids)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Inserted IDs: [1, 2, 3, 4, 5]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check Questions:</strong></p>
+<ul class="v2-ul"><li>How many documents are now in the <code>books</code> collection?</li><li>What would happen if you tried to insert <code>_id: 1</code> again?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Finding Books</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>find_one()</code> and <code>find()</code> to retrieve books from the library.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;library&quot;]
+mycol = mydb[&quot;books&quot;]
+
+# Get the first book
+print(&quot;--- First Book ---&quot;)
+first = mycol.find_one()
+print(first)
+
+# Get all books (title and author only, no _id)
+print(&quot;\n--- All Books (Title and Author) ---&quot;)
+for book in mycol.find({}, { &quot;_id&quot;: 0, &quot;title&quot;: 1, &quot;author&quot;: 1 }):
+    print(book)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>--- First Book ---
+{&#x27;_id&#x27;: 1, &#x27;title&#x27;: &#x27;Things Fall Apart&#x27;, &#x27;author&#x27;: &#x27;Chinua Achebe&#x27;, &#x27;year&#x27;: 1958}
+
+--- All Books (Title and Author) ---
+{&#x27;title&#x27;: &#x27;Things Fall Apart&#x27;, &#x27;author&#x27;: &#x27;Chinua Achebe&#x27;}
+{&#x27;title&#x27;: &#x27;Half of a Yellow Sun&#x27;, &#x27;author&#x27;: &#x27;Chimamanda Adichie&#x27;}
+{&#x27;title&#x27;: &#x27;Purple Hibiscus&#x27;, &#x27;author&#x27;: &#x27;Chimamanda Adichie&#x27;}
+{&#x27;title&#x27;: &#x27;Season of Migration&#x27;, &#x27;author&#x27;: &#x27;Tayeb Salih&#x27;}
+{&#x27;title&#x27;: &quot;So Long a Letter&quot;, &#x27;author&#x27;: &#x27;Mariama Bâ&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>What-if Challenge:</strong> What would change in the output if you used <code>{ "year": 0 }</code> as the projection instead?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4 · Dropping a Collection</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice safely checking for and dropping a collection.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;library&quot;]
+mycol = mydb[&quot;books&quot;]
+
+# Check before dropping
+collist = mydb.list_collection_names()
+if &quot;books&quot; in collist:
+    mycol.drop()
+    print(&quot;books collection dropped.&quot;)
+else:
+    print(&quot;books collection did not exist.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (if collection existed):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>books collection dropped.</code></pre></div></div>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(9)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1 · Forgetting That Databases and Collections Are "Lazy"</h3>
+<p class="v2-p"><strong>Wrong thinking:</strong> "I created the database, so it exists now."</p>
+<p class="v2-p"><strong>Reality:</strong> In MongoDB, databases and collections are not created on disk until you insert at least one document. Simply writing <code>myclient["mydb"]</code> or <code>mydb["mycol"]</code> does nothing by itself.</p>
+<p class="v2-p"><strong>Fix:</strong> Always insert at least one document before checking if a database or collection exists.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2 · Using the Wrong Case in Names</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># These are THREE different collections!
+mydb[&quot;Customers&quot;]   # Capital C
+mydb[&quot;customers&quot;]   # Lowercase c
+mydb[&quot;CUSTOMERS&quot;]   # All uppercase</code></pre></div></div>
+<p class="v2-p">MongoDB collection and database names are <strong>case-sensitive</strong>. Always be consistent with your naming.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3 · Mixing <code>0</code> and <code>1</code> in Projections</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This WILL raise an error:
+mycol.find({}, { &quot;name&quot;: 1, &quot;address&quot;: 0 })</code></pre></div></div>
+<p class="v2-p">You cannot tell MongoDB to both include some fields and exclude others in the same projection. The only exception is <code>_id</code>, which you can explicitly set to <code>0</code> even when including other fields.</p>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Include name and address, exclude _id:
+mycol.find({}, { &quot;_id&quot;: 0, &quot;name&quot;: 1, &quot;address&quot;: 1 })
+
+# Exclude only address, keep everything else:
+mycol.find({}, { &quot;address&quot;: 0 })</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4 · Inserting Duplicate Custom <code>_id</code> Values</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycol.insert_one({ &quot;_id&quot;: 1, &quot;name&quot;: &quot;Alice&quot; })
+mycol.insert_one({ &quot;_id&quot;: 1, &quot;name&quot;: &quot;Bob&quot; })  # ERROR! _id 1 already exists</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Make sure all custom <code>_id</code> values are unique, or let MongoDB generate them automatically by omitting the <code>_id</code> field.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5 · Forgetting to Loop Through <code>find()</code> Results</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — this prints the cursor object, not the documents
+result = mycol.find()
+print(result)  # &lt;pymongo.cursor.Cursor object at 0x...&gt;
+
+# CORRECT — loop through the cursor
+for doc in mycol.find():
+    print(doc)</code></pre></div></div>
+<p class="v2-p"><code>find()</code> returns a Cursor object, not a list. You must iterate over it with a <code>for</code> loop (or convert it to a list with <code>list(mycol.find())</code>).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6 · Not Importing PyMongo</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This will raise: NameError: name &#x27;pymongo&#x27; is not defined
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+
+# Fix — always import at the top:
+import pymongo
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 7 · Dropping a Collection Accidentally</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycol.drop()  # No warning, no confirmation — it&#x27;s gone immediately!</code></pre></div></div>
+<p class="v2-p">Always add a safety check before dropping:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>collist = mydb.list_collection_names()
+if &quot;customers&quot; in collist:
+    confirm = input(&quot;Are you sure you want to drop &#x27;customers&#x27;? (yes/no): &quot;)
+    if confirm == &quot;yes&quot;:
+        mycol.drop()
+        print(&quot;Dropped.&quot;)</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Stage 1: Setup and Connection</div><div class="build-req"><p class="v2-p">In this mini-project, you will build a small Python program that manages customer records in MongoDB. You will use everything learned in this lesson.</p>
+<h3 class="v2-h3">Stage 1: Setup and Connection</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+# Connect to MongoDB
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;shopdb&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+print(&quot;Connected to MongoDB!&quot;)
+print(&quot;Database: shopdb&quot;)
+print(&quot;Collection: customers&quot;)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import pymongo
+
+# Connect to MongoDB
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;shopdb&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+print(&quot;Connected to MongoDB!&quot;)
+print(&quot;Database: shopdb&quot;)
+print(&quot;Collection: customers&quot;)`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-42-stage-1-setup-and-connection</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 42 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 42 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Section 1 · Getting Started with MongoDB and PyMongo</li><li>✅ Section 2 · Creating a Database</li><li>✅ Section 3 · Creating a Collection</li><li>✅ Section 4 · Dropping (Deleting) a Collection</li><li>✅ Section 5 · Inserting Documents</li><li>✅ Section 6 · Finding (Reading) Documents</li></ul><div class="ln"><a href="lesson_41.html" class="ln-btn">&#8592; Lesson 41</a><a href="lesson_43.html" class="ln-btn primary">Lesson 43 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 42 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

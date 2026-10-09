@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 30: Pandas · Analyzing DataFrames and Cleaning Data — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="10" data-key="techbase_python_l30">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 30 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 30</div>
+      <h1>Pandas · Analyzing DataFrames and Cleaning Data</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Stage 1 · Setup and Initial Inspection</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 30</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Imagine you have a spreadsheet full of workout records. Some dates are missing. Some workout durations look like typos. Two rows are exact duplicates. The calorie column has blank entries. If you just calculated the average calories burned from that messy data, your result would be wrong · perhaps badly wrong.</p>
+<p class="v2-p">This is the core problem that <strong>data analysis</strong> and <strong>data cleaning</strong> solve.</p>
+<p class="v2-p">In this lesson you will learn two connected skills:</p>
+<ol class="v2-ol"><li><strong>Analyzing a DataFrame</strong> · getting a fast overview of your data so you know what you're working with.</li><li><strong>Cleaning a DataFrame</strong> · identifying and fixing problems so your data is reliable before you compute anything.</li></ol>
+<p class="v2-p">By the end of this lesson you will be able to load a real-world-style dataset, inspect it intelligently, and systematically remove or repair every category of data problem.</p>
+<hr class="v2-hr"></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Stage 1 · Setup and Initial Inspection</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Imagine you have a spreadsheet full of workout records. Some dates are missing. Some workout durations look like typos. Two rows are exact duplicates. The calorie column has blank entries. If you just calculated the average calories burned from that messy data, your result would be wrong · perhaps badly wrong.</p>
+<p class="v2-p">This is the core problem that <strong>data analysis</strong> and <strong>data cleaning</strong> solve.</p>
+<p class="v2-p">In this lesson you will learn two connected skills:</p>
+<ol class="v2-ol"><li><strong>Analyzing a DataFrame</strong> · getting a fast overview of your data so you know what you're working with.</li><li><strong>Cleaning a DataFrame</strong> · identifying and fixing problems so your data is reliable before you compute anything.</li></ol>
+<p class="v2-p">By the end of this lesson you will be able to load a real-world-style dataset, inspect it intelligently, and systematically remove or repair every category of data problem.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before diving in, let's make sure these foundation ideas are clear.</p>
+<h3 class="v2-h3">What is a DataFrame?</h3>
+<p class="v2-p">A <strong>DataFrame</strong> is like a table in a spreadsheet. It has rows (going across) and columns (going down). Each column has a name (called a <strong>header</strong>), and each cell holds one piece of data.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>   Name    Age   Score
+0  Alice    22    88.5
+1  Bob      19    NaN
+2  Carol    21    74.0</code></pre></div></div>
+<ul class="v2-ul"><li>The numbers on the left (0, 1, 2) are the <strong>row index</strong> · the row's address.</li><li><code>Name</code>, <code>Age</code>, <code>Score</code> are the <strong>column names</strong>.</li><li><code>NaN</code> means "Not a Number" · it represents a missing value.</li></ul>
+<h3 class="v2-h3">What is Pandas?</h3>
+<p class="v2-p"><strong>Pandas</strong> is a Python library (a collection of ready-made tools) that makes working with tables of data very easy. You import it at the start of every script:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd</code></pre></div></div>
+<p class="v2-p">The <code>as pd</code> part means "give pandas the nickname <code>pd</code>" so you can type <code>pd.something</code> instead of <code>pandas.something</code>.</p>
+<h3 class="v2-h3">What is a CSV file?</h3>
+<p class="v2-p">A <strong>CSV</strong> (Comma Separated Values) file is a plain text file that stores table data. Each row is a line of text, and the values are separated by commas:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Duration,Date,Pulse,Maxpulse,Calories
+60,2020/12/01,110,130,409.1
+45,2020/12/04,109,175,282.4</code></pre></div></div>
+<p class="v2-p">Pandas can read CSV files directly into a DataFrame with one line of code.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Part 1 · Analyzing DataFrames</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Why analyze before you compute?</h3>
+<p class="v2-p">Before doing any calculations · averages, totals, comparisons · you must understand your data. Otherwise you might calculate an average that includes missing values, or work with a column that has the wrong data type.</p>
+<p class="v2-p">Think of it like checking your ingredients before you start cooking. You want to know: what do I have, how much, and is anything missing?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.1 Loading a DataFrame from a CSV</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)</code></pre></div></div>
+<ul class="v2-ul"><li><code>pd.read_csv('data.csv')</code> · reads the file called <code>data.csv</code> from your current folder and turns it into a DataFrame.</li><li><code>df</code> · we store the DataFrame in a variable called <code>df</code> (short for "DataFrame").</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> In data science jobs, you almost always start by loading data from a CSV, Excel file, or database. This single line is the foundation of every data project.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.2 <code>head()</code> · See the First Rows</h3>
+<p class="v2-p"><strong>What is it?</strong> A method that shows the top rows of your DataFrame.</p>
+<p class="v2-p"><strong>Why use it?</strong> When a dataset has 10,000 rows, you can't read the whole thing. <code>head()</code> gives you a quick preview of the structure and content.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+print(df.head(10))   # Show the first 10 rows</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output</strong> (first 10 rows of the dataset):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>   Duration          Date  Pulse  Maxpulse  Calories
+0        60  &#x27;2020/12/01&#x27;    110       130     409.1
+1        60  &#x27;2020/12/02&#x27;    117       145     479.0
+2        60  &#x27;2020/12/03&#x27;    103       135     340.0
+3        45  &#x27;2020/12/04&#x27;    109       175     282.4
+4        45  &#x27;2020/12/05&#x27;    117       148     406.0
+5        60  &#x27;2020/12/06&#x27;    102       127     300.0
+6        60  &#x27;2020/12/07&#x27;    110       136     374.0
+7       450  &#x27;2020/12/08&#x27;    104       134     253.3
+8        30  &#x27;2020/12/09&#x27;    109       133     195.1
+9        60  &#x27;2020/12/10&#x27;     98       124     269.0</code></pre></div></div>
+<p class="v2-p"><strong>What to notice:</strong> Already in row 7 you can see Duration is <code>450</code> · while every other value is between 30 and 60. That looks suspicious!</p>
+<p class="v2-p"><strong>Default behaviour (no number given):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(df.head())  # Shows first 5 rows by default</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Tip:</strong> If you call <code>head()</code> without a number, it always shows exactly <strong>5 rows</strong>. This is a shortcut for a quick sanity check.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.3 <code>tail()</code> · See the Last Rows</h3>
+<p class="v2-p"><strong>What is it?</strong> A method that shows the bottom rows of your DataFrame.</p>
+<p class="v2-p"><strong>Why use it?</strong> The last rows of a dataset can reveal problems too · trailing blank rows, or data entered in a different format at the end.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(df.tail())  # Show the last 5 rows</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>    Duration          Date  Pulse  Maxpulse  Calories
+27        60  &#x27;2020/12/27&#x27;     92       118     241.0
+28        60  &#x27;2020/12/28&#x27;    103       132       NaN
+29        60  &#x27;2020/12/29&#x27;    100       132     280.0
+30        60  &#x27;2020/12/30&#x27;    102       129     380.3
+31        60  &#x27;2020/12/31&#x27;     92       115     243.0</code></pre></div></div>
+<p class="v2-p"><strong>What to notice:</strong> Row 28 has <code>NaN</code> in Calories · a missing value.</p>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>Think about it:</strong> What would happen if you calculated the average calories without removing the NaN values first? Try to reason through it before reading on.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.4 <code>info()</code> · Get a Full Data Report</h3>
+<p class="v2-p"><strong>What is it?</strong> A method that prints a structured summary of your entire DataFrame · column names, data types, and how many values are non-null (non-missing).</p>
+<p class="v2-p"><strong>Why use it?</strong> It's the fastest way to spot missing values and check whether your columns have the right data type.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(df.info())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;class &#x27;pandas.core.frame.DataFrame&#x27;&gt;
+RangeIndex: 169 entries, 0 to 168
+Data columns (total 4 columns):
+ #   Column    Non-Null Count  Dtype  
+---  ------    --------------  -----  
+ 0   Duration  169 non-null    int64  
+ 1   Pulse     169 non-null    int64  
+ 2   Maxpulse  169 non-null    int64  
+ 3   Calories  164 non-null    float64
+dtypes: float64(1), int64(3)
+memory usage: 5.4 KB
+None</code></pre></div></div>
+<p class="v2-p"><strong>Breaking down every part of this output:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Part</th><th>What it means</th></tr></thead><tbody><tr><td><code>RangeIndex: 169 entries, 0 to 168</code></td><td>There are 169 rows, numbered from 0 to 168</td></tr><tr><td><code>Data columns (total 4 columns)</code></td><td>There are 4 columns</td></tr><tr><td><code>#</code></td><td>The column's position number</td></tr><tr><td><code>Column</code></td><td>The column's name</td></tr><tr><td><code>Non-Null Count</code></td><td>How many rows have an actual value (not missing)</td></tr><tr><td><code>Dtype</code></td><td>The data type of that column</td></tr></tbody></table></div>
+<p class="v2-p"><strong>What does <code>164 non-null</code> mean for Calories?</strong></p>
+<p class="v2-p">There are 169 rows total. Only 164 have a Calories value. So <strong>5 rows are missing their Calories data</strong>. This is a problem you will need to fix before computing statistics.</p>
+<p class="v2-p"><strong>What is <code>int64</code>?</strong> A whole number (integer). 64 refers to how the computer stores it internally · you don't need to worry about this detail as a beginner.</p>
+<p class="v2-p"><strong>What is <code>float64</code>?</strong> A decimal number (floating point). Calories uses decimals like <code>409.1</code>, so it's stored as float64.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Tip:</strong> Always run <code>df.info()</code> immediately after loading a dataset. It tells you everything important at once.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.5 What Are Null Values (NaN)?</h3>
+<p class="v2-p"><strong>NaN</strong> stands for "Not a Number." In data work, it means a cell is completely empty · no value was recorded for that row and column.</p>
+<p class="v2-p">Think of it like a form where someone left a question blank. The field exists, but there's nothing in it.</p>
+<p class="v2-p"><strong>Why are they a problem?</strong></p>
+<p class="v2-p">Most mathematical operations in Python cannot handle NaN gracefully. For example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Simple demonstration of NaN behavior
+import math
+print(5 + float(&#x27;nan&#x27;))   # Output: nan
+print(float(&#x27;nan&#x27;) &gt; 10) # Output: False — but this is misleading!</code></pre></div></div>
+<p class="v2-p">When NaN appears in a calculation, the result becomes NaN too · which is wrong. Before doing any analysis, you must either <strong>remove</strong> or <strong>fill</strong> those missing values.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Analyzing DataFrames</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Part 2 · Introduction to Data Cleaning</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is data cleaning?</h3>
+<p class="v2-p"><strong>Data cleaning</strong> (also called data wrangling or data munging) is the process of finding and fixing problems in a dataset before you analyze it.</p>
+<p class="v2-p">Think of it like washing vegetables before cooking. You wouldn't skip that step · and you shouldn't skip data cleaning either.</p>
+<h3 class="v2-h3">The four main types of data problems</h3>
+<p class="v2-p">In our workout dataset, we have all four types:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Problem</th><th>Example in Our Data</th></tr></thead><tbody><tr><td><strong>Empty cells</strong></td><td>Row 18 has no Calories; Row 22 has no Date</td></tr><tr><td><strong>Wrong format</strong></td><td>Row 26 has date <code>20201226</code> instead of <code>'2020/12/26'</code></td></tr><tr><td><strong>Wrong data</strong></td><td>Row 7 has Duration = <code>450</code> (should probably be <code>45</code>)</td></tr><tr><td><strong>Duplicates</strong></td><td>Rows 11 and 12 are identical</td></tr></tbody></table></div>
+<p class="v2-p">We will handle each type one by one.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Our Dataset</h3>
+<p class="v2-p">Throughout the cleaning sections, we work with this dataset. Save it mentally · you'll see it again and again:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>    Duration          Date  Pulse  Maxpulse  Calories
+0         60  &#x27;2020/12/01&#x27;    110       130     409.1
+1         60  &#x27;2020/12/02&#x27;    117       145     479.0
+2         60  &#x27;2020/12/03&#x27;    103       135     340.0
+3         45  &#x27;2020/12/04&#x27;    109       175     282.4
+4         45  &#x27;2020/12/05&#x27;    117       148     406.0
+5         60  &#x27;2020/12/06&#x27;    102       127     300.0
+6         60  &#x27;2020/12/07&#x27;    110       136     374.0
+7        450  &#x27;2020/12/08&#x27;    104       134     253.3   ← Wrong data
+8         30  &#x27;2020/12/09&#x27;    109       133     195.1
+9         60  &#x27;2020/12/10&#x27;     98       124     269.0
+10        60  &#x27;2020/12/11&#x27;    103       147     329.3
+11        60  &#x27;2020/12/12&#x27;    100       120     250.7   ← Duplicate
+12        60  &#x27;2020/12/12&#x27;    100       120     250.7   ← Duplicate
+13        60  &#x27;2020/12/13&#x27;    106       128     345.3
+...
+18        45  &#x27;2020/12/18&#x27;     90       112       NaN   ← Empty Calories
+...
+22        45           NaN    100       119     282.0   ← Empty Date
+...
+26        60      20201226    100       120     250.0   ← Wrong format
+...
+28        60  &#x27;2020/12/28&#x27;    103       132       NaN   ← Empty Calories</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Introduction to Data Cleaning</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Part 3 · Cleaning Empty Cells</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Why do empty cells matter?</h3>
+<p class="v2-p">Empty cells are like blank entries in a survey · they leave gaps in your data. If someone calculates the average calories burned per workout and 5 out of 32 entries are blank, the average will be computed on only 27 entries. This can skew your results or cause errors.</p>
+<p class="v2-p">You have two strategies: <strong>remove</strong> the row, or <strong>fill</strong> the empty cell with a sensible value.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.1 Strategy 1: Remove Rows with Empty Cells (<code>dropna()</code>)</h3>
+<p class="v2-p"><strong>What is <code>dropna()</code>?</strong> A method that drops (removes) any row that has at least one NaN value.</p>
+<p class="v2-p"><strong>Analogy:</strong> Imagine a quality inspector on a factory line. Any product with a missing component gets tossed out entirely.</p>
+<h4 class="v2-h4">Simple Example First</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+# Create a tiny DataFrame with a missing value
+data = {&#x27;Name&#x27;: [&#x27;Alice&#x27;, &#x27;Bob&#x27;, &#x27;Carol&#x27;],
+        &#x27;Score&#x27;: [88.5, None, 74.0]}
+
+df = pd.DataFrame(data)
+print(&quot;Before cleaning:&quot;)
+print(df)
+
+clean_df = df.dropna()
+print(&quot;\nAfter dropna():&quot;)
+print(clean_df)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Before cleaning:
+    Name  Score
+0  Alice   88.5
+1    Bob    NaN
+2  Carol   74.0
+
+After dropna():
+    Name  Score
+0  Alice   88.5
+2  Carol   74.0</code></pre></div></div>
+<p class="v2-p">Bob's row was removed because his Score was missing.</p>
+<h4 class="v2-h4">Applying to the Workout Dataset</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+new_df = df.dropna()  # Returns a NEW clean DataFrame
+
+print(new_df.to_string())</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Important:</strong> By default, <code>dropna()</code> does <strong>not</strong> change your original DataFrame. It creates and returns a brand new one. The original <code>df</code> is unchanged.</p></blockquote>
+<h4 class="v2-h4">Making the Change Permanent with <code>inplace=True</code></h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df.dropna(inplace=True)  # Modifies the ORIGINAL df directly
+
+print(df.to_string())</code></pre></div></div>
+<p class="v2-p"><strong>What does <code>inplace=True</code> mean?</strong></p>
+<p class="v2-p">Think of it like editing a document:</p>
+<ul class="v2-ul"><li>Without <code>inplace=True</code>: Pandas makes a photocopy and edits the copy. Your original is safe.</li><li>With <code>inplace=True</code>: Pandas edits the original document directly.</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">🚫 <strong>Common Beginner Mistake:</strong> Writing <code>df.dropna()</code> and expecting <code>df</code> to change. It won't! You must either write <code>df = df.dropna()</code> or use <code>inplace=True</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.2 Strategy 2: Fill Empty Cells with a Value (<code>fillna()</code>)</h3>
+<p class="v2-p"><strong>What is <code>fillna()</code>?</strong> A method that replaces all NaN values with a value you specify.</p>
+<p class="v2-p"><strong>Why use this instead of dropping?</strong> Sometimes losing entire rows wastes too much data. For example, if only the Calories column is missing but Duration, Pulse, and Date are all valid · it might be better to estimate Calories than to throw the whole row away.</p>
+<h4 class="v2-h4">Simple Example</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {&#x27;Name&#x27;: [&#x27;Alice&#x27;, &#x27;Bob&#x27;, &#x27;Carol&#x27;],
+        &#x27;Score&#x27;: [88.5, None, 74.0]}
+
+df = pd.DataFrame(data)
+
+df.fillna(0, inplace=True)  # Fill ALL NaN values with 0
+
+print(df)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>    Name  Score
+0  Alice   88.5
+1    Bob    0.0
+2  Carol   74.0</code></pre></div></div>
+<p class="v2-p">Bob's missing Score is now 0.</p>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>Think about it:</strong> Is filling with 0 always a good idea? What if Score can never be 0 in real life? What would a better fill value be?</p></blockquote>
+<h4 class="v2-h4">Fill a Specific Column Only</h4>
+<p class="v2-p">You almost never want to fill every column with the same value. More often, you target one specific column:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df.fillna({&quot;Calories&quot;: 130}, inplace=True)
+# Only the Calories column&#x27;s NaN values become 130</code></pre></div></div>
+<p class="v2-p"><strong>Why 130?</strong> In this example it's just a placeholder. In real analysis, you'd choose a more meaningful value · like the average.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.3 Strategy 3: Fill Empty Cells with a Calculated Value (Mean, Median, Mode)</h3>
+<p class="v2-p">Instead of guessing a fill value, you can calculate the <strong>average</strong> (mean), <strong>middle value</strong> (median), or <strong>most common value</strong> (mode) from the rest of the column and use that.</p>
+<p class="v2-p"><strong>Analogy:</strong> If a student missed one exam, the school might substitute their average score from other exams instead of recording a zero. That's fairer.</p>
+<h4 class="v2-h4">Understanding Mean, Median, and Mode</h4>
+<p class="v2-p"><strong>Mean (Average):</strong> Add all values together, divide by how many there are.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Values: 10, 20, 30, 40, 50
+Mean = (10+20+30+40+50) / 5 = 150 / 5 = 30</code></pre></div></div>
+<p class="v2-p"><strong>Median (Middle Value):</strong> Sort the values, then pick the one in the middle.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Values sorted: 10, 20, 30, 40, 50
+Middle value = 30  (3 values on each side)</code></pre></div></div>
+<p class="v2-p"><strong>Mode (Most Common Value):</strong> The value that appears most often.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Values: 10, 20, 20, 20, 50
+Mode = 20  (appears 3 times)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>When to use which:</strong></p>
+<ul class="v2-ul"><li><strong>Mean</strong> works well when data is spread evenly without extreme outliers.</li><li><strong>Median</strong> works better when there are outliers (extreme values). Our duration value of 450 would inflate the mean, making median a safer choice.</li><li><strong>Mode</strong> works for categorical data or when one value is clearly the most typical.</li></ul></blockquote>
+<h4 class="v2-h4">Fill with Mean</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+x = df[&quot;Calories&quot;].mean()   # Calculate mean of the Calories column
+print(f&quot;Mean calories: {x:.2f}&quot;)
+
+df.fillna({&quot;Calories&quot;: x}, inplace=True)
+print(df.to_string())</code></pre></div></div>
+<p class="v2-p"><strong>What <code>.mean()</code> does:</strong> Adds up all non-NaN Calories values and divides by how many there are.</p>
+<p class="v2-p"><strong>Expected intermediate output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Mean calories: 304.68</code></pre></div></div>
+<p class="v2-p">All 5 missing Calories cells would be filled with <code>304.68</code>.</p>
+<h4 class="v2-h4">Fill with Median</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+x = df[&quot;Calories&quot;].median()   # The middle value of Calories
+
+df.fillna({&quot;Calories&quot;: x}, inplace=True)</code></pre></div></div>
+<h4 class="v2-h4">Fill with Mode</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+x = df[&quot;Calories&quot;].mode()[0]   # Most common Calories value
+# Note the [0] — mode() returns a list, so we take the first item
+
+df.fillna({&quot;Calories&quot;: x}, inplace=True)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Why <code>[0]</code> after <code>mode()</code>?</strong> The <code>mode()</code> method returns a Series (a list) because there can be more than one most-common value. Adding <code>[0]</code> picks the first one.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Cleaning Empty Cells</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Part 4 · Cleaning Wrong Format Data</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What is "wrong format"?</h3>
+<p class="v2-p">A column has wrong format when the same type of information is stored in different ways across different rows. For example, a "Date" column where some dates look like <code>'2020/12/01'</code> and one looks like <code>20201226</code> · a number instead of a formatted string.</p>
+<p class="v2-p"><strong>Why is this a problem?</strong> Computers are very literal. If Python sees <code>'2020/12/01'</code> and <code>20201226</code> in the same column, it cannot sort them as dates, calculate the number of days between them, or group them by month · because one is a formatted date string and the other is just a plain number.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.1 Converting to a Correct Date Format (<code>pd.to_datetime()</code>)</h3>
+<p class="v2-p">Look at row 26 in our dataset · the Date value is <code>20201226</code> (a plain number), while every other date looks like <code>'2020/12/26'</code>.</p>
+<p class="v2-p">We want to convert the <strong>entire Date column</strong> into proper Python date objects.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df[&#x27;Date&#x27;] = pd.to_datetime(df[&#x27;Date&#x27;], format=&#x27;mixed&#x27;)
+
+print(df.to_string())</code></pre></div></div>
+<p class="v2-p"><strong>Breaking down the code:</strong></p>
+<ul class="v2-ul"><li><code>df['Date']</code> · we are selecting the "Date" column</li><li><code>pd.to_datetime(...)</code> · this is a Pandas function that converts values into proper date objects</li><li><code>format='mixed'</code> · tells Pandas that the dates are in different formats, so it should be flexible and figure each one out</li></ul>
+<p class="v2-p"><strong>Expected Result for key rows:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>    Duration       Date  Pulse  Maxpulse  Calories
+...
+22        45        NaT    100       119     282.0   ← Empty date becomes NaT
+...
+26        60 2020-12-26    100       120     250.0   ← Fixed!
+...</code></pre></div></div>
+<p class="v2-p"><strong>What is <code>NaT</code>?</strong> It stands for "Not a Time." Just like NaN is the missing value for numbers, NaT is the missing value for dates. Row 22 had no date at all, so after conversion it shows NaT.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.2 Removing Rows with Wrong/Missing Dates After Conversion</h3>
+<p class="v2-p">After converting, any rows that had empty or unreadable dates now have <code>NaT</code>. We can remove those rows using <code>dropna()</code> targeted at the Date column:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df[&#x27;Date&#x27;] = pd.to_datetime(df[&#x27;Date&#x27;], format=&#x27;mixed&#x27;)
+
+df.dropna(subset=[&#x27;Date&#x27;], inplace=True)
+# subset=[&#x27;Date&#x27;] means: only drop rows where Date is NaN/NaT
+# Rows with NaN in other columns are kept</code></pre></div></div>
+<p class="v2-p"><strong>What <code>subset=['Date']</code> means:</strong> Instead of dropping any row with any missing value (which is the default), we only drop rows where the <strong>Date column specifically</strong> is empty. All other missing values are left alone.</p>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>Think about it:</strong> Why might we use <code>subset</code> here instead of just <code>dropna()</code>? What would happen to row 18 (which has a valid Date but missing Calories) if we called <code>dropna()</code> without <code>subset</code>?</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Cleaning Wrong Format Data</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Part 5 · Cleaning Wrong Data</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">What is "wrong data"?</h3>
+<p class="v2-p">Wrong data is a value that is technically present and in the right format, but is clearly incorrect or impossible given the context.</p>
+<p class="v2-p"><strong>Example from our dataset:</strong> Row 7 has <code>Duration = 450</code>. All other Duration values are between 30 and 60 minutes. A 450-minute workout session (7.5 hours!) is extremely unlikely. It's almost certainly a typo · someone probably meant <code>45</code>.</p>
+<p class="v2-p">The tricky part: Pandas can't automatically detect this. The number <code>450</code> is perfectly valid as a number. You need domain knowledge (understanding what the data represents) to recognize it's wrong.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.1 Replacing a Specific Wrong Value</h3>
+<p class="v2-p"><strong>Method 1 · Fix one specific cell:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df.loc[7, &#x27;Duration&#x27;] = 45
+# loc[7, &#x27;Duration&#x27;] = row 7, column &#x27;Duration&#x27;
+# We set it to 45 (the corrected value)
+
+print(df.loc[7])</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output for row 7:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Duration             45
+Date       &#x27;2020/12/08&#x27;
+Pulse               104
+Maxpulse            134
+Calories          253.3
+Name: 7, dtype: object</code></pre></div></div>
+<p class="v2-p"><strong>What is <code>df.loc[]</code>?</strong> It's how you access a specific cell or group of cells in a DataFrame.</p>
+<ul class="v2-ul"><li><code>df.loc[7, 'Duration']</code> means: go to row 7, column 'Duration'.</li><li>Assigning <code>= 45</code> changes the value there.</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.2 Replacing Wrong Values Automatically with a Loop</h3>
+<p class="v2-p">For a small dataset you can fix values one by one. But imagine you have 10,000 rows · you can't check each one manually. Instead, you write a rule: "any Duration over 120 minutes is unrealistic · change it to 120."</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+for x in df.index:              # Loop through every row index
+    if df.loc[x, &quot;Duration&quot;] &gt; 120:   # Check if Duration is too large
+        df.loc[x, &quot;Duration&quot;] = 120   # Cap it at 120
+
+print(df.to_string())</code></pre></div></div>
+<p class="v2-p"><strong>Walking through the code line by line:</strong></p>
+<ol class="v2-ol"><li><code>for x in df.index:</code> · <code>df.index</code> is a list of all row numbers (0, 1, 2, ... 31). This loop visits each row one at a time, putting the row number in <code>x</code>.</li><li><code>if df.loc[x, "Duration"] &gt; 120:</code> · checks whether this row's Duration is greater than 120.</li><li><code>df.loc[x, "Duration"] = 120</code> · if it is too large, set it to exactly 120.</li></ol>
+<p class="v2-p"><strong>Expected change:</strong> Only row 7 (Duration = 450) is affected. It becomes 120. All other rows stay the same.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> In financial data, you might cap or flag transactions over a certain amount. In medical data, you might flag heart rates below 30 or above 220 as likely recording errors. This pattern is used everywhere.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.3 Removing Rows with Wrong Data</h3>
+<p class="v2-p">Instead of correcting wrong values, you can simply delete those rows. This is a valid choice when you don't know what the correct value should be.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+for x in df.index:
+    if df.loc[x, &quot;Duration&quot;] &gt; 120:
+        df.drop(x, inplace=True)  # Delete the entire row
+
+print(df.to_string())</code></pre></div></div>
+<p class="v2-p"><strong>What <code>df.drop(x, inplace=True)</code> does:</strong> Removes the row with index number <code>x</code> from the DataFrame permanently (because of <code>inplace=True</code>).</p>
+<p class="v2-p"><strong>After this code:</strong> Row 7 is completely gone. The DataFrame goes from 32 rows to 31 rows.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Correction vs Deletion · which should you choose?</strong></p>
+<ul class="v2-ul"><li><strong>Correct</strong> if you're confident what the right value should be (e.g., <code>450</code> is clearly a typo for <code>45</code>).</li><li><strong>Delete</strong> if the error is too severe to fix, or if you don't know what the right value should be.</li></ul></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Cleaning Wrong Data</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Part 6 · Removing Duplicate Rows</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">What are duplicate rows?</h3>
+<p class="v2-p">A <strong>duplicate row</strong> is a row that has been entered more than once · all values in that row are identical to another row.</p>
+<p class="v2-p"><strong>Analogy:</strong> Imagine a school roll call system accidentally recorded the same student twice. Any report generated from that data would count that student twice · doubling their influence on every statistic.</p>
+<p class="v2-p">In our workout dataset, look at rows 11 and 12:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>    Duration          Date  Pulse  Maxpulse  Calories
+11        60  &#x27;2020/12/12&#x27;    100       120     250.7
+12        60  &#x27;2020/12/12&#x27;    100       120     250.7</code></pre></div></div>
+<p class="v2-p">Every single value is identical. This workout session was accidentally recorded twice.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.1 Discovering Duplicates with <code>duplicated()</code></h3>
+<p class="v2-p">Before removing duplicates, it's good practice to first find them and see which rows they are.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+print(df.duplicated())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (abbreviated):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0     False
+1     False
+2     False
+...
+11    False
+12     True   ← Row 12 is a duplicate of row 11
+...
+31    False
+dtype: bool</code></pre></div></div>
+<p class="v2-p"><strong>What <code>duplicated()</code> returns:</strong> A Series (a column) of <code>True</code> or <code>False</code> values.</p>
+<ul class="v2-ul"><li><code>False</code> means "this row is unique · it hasn't appeared before."</li><li><code>True</code> means "this row is a duplicate · an identical row appeared earlier."</li></ul>
+<p class="v2-p">Notice that row 11 shows <code>False</code> (it's the first occurrence) and row 12 shows <code>True</code> (it's the repeat).</p>
+<h4 class="v2-h4">Second Simple Example</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {&#x27;Name&#x27;: [&#x27;Alice&#x27;, &#x27;Bob&#x27;, &#x27;Alice&#x27;],
+        &#x27;Score&#x27;: [88, 72, 88]}
+
+df = pd.DataFrame(data)
+
+print(df.duplicated())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0    False
+1    False
+2     True    ← Second &quot;Alice&quot; with Score 88 is a duplicate
+dtype: bool</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.2 Removing Duplicates with <code>drop_duplicates()</code></h3>
+<p class="v2-p">Once you've confirmed duplicates exist, remove them:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df.drop_duplicates(inplace=True)
+
+print(df.to_string())</code></pre></div></div>
+<p class="v2-p"><strong>What happens:</strong> Pandas scans all rows. When it finds two identical rows, it keeps the first one and removes the second. Our dataset drops from 32 rows to 31 rows (row 12 is removed, row 11 is kept).</p>
+<p class="v2-p"><strong>The <code>inplace=True</code> rule applies here too:</strong> Without <code>inplace=True</code>, the result is returned as a new DataFrame. With <code>inplace=True</code>, the original DataFrame is modified.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> Duplicates are extremely common in datasets that come from form submissions, database merges, or automated logging systems. Always check for them!</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Removing Duplicate Rows</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Part 7 · Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Warm-Up: Inspecting a Student Dataset</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice using <code>head()</code>, <code>tail()</code>, and <code>info()</code> on a new dataset.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are a teaching assistant at a university. You receive student exam scores as a CSV file. Before calculating any grades, you must understand the data.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create the following DataFrame in Python (paste this code):</li></ol></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {
+    &#x27;StudentID&#x27;: [101, 102, 103, 104, 105, 106, 107],
+    &#x27;Name&#x27;: [&#x27;Ada&#x27;, &#x27;Ben&#x27;, &#x27;Cara&#x27;, &#x27;Dan&#x27;, &#x27;Eva&#x27;, &#x27;Frank&#x27;, &#x27;Grace&#x27;],
+    &#x27;Exam1&#x27;: [85, 92, None, 78, 88, 95, 71],
+    &#x27;Exam2&#x27;: [90, 88, 76, None, 82, 91, 69],
+    &#x27;Grade&#x27;: [&#x27;B&#x27;, &#x27;A&#x27;, &#x27;C&#x27;, &#x27;B&#x27;, &#x27;B&#x27;, &#x27;A&#x27;, &#x27;C&#x27;]
+}
+
+df = pd.DataFrame(data)</code></pre></div></div>
+<ol class="v2-ol"><li>Print the first 3 rows using <code>head()</code>.</li><li>Print the last 2 rows using <code>tail()</code>.</li><li>Print the full info report using <code>info()</code>.</li></ol>
+<p class="v2-p"><strong>Expected output from <code>info()</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;class &#x27;pandas.core.frame.DataFrame&#x27;&gt;
+RangeIndex: 7 entries, 0 to 6
+Data columns (total 5 columns):
+ #   Column     Non-Null Count  Dtype  
+---  ---------  --------------  -----  
+ 0   StudentID  7 non-null      int64  
+ 1   Name       7 non-null      object 
+ 2   Exam1      6 non-null      float64
+ 3   Exam2      6 non-null      float64
+ 4   Grade      7 non-null      object 
+dtypes: float64(2), int64(1), object(2)
+memory usage: 412.0+ bytes</code></pre></div></div>
+<p class="v2-p"><strong>Self-check Questions:</strong></p>
+<ul class="v2-ul"><li>How many students are missing Exam1 scores?</li><li>How many students are missing Exam2 scores?</li><li>Which columns have no missing values?</li><li>What data type is the Grade column? (Hint: <code>object</code> means string/text)</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Handling Missing Values in a Sales Dataset</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice <code>dropna()</code> and <code>fillna()</code> with mean.</p>
+<p class="v2-p"><strong>Scenario:</strong> You work at a retail company. You have monthly sales data, but some months are missing their revenue figures. You need to clean the data before reporting.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create this DataFrame:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {
+    &#x27;Month&#x27;: [&#x27;Jan&#x27;, &#x27;Feb&#x27;, &#x27;Mar&#x27;, &#x27;Apr&#x27;, &#x27;May&#x27;, &#x27;Jun&#x27;],
+    &#x27;Revenue&#x27;: [15000, None, 18500, 14200, None, 21000],
+    &#x27;Units&#x27;: [120, 95, 145, 110, 98, 160]
+}
+
+df = pd.DataFrame(data)
+print(&quot;Original data:&quot;)
+print(df)</code></pre></div></div>
+<ol class="v2-ol"><li>Find the mean revenue (only from the non-missing months).</li><li>Fill the missing Revenue values with that mean.</li><li>Print the cleaned DataFrame.</li></ol>
+<p class="v2-p"><strong>Hint:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mean_rev = df[&#x27;Revenue&#x27;].mean()
+df.fillna({&#x27;Revenue&#x27;: mean_rev}, inplace=True)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (cleaned):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>  Month     Revenue  Units
+0   Jan  15000.000    120
+1   Feb  17175.000    95    ← Was None, now filled with mean
+2   Mar  18500.000    145
+3   Apr  14200.000    110
+4   May  17175.000    98    ← Was None, now filled with mean
+5   Jun  21000.000    160</code></pre></div></div>
+<p class="v2-p"><strong>What-if challenge:</strong> What would the mean revenue be if you used median instead of mean? Try it and compare.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Fixing Date Formats and Wrong Data</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice <code>pd.to_datetime()</code> and conditional value correction.</p>
+<p class="v2-p"><strong>Scenario:</strong> A fitness app exported workout records. Some dates are in the wrong format, and one duration looks like a data entry error.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create this DataFrame:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {
+    &#x27;Date&#x27;: [&#x27;2024/01/15&#x27;, &#x27;2024/01/16&#x27;, &#x27;20240117&#x27;, &#x27;2024/01/18&#x27;],
+    &#x27;Duration_min&#x27;: [45, 350, 60, 30],
+    &#x27;Calories&#x27;: [320, 280, 410, 190]
+}
+
+df = pd.DataFrame(data)
+print(&quot;Original:&quot;)
+print(df)</code></pre></div></div>
+<ol class="v2-ol"><li>Convert the <code>Date</code> column to proper dates using <code>pd.to_datetime()</code> with <code>format='mixed'</code>.</li><li>Find the row where Duration is unrealistically high (over 180 minutes) and fix it to 45.</li><li>Print the corrected DataFrame.</li></ol>
+<p class="v2-p"><strong>Expected output after cleaning:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>        Date  Duration_min  Calories
+0 2024-01-15            45       320
+1 2024-01-16            45       280   ← 350 corrected to 45
+2 2024-01-17            60       410   ← Date format fixed
+3 2024-01-18            30       190</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4 · Detecting and Removing Duplicates</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice <code>duplicated()</code> and <code>drop_duplicates()</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> Your company's order management system accidentally recorded some orders twice. You need to remove the duplicate entries.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create this DataFrame:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {
+    &#x27;OrderID&#x27;: [1001, 1002, 1003, 1002, 1004, 1003],
+    &#x27;Product&#x27;: [&#x27;Laptop&#x27;, &#x27;Mouse&#x27;, &#x27;Keyboard&#x27;, &#x27;Mouse&#x27;, &#x27;Monitor&#x27;, &#x27;Keyboard&#x27;],
+    &#x27;Price&#x27;: [999.99, 29.99, 79.99, 29.99, 349.99, 79.99]
+}
+
+df = pd.DataFrame(data)</code></pre></div></div>
+<ol class="v2-ol"><li>Print <code>df.duplicated()</code> to see which rows are duplicates.</li><li>Remove the duplicates using <code>drop_duplicates()</code>.</li><li>Print the cleaned DataFrame and count how many rows remain.</li></ol>
+<p class="v2-p"><strong>Expected output after cleaning:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>   OrderID   Product    Price
+0     1001    Laptop   999.99
+1     1002     Mouse    29.99
+2     1003  Keyboard    79.99
+4     1004   Monitor   349.99</code></pre></div></div>
+<p class="v2-p"><strong>Self-check:</strong> Which rows were removed? Why did the index go from 0,1,2,3,4,5 to 0,1,2,4?</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(9)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Part 9 · Common Beginner Mistakes</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1: Forgetting <code>inplace=True</code> and wondering why nothing changed</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.dropna()         # Does nothing to df!
+df.fillna(0)        # Does nothing to df!
+df.drop_duplicates() # Does nothing to df!</code></pre></div></div>
+<p class="v2-p"><strong>Right (Option A · use inplace):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.dropna(inplace=True)
+df.fillna(0, inplace=True)
+df.drop_duplicates(inplace=True)</code></pre></div></div>
+<p class="v2-p"><strong>Right (Option B · reassign):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df = df.dropna()
+df = df.fillna(0)
+df = df.drop_duplicates()</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2: Filling ALL columns with the same value</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.fillna(0, inplace=True)
+# This fills missing dates with 0, missing names with 0 — nonsense!</code></pre></div></div>
+<p class="v2-p"><strong>Right:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.fillna({&#x27;Calories&#x27;: df[&#x27;Calories&#x27;].mean()}, inplace=True)
+# Only fill the specific column that makes sense</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3: Using <code>dropna()</code> without <code>subset</code> and accidentally removing too many rows</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.dropna(inplace=True)
+# This removes a row if ANY column is missing
+# A row with valid Date but missing Calories gets deleted too</code></pre></div></div>
+<p class="v2-p"><strong>Right:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.dropna(subset=[&#x27;Date&#x27;], inplace=True)
+# Only remove rows where the Date is missing</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4: Not checking for wrong data · assuming numbers are always correct</h3>
+<p class="v2-p">Just because a cell has a number doesn't mean it's the right number. Always inspect your data domain and use <code>describe()</code> or <code>info()</code> to spot suspiciously large or small values:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(df[&#x27;Duration&#x27;].describe())
+# Shows min, max, mean, etc. — helps you spot outliers</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5: Modifying a DataFrame inside a loop without resetting the index</h3>
+<p class="v2-p">After dropping rows, the index numbers may have gaps (e.g., 0, 1, 2, 4, 5 · missing 3). If you then loop using the old index, you might hit a <code>KeyError</code>. Reset after major operations if needed:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.reset_index(drop=True, inplace=True)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6: Forgetting <code>[0]</code> when using mode</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.fillna({&#x27;Calories&#x27;: df[&#x27;Calories&#x27;].mode()}, inplace=True)
+# Tries to fill with an entire Series — will raise an error!</code></pre></div></div>
+<p class="v2-p"><strong>Right:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.fillna({&#x27;Calories&#x27;: df[&#x27;Calories&#x27;].mode()[0]}, inplace=True)
+# [0] selects the first (most common) value from the result</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Stage 1 · Setup and Initial Inspection</div><div class="build-req"><p class="v2-p">In this project, you will apply all five cleaning techniques to the complete workout dataset · in the correct order.</p>
+<p class="v2-p"><strong>Project Goal:</strong> Start with a messy, uncleaned dataset and produce a fully clean, analysis-ready version.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Setup and Initial Inspection</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+# We simulate the dataset described in the lesson
+data = {
+    &#x27;Duration&#x27;: [60, 60, 60, 45, 45, 60, 60, 450, 30, 60,
+                 60, 60, 60, 60, 60, 60, 60, 60, 45, 60,
+                 45, 60, 45, 60, 45, 60, 60, 60, 60, 60, 60, 60],
+    &#x27;Date&#x27;: [&#x27;2020/12/01&#x27;,&#x27;2020/12/02&#x27;,&#x27;2020/12/03&#x27;,&#x27;2020/12/04&#x27;,
+             &#x27;2020/12/05&#x27;,&#x27;2020/12/06&#x27;,&#x27;2020/12/07&#x27;,&#x27;2020/12/08&#x27;,
+             &#x27;2020/12/09&#x27;,&#x27;2020/12/10&#x27;,&#x27;2020/12/11&#x27;,&#x27;2020/12/12&#x27;,
+             &#x27;2020/12/12&#x27;,&#x27;2020/12/13&#x27;,&#x27;2020/12/14&#x27;,&#x27;2020/12/15&#x27;,
+             &#x27;2020/12/16&#x27;,&#x27;2020/12/17&#x27;,&#x27;2020/12/18&#x27;,&#x27;2020/12/19&#x27;,
+             &#x27;2020/12/20&#x27;,&#x27;2020/12/21&#x27;, None,       &#x27;2020/12/23&#x27;,
+             &#x27;2020/12/24&#x27;,&#x27;2020/12/25&#x27;,&#x27;20201226&#x27;,  &#x27;2020/12/27&#x27;,
+             &#x27;2020/12/28&#x27;,&#x27;2020/12/29&#x27;,&#x27;2020/12/30&#x27;,&#x27;2020/12/31&#x27;],
+    &#x27;Pulse&#x27;: [110,117,103,109,117,102,110,104,109,98,
+              103,100,100,106,104,98,98,100,90,103,
+              97,108,100,130,105,102,100,92,103,100,102,92],
+    &#x27;Maxpulse&#x27;: [130,145,135,175,148,127,136,134,133,124,
+                 147,120,120,128,132,123,120,120,112,123,
+                 125,131,119,101,132,126,120,118,132,132,129,115],
+    &#x27;Calories&#x27;: [409.1,479.0,340.0,282.4,406.0,300.0,374.0,253.3,
+                 195.1,269.0,329.3,250.7,250.7,345.3,379.3,275.0,
+                 215.2,300.0, None, 323.0,243.0,364.2,282.0,300.0,
+                 246.0,334.5,250.0,241.0, None, 280.0,380.3,243.0]
+}
+
+df = pd.DataFrame(data)
+
+print(&quot;=== STAGE 1: Initial Inspection ===&quot;)
+print(f&quot;Shape: {df.shape}&quot;)   # (rows, columns)
+print(df.info())</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import pandas as pd
+
+# We simulate the dataset described in the lesson
+data = {
+    'Duration': [60, 60, 60, 45, 45, 60, 60, 450, 30, 60,
+                 60, 60, 60, 60, 60, 60, 60, 60, 45, 60,
+                 45, 60, 45, 60, 45, 60, 60, 60, 60, 60, 60, 60],
+    'Date': ['2020/12/01','2020/12/02','2020/12/03','2020/12/04',
+             '2020/12/05','2020/12/06','2020/12/07','2020/12/08',
+             '2020/12/09','2020/12/10','2020/12/11','2020/12/12',
+             '2020/12/12','2020/12/13','2020/12/14','2020/12/15',
+             '2020/12/16','2020/12/17','2020/12/18','2020/12/19',
+             '2020/12/20','2020/12/21', None,       '2020/12/23',
+             '2020/12/24','2020/12/25','20201226',  '2020/12/27',
+             '2020/12/28','2020/12/29','2020/12/30','2020/12/31'],
+    'Pulse': [110,117,103,109,117,102,110,104,109,98,
+              103,100,100,106,104,98,98,100,90,103,
+              97,108,100,130,105,102,100,92,103,100,102,92],
+    'Maxpulse': [130,145,135,175,148,127,136,134,133,124,
+                 147,120,120,128,132,123,120,120,112,123,
+                 125,131,119,101,132,126,120,118,132,132,129,115],
+    'Calories': [409.1,479.0,340.0,282.4,406.0,300.0,374.0,253.3,
+                 195.1,269.0,329.3,250.7,250.7,345.3,379.3,275.0,
+                 215.2,300.0, None, 323.0,243.0,364.2,282.0,300.0,
+                 246.0,334.5,250.0,241.0, None, 280.0,380.3,243.0]
+}
+
+df = pd.DataFrame(data)
+
+print(&quot;=== STAGE 1: Initial Inspection ===&quot;)
+print(f&quot;Shape: {df.shape}&quot;)   # (rows, columns)
+print(df.info())`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-30-stage-1-setup-and-initial-inspection</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 30 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 30 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1 · Analyzing DataFrames</li><li>✅ Part 2 · Introduction to Data Cleaning</li><li>✅ Part 3 · Cleaning Empty Cells</li><li>✅ Part 4 · Cleaning Wrong Format Data</li><li>✅ Part 5 · Cleaning Wrong Data</li><li>✅ Part 6 · Removing Duplicate Rows</li></ul><div class="ln"><a href="lesson_29.html" class="ln-btn">&#8592; Lesson 29</a><a href="lesson_31.html" class="ln-btn primary">Lesson 31 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 30 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

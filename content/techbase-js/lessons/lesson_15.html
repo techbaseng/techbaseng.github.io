@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 15: JavaScript Sets: Unique Values · Set Methods · Set Logic (Union/Intersection/Difference) · WeakSet · Full Reference — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="7" data-key="techbase_js_l15">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 15 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 15</div>
+      <h1>JavaScript Sets: Unique Values · Set Methods · Set Logic (Union/Intersection/Difference) · WeakSet · Full Reference</h1>
+      <div class="l-hero-sub">7 phases &nbsp;·&nbsp; Build: 🔵 Stage 1 · Record Attendance</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 15</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 7 phases</span><span>🏗️ 🔵 Stage 1 · Record Attendance</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 7</div><div class="pt">1. Background: Why Sets Exist</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Imagine you run a school event. Students scan their ID to enter. Some students try to scan twice. You only want to count each student <strong>once</strong>.</p>
+<p class="v2-p">With a regular array this is painful:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ With an array — you must manually check for duplicates
+const attended = [];
+
+function recordAttendance(id) {
+  if (!attended.includes(id)) {   // ← extra check every time
+    attended.push(id);
+  }
+}
+
+recordAttendance(&quot;S001&quot;);
+recordAttendance(&quot;S002&quot;);
+recordAttendance(&quot;S001&quot;); // duplicate — must be blocked manually
+
+console.log(attended); // [&quot;S001&quot;, &quot;S002&quot;]</code></pre></div></div>
+<p class="v2-p">With a <strong>Set</strong>, duplicates are blocked automatically:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ✅ With a Set — duplicates ignored automatically
+const attended = new Set();
+
+attended.add(&quot;S001&quot;);
+attended.add(&quot;S002&quot;);
+attended.add(&quot;S001&quot;); // duplicate — silently ignored!
+
+console.log(attended.size); // 2
+console.log(attended);      // Set(2) { &quot;S001&quot;, &quot;S002&quot; }</code></pre></div></div>
+<p class="v2-p">A <strong>Set</strong> is a collection that stores <strong>unique values only</strong>. Every value in a Set appears exactly once · adding the same value a second time simply does nothing.</p>
+<h3 class="v2-h3">Key Differences: Set vs Array</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th>Array</th><th>Set</th></tr></thead><tbody><tr><td>Allows duplicates</td><td>✅ Yes</td><td>❌ No (unique only)</td></tr><tr><td>Keeps insertion order</td><td>✅ Yes</td><td>✅ Yes</td></tr><tr><td>Index-based access</td><td>✅ <code>arr[2]</code></td><td>❌ No index access</td></tr><tr><td>Fast <code>has()</code> check</td><td>❌ O(n) scan</td><td>✅ O(1) hash lookup</td></tr><tr><td>Iteration</td><td>✅ <code>for</code>, <code>forEach</code>, <code>map</code>...</td><td>✅ <code>for...of</code>, <code>forEach</code></td></tr><tr><td><code>size</code> / <code>length</code></td><td><code>.length</code></td><td><code>.size</code></td></tr><tr><td>Built-in maths (union, etc.)</td><td>❌ Manual only</td><td>✅ Native methods</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Think of a Set like a guest list at a club · each name appears only once. No matter how many times the same person knocks, they are only counted once.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Sets are used for: tracking which users have viewed a post, storing unique tags on a blog article, removing duplicates from search results, permission systems (a user either has a permission or doesn't), and implementing mathematical set operations on data.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. Background: Why Sets Exist</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 7</div><div class="pt">2. Topic 1 · Sets: Basics &amp; Creation</div><div class="pc" id="chk2"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<h3 class="v2-h3">Creating a Set</h3>
+<p class="v2-p">Use the <code>new Set()</code> constructor. You can pass any <strong>iterable</strong> (array, string, another Set) to initialise it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Empty Set
+const s1 = new Set();
+console.log(s1); // Set(0) {}
+
+// From an array — duplicates are removed automatically
+const s2 = new Set([1, 2, 3, 2, 1, 4]);
+console.log(s2); // Set(4) { 1, 2, 3, 4 }
+
+// From a string — each CHARACTER becomes an element
+const s3 = new Set(&quot;HELLO&quot;);
+console.log(s3); // Set(4) { &quot;H&quot;, &quot;E&quot;, &quot;L&quot;, &quot;O&quot; }
+// &quot;L&quot; appeared twice but is stored only once!
+
+// From another Set
+const s4 = new Set(s2);
+console.log(s4); // Set(4) { 1, 2, 3, 4 }</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Set(0) {}
+Set(4) { 1, 2, 3, 4 }
+Set(4) { &quot;H&quot;, &quot;E&quot;, &quot;L&quot;, &quot;O&quot; }
+Set(4) { 1, 2, 3, 4 }</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>THINK ABOUT IT:</strong> <code>new Set("HELLO")</code> gives <code>{"H", "E", "L", "O"}</code> · 4 elements, not 5. Why? Because "L" appears at position 2 and 3, but a Set only keeps one copy. Can you predict what <code>new Set("MISSISSIPPI").size</code> equals? Answer: <code>new Set("MISSISSIPPI")</code> → <code>{ "M", "I", "S", "P" }</code> → size 4.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>size</code> Property</h3>
+<p class="v2-p"><code>size</code> is the Set equivalent of <code>length</code> in arrays. It always reflects the count of <strong>unique</strong> values.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;, &quot;Apple&quot;, &quot;Banana&quot;]);
+
+console.log(fruits.size); // 3  ← only 3 unique values</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> Sets use <code>.size</code>, not <code>.length</code>. Calling <code>.length</code> on a Set returns <code>undefined</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const s = new Set([1, 2, 3]);
+console.log(s.size);   // 3   ✅
+console.log(s.length); // undefined ❌</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">What Types Can a Set Store?</h3>
+<p class="v2-p">A Set can store <strong>any JavaScript value</strong> · primitives AND objects:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const mixed = new Set();
+
+mixed.add(42);
+mixed.add(&quot;hello&quot;);
+mixed.add(true);
+mixed.add(null);
+mixed.add(undefined);
+mixed.add({ name: &quot;Amara&quot; }); // objects by reference
+mixed.add([1, 2, 3]);         // arrays by reference
+
+console.log(mixed.size); // 7</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Sets and Object Identity</h3>
+<p class="v2-p">For <strong>objects and arrays</strong>, Sets use <strong>reference equality</strong> · two objects with the same content are treated as different if they are not the same reference in memory.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const s = new Set();
+
+const obj1 = { name: &quot;Alice&quot; };
+const obj2 = { name: &quot;Alice&quot; }; // same content, DIFFERENT reference!
+const obj3 = obj1;              // SAME reference as obj1
+
+s.add(obj1);
+s.add(obj2); // Added! (different reference)
+s.add(obj3); // NOT added (same reference as obj1)
+
+console.log(s.size); // 2 — obj1 and obj2 (obj3 is same as obj1)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>2</code></p>
+<blockquote class="v2-bq"><p class="v2-p">🐛 <strong>COMMON MISTAKE:</strong> <code>new Set([{a:1}, {a:1}]).size</code> returns <code>2</code>, not <code>1</code>. Objects are compared by reference (are they the <em>same object in memory</em>?), not by content. If you want unique objects by content, you need to compare serialised strings like <code>JSON.stringify(obj)</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Iterating a Set</h3>
+<p class="v2-p">Sets are <strong>iterable</strong> · you can loop through them in several ways. They always iterate in <strong>insertion order</strong>.</p>
+<h4 class="v2-h4"><code>for...of</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]);
+
+for (const fruit of fruits) {
+  console.log(fruit);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Apple
+Banana
+Mango</code></pre></div></div>
+<h4 class="v2-h4"><code>forEach(value, value, set)</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>fruits.forEach((value) =&gt; {
+  console.log(value);
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Notice the <code>forEach</code> callback receives <code>(value, value, set)</code> · the first and second arguments are BOTH the value (not index + value like arrays). This is intentional: Sets have no index concept, so the key IS the value to stay consistent with <code>Map</code>'s <code>forEach(value, key, map)</code> signature.</p></blockquote>
+<h4 class="v2-h4">Spread into an Array (very common pattern):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruitsArray = [...fruits];
+console.log(fruitsArray); // [&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]</code></pre></div></div>
+<h4 class="v2-h4">Using <code>Array.from()</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruitsArray2 = Array.from(fruits);
+console.log(fruitsArray2); // [&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Converting a Set to an array (<code>[...mySet]</code>) is the standard way to use Set as a step in a pipeline · e.g. <code>[...new Set(arr)]</code> is the most common one-liner to <strong>deduplicate an array</strong> in modern JavaScript.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Fastest Way to Deduplicate an Array</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const raw = [1, 2, 3, 2, 4, 1, 5, 3];
+
+// One-liner deduplication using Set + spread
+const unique = [...new Set(raw)];
+console.log(unique); // [1, 2, 3, 4, 5]
+
+// Deduplicate an array of strings
+const tags = [&quot;js&quot;, &quot;web&quot;, &quot;js&quot;, &quot;html&quot;, &quot;css&quot;, &quot;web&quot;, &quot;js&quot;];
+const uniqueTags = [...new Set(tags)];
+console.log(uniqueTags); // [&quot;js&quot;, &quot;web&quot;, &quot;html&quot;, &quot;css&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1, 2, 3, 4, 5]
+[&quot;js&quot;, &quot;web&quot;, &quot;html&quot;, &quot;css&quot;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> <code>[...new Set(arr)]</code> is one of the most commonly used JavaScript one-liners in professional code. It appears in React component rendering, API data deduplication, and tag/keyword processing everywhere.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. Topic 1 · Sets: Basics &amp; Creation</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 7</div><div class="pt">3. Topic 2 · Set Methods</div><div class="pc" id="chk3"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">Sets have a focused, clean API. Every method has one clear job.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>add(value)</code> · Add a Value</h3>
+<p class="v2-p">Adds a value to the Set. If the value already exists, nothing happens. Returns the <strong>Set itself</strong> (allowing chaining).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const s = new Set();
+
+s.add(1);
+s.add(2);
+s.add(3);
+s.add(2); // duplicate — silently ignored
+s.add(1); // duplicate — silently ignored
+
+console.log(s);      // Set(3) { 1, 2, 3 }
+console.log(s.size); // 3</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Set(3) { 1, 2, 3 }
+3</code></pre></div></div>
+<h4 class="v2-h4">Chaining <code>add()</code> calls:</h4>
+<p class="v2-p">Because <code>add()</code> returns the Set itself, you can chain:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const s = new Set();
+s.add(10).add(20).add(30).add(20); // 20 is a duplicate
+
+console.log(s); // Set(3) { 10, 20, 30 }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>has(value)</code> · Check if a Value Exists</h3>
+<p class="v2-p">Returns <code>true</code> if the value is in the Set, <code>false</code> otherwise. This is <strong>very fast</strong> (O(1) hash lookup · doesn't have to scan every element like array <code>includes()</code>).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]);
+
+console.log(fruits.has(&quot;Banana&quot;)); // true
+console.log(fruits.has(&quot;Kiwi&quot;));   // false</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+false</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> For large collections, <code>Set.has()</code> is significantly faster than <code>Array.includes()</code>. If you're checking membership frequently on a large list, convert it to a Set first.</p></blockquote>
+<p class="v2-p"><strong>Performance comparison:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const bigArray = Array.from({ length: 100000 }, (_, i) =&gt; i);
+const bigSet   = new Set(bigArray);
+
+// Array.includes() — scans up to 100,000 elements (slow for last item)
+console.time(&quot;array&quot;);
+bigArray.includes(99999);
+console.timeEnd(&quot;array&quot;); // ~1–5ms
+
+// Set.has() — instant hash lookup regardless of size
+console.time(&quot;set&quot;);
+bigSet.has(99999);
+console.timeEnd(&quot;set&quot;); // ~0.01ms</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>delete(value)</code> · Remove a Value</h3>
+<p class="v2-p">Removes a value from the Set. Returns <code>true</code> if the value existed and was removed, <code>false</code> if it wasn't found.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]);
+
+const wasRemoved = fruits.delete(&quot;Banana&quot;);
+console.log(wasRemoved); // true
+console.log(fruits);     // Set(2) { &quot;Apple&quot;, &quot;Mango&quot; }
+
+const notFound = fruits.delete(&quot;Kiwi&quot;);
+console.log(notFound);   // false (wasn&#x27;t in the Set)
+console.log(fruits.size); // 2 (unchanged)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+Set(2) { &quot;Apple&quot;, &quot;Mango&quot; }
+false
+2</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>clear()</code> · Remove All Values</h3>
+<p class="v2-p">Removes <strong>every</strong> element from the Set. The Set still exists but is now empty.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]);
+console.log(fruits.size); // 3
+
+fruits.clear();
+
+console.log(fruits.size); // 0
+console.log(fruits);      // Set(0) {}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3
+0
+Set(0) {}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>values()</code> · Iterator of All Values</h3>
+<p class="v2-p">Returns an iterator object that yields each value in insertion order. You can use this directly in <code>for...of</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]);
+
+const iterator = fruits.values();
+console.log(iterator.next().value); // &quot;Apple&quot;
+console.log(iterator.next().value); // &quot;Banana&quot;
+console.log(iterator.next().value); // &quot;Mango&quot;
+console.log(iterator.next().done);  // true (iterator exhausted)</code></pre></div></div>
+<p class="v2-p">More commonly used in <code>for...of</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (const val of fruits.values()) {
+  console.log(val);
+}
+// Apple
+// Banana
+// Mango</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>keys()</code> · Same as <code>values()</code> for Sets</h3>
+<p class="v2-p">For consistency with <code>Map</code>, Sets have a <code>keys()</code> method · but it behaves identically to <code>values()</code> since Sets have no separate keys.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;]);
+
+for (const key of fruits.keys()) {
+  console.log(key); // &quot;Apple&quot;, then &quot;Banana&quot;
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>entries()</code> · Iterator of [value, value] Pairs</h3>
+<p class="v2-p">Returns an iterator of <code>[value, value]</code> pairs · again for Map consistency. Both entries in each pair are the same value.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Set([&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;]);
+
+for (const [key, val] of fruits.entries()) {
+  console.log(key, &quot;→&quot;, val);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Apple → Apple
+Banana → Banana
+Mango → Mango</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> You'll rarely use <code>entries()</code> on a Set directly. It exists so that code written for Maps can work with Sets too without modification.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Summary: All Set Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>What it does</th><th>Returns</th></tr></thead><tbody><tr><td><code>new Set(iterable?)</code></td><td>Create a Set</td><td>Set</td></tr><tr><td><code>.add(value)</code></td><td>Add a value (no-op if exists)</td><td>The Set (chainable)</td></tr><tr><td><code>.has(value)</code></td><td>Check existence</td><td>Boolean</td></tr><tr><td><code>.delete(value)</code></td><td>Remove a value</td><td>Boolean (was it there?)</td></tr><tr><td><code>.clear()</code></td><td>Remove all values</td><td><code>undefined</code></td></tr><tr><td><code>.values()</code></td><td>Iterator of values</td><td>SetIterator</td></tr><tr><td><code>.keys()</code></td><td>Same as values()</td><td>SetIterator</td></tr><tr><td><code>.entries()</code></td><td>Iterator of [val, val] pairs</td><td>SetIterator</td></tr><tr><td><code>.forEach(fn)</code></td><td>Run function for each value</td><td><code>undefined</code></td></tr><tr><td><code>.size</code></td><td>Count of unique elements</td><td>Number</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Topic 2 · Set Methods</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 7</div><div class="pt">4. Topic 3 · Set Logic</div><div class="pc" id="chk4"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">One of the most powerful features of the modern JavaScript Set (introduced in ES2025 as native methods, and achievable with custom logic before that) is the ability to perform <strong>mathematical set operations</strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Operation</th><th>Question It Answers</th><th>Example</th></tr></thead><tbody><tr><td><strong>Union</strong></td><td>All elements from both sets</td><td>A ∪ B</td></tr><tr><td><strong>Intersection</strong></td><td>Elements in BOTH sets</td><td>A ∩ B</td></tr><tr><td><strong>Difference</strong></td><td>Elements in A but NOT in B</td><td>A − B</td></tr><tr><td><strong>Symmetric Difference</strong></td><td>Elements in ONE set but not both</td><td>A △ B</td></tr><tr><td><strong>isSubsetOf</strong></td><td>Is every element of A in B?</td><td>A ⊆ B</td></tr><tr><td><strong>isSupersetOf</strong></td><td>Does A contain all of B?</td><td>A ⊇ B</td></tr><tr><td><strong>isDisjointFrom</strong></td><td>Do A and B share no elements?</td><td>A ∩ B = ∅</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> These operations appear constantly in real apps: "which users have BOTH permissions A and B?" (intersection), "show all products from either category" (union), "which students enrolled last year but NOT this year?" (difference).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Visual Understanding First</h3>
+<p class="v2-p">Before any code, let's visualise with two sets:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Set A = { 1, 2, 3, 4, 5 }
+Set B = { 3, 4, 5, 6, 7 }
+
+              ┌──────────────────────────┐
+   ┌──────────┤                          ├──────────┐
+   │  1  2    │       3   4   5          │  6   7   │
+   │  (A only)│     (both A &amp; B)         │ (B only) │
+   └──────────┤                          ├──────────┘
+              └──────────────────────────┘
+
+Union A ∪ B        = { 1, 2, 3, 4, 5, 6, 7 }  (everything)
+Intersection A ∩ B = { 3, 4, 5 }               (overlap only)
+Difference A − B   = { 1, 2 }                   (A only)
+Difference B − A   = { 6, 7 }                   (B only)
+Symmetric Diff     = { 1, 2, 6, 7 }             (non-overlap)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Native Set Methods (ES2025+)</h3>
+<p class="v2-p">Modern JavaScript now has these as <strong>native Set methods</strong>. Always use these when available:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4, 5, 6, 7]);</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>union(other)</code> · All Elements from Both Sets (A ∪ B)</h3>
+<p class="v2-p">Combines every element from both Sets into a new Set (no duplicates).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4, 5, 6, 7]);
+
+const unionAB = A.union(B);
+console.log(unionAB); // Set(7) { 1, 2, 3, 4, 5, 6, 7 }</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>Set(7) { 1, 2, 3, 4, 5, 6, 7 }</code></p>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> A school wants to email all students enrolled in <strong>either</strong> maths <strong>or</strong> science. <code>mathStudents.union(scienceStudents)</code> gives the complete list with no duplicates.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>intersection(other)</code> · Elements in BOTH Sets (A ∩ B)</h3>
+<p class="v2-p">Returns a new Set of only the elements that appear in <strong>both</strong> sets.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4, 5, 6, 7]);
+
+const intersectAB = A.intersection(B);
+console.log(intersectAB); // Set(3) { 3, 4, 5 }</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>Set(3) { 3, 4, 5 }</code></p>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Find users who have <strong>both</strong> the "admin" permission and the "editor" permission: <code>adminUsers.intersection(editorUsers)</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>difference(other)</code> · Elements in A but NOT in B (A − B)</h3>
+<p class="v2-p">Returns a new Set of elements that exist in the first set but are <strong>absent from the second</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4, 5, 6, 7]);
+
+const diffAB = A.difference(B);  // In A but not B
+const diffBA = B.difference(A);  // In B but not A
+
+console.log(diffAB); // Set(2) { 1, 2 }
+console.log(diffBA); // Set(2) { 6, 7 }</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Set(2) { 1, 2 }
+Set(2) { 6, 7 }</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> <code>A.difference(B)</code> ≠ <code>B.difference(A)</code>. The order matters! The first set is the "source", the second is the "exclude" list.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> "Which students attended last year but have NOT enrolled this year?" → <code>lastYearStudents.difference(thisYearStudents)</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>symmetricDifference(other)</code> · Elements in ONE but NOT BOTH (A △ B)</h3>
+<p class="v2-p">Returns a new Set of elements that are in <strong>either</strong> set but <strong>not in both</strong>. It is the opposite of intersection · everything that is NOT in the overlap.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4, 5, 6, 7]);
+
+const symDiff = A.symmetricDifference(B);
+console.log(symDiff); // Set(4) { 1, 2, 6, 7 }</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>Set(4) { 1, 2, 6, 7 }</code></p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Symmetric Difference is the same as <code>(A ∪ B) - (A ∩ B)</code> · the union minus the overlap. It tells you "what is exclusive to each set, excluding the shared parts".</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> "Which products changed between two inventory snapshots?" · items that were added OR removed (not the unchanged ones in both).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>isSubsetOf(other)</code> · Is Every Element of A Found in B?</h3>
+<p class="v2-p">Returns <code>true</code> if <strong>all</strong> elements of the Set are also in the other Set.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([3, 4]);
+const B = new Set([1, 2, 3, 4, 5]);
+
+console.log(A.isSubsetOf(B)); // true  — 3 and 4 are both in B
+console.log(B.isSubsetOf(A)); // false — B has elements not in A</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+false</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> "Does this user have all the required permissions?" → <code>requiredPerms.isSubsetOf(userPerms)</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>isSupersetOf(other)</code> · Does A Contain ALL Elements of B?</h3>
+<p class="v2-p">The reverse of <code>isSubsetOf</code>. Returns <code>true</code> if A contains every element of B.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4]);
+
+console.log(A.isSupersetOf(B)); // true  — A contains all of B
+console.log(B.isSupersetOf(A)); // false — B doesn&#x27;t contain all of A</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+false</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> <code>A.isSubsetOf(B)</code> is always the mirror of <code>B.isSupersetOf(A)</code>. They answer the same question from opposite sides.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>isDisjointFrom(other)</code> · Do the Sets Share NO Common Elements?</h3>
+<p class="v2-p">Returns <code>true</code> if the two Sets have <strong>zero elements in common</strong> (empty intersection).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3]);
+const B = new Set([4, 5, 6]);
+const C = new Set([3, 4, 5]);
+
+console.log(A.isDisjointFrom(B)); // true  — no shared elements
+console.log(A.isDisjointFrom(C)); // false — 3 is in both</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+false</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> "Are these two product categories completely separate?" → <code>categoryA.isDisjointFrom(categoryB)</code>. If <code>true</code>, they share no products.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Manual Implementations (for older environments without native methods)</h3>
+<p class="v2-p">If the native Set methods aren't available yet in your environment, here are the manual equivalents using spread and filter:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([1, 2, 3, 4, 5]);
+const B = new Set([3, 4, 5, 6, 7]);
+
+// Union: spread both into a new Set
+const union = new Set([...A, ...B]);
+console.log([...union]); // [1, 2, 3, 4, 5, 6, 7]
+
+// Intersection: keep elements of A that B also has
+const intersection = new Set([...A].filter(x =&gt; B.has(x)));
+console.log([...intersection]); // [3, 4, 5]
+
+// Difference A - B: keep elements of A that B does NOT have
+const difference = new Set([...A].filter(x =&gt; !B.has(x)));
+console.log([...difference]); // [1, 2]
+
+// Symmetric difference: elements in one but not both
+const symDiff = new Set([
+  ...[...A].filter(x =&gt; !B.has(x)),
+  ...[...B].filter(x =&gt; !A.has(x))
+]);
+console.log([...symDiff]); // [1, 2, 6, 7]
+
+// isSubset: every element of A is in B
+const isSubset = [...A].every(x =&gt; B.has(x));
+console.log(isSubset); // false
+
+// isDisjoint: no element of A is in B
+const isDisjoint = [...A].every(x =&gt; !B.has(x));
+console.log(isDisjoint); // false</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">All Set Logic Methods at a Glance</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const A = new Set([&quot;Alice&quot;, &quot;Bob&quot;, &quot;Carol&quot;]);
+const B = new Set([&quot;Bob&quot;, &quot;Carol&quot;, &quot;David&quot;]);
+
+console.log([...A.union(B)]);                // [&quot;Alice&quot;,&quot;Bob&quot;,&quot;Carol&quot;,&quot;David&quot;]
+console.log([...A.intersection(B)]);         // [&quot;Bob&quot;,&quot;Carol&quot;]
+console.log([...A.difference(B)]);           // [&quot;Alice&quot;]
+console.log([...B.difference(A)]);           // [&quot;David&quot;]
+console.log([...A.symmetricDifference(B)]); // [&quot;Alice&quot;,&quot;David&quot;]
+console.log(A.isSubsetOf(B));               // false
+console.log(A.isSupersetOf(new Set([&quot;Bob&quot;,&quot;Carol&quot;]))); // true
+console.log(A.isDisjointFrom(new Set([&quot;X&quot;,&quot;Y&quot;])));     // true</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Topic 3 · Set Logic</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 7</div><div class="pt">5. Topic 4 · WeakSet</div><div class="pc" id="chk5"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">A <code>WeakSet</code> is a special variant of Set with two important differences:</p>
+<ol class="v2-ol"><li>It can <strong>only store objects</strong> (not primitives like numbers or strings)</li><li>It holds its objects <strong>weakly</strong> · meaning the garbage collector can remove them from the WeakSet automatically if nothing else in the program holds a reference to that object</li></ol>
+<h3 class="v2-h3">What Does "Weakly Held" Mean?</h3>
+<p class="v2-p">Think of a regular Set like a strong grip · it holds onto objects and prevents them from being cleaned up. Think of a WeakSet like a sticky note · if the object it points to no longer exists anywhere else, the WeakSet's reference is automatically discarded. This prevents <strong>memory leaks</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Regular Set:
+  Object ←──── strong reference ──── Set
+  (Object CANNOT be garbage collected while Set exists)
+
+WeakSet:
+  Object ←──── weak reference ──── WeakSet
+  (Object CAN be garbage collected even if WeakSet exists)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a WeakSet</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const ws = new WeakSet();
+
+const obj1 = { name: &quot;Alice&quot; };
+const obj2 = { name: &quot;Bob&quot; };
+
+ws.add(obj1);
+ws.add(obj2);
+ws.add(obj1); // duplicate — ignored
+
+console.log(ws.has(obj1)); // true
+console.log(ws.has(obj2)); // true</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+true</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakSet Can ONLY Store Objects</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const ws = new WeakSet();
+
+// ❌ Primitives are NOT allowed
+try {
+  ws.add(42);        // TypeError!
+} catch (e) {
+  console.log(e.message); // &quot;Invalid value used in weak set&quot;
+}
+
+try {
+  ws.add(&quot;hello&quot;);   // TypeError!
+} catch (e) {
+  console.log(e.message);
+}
+
+// ✅ Only objects and arrays (which are objects)
+ws.add({ id: 1 });
+ws.add([1, 2, 3]);
+ws.add(function() {}); // functions are objects too</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakSet Methods · Only Three!</h3>
+<p class="v2-p">WeakSet intentionally has a very limited API:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>What it does</th><th>Returns</th></tr></thead><tbody><tr><td><code>.add(object)</code></td><td>Add an object</td><td>The WeakSet</td></tr><tr><td><code>.has(object)</code></td><td>Check if object is in the set</td><td>Boolean</td></tr><tr><td><code>.delete(object)</code></td><td>Remove an object</td><td>Boolean</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> WeakSet has <strong>NO</strong> <code>size</code>, <code>clear()</code>, <code>forEach()</code>, or iteration methods. You cannot loop over a WeakSet or check how many items it contains. This is intentional · because the garbage collector may remove items at any time, the count would be unreliable.</p></blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const ws = new WeakSet();
+const obj = { name: &quot;Test&quot; };
+
+ws.add(obj);
+console.log(ws.has(obj));  // true
+
+ws.delete(obj);
+console.log(ws.has(obj));  // false
+
+// ❌ These do NOT exist on WeakSet:
+// ws.size       → undefined
+// ws.clear()    → TypeError
+// for...of ws   → TypeError (not iterable)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Automatic Memory Cleanup · The Key Benefit</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let obj = { name: &quot;Temporary&quot; };
+const ws = new WeakSet([obj]);
+
+console.log(ws.has(obj)); // true
+
+// When we clear the last reference to the object...
+obj = null; // ← nothing else references the object now
+
+// ...the garbage collector will eventually remove it from ws automatically
+// ws.has(obj) → false (once GC runs)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> You cannot directly observe garbage collection in JavaScript · it happens automatically. The point is that WeakSet does NOT prevent it from happening, unlike regular Set.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">When to Use WeakSet · Practical Example</h3>
+<p class="v2-p">The most common real-world use of WeakSet is <strong>tracking objects without preventing their cleanup</strong>.</p>
+<h4 class="v2-h4">Example: Mark DOM elements that have been processed</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const processedElements = new WeakSet();
+
+function processElement(el) {
+  if (processedElements.has(el)) {
+    console.log(&quot;Already processed, skipping&quot;);
+    return;
+  }
+  // ... do processing ...
+  processedElements.add(el);
+  console.log(&quot;Processed:&quot;, el.id || &quot;element&quot;);
+}
+
+// When a DOM element is removed from the page,
+// processedElements automatically releases it — no memory leak!</code></pre></div></div>
+<h4 class="v2-h4">Example: Track which objects have been validated</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const validated = new WeakSet();
+
+function validate(user) {
+  // Run expensive validation once, cache the result
+  if (validated.has(user)) return true;
+
+  const isValid = user.name &amp;&amp; user.email; // simplified
+  if (isValid) validated.add(user);
+  return isValid;
+}
+
+const alice = { name: &quot;Alice&quot;, email: &quot;alice@example.com&quot; };
+console.log(validate(alice)); // true — runs full validation
+console.log(validate(alice)); // true — returns cached result</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> WeakSet is used in JavaScript frameworks and libraries to track which components or DOM nodes have been "seen" or "processed" · without creating memory leaks when those components are destroyed.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set vs WeakSet · Full Comparison</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th><code>Set</code></th><th><code>WeakSet</code></th></tr></thead><tbody><tr><td>Value types</td><td>Any (primitives + objects)</td><td>Objects ONLY</td></tr><tr><td>Holds references</td><td>Strongly (prevents GC)</td><td>Weakly (allows GC)</td></tr><tr><td><code>size</code> property</td><td>✅ Yes</td><td>❌ No</td></tr><tr><td>Iterable (<code>for...of</code>)</td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>forEach()</code></td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>clear()</code></td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>add()</code></td><td>✅ Yes</td><td>✅ Yes</td></tr><tr><td><code>has()</code></td><td>✅ Yes</td><td>✅ Yes</td></tr><tr><td><code>delete()</code></td><td>✅ Yes</td><td>✅ Yes</td></tr><tr><td>Use case</td><td>General unique value storage</td><td>Track objects without memory leaks</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Topic 4 · WeakSet</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 7</div><div class="pt">6. Topic 5 · Complete Set Reference</div><div class="pc" id="chk6"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p">Quick reference for every Set and WeakSet feature.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set · Constructor</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>new Set()                 // empty set
+new Set(iterable)         // from array, string, another set, etc.</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set · Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>set.size</code></td><td>Number</td><td>Count of unique elements</td></tr><tr><td><code>set[Symbol.iterator]</code></td><td>Function</td><td>Makes Set iterable in <code>for...of</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set · Instance Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>set.add(value)</code></td><td>Set</td><td>Add value; no-op if exists</td></tr><tr><td><code>set.has(value)</code></td><td>Boolean</td><td><code>true</code> if value is in set</td></tr><tr><td><code>set.delete(value)</code></td><td>Boolean</td><td>Remove value; <code>true</code> if found</td></tr><tr><td><code>set.clear()</code></td><td><code>undefined</code></td><td>Remove all values</td></tr><tr><td><code>set.values()</code></td><td>SetIterator</td><td>Iterate values</td></tr><tr><td><code>set.keys()</code></td><td>SetIterator</td><td>Same as <code>values()</code></td></tr><tr><td><code>set.entries()</code></td><td>SetIterator</td><td>Iterate <code>[value, value]</code> pairs</td></tr><tr><td><code>set.forEach(fn)</code></td><td><code>undefined</code></td><td>Run <code>fn(value, value, set)</code> for each</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set · Logic Methods (ES2025 Native)</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>set.union(other)</code></td><td>New Set</td><td>A ∪ B · all elements from both</td></tr><tr><td><code>set.intersection(other)</code></td><td>New Set</td><td>A ∩ B · only elements in both</td></tr><tr><td><code>set.difference(other)</code></td><td>New Set</td><td>A − B · in A but not B</td></tr><tr><td><code>set.symmetricDifference(other)</code></td><td>New Set</td><td>A △ B · in one but not both</td></tr><tr><td><code>set.isSubsetOf(other)</code></td><td>Boolean</td><td>Is every element of A in B?</td></tr><tr><td><code>set.isSupersetOf(other)</code></td><td>Boolean</td><td>Does A contain all of B?</td></tr><tr><td><code>set.isDisjointFrom(other)</code></td><td>Boolean</td><td>Do A and B share no elements?</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set · Common Conversion Patterns</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const s = new Set([1, 2, 3]);
+
+// Set → Array
+const arr1 = [...s];           // [1, 2, 3]
+const arr2 = Array.from(s);    // [1, 2, 3]
+
+// Array → Set (deduplicate)
+const unique = new Set([1, 2, 2, 3, 3]); // Set { 1, 2, 3 }
+
+// String → Set of unique characters
+const chars = new Set(&quot;hello&quot;); // Set { &quot;h&quot;, &quot;e&quot;, &quot;l&quot;, &quot;o&quot; }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakSet · Constructor</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>new WeakSet()             // empty
+new WeakSet(iterable)     // from iterable of objects</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakSet · Instance Methods (Only Three)</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>ws.add(object)</code></td><td>WeakSet</td><td>Add an object (must be object)</td></tr><tr><td><code>ws.has(object)</code></td><td>Boolean</td><td>Check if object is in WeakSet</td></tr><tr><td><code>ws.delete(object)</code></td><td>Boolean</td><td>Remove object</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Set Operation Quick Reference · Visual Summary</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>A = { 1, 2, 3, 4 }     B = { 3, 4, 5, 6 }
+
+A.union(B)                     → { 1, 2, 3, 4, 5, 6 }
+A.intersection(B)               → { 3, 4 }
+A.difference(B)                 → { 1, 2 }
+B.difference(A)                 → { 5, 6 }
+A.symmetricDifference(B)       → { 1, 2, 5, 6 }
+A.isSubsetOf(B)                 → false
+new Set([3,4]).isSubsetOf(A)    → true
+A.isSupersetOf(new Set([1,2]))  → true
+A.isDisjointFrom(new Set([7]))  → true
+A.isDisjointFrom(B)             → false  (3 and 4 are shared)</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6. Topic 5 · Complete Set Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 7</div><div class="pt">7. Applied Exercises</div><div class="pc" id="chk7"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 2 · Applied Exercises</strong></p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1 · Unique Value Enforcer 🔒</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice creating Sets, using <code>add</code>, <code>has</code>, <code>delete</code>, and converting between Sets and arrays.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building a <strong>tag management system</strong> for a blog platform. Tags must be unique, case-insensitive, and stored efficiently.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const tags = new Set([&quot;javascript&quot;, &quot;web&quot;, &quot;javascript&quot;, &quot;css&quot;]);
+console.log(&quot;Tags:&quot;, [...tags]);  // [&quot;javascript&quot;, &quot;web&quot;, &quot;css&quot;]
+console.log(&quot;Count:&quot;, tags.size); // 3</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Tags: [&quot;javascript&quot;, &quot;web&quot;, &quot;css&quot;]
+Count: 3</code></pre></div></div>
+<h4 class="v2-h4">Task A · Build the Tag System</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Normalise tag: lowercase and trimmed
+function normaliseTag(tag) {
+  return tag.trim().toLowerCase();
+}
+
+class TagManager {
+  constructor() {
+    this.tags = new Set();
+  }
+
+  addTag(tag) {
+    const normalised = normaliseTag(tag);
+    if (this.tags.has(normalised)) {
+      console.log(`&quot;${normalised}&quot; already exists`);
+      return false;
+    }
+    this.tags.add(normalised);
+    console.log(`Added: &quot;${normalised}&quot;`);
+    return true;
+  }
+
+  removeTag(tag) {
+    const normalised = normaliseTag(tag);
+    const removed = this.tags.delete(normalised);
+    console.log(removed ? `Removed: &quot;${normalised}&quot;` : `&quot;${normalised}&quot; not found`);
+    return removed;
+  }
+
+  hasTag(tag) {
+    return this.tags.has(normaliseTag(tag));
+  }
+
+  getAll() {
+    return [...this.tags].sort();
+  }
+}
+
+const manager = new TagManager();
+manager.addTag(&quot;JavaScript&quot;);
+manager.addTag(&quot;  CSS  &quot;);      // spaces trimmed
+manager.addTag(&quot;javascript&quot;);   // duplicate (normalised)
+manager.addTag(&quot;React&quot;);
+manager.addTag(&quot;css&quot;);          // duplicate after normalise
+
+console.log(&quot;\nAll tags:&quot;, manager.getAll());
+console.log(&quot;Has &#x27;react&#x27;:&quot;, manager.hasTag(&quot;React&quot;));
+
+manager.removeTag(&quot;CSS&quot;);
+console.log(&quot;After removal:&quot;, manager.getAll());</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Added: &quot;javascript&quot;
+Added: &quot;css&quot;
+&quot;javascript&quot; already exists
+Added: &quot;react&quot;
+&quot;css&quot; already exists
+
+All tags: [&quot;css&quot;, &quot;javascript&quot;, &quot;react&quot;]
+Has &#x27;react&#x27;: true
+Removed: &quot;css&quot;
+After removal: [&quot;javascript&quot;, &quot;react&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why is <code>Set.has()</code> preferred over <code>Array.includes()</code> for this use case?</li><li>What would happen if we used an array instead of a Set for <code>this.tags</code>?</li><li>Why do we normalise tags before adding them?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Set Logic Challenge 🔢</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice all six set logic operations on real-world data.</p>
+<p class="v2-p"><strong>Scenario:</strong> You work at a <strong>university</strong>. Three subject sets exist: students enrolled in Maths, Computer Science, and Physics.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const mathsClass = new Set([&quot;Alice&quot;, &quot;Bob&quot;, &quot;Carol&quot;]);
+const scienceClass = new Set([&quot;Bob&quot;, &quot;Carol&quot;, &quot;David&quot;]);
+
+const both = mathsClass.intersection(scienceClass);
+console.log(&quot;In both:&quot;, [...both]); // [&quot;Bob&quot;, &quot;Carol&quot;]</code></pre></div></div>
+<h4 class="v2-h4">Task A · Enrolment Analysis</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const maths = new Set([&quot;Alice&quot;, &quot;Bob&quot;,   &quot;Carol&quot;, &quot;David&quot;, &quot;Eve&quot;  ]);
+const cs    = new Set([&quot;Bob&quot;,   &quot;Carol&quot;, &quot;Frank&quot;, &quot;Grace&quot;, &quot;Henry&quot;]);
+const phys  = new Set([&quot;Carol&quot;, &quot;David&quot;, &quot;Grace&quot;, &quot;Ivan&quot;,  &quot;Alice&quot;]);
+
+// 1. All students across all subjects
+const allStudents = maths.union(cs).union(phys);
+console.log(&quot;All students :&quot;, allStudents.size, &quot;→&quot;, [...allStudents].sort());
+
+// 2. Students in BOTH Maths AND CS
+const mathsAndCS = maths.intersection(cs);
+console.log(&quot;Maths &amp; CS   :&quot;, [...mathsAndCS]);
+
+// 3. Students in ALL THREE subjects
+const allThree = maths.intersection(cs).intersection(phys);
+console.log(&quot;All three    :&quot;, [...allThree]);
+
+// 4. Students ONLY in Maths (not CS, not Physics)
+const mathsOnly = maths.difference(cs).difference(phys);
+console.log(&quot;Maths only   :&quot;, [...mathsOnly]);
+
+// 5. Students in Maths OR CS but NOT both
+const mathsOrCSExclusive = maths.symmetricDifference(cs);
+console.log(&quot;Maths XOR CS :&quot;, [...mathsOrCSExclusive].sort());
+
+// 6. Is {Bob, Carol} a subset of maths?
+const checkSubset = new Set([&quot;Bob&quot;, &quot;Carol&quot;]);
+console.log(&quot;Bob+Carol ⊆ Maths:&quot;, checkSubset.isSubsetOf(maths)); // true
+
+// 7. Are Maths and Physics disjoint?
+console.log(&quot;Maths ∩ Phys = ∅:&quot;, maths.isDisjointFrom(phys)); // false (Alice, David, Carol overlap)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>All students : 10 → [&quot;Alice&quot;,&quot;Bob&quot;,&quot;Carol&quot;,&quot;David&quot;,&quot;Eve&quot;,&quot;Frank&quot;,&quot;Grace&quot;,&quot;Henry&quot;,&quot;Ivan&quot;]
+Maths &amp; CS   : [&quot;Bob&quot;, &quot;Carol&quot;]
+All three    : [&quot;Carol&quot;]
+Maths only   : [&quot;Eve&quot;]
+Maths XOR CS : [&quot;Alice&quot;,&quot;David&quot;,&quot;Eve&quot;,&quot;Frank&quot;,&quot;Grace&quot;,&quot;Henry&quot;]
+Bob+Carol ⊆ Maths: true
+Maths ∩ Phys = ∅: false</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What is the difference between <code>difference()</code> and <code>symmetricDifference()</code>?</li><li>Why is <code>A.isSubsetOf(B)</code> the mirror of <code>B.isSupersetOf(A)</code>?</li><li>What does it mean for two sets to be "disjoint"?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · WeakSet Validator ♻️</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice creating and using a WeakSet to track object state without memory leaks.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building a <strong>form validation system</strong>. Each form section is an object. You want to track which sections have been validated without keeping references that prevent cleanup.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const validatedSections = new WeakSet();
+const section = { id: &quot;personal&quot;, filled: true };
+
+validatedSections.add(section);
+console.log(validatedSections.has(section)); // true</code></pre></div></div>
+<h4 class="v2-h4">Task A · Section Validation Tracker</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const validatedSections = new WeakSet();
+const validationErrors  = new WeakSet();
+
+function validateSection(section) {
+  if (validatedSections.has(section)) {
+    return { cached: true, valid: !validationErrors.has(section) };
+  }
+
+  // Simulate validation: all required fields must be non-empty
+  const isValid = section.fields.every(f =&gt; f.value.trim() !== &quot;&quot;);
+
+  validatedSections.add(section);
+  if (!isValid) validationErrors.add(section);
+
+  return { cached: false, valid: isValid };
+}
+
+const nameSection = {
+  id: &quot;name&quot;,
+  fields: [{ name: &quot;firstName&quot;, value: &quot;Alice&quot; }, { name: &quot;lastName&quot;, value: &quot;Smith&quot; }]
+};
+const emailSection = {
+  id: &quot;email&quot;,
+  fields: [{ name: &quot;email&quot;, value: &quot;&quot; }] // empty!
+};
+const addressSection = {
+  id: &quot;address&quot;,
+  fields: [{ name: &quot;street&quot;, value: &quot;123 Main St&quot; }, { name: &quot;city&quot;, value: &quot;Lagos&quot; }]
+};
+
+let result;
+
+result = validateSection(nameSection);
+console.log(`Name    : valid=${result.valid}, cached=${result.cached}`);
+
+result = validateSection(emailSection);
+console.log(`Email   : valid=${result.valid}, cached=${result.cached}`);
+
+result = validateSection(nameSection); // second call — should be cached
+console.log(`Name(2) : valid=${result.valid}, cached=${result.cached}`);
+
+result = validateSection(addressSection);
+console.log(`Address : valid=${result.valid}, cached=${result.cached}`);
+
+// Check if all three sections passed
+const sections = [nameSection, emailSection, addressSection];
+const allValid = sections.every(s =&gt; !validationErrors.has(s));
+console.log(&quot;\nForm ready to submit:&quot;, allValid);
+
+// WeakSet characteristics
+console.log(&quot;\nWeakSet has no size:&quot;, typeof validatedSections.size); // undefined</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Name    : valid=true, cached=false
+Email   : valid=false, cached=false
+Name(2) : valid=true, cached=true
+Address : valid=true, cached=false
+
+Form ready to submit: false
+
+WeakSet has no size: undefined</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why can't WeakSet store primitive values like <code>42</code> or <code>"hello"</code>?</li><li>What would happen if we used a regular Set instead of WeakSet here?</li><li>Why does WeakSet have no <code>size</code> or <code>forEach</code>?</li></ul>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"> · ### Exercise 1 · Unique Value Enforcer 🔒
+
+Objective: Practice creating Sets, using add, has, delete, and converting between Sets and arrays.
+
+Scenario: You're building a tag management system for a blog platform. Tags must be unique, case-insensitive, and stored efficiently.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">🔵 Stage 1 · Record Attendance</div><div class="build-req"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 3 · Project Simulation</strong></p></blockquote>
+<p class="v2-p"><strong>Real-world scenario:</strong> You are a developer at a school. Build an <strong>Attendance &amp; Permission Tracker</strong> that:</p>
+<ul class="v2-ul"><li>Uses <code>Set</code> to record daily student attendance (no duplicates)</li><li>Computes attendance statistics using Set operations</li><li>Uses Set logic to find students who are absent, early leavers, or have full attendance</li><li>Uses <code>WeakSet</code> to track which student objects have been flagged for a follow-up call</li><li>Generates a full attendance report</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">🔵 Stage 1 · Record Attendance</h3>
+<p class="v2-p"><strong>Goal:</strong> Use Sets to record morning and afternoon attendance rolls and compute who attended, who was absent, and who only attended half the day.</p>
+<h4 class="v2-h4">Simple stage preview:</h4></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const morningRoll = new Set([&quot;S001&quot;, &quot;S002&quot;, &quot;S003&quot;]);
+const afternoonRoll = new Set([&quot;S002&quot;, &quot;S003&quot;, &quot;S004&quot;]);
+
+const fullDay = morningRoll.intersection(afternoonRoll);
+console.log(&quot;Full day:&quot;, [...fullDay]); // [&quot;S002&quot;, &quot;S003&quot;]</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`const morningRoll = new Set([&quot;S001&quot;, &quot;S002&quot;, &quot;S003&quot;]);
+const afternoonRoll = new Set([&quot;S002&quot;, &quot;S003&quot;, &quot;S004&quot;]);
+
+const fullDay = morningRoll.intersection(afternoonRoll);
+console.log(&quot;Full day:&quot;, [...fullDay]); // [&quot;S002&quot;, &quot;S003&quot;]`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-15-stage-1-record-attendance</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 15 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-15-stage-1-record-attendance/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 15 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. Background: Why Sets Exist</li><li>✅ 2. Topic 1 · Sets: Basics & Creation</li><li>✅ 3. Topic 2 · Set Methods</li><li>✅ 4. Topic 3 · Set Logic</li><li>✅ 5. Topic 4 · WeakSet</li><li>✅ 6. Topic 5 · Complete Set Reference</li><li>✅ 7. Applied Exercises</li></ul><div class="ln"><a href="lesson_14.html" class="ln-btn">&#8592; Lesson 14</a><a href="lesson_16.html" class="ln-btn primary">Lesson 16 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 15 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

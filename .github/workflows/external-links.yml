@@ -1,0 +1,28 @@
+name: External link check
+
+# Weekly report on links that point to other websites (micro:bit, Raspberry Pi, Freenove).
+# It only reports; it never blocks a deployment.
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt && python build/build.py
+      - name: Check external links
+        continue-on-error: true
+        uses: lycheeverse/lychee-action@v2.4.1
+        with:
+          args: --no-progress --scheme https --exclude-path dist/_headers --max-concurrency 8 --accept 200..=299,403,429 'dist/**/*.html'
+          fail: false

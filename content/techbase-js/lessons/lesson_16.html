@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 16: JavaScript Maps: Key-Value Pairs · Map Methods · WeakMap · Full Reference — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="6" data-key="techbase_js_l16">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 16 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 16</div>
+      <h1>JavaScript Maps: Key-Value Pairs · Map Methods · WeakMap · Full Reference</h1>
+      <div class="l-hero-sub">6 phases &nbsp;·&nbsp; Build: 🔵 Stage 1 · Book Catalogue</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 16</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 6 phases</span><span>🏗️ 🔵 Stage 1 · Book Catalogue</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 6</div><div class="pt">1. Background: Why Maps Exist</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You already know that JavaScript objects store key-value pairs:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const scores = {
+  Alice: 88,
+  Bob:   92,
+  Carol: 75
+};
+console.log(scores[&quot;Alice&quot;]); // 88</code></pre></div></div>
+<p class="v2-p">So why does JavaScript need <strong>Map</strong> when objects already do this job?</p>
+<p class="v2-p">Because objects have <strong>serious limitations</strong> as key-value stores that become painful in real applications:</p>
+<h3 class="v2-h3">The 5 Problems with Objects as Key-Value Stores</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Problem</th><th>Object</th><th>Map</th></tr></thead><tbody><tr><td><strong>Key types</strong></td><td>Strings and Symbols only</td><td><strong>Any type</strong> · objects, arrays, numbers, functions</td></tr><tr><td><strong>Key order</strong></td><td>Not guaranteed for non-string keys</td><td><strong>Always insertion order</strong></td></tr><tr><td><strong>Size</strong></td><td>No built-in count · must use <code>Object.keys(obj).length</code></td><td><code>.size</code> property instantly</td></tr><tr><td><strong>Iteration</strong></td><td>Not directly iterable (need <code>for...in</code> or <code>Object.entries</code>)</td><td>Directly iterable with <code>for...of</code></td></tr><tr><td><strong>Prototype pollution</strong></td><td>Inherits keys like <code>toString</code>, <code>constructor</code> from prototype</td><td>Clean · no inherited keys</td></tr></tbody></table></div>
+<h3 class="v2-h3">A Problem Objects Cannot Solve</h3>
+<p class="v2-p">Imagine you need to store extra data about DOM elements or objects · using the object itself as the key:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Objects can only use STRINGS as keys
+const visits = {};
+const userObj = { name: &quot;Alice&quot; };
+
+visits[userObj] = 5;               // JavaScript converts key to &quot;[object Object]&quot;!
+console.log(Object.keys(visits));  // [&quot;[object Object]&quot;]  ← useless!
+
+// ✅ Map uses the ACTUAL object reference as a key
+const visitsMap = new Map();
+visitsMap.set(userObj, 5);
+console.log(visitsMap.get(userObj)); // 5  ← works perfectly!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Maps are used for: caching computation results keyed by their input object, counting word frequencies, storing metadata about DOM elements, building lookup tables where keys are not strings, and anywhere you need a reliable ordered key-value structure.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. Background: Why Maps Exist</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 6</div><div class="pt">2. Topic 1 · Maps: Basics &amp; Creation</div><div class="pc" id="chk2"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">A <strong>Map</strong> is a collection of key-value pairs where:</p>
+<ul class="v2-ul"><li>Each <strong>key</strong> is unique (like Set values · no duplicates)</li><li>Keys can be <strong>any JavaScript value</strong> (objects, functions, primitives)</li><li>Pairs are stored and iterated in <strong>insertion order</strong></li><li>Size is always available via <code>.size</code></li></ul>
+<p class="v2-p">Think of a Map like a dictionary · each word (key) has exactly one definition (value). But unlike a regular JavaScript object dictionary, your "words" can be anything · not just strings.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a Map</h3>
+<h4 class="v2-h4">Empty Map, then add entries with <code>set()</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map();
+
+map.set(&quot;name&quot;,  &quot;Alice&quot;);
+map.set(&quot;age&quot;,   30);
+map.set(&quot;city&quot;,  &quot;Lagos&quot;);
+
+console.log(map);
+// Map(3) { &quot;name&quot; =&gt; &quot;Alice&quot;, &quot;age&quot; =&gt; 30, &quot;city&quot; =&gt; &quot;Lagos&quot; }
+
+console.log(map.size); // 3</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Map(3) { &quot;name&quot; =&gt; &quot;Alice&quot;, &quot;age&quot; =&gt; 30, &quot;city&quot; =&gt; &quot;Lagos&quot; }
+3</code></pre></div></div>
+<hr class="v2-hr">
+<h4 class="v2-h4">From an Array of <code>[key, value]</code> Pairs (Most Common):</h4>
+<p class="v2-p">Pass an array of two-element arrays to the <code>Map</code> constructor:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = new Map([
+  [&quot;apple&quot;,  5],
+  [&quot;banana&quot;, 8],
+  [&quot;mango&quot;,  3]
+]);
+
+console.log(fruits);
+// Map(3) { &quot;apple&quot; =&gt; 5, &quot;banana&quot; =&gt; 8, &quot;mango&quot; =&gt; 3 }
+
+console.log(fruits.get(&quot;banana&quot;)); // 8
+console.log(fruits.size);          // 3</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Map(3) { &quot;apple&quot; =&gt; 5, &quot;banana&quot; =&gt; 8, &quot;mango&quot; =&gt; 3 }
+8
+3</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> The <code>[key, value]</code> array format is called an <strong>entry</strong>. You will see this pattern constantly when converting between Maps and arrays. <code>Object.entries(obj)</code> also produces this same format · making it easy to convert objects to Maps.</p></blockquote>
+<hr class="v2-hr">
+<h4 class="v2-h4">From an Object (via <code>Object.entries</code>):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const obj = { name: &quot;Bob&quot;, score: 92, city: &quot;Accra&quot; };
+
+// Convert object to Map
+const map = new Map(Object.entries(obj));
+
+console.log(map);
+// Map(3) { &quot;name&quot; =&gt; &quot;Bob&quot;, &quot;score&quot; =&gt; 92, &quot;city&quot; =&gt; &quot;Accra&quot; }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Keys Can Be ANY Type · The Superpower of Map</h3>
+<p class="v2-p">This is the single biggest advantage of Map over a plain object:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map();
+
+// String keys (like objects)
+map.set(&quot;name&quot;, &quot;Alice&quot;);
+
+// Number keys
+map.set(42, &quot;The answer&quot;);
+
+// Boolean keys
+map.set(true,  &quot;yes&quot;);
+map.set(false, &quot;no&quot;);
+
+// Object as a key!
+const user = { id: 1 };
+map.set(user, &quot;User profile data&quot;);
+
+// Array as a key!
+const coords = [10, 20];
+map.set(coords, &quot;Location marker&quot;);
+
+// Function as a key!
+const fn = () =&gt; &quot;hello&quot;;
+map.set(fn, &quot;This function&#x27;s metadata&quot;);
+
+console.log(map.get(&quot;name&quot;));   // &quot;Alice&quot;
+console.log(map.get(42));       // &quot;The answer&quot;
+console.log(map.get(true));     // &quot;yes&quot;
+console.log(map.get(user));     // &quot;User profile data&quot;
+console.log(map.get(coords));   // &quot;Location marker&quot;
+console.log(map.size);          // 6</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Alice
+The answer
+yes
+User profile data
+Location marker
+6</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> Like Set, Map uses <strong>reference equality</strong> for object and array keys. Two objects with the same content are treated as different keys if they are not the same reference in memory.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map();
+map.set({ id: 1 }, &quot;first&quot;);
+map.set({ id: 1 }, &quot;second&quot;); // DIFFERENT key — different object reference!
+console.log(map.size); // 2 (not 1!)</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>size</code> Property · Instant Count</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([[&quot;a&quot;, 1], [&quot;b&quot;, 2], [&quot;c&quot;, 3]]);
+console.log(map.size); // 3</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Unlike objects where you need <code>Object.keys(obj).length</code>, Maps give you size instantly with <code>.size</code>. For large Maps, this is much faster because the count is maintained internally.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map Preserves Insertion Order</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map();
+map.set(&quot;z&quot;, 26);
+map.set(&quot;a&quot;,  1);
+map.set(&quot;m&quot;, 13);
+
+for (const [key, val] of map) {
+  console.log(key, &quot;→&quot;, val);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>z → 26
+a → 1
+m → 13</code></pre></div></div>
+<p class="v2-p">Notice the output is in <strong>insertion order</strong> (z, a, m) · NOT alphabetical order. This is guaranteed for Maps.</p>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> This matters when you need to show items in the order a user added them · like a shopping cart, a history log, or a priority queue.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Iterating a Map</h3>
+<p class="v2-p">Maps are directly iterable. You can loop over them in several ways:</p>
+<h4 class="v2-h4"><code>for...of</code> with destructuring (most common):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const scores = new Map([
+  [&quot;Alice&quot;, 88],
+  [&quot;Bob&quot;,   92],
+  [&quot;Carol&quot;, 75]
+]);
+
+for (const [name, score] of scores) {
+  console.log(name + &quot;: &quot; + score);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Alice: 88
+Bob: 92
+Carol: 75</code></pre></div></div>
+<h4 class="v2-h4"><code>forEach(value, key, map)</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>scores.forEach((score, name) =&gt; {
+  console.log(name + &quot;: &quot; + score);
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> In Map's <code>forEach</code>, the callback receives <code>(value, key, map)</code> · <strong>value first, then key</strong>. This is the opposite of what many beginners expect. It mirrors <code>Array.forEach(element, index)</code> where the "important" thing comes first.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Converting Map ↔ Array ↔ Object</h3>
+<p class="v2-p">These conversions are essential in real-world code:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([[&quot;a&quot;, 1], [&quot;b&quot;, 2], [&quot;c&quot;, 3]]);
+
+// Map → Array of [key, value] pairs
+const entries = [...map];
+console.log(entries); // [[&quot;a&quot;,1], [&quot;b&quot;,2], [&quot;c&quot;,3]]
+
+// Map → Array of keys only
+const keys = [...map.keys()];
+console.log(keys); // [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+
+// Map → Array of values only
+const values = [...map.values()];
+console.log(values); // [1, 2, 3]
+
+// Map → Plain Object (keys must be strings/symbols)
+const obj = Object.fromEntries(map);
+console.log(obj); // { a: 1, b: 2, c: 3 }
+
+// Plain Object → Map
+const backToMap = new Map(Object.entries(obj));
+console.log(backToMap.size); // 3</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[&quot;a&quot;,1], [&quot;b&quot;,2], [&quot;c&quot;,3]]
+[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+[1, 2, 3]
+{ a: 1, b: 2, c: 3 }
+3</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> API responses arrive as plain objects (<code>JSON.parse</code>). You convert them to Maps for efficient lookups, process them, then convert back to objects/JSON for sending responses. <code>Object.entries()</code> and <code>Object.fromEntries()</code> are the bridge.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map vs Object · When to Use Which?</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Situation</th><th>Use</th></tr></thead><tbody><tr><td>Keys are always strings, structure is fixed</td><td><strong>Object</strong> · simpler syntax</td></tr><tr><td>Keys are non-strings (objects, numbers, etc.)</td><td><strong>Map</strong></td></tr><tr><td>Need guaranteed insertion order</td><td><strong>Map</strong></td></tr><tr><td>Need to know the count quickly</td><td><strong>Map</strong> (<code>.size</code>)</td></tr><tr><td>Frequently adding and removing entries</td><td><strong>Map</strong> · better performance</td></tr><tr><td>Need to serialise to JSON directly</td><td><strong>Object</strong> · <code>JSON.stringify</code> doesn't support Map</td></tr><tr><td>Need set operations (union etc.)</td><td><strong>Set</strong>, not Map</td></tr><tr><td>Passing data to external APIs</td><td><strong>Object</strong> (most APIs expect objects)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. Topic 1 · Maps: Basics &amp; Creation</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 6</div><div class="pt">3. Topic 2 · Map Methods</div><div class="pc" id="chk3"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">Maps have a clean, focused API. Every method has one clear job.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>set(key, value)</code> · Add or Update an Entry</h3>
+<p class="v2-p">Adds a new key-value pair. If the key already exists, its value is <strong>updated</strong>. Returns the <strong>Map itself</strong> (enabling chaining).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map();
+
+// Add new entries
+map.set(&quot;name&quot;, &quot;Alice&quot;);
+map.set(&quot;age&quot;,  30);
+
+console.log(map); // Map(2) { &quot;name&quot; =&gt; &quot;Alice&quot;, &quot;age&quot; =&gt; 30 }
+
+// Update existing entry
+map.set(&quot;age&quot;, 31); // &quot;age&quot; key already exists → updates value
+
+console.log(map); // Map(2) { &quot;name&quot; =&gt; &quot;Alice&quot;, &quot;age&quot; =&gt; 31 }
+console.log(map.size); // Still 2 — no new entry created</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Map(2) { &quot;name&quot; =&gt; &quot;Alice&quot;, &quot;age&quot; =&gt; 30 }
+Map(2) { &quot;name&quot; =&gt; &quot;Alice&quot;, &quot;age&quot; =&gt; 31 }
+2</code></pre></div></div>
+<h4 class="v2-h4">Chaining <code>set()</code> calls:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const config = new Map()
+  .set(&quot;host&quot;,    &quot;localhost&quot;)
+  .set(&quot;port&quot;,    3000)
+  .set(&quot;debug&quot;,   true)
+  .set(&quot;timeout&quot;, 5000);
+
+console.log(config.size); // 4</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Building a configuration Map by chaining <code>.set()</code> calls is a common pattern in server-side Node.js code.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>get(key)</code> · Retrieve a Value</h3>
+<p class="v2-p">Returns the value for a given key. Returns <code>undefined</code> if the key doesn't exist.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([
+  [&quot;city&quot;,    &quot;Nairobi&quot;],
+  [&quot;country&quot;, &quot;Kenya&quot;],
+  [&quot;pop&quot;,     5_000_000]
+]);
+
+console.log(map.get(&quot;city&quot;));      // &quot;Nairobi&quot;
+console.log(map.get(&quot;country&quot;));   // &quot;Kenya&quot;
+console.log(map.get(&quot;pop&quot;));       // 5000000
+console.log(map.get(&quot;language&quot;));  // undefined  ← key doesn&#x27;t exist</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Nairobi
+Kenya
+5000000
+undefined</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🐛 <strong>COMMON MISTAKE:</strong> Always check with <code>has()</code> before using <code>get()</code> if the value could legitimately be <code>undefined</code> or <code>0</code> (falsy values). Do NOT use <code>if (map.get(key))</code> · it fails for falsy values!</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ WRONG — fails when value is 0, false, &quot;&quot;, null, undefined
+if (map.get(&quot;score&quot;)) { ... }
+
+// ✅ CORRECT — checks existence, not truthiness
+if (map.has(&quot;score&quot;)) { ... }</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>has(key)</code> · Check if a Key Exists</h3>
+<p class="v2-p">Returns <code>true</code> if the key exists in the Map, <code>false</code> otherwise.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([
+  [&quot;apple&quot;, 5],
+  [&quot;banana&quot;, 0], // ← value is 0, which is falsy!
+]);
+
+// ✅ Correct existence check
+console.log(map.has(&quot;apple&quot;));   // true
+console.log(map.has(&quot;banana&quot;));  // true  ← correct! (value is 0 but key exists)
+console.log(map.has(&quot;mango&quot;));   // false
+
+// ❌ Wrong approach — misses falsy values
+console.log(!!map.get(&quot;banana&quot;)); // false ← WRONG! key exists but value is falsy</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+true
+false
+false</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>delete(key)</code> · Remove an Entry</h3>
+<p class="v2-p">Removes the key-value pair for the given key. Returns <code>true</code> if the key existed and was removed, <code>false</code> if not found.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([
+  [&quot;a&quot;, 1],
+  [&quot;b&quot;, 2],
+  [&quot;c&quot;, 3]
+]);
+
+const removed = map.delete(&quot;b&quot;);
+console.log(removed);   // true
+console.log(map);       // Map(2) { &quot;a&quot; =&gt; 1, &quot;c&quot; =&gt; 3 }
+console.log(map.size);  // 2
+
+const notFound = map.delete(&quot;z&quot;);
+console.log(notFound);  // false</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+Map(2) { &quot;a&quot; =&gt; 1, &quot;c&quot; =&gt; 3 }
+2
+false</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>clear()</code> · Remove All Entries</h3>
+<p class="v2-p">Empties the Map completely. The Map object still exists but is now empty.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([[&quot;a&quot;, 1], [&quot;b&quot;, 2], [&quot;c&quot;, 3]]);
+console.log(map.size); // 3
+
+map.clear();
+
+console.log(map.size); // 0
+console.log(map);      // Map(0) {}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>keys()</code> · Iterator of All Keys</h3>
+<p class="v2-p">Returns an iterator yielding each key in insertion order.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([
+  [&quot;name&quot;,  &quot;Alice&quot;],
+  [&quot;age&quot;,   30],
+  [&quot;city&quot;,  &quot;Lagos&quot;]
+]);
+
+for (const key of map.keys()) {
+  console.log(key);
+}
+// name
+// age
+// city
+
+// Convert to array
+const keysArr = [...map.keys()];
+console.log(keysArr); // [&quot;name&quot;, &quot;age&quot;, &quot;city&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>name
+age
+city
+[&quot;name&quot;, &quot;age&quot;, &quot;city&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>values()</code> · Iterator of All Values</h3>
+<p class="v2-p">Returns an iterator yielding each value in insertion order.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const scores = new Map([
+  [&quot;Alice&quot;, 88],
+  [&quot;Bob&quot;,   92],
+  [&quot;Carol&quot;, 75]
+]);
+
+for (const score of scores.values()) {
+  console.log(score);
+}
+// 88
+// 92
+// 75
+
+// Useful: calculate average using spread
+const avg = [...scores.values()].reduce((s, v) =&gt; s + v, 0) / scores.size;
+console.log(&quot;Average:&quot;, avg.toFixed(1)); // 85.0</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>88
+92
+75
+Average: 85.0</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>entries()</code> · Iterator of <code>[key, value]</code> Pairs</h3>
+<p class="v2-p">Returns an iterator yielding <code>[key, value]</code> arrays. This is the default iteration behaviour of a Map · <code>for...of map</code> is the same as <code>for...of map.entries()</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([
+  [&quot;x&quot;, 10],
+  [&quot;y&quot;, 20],
+  [&quot;z&quot;, 30]
+]);
+
+for (const [key, value] of map.entries()) {
+  console.log(key + &quot; → &quot; + value);
+}
+// x → 10
+// y → 20
+// z → 30
+
+// These are identical:
+for (const [k, v] of map)         { /* same */ }
+for (const [k, v] of map.entries()) { /* same */ }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>forEach(callback)</code> · Run a Function for Each Entry</h3>
+<p class="v2-p">Calls <code>callback(value, key, map)</code> for each entry in insertion order.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const prices = new Map([
+  [&quot;apple&quot;,  1.20],
+  [&quot;banana&quot;, 0.50],
+  [&quot;mango&quot;,  2.00]
+]);
+
+let total = 0;
+prices.forEach((price, fruit) =&gt; {
+  console.log(fruit + &quot;: $&quot; + price.toFixed(2));
+  total += price;
+});
+console.log(&quot;Total: $&quot; + total.toFixed(2));</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>apple: $1.20
+banana: $0.50
+mango: $2.00
+Total: $3.70</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>THINK ABOUT IT:</strong> In <code>forEach</code>, why does value come before key? The Map is designed this way so code reading left-to-right makes intuitive sense: "for each entry, here is its value and here is its key". Also, it is consistent with <code>Array.forEach(element, index)</code> where the "primary data" comes first.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>groupBy()</code> · Group Array Items into a Map (Static Method)</h3>
+<p class="v2-p"><code>Map.groupBy(iterable, keyFn)</code> groups the elements of an iterable into a Map, where each key is the result of calling <code>keyFn</code> on each element and the value is an array of elements sharing that key.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const students = [
+  { name: &quot;Alice&quot;,  grade: &quot;A&quot;, score: 92 },
+  { name: &quot;Bob&quot;,    grade: &quot;B&quot;, score: 78 },
+  { name: &quot;Carol&quot;,  grade: &quot;A&quot;, score: 95 },
+  { name: &quot;David&quot;,  grade: &quot;C&quot;, score: 65 },
+  { name: &quot;Eve&quot;,    grade: &quot;B&quot;, score: 81 },
+];
+
+// Group students by their grade
+const byGrade = Map.groupBy(students, s =&gt; s.grade);
+
+console.log(byGrade.get(&quot;A&quot;));
+// [{ name: &quot;Alice&quot;, grade: &quot;A&quot;, score: 92 },
+//  { name: &quot;Carol&quot;, grade: &quot;A&quot;, score: 95 }]
+
+console.log(byGrade.get(&quot;B&quot;));
+// [{ name: &quot;Bob&quot;, grade: &quot;B&quot;, score: 78 },
+//  { name: &quot;Eve&quot;, grade: &quot;B&quot;, score: 81 }]
+
+// Iterate grouped results
+for (const [grade, group] of byGrade) {
+  const names = group.map(s =&gt; s.name).join(&quot;, &quot;);
+  console.log(`Grade ${grade}: ${names}`);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[{ name: &quot;Alice&quot;, ... }, { name: &quot;Carol&quot;, ... }]
+[{ name: &quot;Bob&quot;, ... }, { name: &quot;Eve&quot;, ... }]
+Grade A: Alice, Carol
+Grade B: Bob, Eve
+Grade C: David</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> <code>Map.groupBy()</code> replaces the classic <code>reduce</code> grouping pattern that every developer had to write manually. Use it to group products by category, transactions by date, users by role · any "bucket" grouping task.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> <code>Map.groupBy()</code> is a relatively new static method (ES2024). For older environments, the manual equivalent with <code>reduce</code> is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const grouped = students.reduce((map, s) =&gt; {
+const key = s.grade;
+if (!map.has(key)) map.set(key, []);
+map.get(key).push(s);
+return map;
+}, new Map());</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Summary: All Map Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>new Map(entries?)</code></td><td>Map</td><td>Create from <code>[[k,v],...]</code> or empty</td></tr><tr><td><code>map.set(key, val)</code></td><td>Map</td><td>Add/update entry (chainable)</td></tr><tr><td><code>map.get(key)</code></td><td>Value or <code>undefined</code></td><td>Retrieve by key</td></tr><tr><td><code>map.has(key)</code></td><td>Boolean</td><td>Check key existence</td></tr><tr><td><code>map.delete(key)</code></td><td>Boolean</td><td>Remove entry</td></tr><tr><td><code>map.clear()</code></td><td><code>undefined</code></td><td>Remove all entries</td></tr><tr><td><code>map.size</code></td><td>Number</td><td>Count of entries</td></tr><tr><td><code>map.keys()</code></td><td>MapIterator</td><td>Iterate keys</td></tr><tr><td><code>map.values()</code></td><td>MapIterator</td><td>Iterate values</td></tr><tr><td><code>map.entries()</code></td><td>MapIterator</td><td>Iterate <code>[key, value]</code> pairs</td></tr><tr><td><code>map.forEach(fn)</code></td><td><code>undefined</code></td><td>Run <code>fn(value, key, map)</code></td></tr><tr><td><code>Map.groupBy(iter, fn)</code></td><td>Map</td><td>Group iterable by key function</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">> ⚠️ WATCH OUT: Map.groupBy() is a relatively new static method (ES2024). For older environments, the manual equivalent with reduce is:
+>
+> `javascript
+> const grouped = students.reduce((map, s) => {
+>   const key = s.grade;
+>   if (!map.has(key)) map.set(key, []);
+>   map.get(key).push(s);
+>   return map;
+> }, new Map());
+> ` · </div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 6</div><div class="pt">4. Topic 3 · WeakMap</div><div class="pc" id="chk4"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><code>WeakMap</code> is to <code>Map</code> what <code>WeakSet</code> is to <code>Set</code> · a special memory-friendly variant with strict rules and intentional limitations.</p>
+<h3 class="v2-h3">The Core Idea · Memory Without Ownership</h3>
+<p class="v2-p">A regular <code>Map</code> holds a <strong>strong reference</strong> to its keys · this prevents the garbage collector from cleaning up the key objects as long as the Map exists. A <code>WeakMap</code> holds <strong>weak references</strong> to its keys · meaning if nothing else in the program holds a reference to a key object, the garbage collector can reclaim it and its entry is automatically removed from the WeakMap.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Regular Map:
+  Object ←──── STRONG key reference ──── Map
+  (Object CANNOT be collected while Map exists)
+
+WeakMap:
+  Object ←──── WEAK key reference  ──── WeakMap
+  (Object CAN be collected — WeakMap doesn&#x27;t prevent it)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakMap Rules · Two Critical Constraints</h3>
+<ol class="v2-ol"><li><strong>Keys MUST be objects</strong> (not primitives like numbers, strings, booleans)</li><li><strong>Not iterable</strong> · no <code>for...of</code>, no <code>keys()</code>, no <code>values()</code>, no <code>entries()</code>, no <code>size</code>, no <code>clear()</code></li></ol>
+<p class="v2-p">These constraints exist by design · because items can disappear at any time (garbage collected), a predictable iteration or count would be meaningless.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a WeakMap</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const wm = new WeakMap();
+
+const key1 = { id: 1 };
+const key2 = { id: 2 };
+const key3 = { id: 3 };
+
+wm.set(key1, &quot;Data for object 1&quot;);
+wm.set(key2, &quot;Data for object 2&quot;);
+wm.set(key3, &quot;Data for object 3&quot;);
+
+console.log(wm.get(key1)); // &quot;Data for object 1&quot;
+console.log(wm.has(key2)); // true</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Data for object 1
+true</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakMap Keys MUST Be Objects</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const wm = new WeakMap();
+
+// ❌ Primitives are NOT allowed as keys
+try {
+  wm.set(&quot;hello&quot;, &quot;value&quot;); // TypeError!
+} catch (e) {
+  console.log(&quot;Error:&quot;, e.message);
+  // &quot;Invalid value used as weak map key&quot;
+}
+
+try {
+  wm.set(42, &quot;value&quot;);      // TypeError!
+} catch (e) {
+  console.log(&quot;Error:&quot;, e.message);
+}
+
+// ✅ Only object keys work
+const obj = { name: &quot;test&quot; };
+wm.set(obj, &quot;this works&quot;);
+console.log(wm.get(obj)); // &quot;this works&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakMap Methods · Only Four</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const wm  = new WeakMap();
+const key = { id: 1 };
+
+wm.set(key, &quot;some value&quot;);   // Add/update entry
+console.log(wm.get(key));    // &quot;some value&quot;
+console.log(wm.has(key));    // true
+wm.delete(key);              // Remove entry
+console.log(wm.has(key));    // false</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>wm.set(objKey, value)</code></td><td>WeakMap</td><td>Add/update entry (key must be object)</td></tr><tr><td><code>wm.get(objKey)</code></td><td>Value or <code>undefined</code></td><td>Retrieve value by object key</td></tr><tr><td><code>wm.has(objKey)</code></td><td>Boolean</td><td>Check if key exists</td></tr><tr><td><code>wm.delete(objKey)</code></td><td>Boolean</td><td>Remove entry</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> There is <strong>no</strong> <code>wm.size</code>, <code>wm.clear()</code>, <code>wm.keys()</code>, <code>wm.values()</code>, <code>wm.entries()</code>, or <code>wm.forEach()</code>. WeakMap intentionally cannot be iterated · items may vanish at any time due to garbage collection.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Automatic Memory Cleanup · The Key Benefit</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let user = { name: &quot;Alice&quot;, id: 1 };
+const cache = new WeakMap();
+
+cache.set(user, { preferences: { theme: &quot;dark&quot; } });
+
+console.log(cache.has(user)); // true
+
+// When we remove our reference to the user object...
+user = null;
+
+// JavaScript&#x27;s garbage collector will eventually:
+// 1. See that no strong references to the original { name: &quot;Alice&quot; } object remain
+// 2. Clean up that object from memory
+// 3. Automatically remove its entry from the WeakMap too
+// → No memory leak!</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Real-World Use Case 1 · Private Object Data</h3>
+<p class="v2-p">Before JavaScript had private class fields (<code>#</code>), WeakMap was the standard way to store private data for class instances:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Private storage — only accessible via the API, not directly on the object
+const _private = new WeakMap();
+
+class BankAccount {
+  constructor(owner, balance) {
+    // Store private data in WeakMap keyed by this instance
+    _private.set(this, { owner, balance, transactions: [] });
+  }
+
+  deposit(amount) {
+    const data = _private.get(this);
+    data.balance += amount;
+    data.transactions.push({ type: &quot;deposit&quot;, amount });
+    console.log(`Deposited $${amount}. New balance: $${data.balance}`);
+  }
+
+  getBalance() {
+    return _private.get(this).balance;
+  }
+
+  getOwner() {
+    return _private.get(this).owner;
+  }
+}
+
+const account = new BankAccount(&quot;Alice&quot;, 1000);
+account.deposit(500);
+console.log(&quot;Balance:&quot;, account.getBalance());
+console.log(&quot;Owner:&quot;, account.getOwner());
+
+// ← Cannot access _private directly from outside this module!
+// When &#x27;account&#x27; goes out of scope, WeakMap cleans up automatically</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Deposited $500. New balance: $1500
+Balance: 1500
+Owner: Alice</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Real-World Use Case 2 · Caching Computed Results Per Object</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const computeCache = new WeakMap();
+
+function getExpensiveData(obj) {
+  // Return cached result if already computed for this object
+  if (computeCache.has(obj)) {
+    console.log(&quot;Cache hit!&quot;);
+    return computeCache.get(obj);
+  }
+
+  // Simulate expensive computation
+  console.log(&quot;Computing...&quot;);
+  const result = { processed: true, data: obj.value * 2 };
+
+  // Cache it — but without preventing obj from being garbage collected
+  computeCache.set(obj, result);
+  return result;
+}
+
+const record = { value: 21 };
+
+console.log(getExpensiveData(record)); // Computing...  { processed: true, data: 42 }
+console.log(getExpensiveData(record)); // Cache hit!    { processed: true, data: 42 }
+
+// When record goes out of scope, cache entry is automatically cleaned up</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Computing...
+{ processed: true, data: 42 }
+Cache hit!
+{ processed: true, data: 42 }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Real-World Use Case 3 · DOM Element Metadata</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const elementData = new WeakMap();
+
+function attachData(element, data) {
+  elementData.set(element, data);
+}
+
+function getData(element) {
+  return elementData.get(element) || null;
+}
+
+// In a browser:
+// const btn = document.querySelector(&quot;#submitBtn&quot;);
+// attachData(btn, { clicks: 0, lastClicked: null });
+//
+// When btn is removed from the DOM and no JS holds a reference,
+// WeakMap automatically releases its entry — no cleanup code needed!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> JavaScript frameworks like Vue.js use WeakMap internally to store reactive metadata about component objects. When a component is destroyed, its metadata is automatically garbage collected · no manual cleanup required.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map vs WeakMap · Full Comparison</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th><code>Map</code></th><th><code>WeakMap</code></th></tr></thead><tbody><tr><td>Key types</td><td>Any value</td><td>Objects ONLY</td></tr><tr><td>Value types</td><td>Any value</td><td>Any value</td></tr><tr><td>Key references</td><td>Strong</td><td>Weak (allows GC)</td></tr><tr><td><code>size</code> property</td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>clear()</code></td><td>✅ Yes</td><td>❌ No</td></tr><tr><td>Iterable</td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>keys()</code> / <code>values()</code> / <code>entries()</code></td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>forEach()</code></td><td>✅ Yes</td><td>❌ No</td></tr><tr><td><code>set()</code> / <code>get()</code> / <code>has()</code> / <code>delete()</code></td><td>✅ Yes</td><td>✅ Yes</td></tr><tr><td>Best use</td><td>General key-value storage</td><td>Private data, caches, DOM metadata</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Topic 3 · WeakMap</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 6</div><div class="pt">5. Topic 4 · Complete Map Reference</div><div class="pc" id="chk5"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p">Quick reference for every Map and WeakMap feature.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map · Constructor</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>new Map()                      // empty Map
+new Map([[k1,v1], [k2,v2]])    // from entries array
+new Map(Object.entries(obj))   // from plain object
+new Map(anotherMap)            // copy of another Map</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map · Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>map.size</code></td><td>Number</td><td>Count of key-value entries</td></tr><tr><td><code>map[Symbol.iterator]</code></td><td>Function</td><td>Makes Map iterable (same as <code>entries()</code>)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map · Instance Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>map.set(key, value)</code></td><td>Map</td><td>Add/update entry; chainable</td></tr><tr><td><code>map.get(key)</code></td><td>Value or <code>undefined</code></td><td>Get value by key</td></tr><tr><td><code>map.has(key)</code></td><td>Boolean</td><td>True if key exists</td></tr><tr><td><code>map.delete(key)</code></td><td>Boolean</td><td>Remove entry; true if found</td></tr><tr><td><code>map.clear()</code></td><td><code>undefined</code></td><td>Remove all entries</td></tr><tr><td><code>map.keys()</code></td><td>MapIterator</td><td>Iterate keys in insertion order</td></tr><tr><td><code>map.values()</code></td><td>MapIterator</td><td>Iterate values in insertion order</td></tr><tr><td><code>map.entries()</code></td><td>MapIterator</td><td>Iterate <code>[key, value]</code> pairs</td></tr><tr><td><code>map.forEach(fn)</code></td><td><code>undefined</code></td><td>Call <code>fn(value, key, map)</code> for each</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map · Static Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>Map.groupBy(iterable, keyFn)</code></td><td>Map</td><td>Group elements by key function result</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Map · Conversion Cheat Sheet</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const map = new Map([[&quot;a&quot;, 1], [&quot;b&quot;, 2], [&quot;c&quot;, 3]]);
+
+// → Array of entries [[k,v], ...]
+[...map]                   // [[&quot;a&quot;,1],[&quot;b&quot;,2],[&quot;c&quot;,3]]
+[...map.entries()]         // same
+
+// → Array of keys
+[...map.keys()]            // [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]
+
+// → Array of values
+[...map.values()]          // [1, 2, 3]
+
+// → Plain object
+Object.fromEntries(map)    // { a:1, b:2, c:3 }
+
+// ← From plain object
+new Map(Object.entries({ a:1, b:2 }))
+
+// ← From array
+new Map([[&quot;a&quot;,1],[&quot;b&quot;,2]])
+
+// ← From another Map (shallow copy)
+new Map(existingMap)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakMap · Constructor</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>new WeakMap()                         // empty
+new WeakMap([[objKey, value], ...])   // from entries (keys must be objects)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">WeakMap · Instance Methods (Only Four)</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>wm.set(objKey, value)</code></td><td>WeakMap</td><td>Add/update entry (key must be object)</td></tr><tr><td><code>wm.get(objKey)</code></td><td>Value or <code>undefined</code></td><td>Get value by object key</td></tr><tr><td><code>wm.has(objKey)</code></td><td>Boolean</td><td>True if key exists</td></tr><tr><td><code>wm.delete(objKey)</code></td><td>Boolean</td><td>Remove entry</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Choosing the Right Structure · Decision Guide</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Do you need key-value pairs?
+  ├─ YES →
+  │     Are keys always strings?
+  │       ├─ YES, simple fixed structure → Plain Object {}
+  │       └─ NO (objects, numbers, etc. as keys) or need order/size → MAP
+  │
+  │     Do keys need to be garbage collected?
+  │       └─ YES (DOM nodes, class instances) → WEAKMAP
+  │
+  └─ NO →
+        Do you need unique values (not pairs)?
+          ├─ YES → SET
+          └─ YES + auto GC → WEAKSET</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Topic 4 · Complete Map Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 6</div><div class="pt">6. Applied Exercises</div><div class="pc" id="chk6"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 2 · Applied Exercises</strong></p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1 · Map Builder &amp; Reader 🏗️</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice creating Maps, using <code>set</code>, <code>get</code>, <code>has</code>, <code>delete</code>, and iterating.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a <strong>student contact directory</strong> for a school. Each student ID maps to a contact record object.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dir = new Map();
+dir.set(&quot;S001&quot;, { name: &quot;Amara&quot;, phone: &quot;080-1234-5678&quot; });
+dir.set(&quot;S002&quot;, { name: &quot;Kwame&quot;, phone: &quot;081-9876-5432&quot; });
+
+console.log(dir.get(&quot;S001&quot;).name); // &quot;Amara&quot;
+console.log(dir.size);             // 2</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Amara
+2</code></pre></div></div>
+<h4 class="v2-h4">Task A · Build the Directory</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const directory = new Map([
+  [&quot;S001&quot;, { name: &quot;Amara Diallo&quot;,    phone: &quot;080-111-2222&quot;, grade: &quot;A&quot; }],
+  [&quot;S002&quot;, { name: &quot;Kwame Asante&quot;,    phone: &quot;081-333-4444&quot;, grade: &quot;B&quot; }],
+  [&quot;S003&quot;, { name: &quot;Fatima Rashid&quot;,   phone: &quot;082-555-6666&quot;, grade: &quot;A&quot; }],
+  [&quot;S004&quot;, { name: &quot;Emeka Obi&quot;,       phone: &quot;083-777-8888&quot;, grade: &quot;C&quot; }],
+  [&quot;S005&quot;, { name: &quot;Priya Sharma&quot;,    phone: &quot;084-999-0000&quot;, grade: &quot;B&quot; }],
+]);
+
+// 1. Look up a student
+const student = directory.get(&quot;S003&quot;);
+console.log(&quot;Found:&quot;, student.name, &quot;—&quot;, student.grade);
+
+// 2. Check existence before updating
+const updateId = &quot;S002&quot;;
+if (directory.has(updateId)) {
+  const current = directory.get(updateId);
+  directory.set(updateId, { ...current, grade: &quot;A&quot; }); // promote grade
+  console.log(&quot;Updated:&quot;, directory.get(updateId).name, &quot;→ grade A&quot;);
+}
+
+// 3. Add a new student
+directory.set(&quot;S006&quot;, { name: &quot;Omar Hassan&quot;, phone: &quot;085-123-4567&quot;, grade: &quot;B&quot; });
+console.log(&quot;Directory size:&quot;, directory.size);
+
+// 4. Remove a student
+directory.delete(&quot;S004&quot;);
+console.log(&quot;After removal:&quot;, directory.size);
+
+// 5. Print all A-grade students
+console.log(&quot;\nA-grade students:&quot;);
+for (const [id, info] of directory) {
+  if (info.grade === &quot;A&quot;) {
+    console.log(`  ${id}: ${info.name}`);
+  }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Found: Fatima Rashid — A
+Updated: Kwame Asante → grade A
+Directory size: 6
+After removal: 5
+
+A-grade students:
+  S001: Amara Diallo
+  S002: Kwame Asante
+  S003: Fatima Rashid</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why use a Map instead of a plain object for this directory?</li><li>What does <code>directory.get("S999")</code> return and how should you handle it?</li><li>Why is <code>has()</code> checked before <code>get()</code> when the value could be <code>undefined</code>?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Word Frequency Counter 📊</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice using a Map to count occurrences, then sort and display results.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building a <strong>text analysis tool</strong> for a content team. Given a block of text, count word frequencies and find the most common words.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const counts = new Map();
+const words  = [&quot;apple&quot;, &quot;banana&quot;, &quot;apple&quot;, &quot;cherry&quot;, &quot;banana&quot;, &quot;apple&quot;];
+
+words.forEach(word =&gt; {
+  counts.set(word, (counts.get(word) || 0) + 1);
+});
+
+console.log(counts.get(&quot;apple&quot;));  // 3
+console.log(counts.get(&quot;banana&quot;)); // 2</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3
+2</code></pre></div></div>
+<h4 class="v2-h4">Task A · Full Word Counter</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function analyseText(text) {
+  // Normalise: lowercase, remove punctuation, split into words
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, &quot;&quot;)
+    .split(/\s+/)
+    .filter(w =&gt; w.length &gt; 0);
+
+  // Count with Map
+  const freq = new Map();
+  for (const word of words) {
+    freq.set(word, (freq.get(word) || 0) + 1);
+  }
+
+  // Sort by frequency (descending) — convert to array first
+  const sorted = [...freq.entries()].sort((a, b) =&gt; b[1] - a[1]);
+
+  return { freq, sorted, totalWords: words.length, uniqueWords: freq.size };
+}
+
+const text = `JavaScript is a powerful language. JavaScript runs in the browser 
+and on the server. The browser renders JavaScript. Learning JavaScript is 
+essential for web development. Web development uses JavaScript everywhere.`;
+
+const result = analyseText(text);
+
+console.log(&quot;Total words :&quot;, result.totalWords);
+console.log(&quot;Unique words:&quot;, result.uniqueWords);
+console.log(&quot;\nTop 5 words:&quot;);
+result.sorted.slice(0, 5).forEach(([word, count], i) =&gt; {
+  const bar = &quot;█&quot;.repeat(count);
+  console.log(`  ${(i + 1)}. ${word.padEnd(15)} ${bar} (${count})`);
+});
+
+console.log(&quot;\nFrequency of &#x27;javascript&#x27;:&quot;, result.freq.get(&quot;javascript&quot;));</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Total words : 36
+Unique words: 20
+
+Top 5 words:
+  1. javascript     ████ (5)
+  2. is             ███ (3)
+  3. the            ███ (3)
+  4. web            ███ (3)
+  5. development    ██ (2)
+
+Frequency of &#x27;javascript&#x27;: 5</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why is a Map better than a plain object for counting words?</li><li>Why does <code>counts.get(word) || 0</code> work for initialising missing keys?</li><li>How would you filter out common words like "the", "is", "a" (stop words)?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Grouping with Map.groupBy() 🗂️</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice <code>Map.groupBy()</code> and manual grouping with <code>reduce</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building a <strong>sales reporting dashboard</strong> that groups transactions by region, month, and status.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const items = [
+  { name: &quot;Book&quot;,   category: &quot;education&quot; },
+  { name: &quot;Pen&quot;,    category: &quot;education&quot; },
+  { name: &quot;Laptop&quot;, category: &quot;tech&quot;      },
+];
+
+const grouped = Map.groupBy(items, item =&gt; item.category);
+console.log(grouped.get(&quot;education&quot;).length); // 2
+console.log(grouped.get(&quot;tech&quot;).length);      // 1</code></pre></div></div>
+<h4 class="v2-h4">Task A · Sales Grouping</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const transactions = [
+  { id: 1,  amount: 4500, region: &quot;North&quot;, month: &quot;Jan&quot;, status: &quot;paid&quot;    },
+  { id: 2,  amount: 3200, region: &quot;South&quot;, month: &quot;Jan&quot;, status: &quot;pending&quot; },
+  { id: 3,  amount: 5800, region: &quot;North&quot;, month: &quot;Feb&quot;, status: &quot;paid&quot;    },
+  { id: 4,  amount: 2900, region: &quot;East&quot;,  month: &quot;Jan&quot;, status: &quot;paid&quot;    },
+  { id: 5,  amount: 6100, region: &quot;South&quot;, month: &quot;Feb&quot;, status: &quot;paid&quot;    },
+  { id: 6,  amount: 3750, region: &quot;East&quot;,  month: &quot;Feb&quot;, status: &quot;pending&quot; },
+  { id: 7,  amount: 4100, region: &quot;North&quot;, month: &quot;Mar&quot;, status: &quot;paid&quot;    },
+  { id: 8,  amount: 1800, region: &quot;South&quot;, month: &quot;Mar&quot;, status: &quot;failed&quot;  },
+];
+
+// 1. Group by region
+const byRegion = Map.groupBy(transactions, t =&gt; t.region);
+console.log(&quot;=== Sales by Region ===&quot;);
+for (const [region, txns] of byRegion) {
+  const total = txns.reduce((sum, t) =&gt; sum + t.amount, 0);
+  console.log(`  ${region.padEnd(6)}: ${txns.length} transactions — $${total.toLocaleString()}`);
+}
+
+// 2. Group by status
+const byStatus = Map.groupBy(transactions, t =&gt; t.status);
+console.log(&quot;\n=== Sales by Status ===&quot;);
+for (const [status, txns] of byStatus) {
+  const total = txns.reduce((sum, t) =&gt; sum + t.amount, 0);
+  console.log(`  ${status.padEnd(8)}: ${txns.length} txns — $${total.toLocaleString()}`);
+}
+
+// 3. Only paid transactions, grouped by month
+const paid = transactions.filter(t =&gt; t.status === &quot;paid&quot;);
+const paidByMonth = Map.groupBy(paid, t =&gt; t.month);
+console.log(&quot;\n=== Paid Transactions by Month ===&quot;);
+for (const [month, txns] of paidByMonth) {
+  const total = txns.reduce((sum, t) =&gt; sum + t.amount, 0);
+  console.log(`  ${month}: $${total.toLocaleString()}`);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>=== Sales by Region ===
+  North : 3 transactions — $14,400
+  South : 3 transactions — $11,100
+  East  : 2 transactions — $6,650
+
+=== Sales by Status ===
+  paid    : 6 txns — $26,550
+  pending : 2 txns — $6,950
+  failed  : 1 txns — $1,800
+
+=== Paid Transactions by Month ===
+  Jan: $7,400
+  Feb: $11,900
+  Mar: $4,100</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What does <code>Map.groupBy</code> return and how is it different from <code>Array.reduce</code>?</li><li>Why is the result a <code>Map</code> and not a plain object?</li><li>How would you find the region with the highest total sales after grouping?</li></ul>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"> · ### Exercise 1 · Map Builder & Reader 🏗️
+
+Objective: Practice creating Maps, using set, get, has, delete, and iterating.
+
+Scenario: You are building a student contact directory for a school. Each student ID maps to a contact record object.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">🔵 Stage 1 · Book Catalogue</div><div class="build-req"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 3 · Project Simulation</strong></p></blockquote>
+<p class="v2-p"><strong>Real-world scenario:</strong> You are building a <strong>library book management system</strong>. The system needs to:</p>
+<ul class="v2-ul"><li>Store books in a Map (ISBN → book details)</li><li>Track borrowing status per book</li><li>Use WeakMap to store private fine/penalty data per borrower object</li><li>Generate statistics by genre using <code>Map.groupBy()</code></li><li>Search, sort, and report on the collection</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">🔵 Stage 1 · Book Catalogue</h3>
+<p class="v2-p"><strong>Goal:</strong> Build a Map-based book catalogue with add, search, and update operations.</p>
+<h4 class="v2-h4">Simple stage preview:</h4></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const catalogue = new Map();
+catalogue.set(&quot;978-0-00-001&quot;, { title: &quot;Dune&quot;, author: &quot;Frank Herbert&quot;, available: true });
+console.log(catalogue.get(&quot;978-0-00-001&quot;).title); // &quot;Dune&quot;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`const catalogue = new Map();
+catalogue.set(&quot;978-0-00-001&quot;, { title: &quot;Dune&quot;, author: &quot;Frank Herbert&quot;, available: true });
+console.log(catalogue.get(&quot;978-0-00-001&quot;).title); // &quot;Dune&quot;`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-16-stage-1-book-catalogue</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 16 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-16-stage-1-book-catalogue/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 16 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. Background: Why Maps Exist</li><li>✅ 2. Topic 1 · Maps: Basics & Creation</li><li>✅ 3. Topic 2 · Map Methods</li><li>✅ 4. Topic 3 · WeakMap</li><li>✅ 5. Topic 4 · Complete Map Reference</li><li>✅ 6. Applied Exercises</li></ul><div class="ln"><a href="lesson_15.html" class="ln-btn">&#8592; Lesson 15</a><a href="lesson_17.html" class="ln-btn primary">Lesson 17 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 16 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

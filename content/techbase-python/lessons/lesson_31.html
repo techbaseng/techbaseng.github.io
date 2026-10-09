@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 31: Pandas Correlations, Pandas Plotting &amp; Introduction to Matplotlib — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="9" data-key="techbase_python_l31">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 31 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 31</div>
+      <h1>Pandas Correlations, Pandas Plotting &amp; Introduction to Matplotlib</h1>
+      <div class="l-hero-sub">9 phases &nbsp;·&nbsp; Build: Project Goal</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 31</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 31! In this lesson, you will learn three powerful skills that work beautifully together:</p>
+<ol class="v2-ol"><li><strong>How to find correlations in data using Pandas</strong> · discovering hidden relationships between numbers</li><li><strong>How to create charts and graphs directly from a Pandas DataFrame</strong></li><li><strong>What Matplotlib is, how to install it, and how to draw your first plot</strong></li></ol>
+<p class="v2-p">By the end of this lesson, you will be able to look at a table of numbers, automatically measure how strongly different columns are related to each other, and then draw visual charts to <em>see</em> those relationships.</p>
+<p class="v2-p"><strong>Real-world relevance:</strong> These skills are used every day by data scientists, business analysts, finance professionals, health researchers, sports statisticians, and engineers. Whenever someone says "does more sleep lead to better grades?" or "does workout duration affect calories burned?" · correlation and charts are the tools they use to answer those questions.</p>
+<hr class="v2-hr"></div><div class="wm"><span>📚 9 phases</span><span>🏗️ Project Goal</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 9</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 31! In this lesson, you will learn three powerful skills that work beautifully together:</p>
+<ol class="v2-ol"><li><strong>How to find correlations in data using Pandas</strong> · discovering hidden relationships between numbers</li><li><strong>How to create charts and graphs directly from a Pandas DataFrame</strong></li><li><strong>What Matplotlib is, how to install it, and how to draw your first plot</strong></li></ol>
+<p class="v2-p">By the end of this lesson, you will be able to look at a table of numbers, automatically measure how strongly different columns are related to each other, and then draw visual charts to <em>see</em> those relationships.</p>
+<p class="v2-p"><strong>Real-world relevance:</strong> These skills are used every day by data scientists, business analysts, finance professionals, health researchers, sports statisticians, and engineers. Whenever someone says "does more sleep lead to better grades?" or "does workout duration affect calories burned?" · correlation and charts are the tools they use to answer those questions.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 9</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before we start, let us make sure you understand a few foundational ideas. We will explain each one simply.</p>
+<h3 class="v2-h3">What is a Library (or Module) in Python?</h3>
+<p class="v2-p">A <strong>library</strong> (also called a <strong>module</strong> or <strong>package</strong>) is a collection of code that someone else already wrote for you. Instead of writing all the code yourself from scratch, you simply "import" (load) the library and use its ready-made tools.</p>
+<p class="v2-p">Think of it like a toolbox: rather than building a hammer yourself, you just open the toolbox and pick up the hammer.</p>
+<p class="v2-p">The two libraries we will use in this lesson are:</p>
+<ul class="v2-ul"><li><strong>Pandas</strong> · for working with tables of data (like a spreadsheet in Python)</li><li><strong>Matplotlib</strong> · for drawing charts and graphs</li></ul>
+<h3 class="v2-h3">What is a DataFrame?</h3>
+<p class="v2-p">A <strong>DataFrame</strong> is like a table · it has rows and columns. Think of it like an Excel spreadsheet inside Python. For example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>| Duration | Pulse | Maxpulse | Calories |
+|----------|-------|----------|----------|
+| 60       | 110   | 130      | 409      |
+| 45       | 117   | 141      | 282      |
+| 45       | 103   | 132      | 270      |</code></pre></div></div>
+<p class="v2-p">Each <strong>column</strong> holds one type of information (like Duration or Calories). Each <strong>row</strong> holds one record (like one workout session).</p>
+<h3 class="v2-h3">What is a CSV file?</h3>
+<p class="v2-p">A <strong>CSV</strong> file (Comma-Separated Values) is a simple text file that stores table data. Each line is one row, and columns are separated by commas. Pandas can read CSV files directly into a DataFrame.</p>
+<h3 class="v2-h3">What is NumPy?</h3>
+<p class="v2-p"><strong>NumPy</strong> is another Python library used for working with numbers and arrays (lists of numbers). Matplotlib often works alongside NumPy. We will use <code>np.array()</code> to create lists of numbers for plotting.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 9</div><div class="pt">Part 1: Pandas · Data Correlations</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is a Correlation?</h3>
+<p class="v2-p"><strong>Correlation</strong> means "how much do two things change together?"</p>
+<p class="v2-p">Imagine you're tracking students in a class. You record their study hours per week and their exam scores. You notice: students who study more tend to score higher. That is a <strong>positive correlation</strong> · when one goes up, the other goes up too.</p>
+<p class="v2-p">Now imagine tracking how many times students skip classes and their exam scores. Students who skip more tend to score <em>lower</em>. That is a <strong>negative correlation</strong> · when one goes up, the other goes down.</p>
+<p class="v2-p">And sometimes two things have no relationship at all · like a student's shoe size and their exam score. That is <strong>no correlation</strong>.</p>
+<h3 class="v2-h3">The Correlation Scale: From -1 to 1</h3>
+<p class="v2-p">Pandas measures correlation as a <strong>number between -1 and 1</strong>. Here is how to read that number:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Correlation Value</th><th>What It Means</th></tr></thead><tbody><tr><td><code>1.0</code></td><td>Perfect positive relationship</td></tr><tr><td><code>0.9</code></td><td>Very strong positive relationship</td></tr><tr><td><code>0.6</code></td><td>Good positive relationship</td></tr><tr><td><code>0.2</code></td><td>Weak relationship (almost no link)</td></tr><tr><td><code>0.0</code></td><td>No relationship at all</td></tr><tr><td><code>-0.2</code></td><td>Weak negative relationship</td></tr><tr><td><code>-0.6</code></td><td>Good negative relationship</td></tr><tr><td><code>-0.9</code></td><td>Very strong negative relationship</td></tr><tr><td><code>-1.0</code></td><td>Perfect negative relationship</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Rule of thumb:</strong> A correlation of <code>0.6</code> or higher (or <code>-0.6</code> or lower) is generally considered a <strong>good</strong> (meaningful) correlation.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Think of correlation like a tug-of-war rope. If both sides pull in the same direction → positive correlation. If they pull in opposite directions → negative. If they both just stand still → no correlation.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>corr()</code> Method in Pandas</h3>
+<p class="v2-p">Pandas has a built-in method called <code>corr()</code> that automatically calculates the correlation between <strong>every pair of numeric columns</strong> in your DataFrame.</p>
+<p class="v2-p"><strong>What it does:</strong> Takes all your numeric columns and measures how strongly each pair is related. It ignores non-numeric (text) columns automatically.</p>
+<p class="v2-p"><strong>Why is this useful?</strong> In a dataset with 10 columns, there are 45 possible pairs to compare. Instead of checking each pair manually, <code>corr()</code> calculates all of them in one line.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Example: Understanding What <code>corr()</code> Returns</h3>
+<p class="v2-p">Let's start with a tiny, easy example to understand the output before we use real data.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+# Create a very simple DataFrame with 3 columns
+data = {
+    &#x27;Hours_Studied&#x27;: [1, 2, 3, 4, 5],
+    &#x27;Exam_Score&#x27;:    [40, 55, 65, 80, 95],
+    &#x27;Shoe_Size&#x27;:     [7, 9, 6, 8, 7]
+}
+
+df = pd.DataFrame(data)
+
+# Calculate correlations
+result = df.corr()
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>               Hours_Studied  Exam_Score  Shoe_Size
+Hours_Studied       1.000000    0.993399   0.000000
+Exam_Score          0.993399    1.000000  -0.019608
+Shoe_Size           0.000000   -0.019608   1.000000</code></pre></div></div>
+<p class="v2-p"><strong>Reading this output · line by line:</strong></p>
+<ul class="v2-ul"><li>Every column is shown as both a <strong>row</strong> and a <strong>column</strong> in the result.</li><li>The diagonal (top-left to bottom-right) is always <code>1.000000</code> · because every column is perfectly correlated with <em>itself</em>. Of course!</li><li><code>Hours_Studied</code> vs <code>Exam_Score</code> = <code>0.993399</code> → <strong>very strong positive correlation</strong>! Students who study more hours get much higher scores. Makes sense!</li><li><code>Hours_Studied</code> vs <code>Shoe_Size</code> = <code>0.000000</code> → <strong>no correlation</strong>. Of course · shoe size has nothing to do with study hours.</li><li>The table is <strong>symmetric</strong>: the value for (row A, column B) is the same as (row B, column A).</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would happen if we added a "Skipped_Classes" column? Would you expect a positive or negative correlation with Exam_Score? Why?</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Real Data Example: The Workout Dataset</h3>
+<p class="v2-p">Now let's use a real dataset. This is a workout tracking CSV file called <code>data.csv</code> that contains these columns: <code>Duration</code>, <code>Pulse</code>, <code>Maxpulse</code>, <code>Calories</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+# Read the CSV file into a DataFrame
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+# Calculate correlations between all numeric columns
+print(df.corr())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>            Duration     Pulse  Maxpulse  Calories
+Duration    1.000000 -0.155408  0.009403  0.922721
+Pulse      -0.155408  1.000000  0.786535  0.025120
+Maxpulse    0.009403  0.786535  1.000000  0.203814
+Calories    0.922721  0.025120  0.203814  1.000000</code></pre></div></div>
+<p class="v2-p"><strong>Let's analyse every relationship:</strong></p>
+<p class="v2-p"><strong>1. Duration vs Duration = <code>1.000000</code> (Perfect Correlation)</strong> Every column is perfectly correlated with itself. This is always the case. It simply confirms the math is working correctly.</p>
+<p class="v2-p"><strong>2. Duration vs Calories = <code>0.922721</code> (Very Good Correlation)</strong> This is close to 1.0, which means there is a very strong positive relationship. The longer you work out, the more calories you burn. And conversely, if you burned a lot of calories, you probably worked out for a long time. This makes complete physical sense!</p>
+<p class="v2-p"><strong>3. Pulse vs Maxpulse = <code>0.786535</code> (Good Correlation)</strong> Your average pulse during a workout is strongly related to your maximum pulse. Higher average pulse → higher max pulse. Makes sense: if your heart is beating fast on average, it probably peaked even higher.</p>
+<p class="v2-p"><strong>4. Duration vs Maxpulse = <code>0.009403</code> (Very Bad Correlation)</strong> This is almost zero. The length of your workout has almost no relationship to how high your maximum heart rate goes. You could work out for 2 hours at a calm pace or 20 minutes at an intense pace · both could reach the same max pulse.</p>
+<p class="v2-p"><strong>5. Duration vs Pulse = <code>-0.155408</code> (Weak Negative Correlation)</strong> Slightly negative, but very weak. Not enough to draw conclusions from.</p>
+<p class="v2-p"><strong>6. Pulse vs Calories = <code>0.025120</code> (Basically No Correlation)</strong> Your average heart rate doesn't really predict how many calories you burn. Duration does, but not pulse alone.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Key insight:</strong> A number close to <code>0</code> (like <code>0.009</code> or <code>0.025</code>) means the two things are <strong>not related</strong>. Don't try to predict one from the other · you'll just be guessing.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">What "Good Correlation" Means for Predictions</h3>
+<p class="v2-p">This is where correlation becomes practically useful:</p>
+<ul class="v2-ul"><li>If Duration and Calories have a correlation of <code>0.92</code>, you can say: <em>"Given how long someone worked out, I can make a reasonable prediction of how many calories they burned."</em></li><li>If Duration and Maxpulse have a correlation of <code>0.009</code>, you <strong>cannot</strong> say: <em>"Given how long someone worked out, I can predict their max heart rate."</em> The data shows no meaningful link.</li></ul>
+<p class="v2-p">This is the foundation of <strong>machine learning</strong> and <strong>data science</strong>: you find which inputs (features) are correlated with the output (target) before building a predictive model.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Second Example: Student Performance Correlations</h3>
+<p class="v2-p">Let's look at another scenario to reinforce the concept:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+# Student performance data
+data = {
+    &#x27;Study_Hours&#x27;: [2, 4, 6, 8, 3, 5, 7, 1, 9, 4],
+    &#x27;Sleep_Hours&#x27;: [5, 7, 8, 8, 6, 7, 8, 4, 7, 6],
+    &#x27;Score&#x27;:       [45, 65, 78, 90, 55, 72, 88, 30, 95, 60],
+    &#x27;Absences&#x27;:    [8, 3, 2, 1, 6, 2, 1, 10, 0, 3]
+}
+
+df = pd.DataFrame(data)
+print(df.corr())</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (approximate):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>              Study_Hours  Sleep_Hours     Score  Absences
+Study_Hours      1.000000     0.674957  0.985290 -0.947674
+Sleep_Hours      0.674957     1.000000  0.718050 -0.678490
+Score            0.985290     0.718050  1.000000 -0.962330
+Absences        -0.947674    -0.678490 -0.962330  1.000000</code></pre></div></div>
+<p class="v2-p"><strong>Analysis:</strong></p>
+<ul class="v2-ul"><li>Study_Hours vs Score = <code>0.985</code> → Extremely strong! More study hours → higher scores.</li><li>Absences vs Score = <code>-0.962</code> → Extremely strong <em>negative</em>! More absences → much lower scores.</li><li>Sleep_Hours vs Score = <code>0.718</code> → Good correlation. More sleep helps performance.</li><li>Study_Hours vs Absences = <code>-0.948</code> → Students who study more miss fewer classes.</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would happen if you added a "TV_Hours" column? Would you expect it to be positively or negatively correlated with Score?</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Common Beginner Mistake: Confusing Correlation with Causation</h3>
+<p class="v2-p"><strong>Mistake:</strong> Assuming that because two things are correlated, one <em>causes</em> the other.</p>
+<p class="v2-p"><strong>Example:</strong> Ice cream sales and drowning accidents are both high in summer. They are correlated · but ice cream does not <em>cause</em> drowning! Both are caused by hot weather leading people to swim more and eat more ice cream.</p>
+<p class="v2-p"><strong>Corrected thinking:</strong> Correlation tells you that two things <em>tend to move together</em>. It does <strong>not</strong> tell you <em>why</em>. Always think critically about whether there is a logical explanation before drawing conclusions.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Pandas · Data Correlations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 9</div><div class="pt">Part 2: Pandas · Plotting</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is Plotting?</h3>
+<p class="v2-p"><strong>Plotting</strong> means drawing a visual chart (a diagram, a graph) from your data. Instead of staring at rows and rows of numbers, you create a picture that shows the pattern at a glance.</p>
+<p class="v2-p">Think of it like this: if I show you 200 workout records in a table, you might not immediately see any pattern. But if I draw a scatter plot showing Duration vs Calories · you'll immediately see the upward trend with your eyes.</p>
+<h3 class="v2-h3">How Pandas Plotting Works</h3>
+<p class="v2-p">Pandas has a built-in <code>plot()</code> method that lets you draw charts directly from a DataFrame. It uses Matplotlib (which we'll learn about in Parts 3 · 5) behind the scenes to actually display the chart. You call <code>plt.show()</code> to make the chart appear on screen.</p>
+<p class="v2-p"><strong>The basic structure is:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt   # needed to show the chart
+
+df = pd.read_csv(&#x27;data.csv&#x27;)       # load the data
+df.plot()                           # draw the plot
+plt.show()                          # display the plot</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Default Plot</h3>
+<p class="v2-p">When you call <code>df.plot()</code> with no arguments, Pandas draws a <strong>line chart</strong> of all numeric columns against the row index (0, 1, 2, 3...).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+df.plot()
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>What this does:</strong></p>
+<ul class="v2-ul"><li><code>import pandas as pd</code> → loads the Pandas library, called <code>pd</code> for short</li><li><code>import matplotlib.pyplot as plt</code> → loads the Matplotlib plotting submodule, called <code>plt</code> for short</li><li><code>df = pd.read_csv('data.csv')</code> → reads the CSV file and creates a DataFrame</li><li><code>df.plot()</code> → tells Pandas to draw a default line plot of all numeric columns</li><li><code>plt.show()</code> → displays the chart on your screen (without this line, nothing appears!)</li></ul>
+<p class="v2-p"><strong>Expected result:</strong> A line chart showing Duration, Pulse, Maxpulse, and Calories all drawn as separate lines. This gives a general overview.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Scatter Plot: Visualising Correlation</h3>
+<p class="v2-p">A <strong>scatter plot</strong> is one of the most powerful charts for visualising correlation. It places a dot for every data row, with the x-position determined by one column and the y-position determined by another.</p>
+<p class="v2-p">If the dots form a diagonal upward line → positive correlation. If the dots form a diagonal downward line → negative correlation. If the dots are scattered randomly → no correlation.</p>
+<p class="v2-p"><strong>Syntax for a scatter plot with Pandas:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df.plot(kind = &#x27;scatter&#x27;, x = &#x27;ColumnName&#x27;, y = &#x27;OtherColumnName&#x27;)</code></pre></div></div>
+<ul class="v2-ul"><li><code>kind = 'scatter'</code> → tells Pandas to make a scatter plot (not a line chart)</li><li><code>x = 'Duration'</code> → use the Duration column as the horizontal axis</li><li><code>y = 'Calories'</code> → use the Calories column as the vertical axis</li></ul>
+<hr class="v2-hr">
+<h4 class="v2-h4">Scatter Plot Example 1: Good Correlation (Duration vs Calories)</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+# Scatter plot showing a GOOD correlation
+df.plot(kind = &#x27;scatter&#x27;, x = &#x27;Duration&#x27;, y = &#x27;Calories&#x27;)
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> The dots will form a clear upward diagonal pattern · the longer the workout duration, the more calories burned. You can visually see the strong correlation of <code>0.922721</code> that we calculated earlier.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Connecting the dots (literally):</strong> When you see the dots trending upward from left to right, that is the <em>visual proof</em> of the high positive correlation number.</p></blockquote>
+<hr class="v2-hr">
+<h4 class="v2-h4">Scatter Plot Example 2: Bad Correlation (Duration vs Maxpulse)</h4>
+<p class="v2-p">Now let's plot the pair that had a very low correlation (<code>0.009403</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+# Scatter plot showing a BAD (no) correlation
+df.plot(kind = &#x27;scatter&#x27;, x = &#x27;Duration&#x27;, y = &#x27;Maxpulse&#x27;)
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> The dots will be <strong>scattered randomly</strong> all over the chart with no clear pattern or direction. There is no diagonal trend. This is the visual confirmation that Duration and Maxpulse have no meaningful relationship · just like the near-zero correlation value showed us numerically.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> Compare the two scatter plots side by side. Can you see immediately which pair has a strong relationship and which doesn't? This is the power of visualisation.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Histogram: Seeing How Data Is Distributed</h3>
+<p class="v2-p">A <strong>histogram</strong> shows you how often values fall into different ranges (called "bins" or "intervals"). It answers the question: "How spread out is my data? What's the most common range?"</p>
+<p class="v2-p"><strong>Analogy:</strong> Imagine asking 200 students how many hours they studied. Instead of listing all 200 numbers, a histogram groups them: "40 students studied 1 · 2 hours, 80 students studied 3 · 4 hours," etc. You immediately see the most common study amount.</p>
+<p class="v2-p"><strong>Key difference from scatter plot:</strong> A scatter plot needs two columns (x and y). A histogram only needs <strong>one column</strong>.</p>
+<p class="v2-p"><strong>Syntax for a histogram:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>df[&quot;ColumnName&quot;].plot(kind = &#x27;hist&#x27;)</code></pre></div></div>
+<ul class="v2-ul"><li><code>df["Duration"]</code> → select just the Duration column from the DataFrame</li><li><code>.plot(kind = 'hist')</code> → draw a histogram of that column's values</li></ul>
+<hr class="v2-hr">
+<h4 class="v2-h4">Histogram Example: Distribution of Workout Durations</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+df = pd.read_csv(&#x27;data.csv&#x27;)
+
+# Histogram of the Duration column
+df[&quot;Duration&quot;].plot(kind = &#x27;hist&#x27;)
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> A bar chart where the x-axis shows ranges of Duration (like 50 · 60 minutes, 60 · 70 minutes, etc.) and the y-axis shows how many workouts fell in each range.</p>
+<p class="v2-p">According to the dataset, <strong>over 100 workouts lasted between 50 and 60 minutes</strong> · this would show as the tallest bar in the histogram, making it very easy to see the most common workout length at a glance.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Histograms are used everywhere · doctors look at histograms of patient ages, engineers look at histograms of measurement errors, teachers look at histograms of exam scores to see how grades are distributed.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Summary of Pandas Plot Types</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Plot Type</th><th><code>kind =</code> value</th><th>What it shows</th><th>Columns needed</th></tr></thead><tbody><tr><td>Line chart</td><td>(default, no <code>kind</code>)</td><td>Trends over rows</td><td>All numeric</td></tr><tr><td>Scatter plot</td><td><code>'scatter'</code></td><td>Relationship between 2 columns</td><td>2 (x and y)</td></tr><tr><td>Histogram</td><td><code>'hist'</code></td><td>Distribution/frequency of values</td><td>1</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Pandas · Plotting</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 9</div><div class="pt">Part 3: Introduction to Matplotlib</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">What is Matplotlib?</h3>
+<p class="v2-p"><strong>Matplotlib</strong> is a Python library specifically designed for creating charts, graphs, diagrams, and all kinds of visualisations.</p>
+<ul class="v2-ul"><li>It was created by <strong>John D. Hunter</strong></li><li>It is <strong>open source</strong> · free for anyone to use</li><li>It is mostly written in Python, with some parts in C, Objective-C, and JavaScript</li><li>It is the most popular charting library in the Python data science world</li></ul>
+<p class="v2-p"><strong>Why do we need it?</strong> Pandas' <code>plot()</code> method we used above actually <em>uses</em> Matplotlib internally. But when you use Matplotlib directly, you get much more control: custom colours, labels, titles, grid lines, multiple charts in one figure, and much more.</p>
+<p class="v2-p"><strong>Where is the code?</strong> The source code is on GitHub at: <code>https://github.com/matplotlib/matplotlib</code></p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Installing Matplotlib</h3>
+<p class="v2-p">Before you can use any external library, you must install it. Here's how:</p>
+<p class="v2-p"><strong>Step 1:</strong> Open your command prompt (Windows) or terminal (Mac/Linux).</p>
+<p class="v2-p"><strong>Step 2:</strong> Type this command and press Enter:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>pip install matplotlib</code></pre></div></div>
+<p class="v2-p"><code>pip</code> is Python's <strong>package manager</strong> · the tool that downloads and installs libraries from the internet.</p>
+<p class="v2-p">If this command doesn't work, you might be using a Python distribution like <strong>Anaconda</strong> or <strong>Spyder</strong>, which often have Matplotlib already pre-installed.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Checking Your Matplotlib Version</h3>
+<p class="v2-p">Once installed, you can verify the installation and see which version you have:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib
+
+print(matplotlib.__version__)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (your version may differ):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3.9.2</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>import matplotlib</code> → loads the entire Matplotlib library</li><li><code>print(matplotlib.__version__)</code> → prints the version number stored in the <code>__version__</code> attribute</li><li>Note: there are <strong>two underscore characters</strong> on each side of <code>version</code> (that's four underscores total: <code>__version__</code>)</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Common mistake:</strong> Typing <code>_version_</code> (one underscore each side) instead of <code>__version__</code> (two underscores each side). Python won't recognise it.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Introduction to Matplotlib</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 9</div><div class="pt">Part 4: Matplotlib · The Pyplot Submodule</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What is Pyplot?</h3>
+<p class="v2-p">Matplotlib is a large library with many parts. The part we almost always use is called <strong>Pyplot</strong> · a submodule (a smaller package inside the bigger one) that contains all the functions for drawing plots.</p>
+<p class="v2-p"><strong>Think of it this way:</strong> Matplotlib is the whole art studio. Pyplot is the particular drawing table where you actually sit down and draw.</p>
+<h3 class="v2-h3">Importing Pyplot</h3>
+<p class="v2-p">The standard way to import Pyplot is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt</code></pre></div></div>
+<p class="v2-p"><strong>Breaking this down:</strong></p>
+<ul class="v2-ul"><li><code>import matplotlib.pyplot</code> → loads the pyplot submodule</li><li><code>as plt</code> → gives it a short nickname <code>plt</code> so you don't have to type <code>matplotlib.pyplot</code> every time</li><li>Now whenever you want to use Pyplot, you just write <code>plt.something()</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Convention:</strong> <code>import matplotlib.pyplot as plt</code> is the universally agreed way to import it. You'll see this exact line in virtually every data science script in the world.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Your First Plot with Pyplot</h3>
+<p class="v2-p">Now let's draw something! This is the simplest possible Matplotlib example · a straight line:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+# Define the x-coordinates of our two points
+xpoints = np.array([0, 6])
+
+# Define the y-coordinates of our two points
+ypoints = np.array([0, 250])
+
+# Draw a line connecting those points
+plt.plot(xpoints, ypoints)
+
+# Display the chart
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong> A chart window opens showing a straight line going from (0, 0) at the bottom-left to (6, 250) at the top-right.</p>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>import matplotlib.pyplot as plt</code> → loads Pyplot with the nickname <code>plt</code></li><li><code>import numpy as np</code> → loads NumPy with the nickname <code>np</code></li><li><code>xpoints = np.array([0, 6])</code> → creates an array with two x-values: 0 and 6</li><li><code>ypoints = np.array([0, 250])</code> → creates an array with two y-values: 0 and 250</li><li><code>plt.plot(xpoints, ypoints)</code> → draws a line chart. Python will plot the point (0, 0) and (6, 250) and draw a line between them</li><li><code>plt.show()</code> → opens a window on your screen to display the chart. <strong>This is required!</strong> Without it, nothing appears.</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>What is <code>np.array()</code>?</strong> It creates a NumPy array · an ordered collection of numbers. Think of it as a smarter version of a Python list. Matplotlib works best with NumPy arrays.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Matplotlib · The Pyplot Submodule</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 9</div><div class="pt">Part 5: Matplotlib Plotting · Drawing Points and Lines</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">The <code>plot()</code> Function</h3>
+<p class="v2-p">The <code>plt.plot()</code> function is the core of Matplotlib. It draws markers (dots) or lines in a diagram.</p>
+<p class="v2-p"><strong>How it works:</strong></p>
+<ul class="v2-ul"><li><strong>Parameter 1:</strong> An array of x-coordinates (horizontal positions)</li><li><strong>Parameter 2:</strong> An array of y-coordinates (vertical positions)</li><li>Each pair (x[i], y[i]) defines one point</li><li>By default, Matplotlib connects the points with a line</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Think of it like plotting points on graph paper.</strong> The x-axis is horizontal. The y-axis is vertical. You mark each point and Matplotlib connects them.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 1: Simple Line Between Two Points</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+# Point 1: (1, 3)   Point 2: (8, 10)
+xpoints = np.array([1, 8])
+ypoints = np.array([3, 10])
+
+plt.plot(xpoints, ypoints)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong> A straight line going from point (1, 3) to point (8, 10).</p>
+<p class="v2-p"><strong>How does Python know which x goes with which y?</strong></p>
+<ul class="v2-ul"><li><code>xpoints[0]</code> = 1 pairs with <code>ypoints[0]</code> = 3 → Point (1, 3)</li><li><code>xpoints[1]</code> = 8 pairs with <code>ypoints[1]</code> = 10 → Point (8, 10)</li><li>Matplotlib draws a line connecting them in order.</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 2: Plotting Without a Line (Just Dots)</h3>
+<p class="v2-p">Sometimes you just want dots, not a line connecting them. Use the shortcut <code>'o'</code> as the third argument · <code>'o'</code> stands for "circles" (ring markers):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+xpoints = np.array([1, 8])
+ypoints = np.array([3, 10])
+
+plt.plot(xpoints, ypoints, &#x27;o&#x27;)   # &#x27;o&#x27; means: show dots only, no line
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong> Two small circle dots on the chart at positions (1, 3) and (8, 10), but <strong>no line</strong> connecting them.</p>
+<p class="v2-p"><strong>Why would you want this?</strong> This is similar to a scatter plot · when you just want to see the positions of data points without implying they are connected in sequence.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 3: Multiple Points · Connecting a Path</h3>
+<p class="v2-p">You can provide as many points as you want, as long as both arrays have the same number of elements:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+# Four x-points and four y-points
+xpoints = np.array([1, 2, 6, 8])
+ypoints = np.array([3, 8, 1, 10])
+
+plt.plot(xpoints, ypoints)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong> A line chart that:</p>
+<ul class="v2-ul"><li>Starts at (1, 3)</li><li>Goes up to (2, 8)</li><li>Drops down to (6, 1)</li><li>Goes back up to (8, 10)</li></ul>
+<p class="v2-p"><strong>Line-by-line:</strong></p>
+<ul class="v2-ul"><li><code>xpoints = np.array([1, 2, 6, 8])</code> → four x-positions</li><li><code>ypoints = np.array([3, 8, 1, 10])</code> → four corresponding y-positions</li><li>Matplotlib connects them in order: (1,3) → (2,8) → (6,1) → (8,10)</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Critical rule:</strong> Both arrays must have the <strong>same number of values</strong>. If <code>xpoints</code> has 4 values, <code>ypoints</code> must also have exactly 4 values. Otherwise you get an error.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 4: Plotting with Default X-Points</h3>
+<p class="v2-p">If you only provide y-values and leave out the x-values, Matplotlib automatically assigns x-values starting from 0:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+# Only y-values provided
+ypoints = np.array([3, 8, 1, 10, 5, 7])
+
+plt.plot(ypoints)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong> A line chart where:</p>
+<ul class="v2-ul"><li>x-axis goes 0, 1, 2, 3, 4, 5 (automatically assigned)</li><li>y-axis shows the values: 3, 8, 1, 10, 5, 7</li></ul>
+<p class="v2-p"><strong>So the plotted points are:</strong> (0,3), (1,8), (2,1), (3,10), (4,5), (5,7)</p>
+<p class="v2-p"><strong>When is this useful?</strong> When your data is in sequence and the index (position number) is the natural x-axis · for example, daily temperatures for a week, where day 0 = Monday, day 1 = Tuesday, etc.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would happen if you provided 10 y-values? What would the x-axis go up to?</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Matplotlib Plotting · Drawing Points and Lines</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 9</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1: Simple Correlation Finder</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>corr()</code> to discover relationships in student data.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have data from 8 students tracking study time, sleep, and test scores.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Copy and run this code:</li></ol></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+
+data = {
+    &#x27;Study_Hours&#x27;: [2, 5, 3, 8, 1, 6, 4, 7],
+    &#x27;Sleep_Hours&#x27;: [6, 7, 5, 8, 4, 8, 6, 7],
+    &#x27;Test_Score&#x27;:  [55, 78, 60, 95, 40, 88, 70, 90],
+    &#x27;Phone_Hours&#x27;: [5, 2, 4, 1, 7, 1, 3, 2]
+}
+
+df = pd.DataFrame(data)
+print(df.corr())</code></pre></div></div>
+<ol class="v2-ol"><li>Look at each pair and answer:</li></ol>
+<p class="v2-p"><strong>Self-check Questions:</strong></p>
+<ul class="v2-ul"><li>What is the correlation between Study_Hours and Test_Score? Is it strong?</li><li>What is the correlation between Phone_Hours and Test_Score? Positive or negative?</li><li>What does the diagonal always equal?</li><li>Would you expect more phone use to lead to lower or higher scores?</li></ul>
+<p class="v2-p"><strong>Expected Output (approximate):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>              Study_Hours  Sleep_Hours  Test_Score  Phone_Hours
+Study_Hours      1.000000     0.697539    0.993180    -0.996386
+Sleep_Hours      0.697539     1.000000    0.746671    -0.707764
+Test_Score       0.993180     0.746671    1.000000    -0.991474
+Phone_Hours     -0.996386    -0.707764   -0.991474     1.000000</code></pre></div></div>
+<p class="v2-p"><strong>What to notice:</strong></p>
+<ul class="v2-ul"><li>Study_Hours vs Test_Score ≈ <code>0.993</code> · incredibly strong positive correlation!</li><li>Phone_Hours vs Test_Score ≈ <code>-0.991</code> · incredibly strong <em>negative</em> correlation. More phone time → much lower scores.</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2: Scatter Plot to Confirm Correlations</h3>
+<p class="v2-p"><strong>Objective:</strong> Visualise two pairs of data · one with strong correlation, one without.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have production data from a factory.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+
+# Factory data
+data = {
+    &#x27;Machine_Hours&#x27;: [2, 4, 6, 8, 10, 12, 14, 16],
+    &#x27;Units_Made&#x27;:    [18, 38, 55, 80, 99, 120, 142, 160],
+    &#x27;Coffee_Breaks&#x27;: [3, 1, 4, 2, 5, 2, 3, 1]
+}
+
+df = pd.DataFrame(data)
+
+# First: check correlations
+print(df.corr())
+
+# Second: scatter plot Machine_Hours vs Units_Made (should show strong correlation)
+df.plot(kind=&#x27;scatter&#x27;, x=&#x27;Machine_Hours&#x27;, y=&#x27;Units_Made&#x27;)
+plt.title(&#x27;Machine Hours vs Units Made&#x27;)
+plt.show()
+
+# Third: scatter plot Machine_Hours vs Coffee_Breaks (should show no correlation)
+df.plot(kind=&#x27;scatter&#x27;, x=&#x27;Machine_Hours&#x27;, y=&#x27;Coffee_Breaks&#x27;)
+plt.title(&#x27;Machine Hours vs Coffee Breaks&#x27;)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> The first scatter plot shows an upward diagonal (strong positive correlation). The second shows dots scattered randomly (no correlation).</p>
+<p class="v2-p"><strong>Optional challenge:</strong> Can you add a histogram showing the distribution of Units_Made?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3: Plotting a Custom Line with Matplotlib</h3>
+<p class="v2-p"><strong>Objective:</strong> Draw a Matplotlib line chart from scratch.</p>
+<p class="v2-p"><strong>Scenario:</strong> Track the temperature in a city over 6 days.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import numpy as np
+
+# Days of the week (x-axis)
+days = np.array([1, 2, 3, 4, 5, 6])
+
+# Temperature in Celsius (y-axis)
+temperature = np.array([22, 25, 28, 24, 19, 23])
+
+# Draw the line
+plt.plot(days, temperature)
+
+# Show the chart
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong> A line chart showing temperature going up from day 1 to 3, then dropping on day 5, then slightly recovering on day 6.</p>
+<p class="v2-p"><strong>What-if challenge:</strong> What happens if you change <code>plt.plot(days, temperature)</code> to <code>plt.plot(days, temperature, 'o')</code>? Try it!</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(8)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 9</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1: Forgetting <code>plt.show()</code></h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>plt.plot(x, y)
+# Nothing appears on screen!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>plt.plot(x, y)
+plt.show()  # This is what actually displays the chart</code></pre></div></div>
+<p class="v2-p"><strong>Why it happens:</strong> Beginners think drawing the chart and displaying it are the same step. They're not. <code>plt.plot()</code> prepares the chart in memory; <code>plt.show()</code> opens the window.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2: Different Array Lengths</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = np.array([1, 2, 3, 4])    # 4 values
+y = np.array([10, 20, 30])     # only 3 values!
+plt.plot(x, y)  # ERROR!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = np.array([1, 2, 3, 4])    # 4 values
+y = np.array([10, 20, 30, 40]) # also 4 values
+plt.plot(x, y)  # Works!</code></pre></div></div>
+<p class="v2-p"><strong>Rule:</strong> x and y arrays must always have the <strong>exact same number of elements</strong>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3: Using <code>.corr()</code> on Non-Numeric Data</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>data = {&#x27;Name&#x27;: [&#x27;Alice&#x27;, &#x27;Bob&#x27;, &#x27;Charlie&#x27;], &#x27;Score&#x27;: [85, 90, 78]}
+df = pd.DataFrame(data)
+print(df.corr())  # Only &#x27;Score&#x27; will appear — Name is text, not a number</code></pre></div></div>
+<p class="v2-p"><strong>Correct understanding:</strong> <code>.corr()</code> <strong>automatically ignores</strong> text columns. Only numeric columns participate in the correlation calculation. This is not an error · it is by design.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4: Misreading the Correlation Table</h3>
+<p class="v2-p"><strong>Wrong thinking:</strong> "The number in row Duration, column Calories is different from row Calories, column Duration."</p>
+<p class="v2-p"><strong>Correct:</strong> The table is <strong>symmetric</strong>. The value at (Duration, Calories) = the value at (Calories, Duration). They are always the same.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5: Importing Without Aliases</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot
+matplotlib.pyplot.plot(x, y)  # Very tedious to type!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+plt.plot(x, y)  # Much cleaner!</code></pre></div></div>
+<p class="v2-p">The <code>as plt</code> shortcut is not required, but it is standard practice and makes your code much easier to read and write.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6: Using One Underscore in <code>__version__</code></h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(matplotlib._version_)   # One underscore each side — Error!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(matplotlib.__version__)  # Two underscores each side — Correct!</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"> · ### Mistake 6: Using One Underscore in __version__
+
+Wrong:
+`python
+print(matplotlib._version_)   # One underscore each side · Error!
+`
+
+Correct:
+`python
+print(matplotlib.__version__)  # Two underscores each side · Correct!
+` · </div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Project Goal</div><div class="build-req"><p class="v2-p">Let's combine everything from this lesson into a realistic mini-project that a fitness coach might actually use.</p>
+<h3 class="v2-h3">Project Goal</h3>
+<p class="v2-p">Analyse workout data to:</p>
+<ol class="v2-ol"><li>Find which factors are most strongly correlated with calories burned</li><li>Draw visual charts to present the findings</li><li>Summarise your conclusions</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1: Setup · Create the Data</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Simulate workout data for 10 sessions
+workout_data = {
+    &#x27;Duration_min&#x27;: [30, 45, 60, 75, 90, 30, 45, 60, 75, 90],
+    &#x27;Avg_Pulse&#x27;:    [110, 120, 115, 125, 130, 105, 118, 122, 128, 135],
+    &#x27;Max_Pulse&#x27;:    [135, 145, 142, 155, 160, 130, 143, 150, 158, 165],
+    &#x27;Intensity_1to10&#x27;: [4, 6, 5, 7, 8, 3, 5, 6, 7, 9],
+    &#x27;Calories&#x27;:     [240, 380, 450, 560, 680, 200, 350, 460, 570, 710]
+}
+
+df = pd.DataFrame(workout_data)
+print(&quot;=== Workout Data ===&quot;)
+print(df)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Simulate workout data for 10 sessions
+workout_data = {
+    'Duration_min': [30, 45, 60, 75, 90, 30, 45, 60, 75, 90],
+    'Avg_Pulse':    [110, 120, 115, 125, 130, 105, 118, 122, 128, 135],
+    'Max_Pulse':    [135, 145, 142, 155, 160, 130, 143, 150, 158, 165],
+    'Intensity_1to10': [4, 6, 5, 7, 8, 3, 5, 6, 7, 9],
+    'Calories':     [240, 380, 450, 560, 680, 200, 350, 460, 570, 710]
+}
+
+df = pd.DataFrame(workout_data)
+print(&quot;=== Workout Data ===&quot;)
+print(df)`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-31-project-goal</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 31 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 31 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1: Pandas · Data Correlations</li><li>✅ Part 2: Pandas · Plotting</li><li>✅ Part 3: Introduction to Matplotlib</li><li>✅ Part 4: Matplotlib · The Pyplot Submodule</li><li>✅ Part 5: Matplotlib Plotting · Drawing Points and Lines</li><li>✅ Guided Practice Exercises</li></ul><div class="ln"><a href="lesson_30.html" class="ln-btn">&#8592; Lesson 30</a><a href="lesson_32.html" class="ln-btn primary">Lesson 32 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 31 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

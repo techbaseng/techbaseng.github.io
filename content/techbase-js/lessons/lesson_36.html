@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 36: JavaScript Meta Programming: Meta Programming Concepts · Reflect API · Proxy API · Complete Reference — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="50" data-key="techbase_js_l36">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 36 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 36</div>
+      <h1>JavaScript Meta Programming: Meta Programming Concepts · Reflect API · Proxy API · Complete Reference</h1>
+      <div class="l-hero-sub">50 phases &nbsp;·&nbsp; Build: Lesson 36 Project</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 36</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 50 phases</span><span>🏗️ Lesson 36 Project</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 50</div><div class="pt">The Core Idea</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p"><strong>Meta programming</strong> means writing code that has knowledge of · or control over · other code at runtime. The prefix "meta" means "about itself": meta programming is <strong>programming about programming</strong>.</p>
+<p class="v2-p">In practical terms, meta programming lets you:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Goal</th><th>Example</th></tr></thead><tbody><tr><td><strong>Intercept</strong> property access</td><td>Log every time any property on an object is read</td></tr><tr><td><strong>Intercept</strong> property writes</td><td>Validate data before it's stored on an object</td></tr><tr><td><strong>Intercept</strong> function calls</td><td>Measure how long any function takes to run</td></tr><tr><td><strong>Reflect</strong> on code structure</td><td>Ask: "Does this object have this property?"</td></tr><tr><td><strong>Create</strong> new behaviour dynamically</td><td>Build objects that respond intelligently to any property name</td></tr><tr><td><strong>Protect</strong> objects</td><td>Make objects that refuse invalid operations</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Core Idea</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 50</div><div class="pt">1.1 · Real-World Analogy: The Hotel Concierge</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Imagine a hotel with a <strong>concierge</strong> standing between you and all hotel services. Instead of going directly to housekeeping, the restaurant, or the spa, every request goes through the concierge first.</p>
+<p class="v2-p">The concierge can:</p>
+<ul class="v2-ul"><li><strong>Allow</strong> the request and pass it through unchanged</li><li><strong>Modify</strong> the request before passing it on ("I'll upgrade your room")</li><li><strong>Reject</strong> the request ("The spa is closed")</li><li><strong>Log</strong> the request ("Noting that Room 204 asked for towels at 2pm")</li><li><strong>Fake</strong> a response entirely ("The restaurant is fully booked · I'll tell you it's open to avoid disappointing you")</li></ul>
+<p class="v2-p">This is exactly what a <strong>Proxy</strong> does in JavaScript: it stands between your code and an object, intercepting every interaction.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.1 · Real-World Analogy: The Hotel Concierge</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 50</div><div class="pt">1.2 · Before Meta Programming: The Limitations</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Without meta programming tools, JavaScript has no built-in way to intercept property access. You can't say "run this code whenever anyone reads or writes any property on this object."</p>
+<p class="v2-p">You can fake it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Manual approach — tedious and doesn&#x27;t scale:
+const user = {
+  _name: &quot;Alice&quot;,
+  get name() {
+    console.log(&quot;name was read&quot;);    // Only works for known properties
+    return this._name;
+  },
+  set name(val) {
+    console.log(&quot;name was written&quot;); // Must write this for EVERY property
+    this._name = val;
+  }
+};</code></pre></div></div>
+<p class="v2-p">This only works if you know every property name in advance and manually write getters/setters for each. If the object has 50 properties · or unknown properties · this falls apart.</p>
+<p class="v2-p"><strong>Meta programming solves this.</strong> With <code>Proxy</code>, one handler intercepts operations on <em>any</em> property, known or unknown.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.2 · Before Meta Programming: The Limitations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 50</div><div class="pt">1.3 · The Two Pillars: Reflect and Proxy</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">JavaScript's meta programming is built on two APIs introduced in ES6 (2015):</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>API</th><th>Role</th><th>Analogy</th></tr></thead><tbody><tr><td><strong><code>Reflect</code></strong></td><td>A clean, functional interface to JavaScript's fundamental operations</td><td>A standardised set of tools for directly performing built-in operations</td></tr><tr><td><strong><code>Proxy</code></strong></td><td>A wrapper that intercepts operations on an object</td><td>The hotel concierge · intercepts every request</td></tr></tbody></table></div>
+<p class="v2-p">They are designed to work together: <code>Proxy</code> traps intercept operations; <code>Reflect</code> methods perform the default version of those same operations. You'll see this combination constantly.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.3 · The Two Pillars: Reflect and Proxy</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 50</div><div class="pt">1.4 · What Can Be Intercepted?</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">JavaScript defines a set of <strong>fundamental operations</strong> · the basic things that can happen to an object. Both <code>Reflect</code> and <code>Proxy</code> are organised around this same list:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Fundamental Operation</th><th>When It Happens</th></tr></thead><tbody><tr><td><code>get</code></td><td>Reading a property: <code>obj.name</code></td></tr><tr><td><code>set</code></td><td>Writing a property: <code>obj.name = "Alice"</code></td></tr><tr><td><code>has</code></td><td>Checking existence: <code>"name" in obj</code></td></tr><tr><td><code>deleteProperty</code></td><td>Deleting: <code>delete obj.name</code></td></tr><tr><td><code>apply</code></td><td>Calling a function: <code>fn()</code></td></tr><tr><td><code>construct</code></td><td>Creating with new: <code>new MyClass()</code></td></tr><tr><td><code>defineProperty</code></td><td><code>Object.defineProperty(obj, ...)</code></td></tr><tr><td><code>getOwnPropertyDescriptor</code></td><td><code>Object.getOwnPropertyDescriptor(obj, ...)</code></td></tr><tr><td><code>getPrototypeOf</code></td><td><code>Object.getPrototypeOf(obj)</code></td></tr><tr><td><code>setPrototypeOf</code></td><td><code>Object.setPrototypeOf(obj, proto)</code></td></tr><tr><td><code>isExtensible</code></td><td><code>Object.isExtensible(obj)</code></td></tr><tr><td><code>preventExtensions</code></td><td><code>Object.preventExtensions(obj)</code></td></tr><tr><td><code>ownKeys</code></td><td><code>Object.keys(obj)</code>, <code>for...in</code>, <code>Object.getOwnPropertyNames()</code></td></tr></tbody></table></div>
+<p class="v2-p">Every one of these can be intercepted with a Proxy trap and performed reflectively with <code>Reflect</code>.</p>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 2 · THE REFLECT API</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.4 · What Can Be Intercepted?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 50</div><div class="pt">What Is Reflect?</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p"><code>Reflect</code> is a built-in object · not a constructor (you never write <code>new Reflect()</code>) · that provides <strong>static methods for interceptable JavaScript operations</strong>. Every method on <code>Reflect</code> corresponds directly to a fundamental operation from the list above.</p>
+<p class="v2-p"><strong>Why does Reflect exist if these operations already worked without it?</strong></p>
+<p class="v2-p">Three reasons:</p>
+<ol class="v2-ol"><li><strong>Consistency</strong> · Before <code>Reflect</code>, these operations were scattered across <code>Object</code>, function calls, and operators. <code>Reflect</code> puts them all in one place with a uniform API.</li><li><strong>Return values</strong> · Old methods either threw errors or returned the object for chaining. <code>Reflect</code> methods return meaningful values: <code>true</code>/<code>false</code> for success/failure.</li><li><strong>Proxy companion</strong> · Inside Proxy traps, <code>Reflect</code> is the clean, safe way to perform the <em>default</em> operation after your custom logic runs.</li></ol>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is Reflect?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 50</div><div class="pt">2.1 · `Reflect.get()` · Reading a Property</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>obj[key]</code> but as a function call:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const person = { name: &quot;Alice&quot;, age: 30 };
+
+// Traditional:
+console.log(person.name);           // Output: Alice
+console.log(person[&quot;age&quot;]);         // Output: 30
+
+// Reflect:
+console.log(Reflect.get(person, &quot;name&quot;));   // Output: Alice
+console.log(Reflect.get(person, &quot;age&quot;));    // Output: 30</code></pre></div></div>
+<p class="v2-p"><strong>With a custom <code>this</code> (the <code>receiver</code> argument):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const obj = {
+  _value: 42,
+  get value() { return this._value; }
+};
+
+const other = { _value: 99 };
+
+// Read obj&#x27;s &#x27;value&#x27; getter, but with &#x27;other&#x27; as &#x27;this&#x27;:
+console.log(Reflect.get(obj, &quot;value&quot;, other));   // Output: 99</code></pre></div></div>
+<p class="v2-p">The third argument <code>receiver</code> overrides what <code>this</code> is inside getters. This is used by Proxy to ensure getters on the target receive the proxy as <code>this</code>, not the raw target.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.1 · <code>Reflect.get()</code> · Reading a Property</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 50</div><div class="pt">2.2 · `Reflect.set()` · Writing a Property</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>obj[key] = value</code> but returns a boolean:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const car = { brand: &quot;Toyota&quot;, speed: 0 };
+
+const success = Reflect.set(car, &quot;speed&quot;, 60);
+console.log(success);       // Output: true
+console.log(car.speed);     // Output: 60
+
+// On a frozen object — returns false instead of throwing:
+const frozen = Object.freeze({ x: 1 });
+const result = Reflect.set(frozen, &quot;x&quot;, 99);
+console.log(result);    // Output: false  ← did not succeed
+console.log(frozen.x);  // Output: 1     ← unchanged</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Why <code>true</code>/<code>false</code> matters:</strong> The old way of setting a property (<code>obj[key] = value</code>) silently fails on frozen/sealed objects (or throws in strict mode). <code>Reflect.set</code> always returns <code>false</code> on failure · no exception needed, no silent ignore. Your code can react to the result.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.2 · <code>Reflect.set()</code> · Writing a Property</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 50</div><div class="pt">2.3 · `Reflect.has()` · Checking Property Existence</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Equivalent to the <code>in</code> operator:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const book = { title: &quot;1984&quot;, author: &quot;Orwell&quot; };
+
+console.log(&quot;title&quot;  in book);               // Output: true
+console.log(Reflect.has(book, &quot;title&quot;));      // Output: true
+console.log(Reflect.has(book, &quot;publisher&quot;));  // Output: false
+
+// Also checks prototype chain, just like &#x27;in&#x27;:
+console.log(Reflect.has(book, &quot;toString&quot;));   // Output: true  ← from Object.prototype</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.3 · <code>Reflect.has()</code> · Checking Property Existence</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 50</div><div class="pt">2.4 · `Reflect.deleteProperty()` · Deleting a Property</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>delete obj[key]</code>, but returns a boolean:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const config = { host: &quot;localhost&quot;, port: 3000, debug: true };
+
+console.log(Reflect.deleteProperty(config, &quot;debug&quot;));   // Output: true
+console.log(config);   // Output: { host: &#x27;localhost&#x27;, port: 3000 }
+
+// On a non-configurable property — returns false:
+const obj = {};
+Object.defineProperty(obj, &quot;id&quot;, { value: 1, configurable: false });
+console.log(Reflect.deleteProperty(obj, &quot;id&quot;));   // Output: false
+console.log(obj.id);                               // Output: 1  ← still there</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.4 · <code>Reflect.deleteProperty()</code> · Deleting a Property</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 50</div><div class="pt">2.5 · `Reflect.apply()` · Calling a Function</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>Function.prototype.apply()</code> but cleaner:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function greet(greeting, punctuation) {
+  return greeting + &quot;, &quot; + this.name + punctuation;
+}
+
+const person = { name: &quot;Alice&quot; };
+
+// Old way:
+const result1 = Function.prototype.apply.call(greet, person, [&quot;Hello&quot;, &quot;!&quot;]);
+
+// Reflect way — much cleaner:
+const result2 = Reflect.apply(greet, person, [&quot;Hello&quot;, &quot;!&quot;]);
+
+console.log(result1);   // Output: Hello, Alice!
+console.log(result2);   // Output: Hello, Alice!</code></pre></div></div>
+<p class="v2-p"><code>Reflect.apply(targetFn, thisArg, argsArray)</code> · identical semantics to <code>fn.apply(thisArg, argsArray)</code> but works even if <code>fn.apply</code> has been overridden.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.5 · <code>Reflect.apply()</code> · Calling a Function</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 50</div><div class="pt">2.6 · `Reflect.construct()` · Calling a Constructor</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>new Constructor(...args)</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Point {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+// Traditional:
+const p1 = new Point(3, 4);
+
+// Reflect:
+const p2 = Reflect.construct(Point, [3, 4]);
+
+console.log(p1);   // Output: Point { x: 3, y: 4 }
+console.log(p2);   // Output: Point { x: 3, y: 4 }</code></pre></div></div>
+<p class="v2-p"><strong>Advanced use · constructing an instance of one class using another's constructor:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Base {
+  constructor(value) { this.value = value; }
+}
+
+class Derived extends Base {}
+
+// Create an instance whose prototype chain follows &#x27;Derived&#x27;,
+// but initialised using &#x27;Base&#x27;s constructor:
+const obj = Reflect.construct(Base, [42], Derived);
+
+console.log(obj instanceof Derived);  // Output: true
+console.log(obj.value);               // Output: 42</code></pre></div></div>
+<p class="v2-p">This is how transpilers (like Babel) implement <code>super()</code> calls.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.6 · <code>Reflect.construct()</code> · Calling a Constructor</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 50</div><div class="pt">2.7 · `Reflect.defineProperty()` · Defining a Property Descriptor</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>Object.defineProperty()</code> but returns a boolean instead of throwing:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const obj = {};
+
+const success = Reflect.defineProperty(obj, &quot;id&quot;, {
+  value:        1001,
+  writable:     false,
+  enumerable:   true,
+  configurable: false
+});
+
+console.log(success);   // Output: true
+console.log(obj.id);    // Output: 1001</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.7 · <code>Reflect.defineProperty()</code> · Defining a Property Descriptor</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 50</div><div class="pt">2.8 · `Reflect.getOwnPropertyDescriptor()` · Reading a Descriptor</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p">Equivalent to <code>Object.getOwnPropertyDescriptor()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const user = { name: &quot;Alice&quot; };
+
+const desc = Reflect.getOwnPropertyDescriptor(user, &quot;name&quot;);
+console.log(desc);
+// Output: { value: &#x27;Alice&#x27;, writable: true, enumerable: true, configurable: true }</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.8 · <code>Reflect.getOwnPropertyDescriptor()</code> · Reading a Descriptor</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 50</div><div class="pt">2.9 · `Reflect.getPrototypeOf()` and `Reflect.setPrototypeOf()`</div><div class="pc" id="chk15"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Animal {}
+class Dog extends Animal {}
+
+const rex = new Dog();
+
+// Get:
+console.log(Reflect.getPrototypeOf(rex) === Dog.prototype);      // Output: true
+console.log(Reflect.getPrototypeOf(Dog.prototype) === Animal.prototype); // Output: true
+
+// Set:
+const base = { type: &quot;generic&quot; };
+const child = { name: &quot;child&quot; };
+
+Reflect.setPrototypeOf(child, base);
+console.log(child.type);   // Output: generic  ← inherited</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.9 · <code>Reflect.getPrototypeOf()</code> and <code>Reflect.setPrototypeOf()</code></strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase16"><div class="ph"><div class="pn">Phase 16 of 50</div><div class="pt">2.10 · `Reflect.ownKeys()` · All Own Property Keys</div><div class="pc" id="chk16"></div></div><div class="pb2"><p class="v2-p">Returns all own keys · including non-enumerable ones and Symbol keys:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const sym = Symbol(&quot;id&quot;);
+const obj = {
+  name:  &quot;Alice&quot;,
+  age:   30,
+  [sym]: 9999
+};
+
+Object.defineProperty(obj, &quot;hidden&quot;, { value: &quot;secret&quot;, enumerable: false });
+
+console.log(Object.keys(obj));           // Output: [&#x27;name&#x27;, &#x27;age&#x27;]           ← enumerable only
+console.log(Reflect.ownKeys(obj));       // Output: [&#x27;name&#x27;, &#x27;age&#x27;, &#x27;hidden&#x27;, Symbol(id)]  ← everything</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong><code>Reflect.ownKeys</code> = <code>Object.getOwnPropertyNames</code> + <code>Object.getOwnPropertySymbols</code></strong> combined into one call.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.10 · <code>Reflect.ownKeys()</code> · All Own Property Keys</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(16)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase17"><div class="ph"><div class="pn">Phase 17 of 50</div><div class="pt">2.11 · `Reflect.isExtensible()` and `Reflect.preventExtensions()`</div><div class="pc" id="chk17"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const obj = { x: 1 };
+
+console.log(Reflect.isExtensible(obj));   // Output: true
+
+Reflect.preventExtensions(obj);
+
+console.log(Reflect.isExtensible(obj));   // Output: false
+Reflect.set(obj, &quot;y&quot;, 2);                 // Fails silently
+console.log(obj.y);                       // Output: undefined</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.11 · <code>Reflect.isExtensible()</code> and <code>Reflect.preventExtensions()</code></strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(17)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase18"><div class="ph"><div class="pn">Phase 18 of 50</div><div class="pt">2.12 · Why Use Reflect Instead of Direct Operations?</div><div class="pc" id="chk18"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Scenario</th><th>Direct Operation</th><th>Problem</th><th>Reflect Solution</th></tr></thead><tbody><tr><td>Delete a property</td><td><code>delete obj.key</code> returns boolean but looks like a statement</td><td>Confusing mixed syntax</td><td><code>Reflect.deleteProperty(obj, key)</code> → clear boolean</td></tr><tr><td>Set on frozen object</td><td><code>obj.key = val</code> silently fails or throws</td><td>Unpredictable</td><td><code>Reflect.set(obj, key, val)</code> → always returns <code>false</code></td></tr><tr><td>Apply with overridden <code>.apply</code></td><td><code>fn.apply(ctx, args)</code> · fails if <code>apply</code> is overridden</td><td>Fragile</td><td><code>Reflect.apply(fn, ctx, args)</code> · always works</td></tr><tr><td>Inside Proxy traps</td><td>No default behaviour path</td><td>Must re-implement manually</td><td><code>Reflect.method(target, ...)</code> · forwards to default</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>Thinking question:</strong> <code>Reflect.set</code> returns <code>false</code> when setting a property on a frozen object. <code>Object.assign</code> doesn't check the return value of each set · it will silently fail on frozen objects. What problem could this cause in real code?</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 3 · THE PROXY API</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.12 · Why Use Reflect Instead of Direct Operations?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(18)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase19"><div class="ph"><div class="pn">Phase 19 of 50</div><div class="pt">What Is a Proxy?</div><div class="pc" id="chk19"></div></div><div class="pb2"><p class="v2-p">A <strong>Proxy</strong> wraps an object (called the <strong>target</strong>) and intercepts operations performed on it. Every time code tries to read, write, delete, or call anything on the proxy, a <strong>trap</strong> function runs first.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Code ──► Proxy (traps run here) ──► Target Object
+                │
+          You control what
+          happens at each step</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is a Proxy?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(19)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase20"><div class="ph"><div class="pn">Phase 20 of 50</div><div class="pt">3.1 · Creating a Proxy</div><div class="pc" id="chk20"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const proxy = new Proxy(target, handler);</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Parameter</th><th>Description</th></tr></thead><tbody><tr><td><code>target</code></td><td>The original object being wrapped</td></tr><tr><td><code>handler</code></td><td>An object containing trap functions</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Minimal example · a transparent proxy (no traps = pure passthrough):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const target = { name: &quot;Alice&quot;, age: 30 };
+const proxy  = new Proxy(target, {});   // Empty handler = no interception
+
+console.log(proxy.name);   // Output: Alice  ← just like accessing target directly
+proxy.age = 31;
+console.log(target.age);   // Output: 31  ← changes flow through to target</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.1 · Creating a Proxy</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(20)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase21"><div class="ph"><div class="pn">Phase 21 of 50</div><div class="pt">3.2 · The `get` Trap · Intercepting Property Reads</div><div class="pc" id="chk21"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const handler = {
+  get(target, property, receiver) {
+    console.log(`GET: &quot;${property}&quot; was read`);
+    return Reflect.get(target, property, receiver);   // Perform the default operation
+  }
+};
+
+const user = new Proxy({ name: &quot;Alice&quot;, role: &quot;admin&quot; }, handler);
+
+console.log(user.name);
+// GET: &quot;name&quot; was read
+// Output: Alice
+
+console.log(user.role);
+// GET: &quot;role&quot; was read
+// Output: admin</code></pre></div></div>
+<p class="v2-p"><strong>Trap function signature · every trap follows this pattern:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Parameter</th><th>Meaning</th></tr></thead><tbody><tr><td><code>target</code></td><td>The original object being proxied</td></tr><tr><td><code>property</code></td><td>The property name (or Symbol) being accessed</td></tr><tr><td><code>receiver</code></td><td>The proxy itself (or object inheriting from the proxy)</td></tr></tbody></table></div>
+<p class="v2-p"><strong><code>Reflect.get(target, property, receiver)</code></strong> performs the default get · exactly what would happen without the proxy. Always call the Reflect equivalent at the end of your trap (unless you intentionally want to suppress the default behaviour).</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.2 · The <code>get</code> Trap · Intercepting Property Reads</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(21)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase22"><div class="ph"><div class="pn">Phase 22 of 50</div><div class="pt">3.3 · Default Values for Missing Properties</div><div class="pc" id="chk22"></div></div><div class="pb2"><p class="v2-p">A <code>get</code> trap lets you return custom values for properties that don't exist:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const withDefaults = new Proxy({}, {
+  get(target, property) {
+    if (property in target) {
+      return target[property];
+    }
+    return `[Property &quot;${property}&quot; not found — returning default]`;
+  }
+});
+
+withDefaults.name = &quot;Alice&quot;;
+console.log(withDefaults.name);        // Output: Alice
+console.log(withDefaults.age);         // Output: [Property &quot;age&quot; not found — returning default]
+console.log(withDefaults.anything);    // Output: [Property &quot;anything&quot; not found — returning default]</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Configuration objects that return sensible defaults for any unset key, i18n translation maps that return the key name when a translation is missing.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.3 · Default Values for Missing Properties</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(22)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase23"><div class="ph"><div class="pn">Phase 23 of 50</div><div class="pt">3.4 · The `set` Trap · Intercepting Property Writes</div><div class="pc" id="chk23"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const handler = {
+  set(target, property, value, receiver) {
+    console.log(`SET: &quot;${property}&quot; = ${JSON.stringify(value)}`);
+
+    // Validation example:
+    if (property === &quot;age&quot; &amp;&amp; (typeof value !== &quot;number&quot; || value &lt; 0 || value &gt; 150)) {
+      throw new TypeError(`Invalid age: ${value}`);
+    }
+
+    return Reflect.set(target, property, value, receiver);   // Perform the actual set
+  }
+};
+
+const person = new Proxy({}, handler);
+
+person.name = &quot;Alice&quot;;
+// SET: &quot;name&quot; = &quot;Alice&quot;
+
+person.age = 30;
+// SET: &quot;age&quot; = 30
+
+person.age = -5;
+// ❌ TypeError: Invalid age: -5</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>The <code>set</code> trap must return <code>true</code> to indicate success</strong> (or <code>false</code> / throw to indicate failure). If you forget the <code>return</code> statement, the trap returns <code>undefined</code> (falsy), which JavaScript treats as a set failure · and in strict mode throws a <code>TypeError</code>. Always <code>return Reflect.set(...)</code> or <code>return true</code>.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.4 · The <code>set</code> Trap · Intercepting Property Writes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(23)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase24"><div class="ph"><div class="pn">Phase 24 of 50</div><div class="pt">3.5 · The `has` Trap · Intercepting `in` Operator</div><div class="pc" id="chk24"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const hiddenRange = new Proxy({ min: 1, max: 100 }, {
+  has(target, property) {
+    // Pretend any number between min and max &quot;exists&quot; in the object:
+    const num = Number(property);
+    if (!isNaN(num)) {
+      return num &gt;= target.min &amp;&amp; num &lt;= target.max;
+    }
+    return Reflect.has(target, property);
+  }
+});
+
+console.log(50  in hiddenRange);   // Output: true   (50 is between 1 and 100)
+console.log(150 in hiddenRange);   // Output: false
+console.log(&quot;min&quot; in hiddenRange); // Output: true   (actual property)</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.5 · The <code>has</code> Trap · Intercepting <code>in</code> Operator</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(24)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase25"><div class="ph"><div class="pn">Phase 25 of 50</div><div class="pt">3.6 · The `deleteProperty` Trap · Intercepting `delete`</div><div class="pc" id="chk25"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const protectedObj = new Proxy(
+  { name: &quot;Alice&quot;, _secret: &quot;password123&quot; },
+  {
+    deleteProperty(target, property) {
+      if (property.startsWith(&quot;_&quot;)) {
+        throw new Error(`Cannot delete protected property: &quot;${property}&quot;`);
+      }
+      console.log(`Deleting &quot;${property}&quot;`);
+      return Reflect.deleteProperty(target, property);
+    }
+  }
+);
+
+delete protectedObj.name;
+// Deleting &quot;name&quot;
+
+delete protectedObj._secret;
+// ❌ Error: Cannot delete protected property: &quot;_secret&quot;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.6 · The <code>deleteProperty</code> Trap · Intercepting <code>delete</code></strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(25)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase26"><div class="ph"><div class="pn">Phase 26 of 50</div><div class="pt">3.7 · The `apply` Trap · Intercepting Function Calls</div><div class="pc" id="chk26"></div></div><div class="pb2"><p class="v2-p">When the proxy wraps a <strong>function</strong>, the <code>apply</code> trap fires whenever the function is called:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function multiply(a, b) {
+  return a * b;
+}
+
+const timedMultiply = new Proxy(multiply, {
+  apply(target, thisArg, argumentsList) {
+    const start  = performance.now();
+    const result = Reflect.apply(target, thisArg, argumentsList);
+    const end    = performance.now();
+    console.log(`multiply(${argumentsList}) = ${result} [${(end - start).toFixed(3)}ms]`);
+    return result;
+  }
+});
+
+timedMultiply(6, 7);    // multiply(6,7) = 42 [0.012ms]
+timedMultiply(100, 50); // multiply(100,50) = 5000 [0.004ms]</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Performance profiling, mocking in tests, access control, argument logging, input sanitisation.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.7 · The <code>apply</code> Trap · Intercepting Function Calls</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(26)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase27"><div class="ph"><div class="pn">Phase 27 of 50</div><div class="pt">3.8 · The `construct` Trap · Intercepting `new`</div><div class="pc" id="chk27"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class User {
+  constructor(name, email) {
+    this.name  = name;
+    this.email = email;
+  }
+}
+
+const TrackedUser = new Proxy(User, {
+  construct(target, argumentsList, newTarget) {
+    console.log(`New ${target.name} created: ${argumentsList[0]}`);
+    const instance = Reflect.construct(target, argumentsList, newTarget);
+    instance.createdAt = new Date().toISOString();
+    return instance;
+  }
+});
+
+const u = new TrackedUser(&quot;Alice&quot;, &quot;alice@example.com&quot;);
+// New User created: Alice
+console.log(u.name);       // Output: Alice
+console.log(u.createdAt);  // Output: current ISO timestamp</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.8 · The <code>construct</code> Trap · Intercepting <code>new</code></strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(27)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase28"><div class="ph"><div class="pn">Phase 28 of 50</div><div class="pt">3.9 · The `ownKeys` Trap · Intercepting Property Enumeration</div><div class="pc" id="chk28"></div></div><div class="pb2"><p class="v2-p">Controls what <code>Object.keys()</code>, <code>for...in</code>, and <code>Object.getOwnPropertyNames()</code> see:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const obj = { name: &quot;Alice&quot;, _private: &quot;secret&quot;, id: 1 };
+
+const filtered = new Proxy(obj, {
+  ownKeys(target) {
+    // Hide properties starting with &#x27;_&#x27;:
+    return Reflect.ownKeys(target).filter(key =&gt; !String(key).startsWith(&quot;_&quot;));
+  },
+  getOwnPropertyDescriptor(target, prop) {
+    // Required: tell the engine all returned keys are &quot;real&quot; properties
+    return { value: target[prop], enumerable: true, configurable: true, writable: true };
+  }
+});
+
+console.log(Object.keys(filtered));   // Output: [&#x27;name&#x27;, &#x27;id&#x27;]  ← _private is hidden
+for (const key in filtered) {
+  console.log(key);   // Output: name, id  ← _private not enumerated
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Why the <code>getOwnPropertyDescriptor</code> trap is also needed:</strong> When JavaScript checks <code>ownKeys</code>, it then verifies each key by calling <code>getOwnPropertyDescriptor</code>. If the descriptor doesn't show <code>enumerable: true, configurable: true</code>, the engine may throw an error or skip the key. Always pair <code>ownKeys</code> with <code>getOwnPropertyDescriptor</code> when hiding properties.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.9 · The <code>ownKeys</code> Trap · Intercepting Property Enumeration</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(28)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase29"><div class="ph"><div class="pn">Phase 29 of 50</div><div class="pt">3.10 · The `defineProperty` Trap · Intercepting Property Definition</div><div class="pc" id="chk29"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const strict = new Proxy({}, {
+  defineProperty(target, property, descriptor) {
+    if (descriptor.value !== undefined &amp;&amp; typeof descriptor.value === &quot;function&quot;) {
+      throw new TypeError(`Functions cannot be stored on this object.`);
+    }
+    console.log(`Defining &quot;${property}&quot;`);
+    return Reflect.defineProperty(target, property, descriptor);
+  }
+});
+
+strict.name = &quot;Alice&quot;;     // Defining &quot;name&quot;
+strict.age  = 30;          // Defining &quot;age&quot;
+
+strict.greet = function() { return &quot;Hi&quot;; };
+// ❌ TypeError: Functions cannot be stored on this object.</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.10 · The <code>defineProperty</code> Trap · Intercepting Property Definition</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(29)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase30"><div class="ph"><div class="pn">Phase 30 of 50</div><div class="pt">3.11 · The `getPrototypeOf` and `setPrototypeOf` Traps</div><div class="pc" id="chk30"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const obj = {};
+
+const liar = new Proxy(obj, {
+  getPrototypeOf(target) {
+    return Array.prototype;   // Pretend to be an array
+  }
+});
+
+console.log(Object.getPrototypeOf(liar) === Array.prototype);  // Output: true
+console.log(liar instanceof Array);                             // Output: true  ← it&#x27;s lying!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Use this with great caution.</strong> Lying about an object's prototype can cause extremely confusing bugs. This trap is primarily useful for implementing virtual objects and testing environments.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.11 · The <code>getPrototypeOf</code> and <code>setPrototypeOf</code> Traps</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(30)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase31"><div class="ph"><div class="pn">Phase 31 of 50</div><div class="pt">3.12 · Revocable Proxies</div><div class="pc" id="chk31"></div></div><div class="pb2"><p class="v2-p">A <strong>revocable proxy</strong> can be disabled after creation. Once revoked, any operation on it throws a <code>TypeError</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const { proxy, revoke } = Proxy.revocable(
+  { name: &quot;Alice&quot;, balance: 1000 },
+  {
+    get(target, prop) {
+      return Reflect.get(target, prop);
+    }
+  }
+);
+
+console.log(proxy.name);     // Output: Alice
+console.log(proxy.balance);  // Output: 1000
+
+revoke();   // Disconnect the proxy
+
+console.log(proxy.name);
+// ❌ TypeError: Cannot perform &#x27;get&#x27; on a proxy that has been revoked</code></pre></div></div>
+<p class="v2-p"><strong>Real-world uses of revocable proxies:</strong></p>
+<ul class="v2-ul"><li>Session tokens: revoke access after logout</li><li>Capability-based security: give a module a proxy to a resource, revoke it when done</li><li>Temporary access windows: allow an operation for exactly N milliseconds, then revoke</li></ul>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.12 · Revocable Proxies</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(31)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase32"><div class="ph"><div class="pn">Phase 32 of 50</div><div class="pt">3.13 · Nested Proxies and the `receiver` Argument</div><div class="pc" id="chk32"></div></div><div class="pb2"><p class="v2-p">When a proxied object has getters, the <code>receiver</code> argument ensures <code>this</code> inside the getter refers to the proxy (not the raw target):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const target = {
+  _count: 0,
+  get count() { return this._count; }   // &#x27;this&#x27; needs to be the proxy to work correctly
+};
+
+const handler = {
+  get(target, property, receiver) {
+    console.log(`Reading: ${property}`);
+    return Reflect.get(target, property, receiver);
+    //                                    ↑ Pass receiver to Reflect.get
+    //                                      so &#x27;this&#x27; inside getters is the proxy
+  }
+};
+
+const proxy = new Proxy(target, handler);
+console.log(proxy.count);
+// Reading: count       ← getter intercepted
+// Reading: _count      ← getter&#x27;s &#x27;this._count&#x27; also intercepted!
+// Output: 0</code></pre></div></div>
+<p class="v2-p">Without passing <code>receiver</code> to <code>Reflect.get</code>, the getter's <code>this._count</code> would access <code>target._count</code> directly, bypassing the proxy's <code>get</code> trap.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.13 · Nested Proxies and the <code>receiver</code> Argument</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(32)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase33"><div class="ph"><div class="pn">Phase 33 of 50</div><div class="pt">3.14 · Complete Handler Trap Reference</div><div class="pc" id="chk33"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Trap</th><th>Triggered By</th><th>Parameters</th><th>Must Return</th></tr></thead><tbody><tr><td><code>get</code></td><td><code>proxy.prop</code>, <code>proxy[key]</code></td><td><code>(target, prop, receiver)</code></td><td>Any value</td></tr><tr><td><code>set</code></td><td><code>proxy.prop = val</code></td><td><code>(target, prop, value, receiver)</code></td><td><code>true</code>/<code>false</code></td></tr><tr><td><code>has</code></td><td><code>key in proxy</code></td><td><code>(target, prop)</code></td><td>Boolean</td></tr><tr><td><code>deleteProperty</code></td><td><code>delete proxy.prop</code></td><td><code>(target, prop)</code></td><td>Boolean</td></tr><tr><td><code>apply</code></td><td><code>proxy()</code></td><td><code>(target, thisArg, args)</code></td><td>Any value</td></tr><tr><td><code>construct</code></td><td><code>new proxy()</code></td><td><code>(target, args, newTarget)</code></td><td>Object</td></tr><tr><td><code>defineProperty</code></td><td><code>Object.defineProperty(proxy, ...)</code></td><td><code>(target, prop, descriptor)</code></td><td>Boolean</td></tr><tr><td><code>getOwnPropertyDescriptor</code></td><td><code>Object.getOwnPropertyDescriptor(proxy, ...)</code></td><td><code>(target, prop)</code></td><td>Descriptor or <code>undefined</code></td></tr><tr><td><code>getPrototypeOf</code></td><td><code>Object.getPrototypeOf(proxy)</code></td><td><code>(target)</code></td><td>Object or <code>null</code></td></tr><tr><td><code>setPrototypeOf</code></td><td><code>Object.setPrototypeOf(proxy, proto)</code></td><td><code>(target, proto)</code></td><td>Boolean</td></tr><tr><td><code>isExtensible</code></td><td><code>Object.isExtensible(proxy)</code></td><td><code>(target)</code></td><td>Boolean</td></tr><tr><td><code>preventExtensions</code></td><td><code>Object.preventExtensions(proxy)</code></td><td><code>(target)</code></td><td>Boolean</td></tr><tr><td><code>ownKeys</code></td><td><code>Object.keys(proxy)</code>, <code>for...in</code></td><td><code>(target)</code></td><td>Array</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.14 · Complete Handler Trap Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(33)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase34"><div class="ph"><div class="pn">Phase 34 of 50</div><div class="pt">3.15 · Proxy Invariants (Rules You Cannot Break)</div><div class="pc" id="chk34"></div></div><div class="pb2"><p class="v2-p">Some traps have <strong>invariants</strong> · rules the JavaScript engine enforces, even if your trap tries to break them. Violating an invariant throws a <code>TypeError</code>:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Invariant</th><th>Rule</th></tr></thead><tbody><tr><td><code>get</code></td><td>Cannot return a different value for a non-writable, non-configurable property</td></tr><tr><td><code>set</code></td><td>Must return <code>false</code> (not <code>true</code>) for non-writable, non-configurable properties</td></tr><tr><td><code>has</code></td><td>Cannot return <code>false</code> for a non-configurable own property</td></tr><tr><td><code>deleteProperty</code></td><td>Cannot return <code>true</code> for a non-configurable property</td></tr><tr><td><code>getPrototypeOf</code></td><td>Must return the actual prototype if target is non-extensible</td></tr><tr><td><code>construct</code></td><td>Must return an object, not a primitive</td></tr></tbody></table></div>
+<p class="v2-p">These invariants exist to maintain JavaScript's fundamental correctness guarantees. They prevent proxies from completely undermining the type system.</p>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 4 · META PROGRAMMING REFERENCE</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.15 · Proxy Invariants (Rules You Cannot Break)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(34)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase35"><div class="ph"><div class="pn">Phase 35 of 50</div><div class="pt">4.1 · Complete Reflect API Reference</div><div class="pc" id="chk35"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Equivalent Operation</th><th>Returns</th></tr></thead><tbody><tr><td><code>Reflect.get(target, key, receiver?)</code></td><td><code>target[key]</code></td><td>Property value</td></tr><tr><td><code>Reflect.set(target, key, value, receiver?)</code></td><td><code>target[key] = value</code></td><td>Boolean</td></tr><tr><td><code>Reflect.has(target, key)</code></td><td><code>key in target</code></td><td>Boolean</td></tr><tr><td><code>Reflect.deleteProperty(target, key)</code></td><td><code>delete target[key]</code></td><td>Boolean</td></tr><tr><td><code>Reflect.apply(fn, thisArg, args)</code></td><td><code>fn.apply(thisArg, args)</code></td><td>Return value of fn</td></tr><tr><td><code>Reflect.construct(Cls, args, newTarget?)</code></td><td><code>new Cls(...args)</code></td><td>New instance</td></tr><tr><td><code>Reflect.defineProperty(target, key, desc)</code></td><td><code>Object.defineProperty(...)</code></td><td>Boolean</td></tr><tr><td><code>Reflect.getOwnPropertyDescriptor(target, key)</code></td><td><code>Object.getOwnPropertyDescriptor(...)</code></td><td>Descriptor or <code>undefined</code></td></tr><tr><td><code>Reflect.getPrototypeOf(target)</code></td><td><code>Object.getPrototypeOf(...)</code></td><td>Object or <code>null</code></td></tr><tr><td><code>Reflect.setPrototypeOf(target, proto)</code></td><td><code>Object.setPrototypeOf(...)</code></td><td>Boolean</td></tr><tr><td><code>Reflect.isExtensible(target)</code></td><td><code>Object.isExtensible(...)</code></td><td>Boolean</td></tr><tr><td><code>Reflect.preventExtensions(target)</code></td><td><code>Object.preventExtensions(...)</code></td><td>Boolean</td></tr><tr><td><code>Reflect.ownKeys(target)</code></td><td><code>Object.getOwnPropertyNames + Symbols</code></td><td>Array of keys</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.1 · Complete Reflect API Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(35)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase36"><div class="ph"><div class="pn">Phase 36 of 50</div><div class="pt">4.2 · Complete Proxy Handler Traps Reference</div><div class="pc" id="chk36"></div></div><div class="pb2"><p class="v2-p"><em>(See the complete table in Section 3.14)</em></p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.2 · Complete Proxy Handler Traps Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(36)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase37"><div class="ph"><div class="pn">Phase 37 of 50</div><div class="pt">4.3 · Proxy vs Object.defineProperty · When to Use Each</div><div class="pc" id="chk37"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Need</th><th><code>Object.defineProperty</code></th><th><code>Proxy</code></th></tr></thead><tbody><tr><td>Intercept one known property</td><td>✅ Simple and performant</td><td>✅ Also works</td></tr><tr><td>Intercept all properties, known or unknown</td><td>❌ Must define per-property</td><td>✅ One handler covers all</td></tr><tr><td>Intercept method calls</td><td>❌ Cannot intercept <code>()</code></td><td>✅ <code>apply</code> trap</td></tr><tr><td>Intercept <code>in</code> operator</td><td>❌ Cannot intercept <code>in</code></td><td>✅ <code>has</code> trap</td></tr><tr><td>Intercept <code>delete</code></td><td>❌ Cannot intercept <code>delete</code></td><td>✅ <code>deleteProperty</code> trap</td></tr><tr><td>Intercept <code>Object.keys()</code></td><td>❌ <code>enumerable: false</code> is close but limited</td><td>✅ <code>ownKeys</code> trap</td></tr><tr><td>Revocable access</td><td>❌ Cannot un-define</td><td>✅ <code>Proxy.revocable()</code></td></tr><tr><td>Performance-critical hot path</td><td>✅ Faster (no overhead)</td><td>⚠️ Some overhead per access</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.3 · Proxy vs Object.defineProperty · When to Use Each</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(37)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase38"><div class="ph"><div class="pn">Phase 38 of 50</div><div class="pt">4.4 · Common Meta Programming Patterns</div><div class="pc" id="chk38"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Pattern</th><th>Mechanism</th><th>Chapter</th></tr></thead><tbody><tr><td>Property access logging</td><td><code>get</code> trap</td><td>3.2</td></tr><tr><td>Input validation</td><td><code>set</code> trap</td><td>3.4</td></tr><tr><td>Default values for missing properties</td><td><code>get</code> trap</td><td>3.3</td></tr><tr><td>Read-only objects</td><td><code>set</code> trap that always returns <code>false</code></td><td>3.4</td></tr><tr><td>Hidden properties</td><td><code>ownKeys</code> + <code>has</code> traps</td><td>3.5, 3.9</td></tr><tr><td>Function timing / profiling</td><td><code>apply</code> trap</td><td>3.7</td></tr><tr><td>Constructor injection</td><td><code>construct</code> trap</td><td>3.8</td></tr><tr><td>Revocable access</td><td><code>Proxy.revocable()</code></td><td>3.12</td></tr><tr><td>Reactive data binding</td><td><code>set</code> trap triggers re-render</td><td>Phase 3</td></tr><tr><td>Negative array indexing (<code>arr[-1]</code>)</td><td><code>get</code> trap</td><td>Exercise 2</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.4 · Common Meta Programming Patterns</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(38)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase39"><div class="ph"><div class="pn">Phase 39 of 50</div><div class="pt">4.5 · Symbols and Meta Programming</div><div class="pc" id="chk39"></div></div><div class="pb2"><p class="v2-p">JavaScript's built-in <strong>Symbol</strong> values are another form of meta programming · they let you define how objects behave with built-in language features.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Range {
+  constructor(from, to) {
+    this.from = from;
+    this.to   = to;
+  }
+
+  // Symbol.iterator — makes Range work in for...of loops:
+  [Symbol.iterator]() {
+    let current = this.from;
+    const last  = this.to;
+    return {
+      next() {
+        return current &lt;= last
+          ? { value: current++, done: false }
+          : { value: undefined, done: true };
+      }
+    };
+  }
+
+  // Symbol.toPrimitive — controls type coercion:
+  [Symbol.toPrimitive](hint) {
+    if (hint === &quot;number&quot;) return this.to - this.from + 1;  // Length of range
+    if (hint === &quot;string&quot;) return `Range(${this.from}–${this.to})`;
+    return true;
+  }
+
+  // Symbol.hasInstance — controls instanceof behaviour:
+  static [Symbol.hasInstance](instance) {
+    return typeof instance === &quot;number&quot;;
+  }
+}
+
+const r = new Range(1, 5);
+
+for (const n of r) process.stdout.write(n + &quot; &quot;);
+// Output: 1 2 3 4 5
+
+console.log(`${r}`);     // Output: Range(1–5)
+console.log(+r);         // Output: 5  (number of items)
+console.log(3 instanceof Range);  // Output: true  (3 is a number!)</code></pre></div></div>
+<p class="v2-p"><strong>Well-known Symbols:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Symbol</th><th>Controls</th></tr></thead><tbody><tr><td><code>Symbol.iterator</code></td><td><code>for...of</code>, spread <code>[...obj]</code>, destructuring</td></tr><tr><td><code>Symbol.toPrimitive</code></td><td>Type coercion (number, string, default)</td></tr><tr><td><code>Symbol.hasInstance</code></td><td><code>instanceof</code> operator</td></tr><tr><td><code>Symbol.toStringTag</code></td><td><code>Object.prototype.toString.call(obj)</code> display</td></tr><tr><td><code>Symbol.species</code></td><td>Which constructor derived classes use</td></tr><tr><td><code>Symbol.isConcatSpreadable</code></td><td>Whether <code>Array.prototype.concat</code> spreads the object</td></tr><tr><td><code>Symbol.asyncIterator</code></td><td><code>for await...of</code> loops</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.5 · Symbols and Meta Programming</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(39)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase40"><div class="ph"><div class="pn">Phase 40 of 50</div><div class="pt">4.6 · Performance Considerations</div><div class="pc" id="chk40"></div></div><div class="pb2"><p class="v2-p">Proxies add overhead to every intercepted operation. For performance-sensitive hot paths:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Profile proxy overhead:
+const plain  = { x: 1 };
+const proxied = new Proxy({ x: 1 }, {
+  get: (t, k) =&gt; Reflect.get(t, k)
+});
+
+console.time(&quot;plain&quot;);
+for (let i = 0; i &lt; 1_000_000; i++) plain.x;
+console.timeEnd(&quot;plain&quot;);    // e.g. ~2ms
+
+console.time(&quot;proxied&quot;);
+for (let i = 0; i &lt; 1_000_000; i++) proxied.x;
+console.timeEnd(&quot;proxied&quot;);  // e.g. ~15ms  ← ~7x slower</code></pre></div></div>
+<p class="v2-p"><strong>Guidelines:</strong></p>
+<ul class="v2-ul"><li>Use proxies for developer-facing APIs, validation, and tooling · where correctness matters more than microsecond performance</li><li>Avoid proxies on hot code paths called millions of times per second (tight loops, rendering)</li><li>Modern engines (V8, SpiderMonkey) optimise simple proxies aggressively; real-world overhead is often negligible</li></ul>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 2 · APPLIED EXERCISES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.6 · Performance Considerations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(40)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase41"><div class="ph"><div class="pn">Phase 41 of 50</div><div class="pt">Exercise 1 · Reflect Practice: Safe Object Operations</div><div class="pc" id="chk41"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Use <code>Reflect</code> methods to perform safer, more predictable object operations than their traditional counterparts.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building a configuration manager that needs to read, write, and inspect settings safely · even if those settings have been frozen or have custom descriptors.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 1 · Reflect Practice: Safe Object Operations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Traditional way — throws on frozen objects in strict mode:
+const cfg = Object.freeze({ debug: false });
+try {
+  cfg.debug = true;   // Throws TypeError in strict mode
+} catch (e) {
+  console.log(e.message);
+}
+
+// Reflect way — returns false, never throws:
+const result = Reflect.set(cfg, &quot;debug&quot;, true);
+console.log(result);   // Output: false  — clean signal without exception</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create a <code>ConfigManager</code> class that stores settings in a plain object internally.</li><li>Write a <code>safeGet(key, defaultValue)</code> method using <code>Reflect.has</code> and <code>Reflect.get</code>.</li><li>Write a <code>safeSet(key, value)</code> method using <code>Reflect.set</code> that returns <code>true/false</code> without throwing.</li><li>Write a <code>safeDelete(key)</code> method using <code>Reflect.deleteProperty</code>.</li><li>Write a <code>listKeys()</code> method using <code>Reflect.ownKeys</code> that separates string keys from Symbol keys.</li><li>Test with both normal and frozen objects.</li></ol>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>What does <code>Reflect.ownKeys()</code> return that <code>Object.keys()</code> does not?</li><li>In what scenario would <code>Reflect.set</code> return <code>false</code> even on a non-frozen object?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(41)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase42"><div class="ph"><div class="pn">Phase 42 of 50</div><div class="pt">Exercise 2 · Proxy: Negative Array Indexing</div><div class="pc" id="chk42"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Use a <code>get</code> trap to support Python-style negative indexing on JavaScript arrays.</p>
+<p class="v2-p"><strong>Scenario:</strong> In Python, <code>arr[-1]</code> returns the last element, <code>arr[-2]</code> the second-to-last, etc. JavaScript does not support this natively. Use a Proxy to add this behaviour.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 2 · Proxy: Negative Array Indexing</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr  = [10, 20, 30, 40, 50];
+const last = arr[arr.length - 1];
+console.log(last);   // Output: 50  ← clunky</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Write a <code>createNegativeArray(arr)</code> function that returns a Proxy-wrapped array.</li><li>In the <code>get</code> trap, detect when the property is a numeric string. Convert it to a number.</li><li>If the number is negative, convert to <code>arr.length + index</code> before forwarding.</li><li>If the number is non-negative or the property is non-numeric (e.g., <code>"length"</code>, <code>"push"</code>), fall through to <code>Reflect.get</code>.</li><li>Test:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const nums = createNegativeArray([10, 20, 30, 40, 50]);
+console.log(nums[-1]);   // Output: 50
+console.log(nums[-2]);   // Output: 40
+console.log(nums[0]);    // Output: 10
+console.log(nums.length); // Output: 5
+nums.push(60);
+console.log(nums[-1]);   // Output: 60  ← works after mutation</code></pre></div></div>
+<p class="v2-p"><strong>Hint:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>get(target, property, receiver) {
+  const index = Number(property);
+  if (Number.isInteger(index) &amp;&amp; index &lt; 0) {
+    return Reflect.get(target, target.length + index, receiver);
+  }
+  return Reflect.get(target, property, receiver);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why must you check <code>Number.isInteger(index)</code> rather than just <code>!isNaN(index)</code>?</li><li>What happens to <code>nums.map()</code>, <code>nums.filter()</code>, and other array methods? Do they still work? Why?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(42)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase43"><div class="ph"><div class="pn">Phase 43 of 50</div><div class="pt">Exercise 3 · Proxy: Type-Enforced Object (Typed Properties)</div><div class="pc" id="chk43"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Create a proxy-based schema validator that enforces type rules on every property write.</p>
+<p class="v2-p"><strong>Scenario:</strong> A form data object for a user registration flow where every field has a required type.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 3 · Proxy: Type-Enforced Object (Typed Properties)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// We want this to throw:
+const typedUser = createTyped({ name: &quot;string&quot;, age: &quot;number&quot; });
+typedUser.name = &quot;Alice&quot;;   // ✅
+typedUser.age  = &quot;thirty&quot;;  // ❌ TypeError: age must be a number</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Write a <code>createTyped(schema)</code> function that accepts an object mapping property names to type strings (e.g., <code>"string"</code>, <code>"number"</code>, <code>"boolean"</code>).</li><li>Return a Proxy whose <code>set</code> trap checks <code>typeof value === schema[property]</code> for every write.</li><li>If the type doesn't match, throw a <code>TypeError</code> with a descriptive message.</li><li>If the property isn't in the schema, throw a <code>RangeError</code> (no unknown properties allowed).</li><li>Add a <code>get</code> trap that returns <code>undefined</code> for undefined properties (instead of throwing).</li></ol>
+<p class="v2-p"><strong>Expected behaviour:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const user = createTyped({
+  name:    &quot;string&quot;,
+  age:     &quot;number&quot;,
+  premium: &quot;boolean&quot;
+});
+
+user.name    = &quot;Alice&quot;;   // ✅
+user.age     = 30;        // ✅
+user.premium = true;      // ✅
+
+user.age     = &quot;30&quot;;      // ❌ TypeError: &quot;age&quot; must be of type &quot;number&quot;, got &quot;string&quot;
+user.unknown = &quot;value&quot;;   // ❌ RangeError: &quot;unknown&quot; is not a valid property</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>How would you extend this to support <code>"array"</code> as a type? (<code>typeof [] === "object"</code> · tricky!)</li><li>Where would you add a <code>"required"</code> validation check that prevents reading before writing?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(43)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase44"><div class="ph"><div class="pn">Phase 44 of 50</div><div class="pt">Exercise 4 · Proxy: Observable Object (Reactive System Foundations)</div><div class="pc" id="chk44"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Build a mini reactive system where any change to an object automatically notifies registered watchers · the foundation of how Vue.js and MobX work.</p>
+<p class="v2-p"><strong>Scenario:</strong> A state object for a UI component. When any property changes, the UI should re-render.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Write a <code>makeObservable(obj, onChange)</code> function that returns a Proxy.</li><li>The <code>set</code> trap calls <code>onChange(property, oldValue, newValue)</code> whenever a property changes.</li><li>Only fire the callback if the value actually changed (<code>oldValue !== newValue</code>).</li><li>The <code>deleteProperty</code> trap should also notify with <code>newValue = undefined</code>.</li><li>Test with a simulated "renderer":</li></ol></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 4 · Proxy: Observable Object (Reactive System Foundations)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const state = makeObservable(
+  { count: 0, name: &quot;Alice&quot;, active: true },
+  (prop, oldVal, newVal) =&gt; {
+    console.log(`[STATE CHANGE] ${prop}: ${JSON.stringify(oldVal)} → ${JSON.stringify(newVal)}`);
+    // In a real UI framework, this would trigger a re-render
+  }
+);
+
+state.count  = 1;     // [STATE CHANGE] count: 0 → 1
+state.count  = 1;     // No change — callback NOT fired (same value)
+state.name   = &quot;Bob&quot;; // [STATE CHANGE] name: &quot;Alice&quot; → &quot;Bob&quot;
+delete state.active;  // [STATE CHANGE] active: true → undefined</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why check <code>oldValue !== newValue</code> before firing the callback? What problem does this prevent?</li><li>How would you extend this to support watching specific properties rather than all properties?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(44)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase45"><div class="ph"><div class="pn">Phase 45 of 50</div><div class="pt">Exercise 5 · Proxy: Logging and Profiling Wrapper</div><div class="pc" id="chk45"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Build a reusable function profiler using the <code>apply</code> trap.</p>
+<p class="v2-p"><strong>Scenario:</strong> A development utility that wraps any function and logs its call count, arguments, return value, and execution time.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Write a <code>profile(fn, label)</code> function that returns a Proxy wrapping <code>fn</code>.</li><li>Use the <code>apply</code> trap to:</li></ol>
+<p class="v2-p">- Increment a call counter    - Log: <code>[CALL #N] label(args) → result [Xms]</code>    - Return the actual result</p>
+<ol class="v2-ol"><li>Add a static <code>getStats(proxy)</code> mechanism · either via a Symbol property on the proxy or a separate <code>WeakMap</code>.</li><li>Test with several functions:</li></ol></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body"> ·  · # PHASE 3 · PROJECT SIMULATION · </div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const slowAdd = profile((a, b) =&gt; {
+  // Simulate work:
+  let sum = 0;
+  for (let i = 0; i &lt; 1_000_000; i++) sum += i;
+  return a + b;
+}, &quot;slowAdd&quot;);
+
+slowAdd(3, 4);
+// [CALL #1] slowAdd(3, 4) → 7 [12.3ms]
+slowAdd(10, 20);
+// [CALL #2] slowAdd(10, 20) → 30 [11.8ms]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Can the profiled function still be called without the proxy? Does the proxy modify the original?</li><li>If you profile a method on an object (<code>obj.method</code>), what challenge arises with <code>this</code>? How does <code>thisArg</code> in the <code>apply</code> trap help?</li></ol>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 3 · PROJECT SIMULATION</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(45)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase46"><div class="ph"><div class="pn">Phase 46 of 50</div><div class="pt">Project: Reactive State Management Library</div><div class="pc" id="chk46"></div></div><div class="pb2"><p class="v2-p"><strong>Scenario:</strong> You are building a lightweight reactive state management library · a simplified version of what powers Vue.js's reactivity system, MobX, and Solid.js. The library must:</p>
+<ul class="v2-ul"><li>Track dependencies automatically (which parts of the UI depend on which state)</li><li>Notify subscribers when state changes</li><li>Support computed values that update when their dependencies change</li><li>Prevent direct mutation of state outside authorised setters</li><li>Provide a read-only view of the state for safe sharing</li><li>Log all state transitions in development mode</li></ul>
+<p class="v2-p">This project uses every meta programming concept from all four chapters: <code>Reflect</code> methods, all major <code>Proxy</code> traps, revocable proxies for read-only views, and Symbols.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Core Reactive Store</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// --- Dependency tracking ---
+// Which &quot;effect&quot; (subscriber function) is currently running?
+let activeEffect = null;
+const dependencyMap = new WeakMap();  // target → Map(key → Set(effects))
+
+function track(target, key) {
+  if (!activeEffect) return;   // Nothing is watching right now
+
+  if (!dependencyMap.has(target)) {
+    dependencyMap.set(target, new Map());
+  }
+  const keyMap = dependencyMap.get(target);
+
+  if (!keyMap.has(key)) {
+    keyMap.set(key, new Set());
+  }
+  keyMap.get(key).add(activeEffect);   // Record: this effect depends on target[key]
+}
+
+function trigger(target, key, oldValue, newValue) {
+  if (!dependencyMap.has(target)) return;
+  const keyMap = dependencyMap.get(target);
+  if (!keyMap.has(key)) return;
+
+  const effects = keyMap.get(key);
+  effects.forEach(effect =&gt; {
+    if (effect !== activeEffect) {   // Don&#x27;t trigger the currently-running effect
+      effect();
+    }
+  });
+}
+
+// --- Reactive Proxy Handler ---
+function createReactiveHandler(options = {}) {
+  const { readonly = false, debug = false } = options;
+
+  return {
+    get(target, key, receiver) {
+      const value = Reflect.get(target, key, receiver);
+
+      // Track this access if an effect is watching:
+      if (typeof key === &quot;string&quot; || typeof key === &quot;symbol&quot;) {
+        track(target, key);
+      }
+
+      if (debug) {
+        console.log(`[REACTIVE GET] ${String(key)} =`, value);
+      }
+
+      // If the value is an object, wrap it in a reactive proxy too (deep reactivity):
+      if (value !== null &amp;&amp; typeof value === &quot;object&quot; &amp;&amp; !isProxy(value)) {
+        return createReactive(value, options);
+      }
+
+      return value;
+    },
+
+    set(target, key, value, receiver) {
+      if (readonly) {
+        console.warn(`[REACTIVE] Attempted to write &quot;${String(key)}&quot; on read-only state.`);
+        return false;
+      }
+
+      const oldValue = Reflect.get(target, key, receiver);
+
+      if (Object.is(oldValue, value)) return true;   // No actual change
+
+      const success = Reflect.set(target, key, value, receiver);
+
+      if (success) {
+        if (debug) {
+          console.log(`[REACTIVE SET] ${String(key)}: ${JSON.stringify(oldValue)} → ${JSON.stringify(value)}`);
+        }
+        trigger(target, key, oldValue, value);   // Notify dependents
+      }
+
+      return success;
+    },
+
+    deleteProperty(target, key) {
+      if (readonly) {
+        console.warn(`[REACTIVE] Attempted to delete &quot;${String(key)}&quot; on read-only state.`);
+        return false;
+      }
+
+      const hadKey    = Reflect.has(target, key);
+      const oldValue  = Reflect.get(target, key);
+      const success   = Reflect.deleteProperty(target, key);
+
+      if (success &amp;&amp; hadKey) {
+        trigger(target, key, oldValue, undefined);
+      }
+
+      return success;
+    },
+
+    has(target, key) {
+      track(target, key);
+      return Reflect.has(target, key);
+    },
+
+    ownKeys(target) {
+      track(target, Symbol.for(&quot;__ownKeys__&quot;));   // Track enumeration
+      return Reflect.ownKeys(target);
+    }
+  };
+}
+
+// Track which objects are already proxied (avoid double-wrapping):
+const proxySet = new WeakSet();
+
+function isProxy(obj) {
+  return proxySet.has(obj);
+}
+
+function createReactive(raw, options = {}) {
+  const proxy = new Proxy(raw, createReactiveHandler(options));
+  proxySet.add(proxy);
+  return proxy;
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 2 · Store Class with Computed Values and Effects</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Store {
+  #raw;
+  #state;
+  #readonlyState;
+  #computedCache;
+  #debug;
+
+  constructor(initialState, debug = false) {
+    this.#raw           = { ...initialState };
+    this.#debug         = debug;
+    this.#computedCache = new Map();
+
+    // Main reactive state:
+    this.#state = createReactive(this.#raw, { debug });
+
+    // Read-only view for safe sharing:
+    const { proxy: roProxy, revoke } = Proxy.revocable(
+      this.#state,
+      createReactiveHandler({ readonly: true, debug })
+    );
+    this.#readonlyState = roProxy;
+    this._revokeReadonly = revoke;   // Store revoke for cleanup
+  }
+
+  // Access reactive state:
+  get state()   { return this.#state; }
+
+  // Access read-only view:
+  get readonly(){ return this.#readonlyState; }
+
+  // Register a side effect that runs whenever its dependencies change:
+  effect(fn) {
+    const wrappedEffect = () =&gt; {
+      const prev   = activeEffect;
+      activeEffect = wrappedEffect;   // Mark this as the active tracker
+      try {
+        fn(this.#state);
+      } finally {
+        activeEffect = prev;          // Restore previous tracker
+      }
+    };
+
+    wrappedEffect();   // Run once immediately to collect dependencies
+    return wrappedEffect;
+  }
+
+  // Computed property — cached, recomputes when dependencies change:
+  computed(key, computeFn) {
+    let cachedValue;
+    let dirty = true;   // Flag: needs recomputation
+
+    const recompute = () =&gt; { dirty = true; };
+
+    const getter = () =&gt; {
+      if (dirty) {
+        const prev   = activeEffect;
+        activeEffect = recompute;   // Track what this computed depends on
+        try {
+          cachedValue = computeFn(this.#state);
+        } finally {
+          activeEffect = prev;
+        }
+        dirty = false;
+      }
+      return cachedValue;
+    };
+
+    this.#computedCache.set(key, getter);
+    return getter;
+  }
+
+  // Batch multiple mutations — only trigger effects once at the end:
+  batch(mutations) {
+    const pending = new Set();
+
+    // Temporarily override trigger to collect effects:
+    // (Simplified — a production version would queue all triggers)
+    mutations(this.#state);
+    // Effects fire after the synchronous mutations block completes
+  }
+
+  // Snapshot of current state as plain object:
+  snapshot() {
+    return JSON.parse(JSON.stringify(this.#raw));
+  }
+
+  // Clean up — revoke read-only proxy:
+  destroy() {
+    this._revokeReadonly();
+    if (this.#debug) console.log(&quot;[STORE] Destroyed — read-only access revoked.&quot;);
+  }
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 3 · Using the Store</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// --- Create a store for a shopping cart ---
+const cart = new Store({
+  items: [],
+  discount: 0,
+  user: { name: &quot;Alice&quot;, premium: false }
+}, true /* debug mode */);
+
+// --- Register an effect: re-render the cart total whenever items or discount change ---
+cart.effect(state =&gt; {
+  const subtotal = state.items.reduce((sum, item) =&gt; sum + item.price * item.qty, 0);
+  const total    = subtotal * (1 - state.discount);
+  console.log(`[CART] ${state.items.length} items | Subtotal: £${subtotal.toFixed(2)} | Total: £${total.toFixed(2)}`);
+});
+// Runs immediately:
+// [CART] 0 items | Subtotal: £0.00 | Total: £0.00
+
+// --- Register an effect: show welcome message when user changes ---
+cart.effect(state =&gt; {
+  console.log(`[USER] Welcome, ${state.user.name} (${state.user.premium ? &quot;Premium&quot; : &quot;Standard&quot;})`);
+});
+// Runs immediately:
+// [USER] Welcome, Alice (Standard)
+
+// --- Computed: item count ---
+const itemCount = cart.computed(&quot;itemCount&quot;, state =&gt;
+  state.items.reduce((sum, item) =&gt; sum + item.qty, 0)
+);
+
+// --- Mutate state ---
+cart.state.items.push({ name: &quot;Laptop&quot;, price: 899, qty: 1 });
+// Triggers cart effect:
+// [CART] 1 items | Subtotal: £899.00 | Total: £899.00
+
+cart.state.discount = 0.1;
+// Triggers cart effect:
+// [CART] 1 items | Subtotal: £899.00 | Total: £809.10
+
+cart.state.user.name = &quot;Bob&quot;;
+// Triggers user effect:
+// [USER] Welcome, Bob (Standard)
+
+console.log(&quot;Item count:&quot;, itemCount());  // Output: Item count: 1
+
+// --- Read-only view ---
+const safeView = cart.readonly;
+console.log(safeView.discount);    // Output: 0.1  ← read works
+safeView.discount = 0.5;           // [REACTIVE] Attempted to write &quot;discount&quot; on read-only state.
+console.log(safeView.discount);    // Output: 0.1  ← unchanged
+
+// --- Snapshot for serialisation ---
+const snap = cart.snapshot();
+console.log(snap.discount);   // Output: 0.1  ← plain object, safe to serialise
+
+// --- Cleanup ---
+cart.destroy();
+// [STORE] Destroyed — read-only access revoked.
+safeView.discount;
+// ❌ TypeError: Cannot perform &#x27;get&#x27; on a proxy that has been revoked</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 4 · Advanced: Schema-Validated Store</h3>
+<p class="v2-p">Combine the Proxy validator from Exercise 3 with the reactive store for full type safety:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function createValidatedStore(schema, initialState) {
+  // First validate the initial state:
+  for (const [key, type] of Object.entries(schema)) {
+    if (key in initialState &amp;&amp; typeof initialState[key] !== type) {
+      throw new TypeError(`Initial state: &quot;${key}&quot; must be of type &quot;${type}&quot;`);
+    }
+  }
+
+  const store = new Store(initialState);
+
+  // Wrap the state proxy in a validation layer:
+  const validatedState = new Proxy(store.state, {
+    set(target, key, value, receiver) {
+      if (key in schema &amp;&amp; typeof value !== schema[key]) {
+        throw new TypeError(
+          `&quot;${String(key)}&quot; must be of type &quot;${schema[key]}&quot;, got &quot;${typeof value}&quot;`
+        );
+      }
+      return Reflect.set(target, key, value, receiver);
+    }
+  });
+
+  return { state: validatedState, store };
+}
+
+// Usage:
+const { state, store } = createValidatedStore(
+  { username: &quot;string&quot;, score: &quot;number&quot;, active: &quot;boolean&quot; },
+  { username: &quot;Alice&quot;,  score: 0,       active: true }
+);
+
+state.score    = 100;      // ✅
+state.username = &quot;Bob&quot;;    // ✅
+state.score    = &quot;high&quot;;   // ❌ TypeError: &quot;score&quot; must be of type &quot;number&quot;, got &quot;string&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Reflection Questions:</strong></p>
+<ol class="v2-ol"><li>The store uses a <code>WeakMap</code> for <code>dependencyMap</code> (mapping targets to their effects). Why <code>WeakMap</code> instead of a regular <code>Map</code>? What memory problem does this prevent?</li><li>The <code>ownKeys</code> trap tracks with <code>Symbol.for("__ownKeys__")</code>. Why use a Symbol as the tracking key instead of a string like <code>"__ownKeys__"</code>?</li><li>The read-only view uses a revocable Proxy. When would you call <code>store.destroy()</code> in a real application? (Think about component lifecycles in a UI framework.)</li><li>The <code>isProxy(obj)</code> function uses a <code>WeakSet</code> to track proxied objects. Why not just add a property like <code>obj.__isProxy = true</code> instead?</li><li>The current <code>batch()</code> implementation is a placeholder. In a real reactive system, batching prevents effects from running on every single mutation. How would you implement true batching · collecting all effects during mutations, then running each effect exactly once at the end?</li></ol>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># QUIZ &amp; COMPLETION CHECKLIST</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Project: Reactive State Management Library</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(46)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase47"><div class="ph"><div class="pn">Phase 47 of 50</div><div class="pt">Self-Assessment Quiz</div><div class="pc" id="chk47"></div></div><div class="pb2"><p class="v2-p"><strong>Q1:</strong> What is meta programming, and what two ES6 APIs are its primary tools in JavaScript?</p>
+<p class="v2-p"><strong>Q2:</strong> What is the difference between <code>Reflect.set(target, key, value)</code> and <code>target[key] = value</code>?</p>
+<p class="v2-p"><strong>Q3:</strong> Write a Proxy that logs every property read with the property name and value.</p>
+<p class="v2-p"><strong>Q4:</strong> What are "Proxy traps" and "invariants"? Give one example of each.</p>
+<p class="v2-p"><strong>Q5:</strong> What is a revocable Proxy, and when would you use one?</p>
+<p class="v2-p"><strong>Q6:</strong> What does the <code>receiver</code> argument in a <code>get</code> trap do, and why does it matter?</p>
+<p class="v2-p"><strong>Q7:</strong> What is the difference between <code>Reflect.ownKeys(obj)</code> and <code>Object.keys(obj)</code>?</p>
+<p class="v2-p"><strong>Q8:</strong> Why is <code>return Reflect.set(target, key, value, receiver)</code> better than <code>return true</code> at the end of a <code>set</code> trap?</p>
+<p class="v2-p"><strong>Q9:</strong> What does the <code>apply</code> trap intercept, and what does it receive as arguments?</p>
+<p class="v2-p"><strong>Q10:</strong> In what order are these evaluated: direct property access, Proxy <code>get</code> trap, <code>Object.defineProperty</code> getter? Where does Proxy fit in this chain?</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Self-Assessment Quiz</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(47)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase48"><div class="ph"><div class="pn">Phase 48 of 50</div><div class="pt">Answer Key</div><div class="pc" id="chk48"></div></div><div class="pb2"><p class="v2-p"><strong>A1:</strong> Meta programming is writing code that reads, controls, or transforms other code at runtime. The two primary tools are <code>Reflect</code> (a functional interface to fundamental JS operations) and <code>Proxy</code> (an interceptor that wraps objects and intercepts operations on them).</p>
+<p class="v2-p"><strong>A2:</strong> <code>target[key] = value</code> silently fails on frozen/non-writable properties (or throws in strict mode) and returns the value, not a success indicator. <code>Reflect.set(...)</code> always returns a boolean (<code>true</code> = success, <code>false</code> = failure) without throwing · consistent across all contexts.</p>
+<p class="v2-p"><strong>A3:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const logged = new Proxy(obj, {
+  get(target, property, receiver) {
+    const value = Reflect.get(target, property, receiver);
+    console.log(`GET &quot;${String(property)}&quot; = ${JSON.stringify(value)}`);
+    return value;
+  }
+});</code></pre></div></div>
+<p class="v2-p"><strong>A4:</strong> A <strong>trap</strong> is a method on the Proxy handler that intercepts a specific operation (e.g., <code>get</code> intercepts property reads). An <strong>invariant</strong> is a rule the engine enforces even if your trap tries to break it · e.g., a <code>get</code> trap cannot return a different value for a non-writable, non-configurable property.</p>
+<p class="v2-p"><strong>A5:</strong> A revocable Proxy is created with <code>Proxy.revocable()</code> and returns both <code>proxy</code> and <code>revoke</code>. Calling <code>revoke()</code> permanently disables the proxy · all further operations throw a <code>TypeError</code>. Used for: session expiry, temporary capability grants, component cleanup.</p>
+<p class="v2-p"><strong>A6:</strong> <code>receiver</code> is the Proxy itself (or an object that inherits from it). Passing <code>receiver</code> to <code>Reflect.get(target, key, receiver)</code> ensures that when a getter runs on the target, <code>this</code> inside that getter refers to the proxy · not the raw target. Without it, getters bypass proxy traps when accessing <code>this.property</code>.</p>
+<p class="v2-p"><strong>A7:</strong> <code>Object.keys(obj)</code> returns only own, enumerable, string-keyed properties. <code>Reflect.ownKeys(obj)</code> returns all own properties · including non-enumerable, non-configurable, and Symbol-keyed ones.</p>
+<p class="v2-p"><strong>A8:</strong> <code>return true</code> unconditionally claims success. <code>return Reflect.set(target, key, value, receiver)</code> reports the actual outcome · if the underlying set fails (frozen property, failed setter, etc.), it correctly returns <code>false</code>. Lying with <code>return true</code> violates the trap's invariant contract.</p>
+<p class="v2-p"><strong>A9:</strong> The <code>apply</code> trap intercepts function calls: <code>proxy()</code>, <code>proxy.call(ctx, args)</code>, <code>proxy.apply(ctx, args)</code>. It receives <code>(target, thisArg, argumentsList)</code> · the original function, the value of <code>this</code>, and an array of all arguments.</p>
+<p class="v2-p"><strong>A10:</strong> When you access a property on a proxied object: the Proxy <code>get</code> trap fires first. Inside the trap, <code>Reflect.get(target, key, receiver)</code> is called, which consults the target's actual property · including any <code>Object.defineProperty</code> getter defined on it. Proxy traps intercept at the highest level; descriptor getters run when the Reflect operation executes on the underlying target.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Answer Key</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(48)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase49"><div class="ph"><div class="pn">Phase 49 of 50</div><div class="pt">Key Gotchas Summary</div><div class="pc" id="chk49"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Why It Happens</th><th>Fix</th></tr></thead><tbody><tr><td>Forgetting <code>return</code> in <code>set</code> trap</td><td>Returns <code>undefined</code> (falsy) → strict mode throws</td><td>Always <code>return Reflect.set(...)</code> or <code>return true/false</code></td></tr><tr><td>Not passing <code>receiver</code> to <code>Reflect.get</code></td><td>Getters on target use raw target as <code>this</code>, bypassing proxy</td><td><code>Reflect.get(target, key, receiver)</code> · always pass it</td></tr><tr><td>Double-wrapping objects in <code>get</code> trap</td><td>Nested object gets wrapped in new proxy on every read</td><td>Track already-proxied objects with <code>WeakSet</code></td></tr><tr><td>Using proxy as <code>this</code> in trap</td><td>Inside a trap, <code>this</code> is the handler, not the proxy or target</td><td>Use <code>target</code> or <code>receiver</code> explicitly</td></tr><tr><td>Breaking invariants</td><td>Returning inconsistent values for non-configurable properties</td><td>Test with strict mode; check the invariant table</td></tr><tr><td><code>ownKeys</code> without <code>getOwnPropertyDescriptor</code></td><td>Engine verifies each returned key · missing descriptor causes error</td><td>Pair <code>ownKeys</code> with <code>getOwnPropertyDescriptor</code> trap</td></tr><tr><td>Losing revoke reference</td><td>No way to revoke a revocable proxy</td><td>Store both <code>proxy</code> and <code>revoke</code> from <code>Proxy.revocable()</code></td></tr><tr><td>Proxy on hot path</td><td>Every trap call adds overhead</td><td>Profile first; avoid proxy on million-calls-per-second paths</td></tr><tr><td>Proxying the wrong object</td><td>Setting a trap on a copy instead of the original</td><td><code>new Proxy(originalObject, handler)</code> · proxy wraps the original</td></tr><tr><td><code>Symbol.for()</code> vs <code>Symbol()</code></td><td><code>Symbol()</code> creates unique symbols · <code>Symbol.for(key)</code> returns shared global one</td><td>Use <code>Symbol.for(key)</code> only for intentionally shared symbols</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Key Gotchas Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(49)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase50"><div class="ph"><div class="pn">Phase 50 of 50</div><div class="pt">One-Sentence Summary</div><div class="pc" id="chk50"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p">JavaScript meta programming · built on <code>Reflect</code>'s clean functional interface to fundamental operations and <code>Proxy</code>'s ability to intercept any interaction with any object · is what powers reactive frameworks, validation libraries, ORM query builders, and developer tools: code that programs the behaviour of other code at runtime.</p></blockquote>
+<hr class="v2-hr">
+<p class="v2-p"><em>Tutorial generated by AI_TUTORIAL_GENERATOR · Source curriculum: W3Schools JavaScript Meta Programming (4 pages)</em></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>One-Sentence Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(50)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lesson 36 Project</div><div class="build-req"><p class="v2-p">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code h</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>My Project</title>
+</head>
+<body>
+<!-- Your code here -->
+</body>
+</html>`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-36-lesson-36-project</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 36 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-36-lesson-36-project/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 36 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ The Core Idea</li><li>✅ 1.1 · Real-World Analogy: The Hotel Concierge</li><li>✅ 1.2 · Before Meta Programming: The Limitations</li><li>✅ 1.3 · The Two Pillars: Reflect and Proxy</li><li>✅ 1.4 · What Can Be Intercepted?</li><li>✅ What Is Reflect?</li><li>✅ 2.1 · `Reflect.get()` · Reading a Property</li><li>✅ 2.2 · `Reflect.set()` · Writing a Property</li></ul><div class="ln"><a href="lesson_35.html" class="ln-btn">&#8592; Lesson 35</a><a href="lesson_37.html" class="ln-btn primary">Lesson 37 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 36 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

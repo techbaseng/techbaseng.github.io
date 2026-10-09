@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 17: JavaScript Looping, Iterables, Iterators &amp; Generators: Every Loop · The Iterable Protocol · Custom Iterators · Generator Functions — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="6" data-key="techbase_js_l17">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 17 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 17</div>
+      <h1>JavaScript Looping, Iterables, Iterators &amp; Generators: Every Loop · The Iterable Protocol · Custom Iterators · Generator Functions</h1>
+      <div class="l-hero-sub">6 phases &nbsp;·&nbsp; Build: 🔵 Stage 1 · Data Source Generator</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 17</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 6 phases</span><span>🏗️ 🔵 Stage 1 · Data Source Generator</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 6</div><div class="pt">1. Background: What Is Looping and Why Does It Matter?</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Imagine you are a teacher who needs to print a report card for every student in a class of 500. Without loops you would write the same print instruction 500 times. With a loop, you write it <strong>once</strong> and the computer repeats it automatically.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Without a loop — impossible to scale
+console.log(&quot;Report: Alice  — Score: 88&quot;);
+console.log(&quot;Report: Bob    — Score: 92&quot;);
+// ... 498 more lines!
+
+// ✅ With a loop — one instruction, any number of repetitions
+const students = [{ name: &quot;Alice&quot;, score: 88 }, { name: &quot;Bob&quot;, score: 92 }];
+for (const s of students) {
+  console.log(`Report: ${s.name.padEnd(6)} — Score: ${s.score}`);
+}</code></pre></div></div>
+<p class="v2-p">A <strong>loop</strong> is a block of code that repeats until a condition is met. JavaScript has many loop types · each designed for a specific situation.</p>
+<p class="v2-p">Beyond simple loops, JavaScript has a deeper concept · the <strong>iteration protocol</strong>. This is a set of rules that defines what it means for anything (not just arrays) to be "loop-able". Understanding this protocol unlocks:</p>
+<ul class="v2-ul"><li><strong>Iterables</strong> · objects that can be looped with <code>for...of</code></li><li><strong>Iterators</strong> · objects that control exactly how values are produced one at a time</li><li><strong>Generators</strong> · special functions that can pause and resume, producing values lazily on demand</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Iteration is everywhere in professional JavaScript · reading lines from a file, paginating API results, streaming data, building custom data structures, and implementing pipelines that process millions of records without loading them all into memory at once.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. Background: What Is Looping and Why Does It Matter?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 6</div><div class="pt">2. Topic 1 · JavaScript Looping (All Loop Types)</div><div class="pc" id="chk2"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">JavaScript has <strong>seven</strong> loop constructs. Each has a specific job. Understanding when to use each is a core professional skill.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2A · <code>for</code> Loop · Classic Counter Loop</h3>
+<p class="v2-p">The <code>for</code> loop is the most fundamental loop. Use it when you know <strong>exactly how many times</strong> you want to loop, or when you need precise control over the counter.</p>
+<p class="v2-p"><strong>Structure:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (initialise; condition; update) {
+  // body runs while condition is true
+}</code></pre></div></div>
+<ul class="v2-ul"><li><strong>Initialise</strong> · runs once before the loop starts (set up counter)</li><li><strong>Condition</strong> · checked before each iteration; loop stops when <code>false</code></li><li><strong>Update</strong> · runs after each iteration (advance counter)</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Count from 1 to 5
+for (let i = 1; i &lt;= 5; i++) {
+  console.log(i);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5</code></pre></div></div>
+<h4 class="v2-h4">Step-by-step trace:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Start:   i = 1 → condition 1 &lt;= 5 → true  → body runs → i becomes 2
+         i = 2 → condition 2 &lt;= 5 → true  → body runs → i becomes 3
+         i = 3 → condition 3 &lt;= 5 → true  → body runs → i becomes 4
+         i = 4 → condition 4 &lt;= 5 → true  → body runs → i becomes 5
+         i = 5 → condition 5 &lt;= 5 → true  → body runs → i becomes 6
+         i = 6 → condition 6 &lt;= 5 → false → STOP</code></pre></div></div>
+<h4 class="v2-h4">Loop through an array by index:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = [&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;];
+
+for (let i = 0; i &lt; fruits.length; i++) {
+  console.log(i + &quot;: &quot; + fruits[i]);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0: Apple
+1: Banana
+2: Mango</code></pre></div></div>
+<h4 class="v2-h4">Count backwards:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (let i = 5; i &gt;= 1; i--) {
+  console.log(i);
+}
+// 5, 4, 3, 2, 1</code></pre></div></div>
+<h4 class="v2-h4">Count in steps:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (let i = 0; i &lt;= 10; i += 2) {
+  console.log(i); // 0, 2, 4, 6, 8, 10
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Use <code>let</code> for the loop variable · never <code>var</code>. With <code>var</code>, the variable "leaks" out of the loop block. With <code>let</code>, it is properly block-scoped.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🐛 <strong>COMMON MISTAKE · Off-by-one error:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Wrong — misses last element (&lt; vs &lt;=)
+for (let i = 0; i &lt; 5; i++) { ... }  // runs 5 times: 0,1,2,3,4
+
+// To loop array by index, always use i &lt; arr.length (not &lt;=)
+for (let i = 0; i &lt; arr.length; i++) { ... }  // correct!
+// arr.length - 1 is the last valid index</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2B · <code>while</code> Loop · Condition-First Loop</h3>
+<p class="v2-p">The <code>while</code> loop repeats as long as a condition is <code>true</code>. Use it when you do <strong>not know in advance</strong> how many iterations you need.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>while (condition) {
+  // body
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let count = 1;
+
+while (count &lt;= 5) {
+  console.log(count);
+  count++;
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5</code></pre></div></div>
+<h4 class="v2-h4">Real example · keep asking for input until valid:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Simulated user input
+const inputs = [&quot;&quot;, &quot;abc&quot;, &quot;&quot;, &quot;42&quot;]; // first valid input is &quot;42&quot;
+let idx = 0;
+
+let input = &quot;&quot;;
+while (input.trim() === &quot;&quot; || isNaN(Number(input))) {
+  input = inputs[idx++]; // simulate reading next input
+}
+console.log(&quot;Valid input received:&quot;, input); // &quot;42&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>Valid input received: 42</code></p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT · Infinite Loop!</strong> If the condition never becomes <code>false</code>, the loop runs forever and crashes the program.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ DANGER — infinite loop!
+let i = 1;
+while (i &gt; 0) {   // i always &gt; 0 since we never change it
+console.log(i);
+// forgot to add: i++
+}
+// Always make sure the loop variable changes toward the exit condition!</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2C · <code>do...while</code> Loop · Body-First Loop</h3>
+<p class="v2-p">Like <code>while</code>, but the body runs <strong>at least once</strong> before the condition is checked.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>do {
+  // body runs first, THEN condition is checked
+} while (condition);</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let count = 1;
+
+do {
+  console.log(count);
+  count++;
+} while (count &lt;= 5);</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5</code></pre></div></div>
+<h4 class="v2-h4">The key difference · runs at least once even if condition starts false:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let i = 10; // condition (i &lt;= 5) is already false
+
+// while — body NEVER runs
+while (i &lt;= 5) {
+  console.log(&quot;while:&quot;, i); // skipped entirely
+}
+
+// do...while — body runs ONCE before condition is checked
+do {
+  console.log(&quot;do...while:&quot;, i); // prints &quot;do...while: 10&quot;
+} while (i &lt;= 5);</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>do...while: 10</code></p>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> <code>do...while</code> is perfect for menu systems and prompts · show the menu at least once, then keep showing it until the user picks "Exit".</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2D · <code>for...in</code> Loop · Iterate Object Properties</h3>
+<p class="v2-p"><code>for...in</code> loops over the <strong>enumerable property keys</strong> of an object (including inherited ones from the prototype chain). It is designed for plain objects.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (const key in object) {
+  // key is each property name (string)
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const student = {
+  name:  &quot;Amara&quot;,
+  score: 85,
+  grade: &quot;A&quot;,
+  city:  &quot;Lagos&quot;
+};
+
+for (const key in student) {
+  console.log(key + &quot;: &quot; + student[key]);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>name: Amara
+score: 85
+grade: A
+city: Lagos</code></pre></div></div>
+<h4 class="v2-h4"><code>hasOwnProperty</code> · Skip Inherited Keys:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (const key in student) {
+  if (student.hasOwnProperty(key)) {
+    // Only own properties, not inherited prototype properties
+    console.log(key + &quot;:&quot;, student[key]);
+  }
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT · Do NOT use <code>for...in</code> on arrays!</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = [&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;];
+
+// ❌ for...in on arrays — gives STRING indices, may include extra properties
+for (const i in arr) {
+console.log(i, typeof i); // &quot;0&quot; string, &quot;1&quot; string, &quot;2&quot; string ← strings not numbers!
+}
+
+// ✅ Use for...of or a regular for loop for arrays instead</code></pre></div></div>
+<p class="v2-p"><code>for...in</code> is for <strong>objects</strong>. <code>for...of</code> is for <strong>iterables</strong> (arrays, strings, Sets, Maps).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2E · <code>for...of</code> Loop · Iterate Iterable Values (Modern, Preferred)</h3>
+<p class="v2-p"><code>for...of</code> loops over the <strong>values</strong> of any iterable · arrays, strings, Sets, Maps, generators, and any object implementing the iterable protocol.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (const value of iterable) {
+  // value is each element
+}</code></pre></div></div>
+<h4 class="v2-h4">Arrays:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = [&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;];
+
+for (const fruit of fruits) {
+  console.log(fruit);
+}
+// Apple
+// Banana
+// Mango</code></pre></div></div>
+<h4 class="v2-h4">Strings · character by character:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (const char of &quot;Hello&quot;) {
+  console.log(char);
+}
+// H
+// e
+// l
+// l
+// o</code></pre></div></div>
+<h4 class="v2-h4">Sets:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const tags = new Set([&quot;js&quot;, &quot;web&quot;, &quot;css&quot;]);
+
+for (const tag of tags) {
+  console.log(tag);
+}
+// js
+// web
+// css</code></pre></div></div>
+<h4 class="v2-h4">Maps · destructuring key and value:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const scores = new Map([[&quot;Alice&quot;, 88], [&quot;Bob&quot;, 92]]);
+
+for (const [name, score] of scores) {
+  console.log(name + &quot;: &quot; + score);
+}
+// Alice: 88
+// Bob: 92</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> When you need the index while using <code>for...of</code>, use <code>entries()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const fruits = [&quot;Apple&quot;, &quot;Banana&quot;, &quot;Mango&quot;];
+
+for (const [index, fruit] of fruits.entries()) {
+console.log(index + &quot;: &quot; + fruit);
+}
+// 0: Apple
+// 1: Banana
+// 2: Mango</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2F · <code>break</code> and <code>continue</code> · Loop Control</h3>
+<h4 class="v2-h4"><code>break</code> · Exit the loop immediately:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const nums = [3, 7, 2, 9, 1, 5];
+
+// Find first number greater than 6
+for (const n of nums) {
+  if (n &gt; 6) {
+    console.log(&quot;Found:&quot;, n);
+    break; // stop immediately
+  }
+}
+// Found: 7</code></pre></div></div>
+<h4 class="v2-h4"><code>continue</code> · Skip to next iteration:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const nums = [1, 2, 3, 4, 5, 6];
+
+// Print only odd numbers
+for (const n of nums) {
+  if (n % 2 === 0) continue; // skip even numbers
+  console.log(n);
+}
+// 1
+// 3
+// 5</code></pre></div></div>
+<h4 class="v2-h4">Labelled <code>break</code> · Break out of nested loops:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Without label — only breaks the inner loop
+outer: for (let i = 0; i &lt; 3; i++) {
+  for (let j = 0; j &lt; 3; j++) {
+    if (i === 1 &amp;&amp; j === 1) {
+      break outer; // exits BOTH loops immediately
+    }
+    console.log(i, j);
+  }
+}
+// 0 0
+// 0 1
+// 0 2
+// 1 0
+// (stops here — break outer exits both loops)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0 0
+0 1
+0 2
+1 0</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">2G · Loop Comparison Table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Loop</th><th>Use When</th><th>Needs index?</th><th>Works on objects?</th><th>Works on iterables?</th></tr></thead><tbody><tr><td><code>for</code></td><td>Known count / index control</td><td>✅ Yes</td><td>❌ (manually)</td><td>✅ (manually)</td></tr><tr><td><code>while</code></td><td>Unknown count, condition-driven</td><td>⚙️ Manual</td><td>⚙️ Manual</td><td>⚙️ Manual</td></tr><tr><td><code>do...while</code></td><td>Run at least once</td><td>⚙️ Manual</td><td>⚙️ Manual</td><td>⚙️ Manual</td></tr><tr><td><code>for...in</code></td><td>Object property keys</td><td>❌ No (gives key)</td><td>✅ Yes</td><td>⚠️ Not recommended</td></tr><tr><td><code>for...of</code></td><td>Any iterable values</td><td>✅ via <code>.entries()</code></td><td>❌ (plain objects)</td><td>✅ Yes</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. Topic 1 · JavaScript Looping (All Loop Types)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 6</div><div class="pt">3. Topic 2 · Iterables</div><div class="pc" id="chk3"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">You have used <code>for...of</code> to loop over arrays, strings, Sets, and Maps. But how does <code>for...of</code> <em>know</em> how to loop over them? They are all different types of objects! The answer is the <strong>iterable protocol</strong>.</p>
+<h3 class="v2-h3">What Is an Iterable?</h3>
+<p class="v2-p">An <strong>iterable</strong> is any object that has a special method named <code>[Symbol.iterator]</code>. This method, when called, returns an <strong>iterator</strong> · an object that produces values one at a time.</p>
+<p class="v2-p">Think of it like a vending machine:</p>
+<ul class="v2-ul"><li>The <strong>vending machine</strong> is the iterable (has a mechanism to deliver items)</li><li>The <strong>dispenser button</strong> is <code>[Symbol.iterator]()</code> · calling it starts the dispensing process</li><li>Each <strong>press of the button</strong> is like calling <code>.next()</code> · one item comes out</li><li>When the machine is <strong>empty</strong>, it signals done</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Iterable                →   has [Symbol.iterator]() method
+[Symbol.iterator]()     →   returns an Iterator
+Iterator                →   has .next() method
+.next()                 →   returns { value: ..., done: false/true }</code></pre></div></div>
+<h3 class="v2-h3">Built-in Iterables in JavaScript</h3>
+<p class="v2-p">These types are all iterable out of the box:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Type</th><th>Example</th></tr></thead><tbody><tr><td><code>Array</code></td><td><code>[1, 2, 3]</code></td></tr><tr><td><code>String</code></td><td><code>"hello"</code></td></tr><tr><td><code>Set</code></td><td><code>new Set([1, 2, 3])</code></td></tr><tr><td><code>Map</code></td><td><code>new Map([["a", 1]])</code></td></tr><tr><td><code>arguments</code> object</td><td>Inside functions</td></tr><tr><td><code>NodeList</code></td><td><code>document.querySelectorAll("p")</code></td></tr><tr><td>Generator objects</td><td>Result of calling a generator function</td></tr><tr><td><code>TypedArray</code></td><td><code>Int8Array</code>, <code>Float64Array</code>, etc.</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Plain objects <code>{}</code> are NOT iterable by default.</strong></p>
+<hr class="v2-hr">
+<h3 class="v2-h3">How <code>for...of</code> Uses the Iterable Protocol Internally</h3>
+<p class="v2-p">When JavaScript sees <code>for (const x of something)</code>, it does this behind the scenes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr = [10, 20, 30];
+
+// What for...of does internally:
+const iterator = arr[Symbol.iterator](); // Step 1: get the iterator
+
+let result = iterator.next();            // Step 2: ask for first value
+while (!result.done) {                   // Step 3: loop while not done
+  const x = result.value;
+  console.log(x);                        // Step 4: use the value
+  result = iterator.next();             // Step 5: ask for next value
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>10
+20
+30</code></pre></div></div>
+<p class="v2-p">This is exactly what <code>for...of</code> does automatically:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (const x of [10, 20, 30]) {
+  console.log(x); // 10, 20, 30
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Verifying That Something Is Iterable</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function isIterable(obj) {
+  return obj != null &amp;&amp; typeof obj[Symbol.iterator] === &quot;function&quot;;
+}
+
+console.log(isIterable([1, 2, 3]));          // true
+console.log(isIterable(&quot;hello&quot;));            // true
+console.log(isIterable(new Set([1, 2])));    // true
+console.log(isIterable(new Map()));          // true
+console.log(isIterable({ a: 1 }));          // false ← plain object!
+console.log(isIterable(42));                // false
+console.log(isIterable(null));              // false</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+true
+true
+true
+false
+false
+false</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Using Spread <code>...</code> and Destructuring · They Use the Iterable Protocol Too!</h3>
+<p class="v2-p">Any iterable works with spread and destructuring · not just arrays:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Spread Set into array
+const set = new Set([1, 2, 3]);
+const arr = [...set];
+console.log(arr); // [1, 2, 3]
+
+// Spread Map
+const map = new Map([[&quot;a&quot;, 1], [&quot;b&quot;, 2]]);
+console.log([...map]); // [[&quot;a&quot;,1],[&quot;b&quot;,2]]
+
+// Spread String
+console.log([...&quot;hello&quot;]); // [&quot;h&quot;,&quot;e&quot;,&quot;l&quot;,&quot;l&quot;,&quot;o&quot;]
+
+// Destructure a Set
+const [first, second] = new Set([10, 20, 30]);
+console.log(first, second); // 10 20
+
+// Spread into function arguments
+function sum(a, b, c) { return a + b + c; }
+const nums = [1, 2, 3];
+console.log(sum(...nums)); // 6</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1, 2, 3]
+[[&quot;a&quot;,1],[&quot;b&quot;,2]]
+[&quot;h&quot;,&quot;e&quot;,&quot;l&quot;,&quot;l&quot;,&quot;o&quot;]
+10 20
+6</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> The iterable protocol is the foundation of modern JavaScript patterns like <code>Array.from()</code>, <code>Promise.all([...])</code>, <code>for...of</code> in React's render loops, and REST/spread patterns throughout every modern codebase.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Making a Plain Object Iterable</h3>
+<p class="v2-p">A plain object <code>{}</code> is not iterable · <code>for...of</code> will throw a TypeError. To make it iterable, you add a <code>[Symbol.iterator]</code> method.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const range = {
+  from: 1,
+  to:   5,
+
+  [Symbol.iterator]() {
+    let current = this.from;
+    const last  = this.to;
+
+    // Return an iterator object
+    return {
+      next() {
+        if (current &lt;= last) {
+          return { value: current++, done: false };
+        }
+        return { value: undefined, done: true };
+      }
+    };
+  }
+};
+
+// Now range is iterable!
+for (const n of range) {
+  console.log(n);
+}
+// 1, 2, 3, 4, 5
+
+// Spread also works!
+console.log([...range]); // [1, 2, 3, 4, 5]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5
+[1, 2, 3, 4, 5]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>THINK ABOUT IT:</strong> What would happen if <code>current</code> never reached <code>last</code>? The <code>done: true</code> would never be returned, and <code>for...of</code> would loop forever. Always make sure your iterator eventually returns <code>{ done: true }</code>!</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Topic 2 · Iterables</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 6</div><div class="pt">4. Topic 3 · Iterators</div><div class="pc" id="chk4"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">An <strong>iterator</strong> is an object that implements the <strong>iterator protocol</strong>:</p>
+<ul class="v2-ul"><li>It must have a <code>.next()</code> method</li><li><code>.next()</code> must return an object with exactly two properties:</li></ul>
+<p class="v2-p">- <code>value</code> · the current value (any type)   - <code>done</code> · a boolean: <code>false</code> if more values remain, <code>true</code> when finished</p>
+<p class="v2-p">When <code>done</code> is <code>true</code>, any <code>value</code> provided is ignored by <code>for...of</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating an Iterator from Scratch</h3>
+<p class="v2-p">Let's build a counter iterator step by step:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function makeCounter(start, end) {
+  let current = start;
+
+  return {
+    next() {
+      if (current &lt;= end) {
+        return { value: current++, done: false };
+      }
+      return { value: undefined, done: true };
+    }
+  };
+}
+
+const counter = makeCounter(1, 4);
+
+console.log(counter.next()); // { value: 1, done: false }
+console.log(counter.next()); // { value: 2, done: false }
+console.log(counter.next()); // { value: 3, done: false }
+console.log(counter.next()); // { value: 4, done: false }
+console.log(counter.next()); // { value: undefined, done: true }
+console.log(counter.next()); // { value: undefined, done: true } ← stays done</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{ value: 1, done: false }
+{ value: 2, done: false }
+{ value: 3, done: false }
+{ value: 4, done: false }
+{ value: undefined, done: true }
+{ value: undefined, done: true }</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Notice that once an iterator returns <code>{ done: true }</code>, it should continue to return <code>{ done: true }</code> for any further <code>.next()</code> calls. This is the convention.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Iterator vs Iterable · What Is the Difference?</h3>
+<p class="v2-p">This is a very common point of confusion:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Term</th><th>Definition</th><th>Has</th></tr></thead><tbody><tr><td><strong>Iterable</strong></td><td>An object that CAN be iterated</td><td><code>[Symbol.iterator]()</code> method → returns an iterator</td></tr><tr><td><strong>Iterator</strong></td><td>An object that DOES the iterating</td><td><code>.next()</code> method → returns <code>{value, done}</code></td></tr></tbody></table></div>
+<p class="v2-p">An iterable <strong>produces</strong> iterators. An iterator <strong>produces</strong> values.</p>
+<p class="v2-p">Arrays are <strong>iterable</strong> · calling <code>arr[Symbol.iterator]()</code> gives you an <strong>iterator</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const arr      = [10, 20, 30];       // Array is ITERABLE
+const iterator = arr[Symbol.iterator](); // iterator is the ITERATOR
+
+console.log(iterator.next()); // { value: 10, done: false }
+console.log(iterator.next()); // { value: 20, done: false }
+console.log(iterator.next()); // { value: 30, done: false }
+console.log(iterator.next()); // { value: undefined, done: true }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Self-Iterating Objects · Combining Both Protocols</h3>
+<p class="v2-p">The cleanest design makes an object both iterable <strong>and</strong> its own iterator by returning <code>this</code> from <code>[Symbol.iterator]()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function makeRange(from, to) {
+  return {
+    current: from,
+    last:    to,
+
+    // Makes it ITERABLE
+    [Symbol.iterator]() {
+      return this; // ← returns itself as the iterator
+    },
+
+    // Makes it an ITERATOR
+    next() {
+      if (this.current &lt;= this.last) {
+        return { value: this.current++, done: false };
+      }
+      return { value: undefined, done: true };
+    }
+  };
+}
+
+const range = makeRange(1, 5);
+
+// Works with for...of (uses [Symbol.iterator])
+for (const n of range) {
+  console.log(n);
+}
+// 1 2 3 4 5
+
+// Also works with spread (uses [Symbol.iterator])
+// Note: range is now exhausted — a new range is needed to spread
+const range2 = makeRange(1, 3);
+console.log([...range2]); // [1, 2, 3]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5
+[1, 2, 3]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> When an object is its own iterator (returns <code>this</code>), it is <strong>consumed</strong> · once iterated, it cannot be iterated again. A fresh iterable (like an array) returns a new iterator each time <code>[Symbol.iterator]()</code> is called, so you can loop it many times.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Practical Example · A Fibonacci Iterator</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function fibIterator(limit) {
+  let prev = 0, curr = 1;
+
+  return {
+    [Symbol.iterator]() { return this; },
+
+    next() {
+      if (prev &gt; limit) return { value: undefined, done: true };
+      const value = prev;
+      [prev, curr] = [curr, prev + curr]; // advance sequence
+      return { value, done: false };
+    }
+  };
+}
+
+// Print Fibonacci numbers up to 100
+for (const n of fibIterator(100)) {
+  process.stdout.write(n + &quot; &quot;);
+}
+console.log();
+// 0 1 1 2 3 5 8 13 21 34 55 89
+
+// Collect into array
+console.log([...fibIterator(50)]); // [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0 1 1 2 3 5 8 13 21 34 55 89
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Iterators are used to represent sequences that are computed on demand · paginated API results, rows from a database cursor, tokens from a parser, or any data where you want the next item only when you need it (lazy evaluation).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Iterator Return Method (Optional Cleanup)</h3>
+<p class="v2-p">Iterators can optionally implement a <code>return(value)</code> method, which is called when a loop exits early (via <code>break</code> or <code>return</code> inside <code>for...of</code>). Use it to release resources.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function makeCleanupIterator(items) {
+  let index = 0;
+  return {
+    [Symbol.iterator]() { return this; },
+
+    next() {
+      if (index &lt; items.length) {
+        return { value: items[index++], done: false };
+      }
+      return { value: undefined, done: true };
+    },
+
+    return(value) {
+      console.log(&quot;Iterator closed early — releasing resources&quot;);
+      return { value, done: true };
+    }
+  };
+}
+
+for (const item of makeCleanupIterator([1, 2, 3, 4, 5])) {
+  console.log(item);
+  if (item === 3) break; // triggers return()
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+Iterator closed early — releasing resources</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Topic 3 · Iterators</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 6</div><div class="pt">5. Topic 4 · Generator Functions</div><div class="pc" id="chk5"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">Writing iterators manually (as shown above) works · but it is verbose and requires careful state management. <strong>Generator functions</strong> are a much easier way to create iterators. They let you write iterating logic in a natural, top-to-bottom style using the special <code>yield</code> keyword.</p>
+<h3 class="v2-h3">The Magic of <code>yield</code> · Pause and Resume</h3>
+<p class="v2-p">A generator function can <strong>pause</strong> its execution in the middle and <strong>resume</strong> later from exactly where it left off. Normal functions cannot do this · they run start to finish without stopping.</p>
+<p class="v2-p">Think of it like a book with bookmarks:</p>
+<ul class="v2-ul"><li><strong>Normal function</strong> · reads the whole chapter at once, then closes the book</li><li><strong>Generator function</strong> · reads one page, puts a bookmark in, hands you the page, waits. When you ask for the next page, it opens the book at the bookmark and continues.</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Declaring a Generator Function</h3>
+<p class="v2-p">The <code>function<em></code> syntax (note the asterisk <code></em></code>) marks a function as a generator:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* myGenerator() {
+  yield 1;
+  yield 2;
+  yield 3;
+}</code></pre></div></div>
+<p class="v2-p">Calling a generator function does <strong>not run the body</strong>. It returns a <strong>generator object</strong> · which is both an iterator AND an iterable.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* myGenerator() {
+  console.log(&quot;Start&quot;);
+  yield 1;
+  console.log(&quot;After first yield&quot;);
+  yield 2;
+  console.log(&quot;After second yield&quot;);
+  yield 3;
+  console.log(&quot;Done&quot;);
+}
+
+const gen = myGenerator(); // ← body does NOT run yet!
+
+console.log(gen.next()); // &quot;Start&quot; then { value: 1, done: false }
+console.log(gen.next()); // &quot;After first yield&quot; then { value: 2, done: false }
+console.log(gen.next()); // &quot;After second yield&quot; then { value: 3, done: false }
+console.log(gen.next()); // &quot;Done&quot; then { value: undefined, done: true }</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Start
+{ value: 1, done: false }
+After first yield
+{ value: 2, done: false }
+After second yield
+{ value: 3, done: false }
+Done
+{ value: undefined, done: true }</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>THINK ABOUT IT:</strong> The <code>console.log("Start")</code> only runs when we call <code>.next()</code> the first time · not when we call <code>myGenerator()</code>. This is the pausing behaviour. The function runs until it hits a <code>yield</code>, pauses there, and waits for the next <code>.next()</code> call.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Generators Are Both Iterators and Iterables</h3>
+<p class="v2-p">Generator objects implement both protocols automatically. This means you can use them directly in <code>for...of</code>, spread, and destructuring:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* count() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+// for...of (uses iterable protocol)
+for (const n of count()) {
+  console.log(n);
+}
+// 1, 2, 3
+
+// Spread (uses iterable protocol)
+console.log([...count()]); // [1, 2, 3]
+
+// Destructuring
+const [a, b, c] = count();
+console.log(a, b, c); // 1 2 3</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+[1, 2, 3]
+1 2 3</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Generators with Loops · Infinite Sequences</h3>
+<p class="v2-p">Generators are perfect for producing sequences · especially <strong>infinite</strong> ones. Because values are produced lazily (one at a time on demand), you can define an endless sequence without running out of memory.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// An INFINITE counter — never runs out!
+function* counter(start = 0) {
+  let n = start;
+  while (true) {   // ← infinite loop is OK in a generator!
+    yield n++;
+  }
+}
+
+const gen = counter(1);
+
+console.log(gen.next().value); // 1
+console.log(gen.next().value); // 2
+console.log(gen.next().value); // 3
+// ... you can call .next() as many times as you want
+
+// Take first 5 values using a helper
+function take(gen, n) {
+  const result = [];
+  for (const val of gen) {
+    result.push(val);
+    if (result.length === n) break;
+  }
+  return result;
+}
+
+console.log(take(counter(10), 5)); // [10, 11, 12, 13, 14]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+[10, 11, 12, 13, 14]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> Never do <code>[...counter()]</code> · spreading an infinite generator will try to collect all values until memory is exhausted. Always use <code>break</code>, <code>.next()</code>, or <code>take()</code> to limit how many values you consume from an infinite generator.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>return</code> in a Generator</h3>
+<p class="v2-p">If a generator hits a <code>return</code> statement (or the function body ends), it signals <code>done: true</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* gen() {
+  yield 1;
+  yield 2;
+  return &quot;finished&quot;; // ← done: true, value: &quot;finished&quot;
+  yield 3;           // ← NEVER reached
+}
+
+const g = gen();
+console.log(g.next()); // { value: 1,          done: false }
+console.log(g.next()); // { value: 2,          done: false }
+console.log(g.next()); // { value: &quot;finished&quot;, done: true  }
+console.log(g.next()); // { value: undefined,  done: true  }</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> The <code>return</code> value in a generator IS available in <code>.next()</code> but is <strong>skipped by <code>for...of</code></strong>. <code>for...of</code> stops as soon as it sees <code>done: true</code> without using the value.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Passing Values INTO a Generator with <code>.next(value)</code></h3>
+<p class="v2-p">You can pass a value into a generator through <code>.next(value)</code>. This value becomes the <strong>result of the <code>yield</code> expression</strong> inside the generator.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* dialogue() {
+  const name    = yield &quot;What is your name?&quot;;
+  const age     = yield `Hello ${name}! How old are you?`;
+  yield `So ${name} is ${age} years old. Got it!`;
+}
+
+const chat = dialogue();
+
+console.log(chat.next().value);          // &quot;What is your name?&quot;
+console.log(chat.next(&quot;Alice&quot;).value);   // &quot;Hello Alice! How old are you?&quot;
+console.log(chat.next(30).value);        // &quot;So Alice is 30 years old. Got it!&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>What is your name?
+Hello Alice! How old are you?
+So Alice is 30 years old. Got it!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> The first <code>.next()</code> call cannot pass a value in (there is no <code>yield</code> to receive it yet). Values passed in through <code>.next(val)</code> only apply from the second call onward.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>yield*</code> · Delegate to Another Generator or Iterable</h3>
+<p class="v2-p"><code>yield*</code> inside a generator delegates iteration to another iterable or generator, yielding all of its values in sequence.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* inner() {
+  yield &quot;B&quot;;
+  yield &quot;C&quot;;
+}
+
+function* outer() {
+  yield &quot;A&quot;;
+  yield* inner();  // ← delegates to inner generator
+  yield &quot;D&quot;;
+}
+
+console.log([...outer()]); // [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>["A", "B", "C", "D"]</code></p>
+<p class="v2-p"><code>yield*</code> works with any iterable · arrays, strings, Sets, other generators:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* combined() {
+  yield* [1, 2, 3];         // yields from array
+  yield* &quot;AB&quot;;              // yields characters of string
+  yield* new Set([4, 5]);   // yields from Set
+}
+
+console.log([...combined()]); // [1, 2, 3, &quot;A&quot;, &quot;B&quot;, 4, 5]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>[1, 2, 3, "A", "B", 4, 5]</code></p>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> <code>yield*</code> is used to build tree-traversal generators · e.g., yielding all nodes in a nested file system or DOM tree structure depth-first without recursion complexity.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Generator as an Iterable Object Method</h3>
+<p class="v2-p">You can use generator functions as methods inside objects or classes, making them directly iterable:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class NumberRange {
+  constructor(from, to, step = 1) {
+    this.from = from;
+    this.to   = to;
+    this.step = step;
+  }
+
+  // Generator method — makes instances of NumberRange iterable
+  *[Symbol.iterator]() {
+    for (let n = this.from; n &lt;= this.to; n += this.step) {
+      yield n;
+    }
+  }
+}
+
+const evens = new NumberRange(2, 10, 2);
+
+for (const n of evens) {
+  process.stdout.write(n + &quot; &quot;);
+}
+console.log();
+// 2 4 6 8 10
+
+console.log([...new NumberRange(1, 5)]); // [1, 2, 3, 4, 5]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2 4 6 8 10
+[1, 2, 3, 4, 5]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Generator vs Manual Iterator · Side by Side</h3>
+<p class="v2-p">Here is the same Fibonacci iterator from Topic 3, now written as a generator:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Manual iterator (Topic 3 version) — verbose!
+function fibIterator(limit) {
+  let prev = 0, curr = 1;
+  return {
+    [Symbol.iterator]() { return this; },
+    next() {
+      if (prev &gt; limit) return { value: undefined, done: true };
+      const value = prev;
+      [prev, curr] = [curr, prev + curr];
+      return { value, done: false };
+    }
+  };
+}
+
+// Generator version — clean and simple!
+function* fibGenerator(limit) {
+  let prev = 0, curr = 1;
+  while (prev &lt;= limit) {
+    yield prev;
+    [prev, curr] = [curr, prev + curr];
+  }
+}
+
+// Both produce the same output:
+console.log([...fibGenerator(100)]); // [0,1,1,2,3,5,8,13,21,34,55,89]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>[0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89]</code></p>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Generators are used in: Redux Saga (managing async side effects in React apps), data streaming (process file lines one at a time), custom pagination (fetch next page only when needed), and any "lazy" sequence where values should be produced on demand.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Summary: Iterator vs Generator vs Iterable</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Concept</th><th>Definition</th><th>Key Syntax</th></tr></thead><tbody><tr><td><strong>Iterable</strong></td><td>Object that CAN produce an iterator</td><td>Has <code>[Symbol.iterator]()</code> method</td></tr><tr><td><strong>Iterator</strong></td><td>Object that produces values one at a time</td><td>Has <code>.next()</code> → <code>{value, done}</code></td></tr><tr><td><strong>Generator function</strong></td><td>Function that produces a generator object</td><td><code>function*</code> with <code>yield</code></td></tr><tr><td><strong>Generator object</strong></td><td>Both an iterator AND an iterable</td><td>Returned by calling <code>function*</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Topic 4 · Generator Functions</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 6</div><div class="pt">6. Applied Exercises</div><div class="pc" id="chk6"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 2 · Applied Exercises</strong></p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1 · Loop Master 🔁</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice choosing the right loop for each situation.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a <strong>student results portal</strong>. Each task below requires a different loop type.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const scores = [72, 45, 88, 56, 93];
+let total = 0;
+
+for (const score of scores) {
+  total += score;
+}
+console.log(&quot;Average:&quot;, (total / scores.length).toFixed(1)); // 70.8</code></pre></div></div>
+<h4 class="v2-h4">Task A · Use the Right Loop</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const students = [
+  { name: &quot;Amara&quot;,  score: 85, grade: &quot;B&quot; },
+  { name: &quot;Kwame&quot;,  score: 92, grade: &quot;A&quot; },
+  { name: &quot;Fatima&quot;, score: 58, grade: &quot;F&quot; },
+  { name: &quot;Emeka&quot;,  score: 74, grade: &quot;C&quot; },
+  { name: &quot;Priya&quot;,  score: 95, grade: &quot;A&quot; },
+];
+
+// 1. FOR loop — print each student with rank
+console.log(&quot;--- Rankings (for loop) ---&quot;);
+for (let i = 0; i &lt; students.length; i++) {
+  console.log(`${i + 1}. ${students[i].name} — ${students[i].score}`);
+}
+
+// 2. FOR...OF — sum all scores
+let total = 0;
+for (const s of students) { total += s.score; }
+console.log(&quot;\nClass average:&quot;, (total / students.length).toFixed(1));
+
+// 3. FOR...IN — list properties of first student object
+console.log(&quot;\nStudent record fields (for...in):&quot;);
+for (const key in students[0]) {
+  console.log(`  ${key}: ${students[0][key]}`);
+}
+
+// 4. WHILE — find first student scoring above 90
+let idx = 0;
+while (idx &lt; students.length &amp;&amp; students[idx].score &lt;= 90) idx++;
+const topStudent = idx &lt; students.length ? students[idx] : null;
+console.log(&quot;\nFirst student above 90:&quot;, topStudent?.name ?? &quot;none&quot;);
+
+// 5. DO...WHILE — show menu until valid selection
+const validChoices = [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;];
+const inputs = [&quot;X&quot;, &quot;Q&quot;, &quot;B&quot;]; // simulated; &quot;B&quot; is the first valid one
+let choice, inputIdx = 0;
+do {
+  choice = inputs[inputIdx++];
+  console.log(&quot;Input received:&quot;, choice);
+} while (!validChoices.includes(choice));
+console.log(&quot;Valid choice selected:&quot;, choice);</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>--- Rankings (for loop) ---
+1. Amara — 85
+2. Kwame — 92
+3. Fatima — 58
+4. Emeka — 74
+5. Priya — 95
+
+Class average: 80.8
+
+Student record fields (for...in):
+  name: Amara
+  score: 85
+  grade: B
+
+First student above 90: Kwame
+
+Input received: X
+Input received: Q
+Input received: B
+Valid choice selected: B</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why should you NOT use <code>for...in</code> to loop over the <code>students</code> array?</li><li>When would <code>do...while</code> be more appropriate than <code>while</code>?</li><li>What is the difference between <code>break</code> and <code>continue</code>?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Custom Iterable Builder 🔧</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice creating a custom iterable object using <code>[Symbol.iterator]</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> Build a <strong>paginated data reader</strong> that iterates records in pages of a given size.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const simpleRange = {
+  [Symbol.iterator]() {
+    let n = 1;
+    return { next() { return n &lt;= 3 ? { value: n++, done: false } : { value: undefined, done: true }; } };
+  }
+};
+
+for (const n of simpleRange) process.stdout.write(n + &quot; &quot;);
+console.log(); // 1 2 3</code></pre></div></div>
+<h4 class="v2-h4">Task A · Paginator Object</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function createPaginator(records, pageSize) {
+  return {
+    records,
+    pageSize,
+
+    [Symbol.iterator]() {
+      let pageNum = 0;
+      const { records, pageSize } = this;
+
+      return {
+        next() {
+          const start = pageNum * pageSize;
+          if (start &gt;= records.length) return { value: undefined, done: true };
+
+          const page = {
+            pageNumber: pageNum + 1,
+            items: records.slice(start, start + pageSize),
+            totalPages: Math.ceil(records.length / pageSize)
+          };
+          pageNum++;
+          return { value: page, done: false };
+        }
+      };
+    }
+  };
+}
+
+const allRecords = [
+  &quot;Record A&quot;, &quot;Record B&quot;, &quot;Record C&quot;, &quot;Record D&quot;,
+  &quot;Record E&quot;, &quot;Record F&quot;, &quot;Record G&quot;
+];
+
+const paginator = createPaginator(allRecords, 3);
+
+for (const page of paginator) {
+  console.log(`\n── Page ${page.pageNumber}/${page.totalPages} ──`);
+  page.items.forEach((item, i) =&gt; console.log(`  ${i + 1}. ${item}`));
+}
+
+// Can be spread into an array of page objects
+const pages = [...createPaginator(allRecords, 3)];
+console.log(&quot;\nTotal pages:&quot;, pages.length);</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>── Page 1/3 ──
+  1. Record A
+  2. Record B
+  3. Record C
+
+── Page 2/3 ──
+  1. Record D
+  2. Record E
+  3. Record F
+
+── Page 3/3 ──
+  1. Record G
+
+Total pages: 3</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why is <code>[Symbol.iterator]</code> the key that makes an object iterable?</li><li>What is the difference between the iterable (paginator) and the iterator (object returned from <code>[Symbol.iterator]()</code>)?</li><li>How would you rewrite this using a generator function?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Generator Workshop ⚡</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice writing generator functions for real data tasks.</p>
+<p class="v2-p"><strong>Scenario:</strong> Build generators for a <strong>data processing pipeline</strong> at an analytics company.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* squares(n) {
+  for (let i = 1; i &lt;= n; i++) yield i * i;
+}
+console.log([...squares(5)]); // [1, 4, 9, 16, 25]</code></pre></div></div>
+<h4 class="v2-h4">Task A · Utility Generators</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// 1. Unique ID generator
+function* idGenerator(prefix = &quot;ID&quot;) {
+  let n = 1;
+  while (true) {
+    yield `${prefix}-${String(n++).padStart(4, &quot;0&quot;)}`;
+  }
+}
+
+const userId = idGenerator(&quot;USR&quot;);
+console.log(userId.next().value); // USR-0001
+console.log(userId.next().value); // USR-0002
+console.log(userId.next().value); // USR-0003
+
+// 2. Chunker — split array into fixed-size chunks lazily
+function* chunk(array, size) {
+  for (let i = 0; i &lt; array.length; i += size) {
+    yield array.slice(i, i + size);
+  }
+}
+
+const data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+for (const batch of chunk(data, 3)) {
+  console.log(&quot;Batch:&quot;, batch);
+}
+// Batch: [1, 2, 3]
+// Batch: [4, 5, 6]
+// Batch: [7, 8, 9]
+// Batch: [10]
+
+// 3. Filter + map pipeline using generators
+function* filterGen(iterable, predicate) {
+  for (const item of iterable) {
+    if (predicate(item)) yield item;
+  }
+}
+
+function* mapGen(iterable, transform) {
+  for (const item of iterable) {
+    yield transform(item);
+  }
+}
+
+const scores  = [45, 72, 88, 56, 93, 61, 78, 34, 90];
+const passing = filterGen(scores, s =&gt; s &gt;= 60);
+const graded  = mapGen(passing, s =&gt; ({
+  score: s,
+  grade: s &gt;= 90 ? &quot;A&quot; : s &gt;= 75 ? &quot;B&quot; : &quot;C&quot;
+}));
+
+console.log(&quot;\nPassing grades:&quot;);
+for (const g of graded) {
+  console.log(`  Score: ${g.score} → Grade: ${g.grade}`);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>USR-0001
+USR-0002
+USR-0003
+Batch: [1, 2, 3]
+Batch: [4, 5, 6]
+Batch: [7, 8, 9]
+Batch: [10]
+
+Passing grades:
+  Score: 72  → Grade: C
+  Score: 88  → Grade: B
+  Score: 93  → Grade: A
+  Score: 61  → Grade: C
+  Score: 78  → Grade: B
+  Score: 90  → Grade: A</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why is an infinite generator (<code>while (true) { yield ... }</code>) safe to use as long as you break or use <code>.next()</code> selectively?</li><li>How does <code>yield*</code> differ from calling <code>yield</code> inside a loop?</li><li>What is "lazy evaluation" and why do generators enable it?</li></ul>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"> · ### Exercise 1 · Loop Master 🔁
+
+Objective: Practice choosing the right loop for each situation.
+
+Scenario: You are building a student results portal. Each task below requires a different loop type.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">🔵 Stage 1 · Data Source Generator</div><div class="build-req"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 3 · Project Simulation</strong></p></blockquote>
+<p class="v2-p"><strong>Real-world scenario:</strong> You work at a data analytics company. You receive large batches of raw transaction records. Build a <strong>lazy data pipeline</strong> using generators and iterators that:</p>
+<ul class="v2-ul"><li>Reads records lazily (one at a time) without loading the entire dataset</li><li>Filters, transforms, and enriches data through a composable pipeline</li><li>Paginates output into batches for display or further processing</li><li>Tracks pipeline statistics using a custom iterable</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">🔵 Stage 1 · Data Source Generator</h3>
+<p class="v2-p"><strong>Goal:</strong> Create a generator that simulates streaming raw records lazily, one at a time.</p>
+<h4 class="v2-h4">Simple stage preview:</h4></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function* range(n) { for (let i = 1; i &lt;= n; i++) yield i; }
+console.log([...range(4)]); // [1, 2, 3, 4]</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`function* range(n) { for (let i = 1; i <= n; i++) yield i; }
+console.log([...range(4)]); // [1, 2, 3, 4]`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-17-stage-1-data-source-generator</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 17 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-17-stage-1-data-source-generator/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 17 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. Background: What Is Looping and Why Does It Matter?</li><li>✅ 2. Topic 1 · JavaScript Looping (All Loop Types)</li><li>✅ 3. Topic 2 · Iterables</li><li>✅ 4. Topic 3 · Iterators</li><li>✅ 5. Topic 4 · Generator Functions</li><li>✅ 6. Applied Exercises</li></ul><div class="ln"><a href="lesson_16.html" class="ln-btn">&#8592; Lesson 16</a><a href="lesson_18.html" class="ln-btn primary">Lesson 18 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 17 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

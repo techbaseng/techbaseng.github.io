@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 17: Iterators, Modules, Dates, and Math in Python — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="7" data-key="techbase_python_l17">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 17 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 17</div>
+      <h1>Iterators, Modules, Dates, and Math in Python</h1>
+      <div class="l-hero-sub">7 phases &nbsp;·&nbsp; Build: Stage 1 · Setup: Create the data module</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 17</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 17! In this lesson, you will learn four powerful and practical Python topics that every programmer uses regularly:</p>
+<ol class="v2-ol"><li><strong>Iterators</strong> · How Python moves through data, one item at a time</li><li><strong>Modules</strong> · How to organise and reuse code across files</li><li><strong>Dates and Times</strong> · How to work with real-world time using Python</li><li><strong>Math</strong> · How to do advanced calculations using Python's built-in tools</li></ol>
+<p class="v2-p">These four topics connect naturally. You use iterators to walk through data, modules to import useful tools (like <code>datetime</code> and <code>math</code>), dates to track when things happen, and math to calculate important values in science, finance, and engineering.</p>
+<p class="v2-p">By the end of this lesson you will be able to write a mini program that tracks student submissions, shows the current date, and calculates statistics · all from scratch.</p>
+<hr class="v2-hr"></div><div class="wm"><span>📚 7 phases</span><span>🏗️ Stage 1 · Setup: Create the data module</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 7</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 17! In this lesson, you will learn four powerful and practical Python topics that every programmer uses regularly:</p>
+<ol class="v2-ol"><li><strong>Iterators</strong> · How Python moves through data, one item at a time</li><li><strong>Modules</strong> · How to organise and reuse code across files</li><li><strong>Dates and Times</strong> · How to work with real-world time using Python</li><li><strong>Math</strong> · How to do advanced calculations using Python's built-in tools</li></ol>
+<p class="v2-p">These four topics connect naturally. You use iterators to walk through data, modules to import useful tools (like <code>datetime</code> and <code>math</code>), dates to track when things happen, and math to calculate important values in science, finance, and engineering.</p>
+<p class="v2-p">By the end of this lesson you will be able to write a mini program that tracks student submissions, shows the current date, and calculates statistics · all from scratch.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 7</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before we begin, make sure you are comfortable with these ideas:</p>
+<ul class="v2-ul"><li><strong>Variables</strong> · storing values like <code>x = 5</code></li><li><strong>Lists and Tuples</strong> · collections of items like <code>["apple", "banana"]</code></li><li><strong>For loops</strong> · repeating actions with <code>for x in something:</code></li><li><strong>Functions</strong> · blocks of reusable code created with <code>def</code></li><li><strong>Classes</strong> · blueprints for objects (you will see them in the Iterator section)</li></ul>
+<p class="v2-p">If any of those feel unfamiliar, review your earlier lessons briefly before continuing.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 7</div><div class="pt">Part 1 · Python Iterators</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is an Iterator?</h3>
+<p class="v2-p">Think of an iterator like a <strong>book with a bookmark</strong>. The bookmark remembers which page you are on. Every time you want to read, you open to the bookmark, read one page, and move the bookmark forward. You never have to remember where you are · the bookmark does that for you.</p>
+<p class="v2-p">In Python, an <strong>iterator</strong> is an object that remembers where you are in a collection of items. Each time you ask for the "next" item, it gives you one and moves forward automatically.</p>
+<p class="v2-p"><strong>Why does this exist?</strong> Sometimes you have a very large amount of data and you cannot (or do not want to) load it all at once. An iterator lets you process one item at a time without needing to see the full list upfront. This saves memory and is faster for large data.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Two Important Words: Iterable vs Iterator</h3>
+<p class="v2-p">These sound similar but mean different things.</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Word</th><th>What it means</th><th>Examples</th></tr></thead><tbody><tr><td><strong>Iterable</strong></td><td>An object you CAN loop through</td><td><code>list</code>, <code>tuple</code>, <code>dict</code>, <code>set</code>, <code>string</code></td></tr><tr><td><strong>Iterator</strong></td><td>An object that IS actively stepping through another object</td><td>Created by calling <code>iter()</code> on an iterable</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Analogy:</strong> A list is like a full bag of fruit. An iterator is the hand reaching into the bag and pulling out one fruit at a time.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>iter()</code> and <code>next()</code> Functions</h3>
+<p class="v2-p">To turn an iterable into an iterator, you use <code>iter()</code>. To get the next item from an iterator, you use <code>next()</code>.</p>
+<p class="v2-p"><strong>Very simple example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mytuple = (&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;)  # This is an iterable (a tuple)
+myit = iter(mytuple)                     # This creates an iterator from it
+
+print(next(myit))   # Step 1: get the first item
+print(next(myit))   # Step 2: get the second item
+print(next(myit))   # Step 3: get the third item</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>apple
+banana
+cherry</code></pre></div></div>
+<p class="v2-p"><strong>Line by line explanation:</strong></p>
+<ul class="v2-ul"><li><code>mytuple = ("apple", "banana", "cherry")</code> · creates a tuple with three fruits</li><li><code>myit = iter(mytuple)</code> · creates an iterator; it is now "pointing at" apple</li><li><code>print(next(myit))</code> · asks the iterator: "what's the next item?" It returns <code>apple</code> and moves the pointer to <code>banana</code></li><li><code>print(next(myit))</code> · returns <code>banana</code>, pointer moves to <code>cherry</code></li><li><code>print(next(myit))</code> · returns <code>cherry</code>, pointer moves past the end</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Think about it:</strong> What would happen if you called <code>next(myit)</code> a fourth time? There are no more items · Python would raise an error called <code>StopIteration</code>. You will learn how to handle that shortly.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Strings Are Iterable Too</h3>
+<p class="v2-p">A string is just a sequence of characters. So strings are also iterable:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mystr = &quot;banana&quot;
+myit = iter(mystr)
+
+print(next(myit))   # b
+print(next(myit))   # a
+print(next(myit))   # n
+print(next(myit))   # a
+print(next(myit))   # n
+print(next(myit))   # a</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>b
+a
+n
+a
+n
+a</code></pre></div></div>
+<p class="v2-p">Each call to <code>next()</code> returns one character, in order.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Looping Through an Iterator</h3>
+<p class="v2-p">You already know the <code>for</code> loop. Here is something interesting: when you use a <code>for</code> loop on a list, tuple, string, or other iterable, Python is secretly using an iterator under the hood!</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mytuple = (&quot;apple&quot;, &quot;banana&quot;, &quot;cherry&quot;)
+
+for x in mytuple:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>apple
+banana
+cherry</code></pre></div></div>
+<p class="v2-p">Python automatically calls <code>iter()</code> to create an iterator and then calls <code>next()</code> on every loop turn. The <code>for</code> loop knows when to stop because the iterator signals "done" by raising <code>StopIteration</code>.</p>
+<p class="v2-p"><strong>Same thing with a string:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mystr = &quot;banana&quot;
+
+for x in mystr:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>b
+a
+n
+a
+n
+a</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world connection:</strong> Every time you write <code>for item in my_list:</code>, Python is using the iterator protocol. Understanding this helps you understand how loops actually work inside Python.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating Your Own Iterator</h3>
+<p class="v2-p">Python lets you build your own custom iterator by creating a class with two special methods:</p>
+<ul class="v2-ul"><li><code>__iter__()</code> · sets up the iterator (runs once when <code>iter()</code> is called)</li><li><code>__next__()</code> · returns the next value (runs every time <code>next()</code> is called)</li></ul>
+<p class="v2-p"><strong>What is a class?</strong> Think of a class as a blueprint. It defines what an object should do. <code>__iter__</code> and <code>__next__</code> are special "dunder" (double underscore) methods that Python calls automatically.</p>
+<p class="v2-p"><strong>Simple custom iterator · counts upward from 1:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class MyNumbers:
+    def __iter__(self):
+        self.a = 1      # Start counting from 1
+        return self     # Must return the iterator object itself
+
+    def __next__(self):
+        x = self.a      # Save the current value
+        self.a += 1     # Move to the next number (a += 1 means a = a + 1)
+        return x        # Return the current value
+
+myclass = MyNumbers()   # Create an instance of the class
+myiter = iter(myclass)  # Call __iter__, which sets self.a = 1
+
+print(next(myiter))     # Calls __next__, returns 1, sets self.a = 2
+print(next(myiter))     # Returns 2, sets self.a = 3
+print(next(myiter))     # Returns 3, sets self.a = 4
+print(next(myiter))     # Returns 4
+print(next(myiter))     # Returns 5</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5</code></pre></div></div>
+<p class="v2-p"><strong>Line by line breakdown of <code>__next__</code>:</strong></p>
+<ul class="v2-ul"><li><code>x = self.a</code> · saves the current count (e.g., 1) into <code>x</code></li><li><code>self.a += 1</code> · increments the count for next time (now it will be 2)</li><li><code>return x</code> · sends back the saved value (1)</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>What if you change <code>self.a = 1</code> to <code>self.a = 5</code>?</strong> The sequence would start at 5, 6, 7, … Try it!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">StopIteration · How to Stop Your Iterator</h3>
+<p class="v2-p">The example above would count forever if you kept calling <code>next()</code>. In real programs, that would be a problem. Python has a solution: you raise a special signal called <code>StopIteration</code> when the sequence should end.</p>
+<p class="v2-p"><strong>Example · count from 1 to 20 only:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class MyNumbers:
+    def __iter__(self):
+        self.a = 1
+        return self
+
+    def __next__(self):
+        if self.a &lt;= 20:        # As long as the count is 20 or less...
+            x = self.a
+            self.a += 1
+            return x
+        else:
+            raise StopIteration  # Signal: no more items!
+
+myclass = MyNumbers()
+myiter = iter(myclass)
+
+for x in myiter:       # for loop automatically stops at StopIteration
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</code></pre></div></div>
+<p class="v2-p"><strong>What <code>raise StopIteration</code> does:</strong></p>
+<ul class="v2-ul"><li><code>raise</code> is Python's keyword for signalling an error or event</li><li><code>StopIteration</code> is the specific signal that tells a <code>for</code> loop "we are done"</li><li>The <code>for</code> loop catches this signal silently and stops · you never see an error</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Common beginner mistake:</strong> Forgetting to include the <code>raise StopIteration</code> and having an infinite loop. Always include a stopping condition!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Guided Practice · Part 1: Iterators</h3>
+<p class="v2-p"><strong>Exercise 1A · Iterate manually</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Practice using <code>iter()</code> and <code>next()</code> on a list.</p>
+<p class="v2-p"><strong>Scenario:</strong> A school stores student names in a list. Print the first three names manually using <code>next()</code>.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create a list: <code>students = ["Amaka", "Chidi", "Emeka", "Ngozi", "Yemi"]</code></li><li>Create an iterator from it using <code>iter()</code></li><li>Print the first three names using three separate <code>next()</code> calls</li></ol>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Amaka
+Chidi
+Emeka</code></pre></div></div>
+<p class="v2-p"><strong>Solution:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>students = [&quot;Amaka&quot;, &quot;Chidi&quot;, &quot;Emeka&quot;, &quot;Ngozi&quot;, &quot;Yemi&quot;]
+myit = iter(students)
+
+print(next(myit))   # Amaka
+print(next(myit))   # Chidi
+print(next(myit))   # Emeka</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What would the 4th <code>next()</code> call return?</li><li>What happens after the 5th <code>next()</code> call?</li></ul>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Exercise 1B · Custom iterator for even numbers</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Build a custom iterator that generates the first N even numbers.</p>
+<p class="v2-p"><strong>Scenario:</strong> You need even numbers for a data-processing task.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class EvenNumbers:
+    def __iter__(self):
+        self.n = 0         # Start at 0 (first even number)
+        return self
+
+    def __next__(self):
+        if self.n &lt;= 20:   # Stop after 20
+            x = self.n
+            self.n += 2    # Move to next even number
+            return x
+        else:
+            raise StopIteration
+
+myevens = EvenNumbers()
+myiter = iter(myevens)
+
+for x in myiter:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>0
+2
+4
+6
+8
+10
+12
+14
+16
+18
+20</code></pre></div></div>
+<p class="v2-p"><strong>What-if challenge:</strong> What if you changed <code>self.n += 2</code> to <code>self.n += 3</code>? What sequence would you get?</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Python Iterators</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 7</div><div class="pt">Part 2 · Python Modules</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is a Module?</h3>
+<p class="v2-p">Think of a <strong>module</strong> like a toolbox. When you are building something, you do not carry every tool you own in your hands · you keep them in a toolbox and pick out what you need. A Python module is a file of pre-written code (functions, variables, classes) that you can "pick up" and use in your own program.</p>
+<p class="v2-p"><strong>Why do modules exist?</strong></p>
+<ul class="v2-ul"><li>To organise code: instead of one giant messy file, split code into neat files</li><li>To reuse code: write a function once in a module, use it in many programs</li><li>To share code: Python has thousands of ready-made modules others have built</li></ul>
+<p class="v2-p">A module is simply a Python file saved with the <code>.py</code> extension. Any <code>.py</code> file can be a module.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a Module</h3>
+<p class="v2-p">To create a module, write your Python code in a file and save it as <code>something.py</code>.</p>
+<p class="v2-p"><strong>Create a file called <code>mymodule.py</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># mymodule.py
+def greeting(name):
+    print(&quot;Hello, &quot; + name)</code></pre></div></div>
+<p class="v2-p">That is it! You have a module. It contains one function called <code>greeting</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Using (Importing) a Module</h3>
+<p class="v2-p">To use a module in another file, you use the <code>import</code> keyword.</p>
+<p class="v2-p"><strong>In a different file (e.g., <code>main.py</code>):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mymodule
+
+mymodule.greeting(&quot;Jonathan&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello, Jonathan</code></pre></div></div>
+<p class="v2-p"><strong>Breaking it down:</strong></p>
+<ul class="v2-ul"><li><code>import mymodule</code> · Python finds <code>mymodule.py</code> and loads it</li><li><code>mymodule.greeting("Jonathan")</code> · accesses the <code>greeting</code> function inside <code>mymodule</code></li><li>The syntax is always: <code>module_name.function_name()</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Important rule:</strong> When calling a function from a module, you must use the format <code>module_name.function_name()</code>. Forgetting the <code>module_name.</code> part is a very common beginner mistake.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Variables in a Module</h3>
+<p class="v2-p">Modules can contain more than functions. They can hold variables of any type · strings, numbers, lists, dictionaries, and so on.</p>
+<p class="v2-p"><strong>In <code>mymodule.py</code>, add a dictionary:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># mymodule.py
+
+def greeting(name):
+    print(&quot;Hello, &quot; + name)
+
+person1 = {
+    &quot;name&quot;: &quot;John&quot;,
+    &quot;age&quot;: 36,
+    &quot;country&quot;: &quot;Norway&quot;
+}</code></pre></div></div>
+<p class="v2-p"><strong>In <code>main.py</code>, access the dictionary:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mymodule
+
+a = mymodule.person1[&quot;age&quot;]
+print(a)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>36</code></pre></div></div>
+<p class="v2-p"><strong>What happened:</strong></p>
+<ul class="v2-ul"><li><code>mymodule.person1</code> accesses the dictionary called <code>person1</code> inside the module</li><li><code>["age"]</code> gets the value associated with the <code>"age"</code> key</li><li>The result <code>36</code> is stored in <code>a</code> and printed</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Renaming a Module (Aliases)</h3>
+<p class="v2-p">Sometimes module names are long and you want a shorter name. Use the <code>as</code> keyword to create an <strong>alias</strong> (a nickname).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mymodule as mx
+
+a = mx.person1[&quot;age&quot;]
+print(a)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>36</code></pre></div></div>
+<p class="v2-p">Instead of typing <code>mymodule</code> every time, you type <code>mx</code>. This is especially useful with very common modules like NumPy (usually imported as <code>np</code>) or Pandas (usually imported as <code>pd</code>).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Built-in Modules</h3>
+<p class="v2-p">Python comes with dozens of modules already installed. You do not need to create them · just import them. Examples include <code>platform</code>, <code>math</code>, <code>datetime</code>, <code>random</code>, <code>os</code>, and more.</p>
+<p class="v2-p"><strong>Example · using the <code>platform</code> module to check your operating system:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import platform
+
+x = platform.system()
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (depends on your computer):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Windows</code></pre></div></div>
+<p class="v2-p">or</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Linux</code></pre></div></div>
+<p class="v2-p">or</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Darwin</code></pre></div></div>
+<p class="v2-p">(Darwin = macOS)</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>dir()</code> Function · What's Inside a Module?</h3>
+<p class="v2-p">If you ever want to see all the functions and variables inside a module, use the <code>dir()</code> function. It returns a list of everything the module contains.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import platform
+
+x = dir(platform)
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (shortened):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&#x27;DEV_NULL&#x27;, &#x27;_UNIXCONFDIR&#x27;, &#x27;__builtins__&#x27;, ..., &#x27;architecture&#x27;, &#x27;java_ver&#x27;, &#x27;machine&#x27;, &#x27;node&#x27;, &#x27;platform&#x27;, &#x27;processor&#x27;, &#x27;python_branch&#x27;, &#x27;python_build&#x27;, ...]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> When you discover a new module and want to explore it, <code>dir(module_name)</code> is your quick guide to what tools it provides.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Importing Only Parts of a Module</h3>
+<p class="v2-p">Sometimes you only need one specific function or variable from a module. You can import just that one thing using the <code>from</code> keyword:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from mymodule import person1
+
+print(person1[&quot;age&quot;])</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>36</code></pre></div></div>
+<p class="v2-p"><strong>Key difference:</strong> When using <code>from module import something</code>, you do NOT use the module name prefix. You just write <code>person1["age"]</code>, not <code>mymodule.person1["age"]</code>.</p>
+<p class="v2-p"><strong>Two styles compared:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Style 1: import the whole module
+import mymodule
+print(mymodule.person1[&quot;age&quot;])   # must use prefix
+
+# Style 2: import only what you need
+from mymodule import person1
+print(person1[&quot;age&quot;])            # no prefix needed</code></pre></div></div>
+<p class="v2-p">Both produce the same result: <code>36</code>.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Common beginner mistake:</strong> Using <code>from mymodule import person1</code> and then writing <code>mymodule.person1["age"]</code> · this causes a <code>NameError</code> because you did not import the full module, only the specific item.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Guided Practice · Part 2: Modules</h3>
+<p class="v2-p"><strong>Exercise 2A · Create and use a simple module</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Create a module with useful school functions.</p>
+<p class="v2-p"><strong>Step 1:</strong> Create a file called <code>school.py</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># school.py
+
+school_name = &quot;Sunrise Academy&quot;
+total_students = 450
+
+def welcome(student_name):
+    print(&quot;Welcome to &quot; + school_name + &quot;, &quot; + student_name + &quot;!&quot;)
+
+def average(scores):
+    return sum(scores) / len(scores)</code></pre></div></div>
+<p class="v2-p"><strong>Step 2:</strong> In your main file, use the module:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import school
+
+school.welcome(&quot;Amaka&quot;)
+
+scores = [78, 85, 92, 70, 88]
+avg = school.average(scores)
+print(&quot;Class average:&quot;, avg)
+print(&quot;Total students:&quot;, school.total_students)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Welcome to Sunrise Academy, Amaka!
+Class average: 82.6
+Total students: 450</code></pre></div></div>
+<p class="v2-p"><strong>Self-check:</strong> What would <code>from school import welcome</code> change about how you call the function?</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Python Modules</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 7</div><div class="pt">Part 3 · Python Dates</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Why Doesn't Python Have a Built-in Date Type?</h3>
+<p class="v2-p">Unlike numbers or strings, a date is not one of Python's built-in data types. Instead, Python gives you a <strong>module</strong> called <code>datetime</code> that you can import to work with dates and times.</p>
+<p class="v2-p">This connects directly to what you just learned · <code>datetime</code> is a <strong>module</strong>, and you must <strong>import</strong> it before using it.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Importing and Using <code>datetime</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+x = datetime.datetime.now()
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (will match your current date and time):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2025-07-15 14:32:45.678901</code></pre></div></div>
+<p class="v2-p"><strong>Breaking it down:</strong></p>
+<ul class="v2-ul"><li><code>import datetime</code> · loads the datetime module</li><li><code>datetime.datetime</code> · inside the <code>datetime</code> module, there is a class also called <code>datetime</code></li><li><code>.now()</code> · calls the <code>now()</code> method, which captures the current date and time at this exact moment</li><li>The output format is: <code>YYYY-MM-DD HH:MM:SS.microseconds</code></li></ul>
+<p class="v2-p">The date output contains: <strong>year, month, day, hour, minute, second, and microsecond</strong>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Accessing Individual Date Parts</h3>
+<p class="v2-p">A datetime object contains many parts. You can access them individually:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+x = datetime.datetime.now()
+
+print(x.year)              # just the year number
+print(x.strftime(&quot;%A&quot;))    # full weekday name</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (example):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2025
+Tuesday</code></pre></div></div>
+<ul class="v2-ul"><li><code>x.year</code> · accesses the year attribute directly</li><li><code>x.strftime("%A")</code> · formats the date; <code>%A</code> means "full weekday name"</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a Specific Date Object</h3>
+<p class="v2-p">You do not have to use "today's date." You can create any date you want using <code>datetime.datetime(year, month, day)</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+x = datetime.datetime(2020, 5, 17)
+
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2020-05-17 00:00:00</code></pre></div></div>
+<p class="v2-p"><strong>Parameters explained:</strong></p>
+<ul class="v2-ul"><li><code>2020</code> · the year</li><li><code>5</code> · the month (May)</li><li><code>17</code> · the day</li><li>The time defaults to <code>00:00:00</code> (midnight) when not specified</li></ul>
+<p class="v2-p">You can also pass optional time parameters: <code>datetime.datetime(year, month, day, hour, minute, second, microsecond, timezone)</code>. But for most uses, just year/month/day is enough.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>strftime()</code> Method · Formatting Dates as Text</h3>
+<p class="v2-p"><code>strftime</code> stands for "string from time." It converts a date object into a human-readable string using <strong>format codes</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+x = datetime.datetime(2018, 6, 1)
+
+print(x.strftime(&quot;%B&quot;))</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>June</code></pre></div></div>
+<p class="v2-p"><code>%B</code> means "full month name."</p>
+<p class="v2-p"><strong>Complete format codes reference:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Code</th><th>What it gives you</th><th>Example</th></tr></thead><tbody><tr><td><code>%a</code></td><td>Weekday, short</td><td>Wed</td></tr><tr><td><code>%A</code></td><td>Weekday, full</td><td>Wednesday</td></tr><tr><td><code>%w</code></td><td>Weekday as number (0=Sunday)</td><td>3</td></tr><tr><td><code>%d</code></td><td>Day of month (01 · 31)</td><td>31</td></tr><tr><td><code>%b</code></td><td>Month name, short</td><td>Dec</td></tr><tr><td><code>%B</code></td><td>Month name, full</td><td>December</td></tr><tr><td><code>%m</code></td><td>Month as number (01 · 12)</td><td>12</td></tr><tr><td><code>%y</code></td><td>Year, 2-digit</td><td>18</td></tr><tr><td><code>%Y</code></td><td>Year, 4-digit</td><td>2018</td></tr><tr><td><code>%H</code></td><td>Hour (00 · 23)</td><td>17</td></tr><tr><td><code>%I</code></td><td>Hour (00 · 12)</td><td>05</td></tr><tr><td><code>%p</code></td><td>AM or PM</td><td>PM</td></tr><tr><td><code>%M</code></td><td>Minute (00 · 59)</td><td>41</td></tr><tr><td><code>%S</code></td><td>Second (00 · 59)</td><td>08</td></tr><tr><td><code>%f</code></td><td>Microsecond</td><td>548513</td></tr><tr><td><code>%j</code></td><td>Day number of the year (001 · 366)</td><td>365</td></tr><tr><td><code>%U</code></td><td>Week number of year (Sunday first)</td><td>52</td></tr><tr><td><code>%W</code></td><td>Week number of year (Monday first)</td><td>52</td></tr><tr><td><code>%c</code></td><td>Local full date and time</td><td>Mon Dec 31 17:41:00 2018</td></tr><tr><td><code>%x</code></td><td>Local date</td><td>12/31/18</td></tr><tr><td><code>%X</code></td><td>Local time</td><td>17:41:00</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Multiple Format Codes Together</h3>
+<p class="v2-p">You can combine many format codes to build any date string you want:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+x = datetime.datetime(2024, 3, 14)
+
+# Format: &quot;Day, DD Month YYYY&quot;
+print(x.strftime(&quot;%A, %d %B %Y&quot;))
+
+# Format: &quot;MM/DD/YYYY&quot;
+print(x.strftime(&quot;%m/%d/%Y&quot;))
+
+# Format: &quot;Year: YYYY | Month: MM | Day: DD&quot;
+print(x.strftime(&quot;Year: %Y | Month: %m | Day: %d&quot;))</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Thursday, 14 March 2024
+03/14/2024
+Year: 2024 | Month: 03 | Day: 14</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> In business systems, you often need to display dates in different formats for different regions. <code>strftime()</code> is how you do that.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Guided Practice · Part 3: Dates</h3>
+<p class="v2-p"><strong>Exercise 3A · Birthday formatter</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Create a date for a birthday and print it in three different formats.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a school records system. Format a student's birthday in three ways.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+birthday = datetime.datetime(2005, 8, 22)
+
+# Format 1: Full written date
+print(birthday.strftime(&quot;%A, %d %B %Y&quot;))
+
+# Format 2: Short numeric
+print(birthday.strftime(&quot;%m/%d/%Y&quot;))
+
+# Format 3: Just the year and month
+print(birthday.strftime(&quot;%B %Y&quot;))</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Monday, 22 August 2005
+08/22/2005
+August 2005</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Exercise 3B · Today's date display</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import datetime
+
+today = datetime.datetime.now()
+
+print(&quot;Today is:&quot;, today.strftime(&quot;%A, %d %B %Y&quot;))
+print(&quot;Current time:&quot;, today.strftime(&quot;%H:%M:%S&quot;))
+print(&quot;Day of year:&quot;, today.strftime(&quot;%j&quot;))</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (example · will match your current date):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Today is: Tuesday, 15 July 2025
+Current time: 09:45:22
+Day of year: 196</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What format code gives just the day name?</li><li>How would you display only the hour and minute (like <code>09:45</code>)?</li></ul>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Python Dates</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 7</div><div class="pt">Part 4 · Python Math</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Two Ways to Do Math in Python</h3>
+<p class="v2-p">Python gives you two levels of math tools:</p>
+<ol class="v2-ol"><li><strong>Built-in functions</strong> · always available, no import needed (<code>min()</code>, <code>max()</code>, <code>abs()</code>, <code>pow()</code>)</li><li><strong>The <code>math</code> module</strong> · powerful functions you must import first (<code>math.sqrt()</code>, <code>math.ceil()</code>, <code>math.floor()</code>, <code>math.pi</code>)</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Built-in Math Functions</h3>
+<p class="v2-p">These functions are part of Python itself · no <code>import</code> needed.</p>
+<p class="v2-p"><strong><code>min()</code> and <code>max()</code> · find the lowest or highest value:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = min(5, 10, 25)
+y = max(5, 10, 25)
+
+print(x)
+print(y)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>5
+25</code></pre></div></div>
+<ul class="v2-ul"><li><code>min(5, 10, 25)</code> · compares the three values and returns the smallest: 5</li><li><code>max(5, 10, 25)</code> · returns the largest: 25</li></ul>
+<p class="v2-p"><strong>They also work on lists:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>scores = [72, 88, 65, 94, 51]
+print(min(scores))   # 51
+print(max(scores))   # 94</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong><code>abs()</code> · absolute value (always positive):</strong></p>
+<p class="v2-p">The absolute value of a number is its distance from zero · always positive.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = abs(-7.25)
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>7.25</code></pre></div></div>
+<p class="v2-p"><code>-7.25</code> becomes <code>7.25</code>. Think of it as "remove the minus sign."</p>
+<p class="v2-p"><strong>Real-world use:</strong> In finance, you might have a balance of -500 (debt). <code>abs(-500)</code> gives you <code>500</code> · the amount owed without the sign.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>debt = -15000
+print(&quot;Amount owed:&quot;, abs(debt))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Amount owed: 15000</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong><code>pow(x, y)</code> · raise x to the power of y:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = pow(4, 3)    # same as 4 × 4 × 4
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>64</code></pre></div></div>
+<ul class="v2-ul"><li><code>pow(4, 3)</code> means 4³ = 4 × 4 × 4 = 64</li></ul>
+<p class="v2-p"><strong>More examples:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>print(pow(2, 10))   # 2^10 = 1024
+print(pow(5, 2))    # 5^2 = 25
+print(pow(9, 0.5))  # 9^0.5 = square root of 9 = 3.0</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1024
+25
+3.0</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> <code>pow()</code> is used in compound interest formulas, physics (energy calculations), and computer science (hash functions, encryption).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>math</code> Module</h3>
+<p class="v2-p">For more advanced mathematical operations, Python includes a dedicated <code>math</code> module.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math</code></pre></div></div>
+<p class="v2-p">Once imported, you have access to dozens of functions and constants.</p>
+<hr class="v2-hr">
+<p class="v2-p"><strong><code>math.sqrt()</code> · square root:</strong></p>
+<p class="v2-p">The square root of a number is what you multiply by itself to get that number. For example, the square root of 64 is 8 (because 8 × 8 = 64).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+x = math.sqrt(64)
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>8.0</code></pre></div></div>
+<p class="v2-p">Note: <code>sqrt()</code> always returns a float (a decimal number).</p>
+<p class="v2-p"><strong>More examples:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+print(math.sqrt(25))    # 5.0
+print(math.sqrt(100))   # 10.0
+print(math.sqrt(2))     # 1.4142135623730951</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> In physics, calculating the length of a diagonal (Pythagoras theorem): <code>c = math.sqrt(a<strong>2 + b</strong>2)</code>. In statistics, the standard deviation formula involves square roots.</p></blockquote>
+<hr class="v2-hr">
+<p class="v2-p"><strong><code>math.ceil()</code> · round UP to the nearest whole number:</strong></p>
+<p class="v2-p"><code>ceil</code> stands for "ceiling." Just like a ceiling is always above you, <code>ceil()</code> always goes upward.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+x = math.ceil(1.4)    # 1.4 rounds UP to 2
+y = math.ceil(7.001)  # 7.001 rounds UP to 8
+z = math.ceil(-1.4)   # -1.4 rounds UP to -1
+
+print(x)   # 2
+print(y)   # 8
+print(z)   # -1</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2
+8
+-1</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> If you need 7.5 buses to transport students, you must order 8 buses · you cannot have half a bus. <code>math.ceil(7.5)</code> gives you 8.</p>
+<hr class="v2-hr">
+<p class="v2-p"><strong><code>math.floor()</code> · round DOWN to the nearest whole number:</strong></p>
+<p class="v2-p"><code>floor</code> is the opposite. Just like a floor is always below you, <code>floor()</code> always goes downward.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+x = math.floor(1.4)    # 1.4 rounds DOWN to 1
+y = math.floor(7.999)  # 7.999 rounds DOWN to 7
+z = math.floor(-1.4)   # -1.4 rounds DOWN to -2
+
+print(x)   # 1
+print(y)   # 7
+print(z)   # -2</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+7
+-2</code></pre></div></div>
+<p class="v2-p"><strong>Comparison of rounding functions:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Value</th><th><code>round()</code></th><th><code>math.ceil()</code></th><th><code>math.floor()</code></th></tr></thead><tbody><tr><td>1.4</td><td>1</td><td>2</td><td>1</td></tr><tr><td>1.5</td><td>2</td><td>2</td><td>1</td></tr><tr><td>1.9</td><td>2</td><td>2</td><td>1</td></tr><tr><td>-1.4</td><td>-1</td><td>-1</td><td>-2</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong><code>math.pi</code> · the constant π (Pi):</strong></p>
+<p class="v2-p">Pi is the ratio of a circle's circumference to its diameter. It is approximately 3.14159... and goes on forever.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+x = math.pi
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3.141592653589793</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use · calculate the area of a circle:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+radius = 7
+area = math.pi * radius ** 2   # Area = π × r²
+print(&quot;Area of circle:&quot;, area)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Area of circle: 153.93804002589985</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Second Example Set · Reinforcing Math Concepts</h3>
+<p class="v2-p"><strong>Example: Physics · distance calculation with <code>sqrt</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+# How far is a point (x=3, y=4) from the origin (0,0)?
+# Pythagoras: distance = sqrt(x^2 + y^2)
+x = 3
+y = 4
+distance = math.sqrt(x**2 + y**2)
+print(&quot;Distance:&quot;, distance)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Distance: 5.0</code></pre></div></div>
+<p class="v2-p"><strong>Example: Budgeting · <code>ceil</code> for packaging:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+items = 55
+items_per_box = 12
+
+boxes_needed = math.ceil(items / items_per_box)
+print(&quot;Boxes needed:&quot;, boxes_needed)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Boxes needed: 5</code></pre></div></div>
+<p class="v2-p">(55 ÷ 12 = 4.58… → round up → 5 boxes)</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Guided Practice · Part 4: Math</h3>
+<p class="v2-p"><strong>Exercise 4A · Score analysis</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Use built-in and math functions together on student scores.</p>
+<p class="v2-p"><strong>Scenario:</strong> A teacher has a list of test scores and wants to analyze them.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+
+scores = [72, 85, 91, 63, 78, 88, 55, 94, 70, 82]
+
+print(&quot;Highest score:&quot;, max(scores))
+print(&quot;Lowest score:&quot;, min(scores))
+print(&quot;Average:&quot;, sum(scores) / len(scores))
+
+# How many boxes of certificates (5 per box) are needed?
+boxes = math.ceil(len(scores) / 5)
+print(&quot;Certificate boxes needed:&quot;, boxes)
+
+# Variance-like: sqrt of average squared difference from 80
+diffs_sq = [(s - 80)**2 for s in scores]
+spread = math.sqrt(sum(diffs_sq) / len(diffs_sq))
+print(&quot;Spread from 80:&quot;, round(spread, 2))</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Highest score: 94
+Lowest score: 55
+Average: 77.8
+Certificate boxes needed: 2
+Spread from 80: 12.47</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Python Math</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 7</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1 · Calling <code>next()</code> too many times</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong — no StopIteration guard
+mytuple = (&quot;a&quot;, &quot;b&quot;)
+myit = iter(mytuple)
+print(next(myit))   # a
+print(next(myit))   # b
+print(next(myit))   # ERROR: StopIteration</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Use a <code>for</code> loop (it stops automatically) or wrap in a <code>try/except</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mytuple = (&quot;a&quot;, &quot;b&quot;)
+myit = iter(mytuple)
+try:
+    while True:
+        print(next(myit))
+except StopIteration:
+    print(&quot;Done!&quot;)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2 · Forgetting <code>raise StopIteration</code> in a custom iterator</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong — infinite loop!
+class Counter:
+    def __iter__(self):
+        self.n = 1
+        return self
+    def __next__(self):
+        x = self.n
+        self.n += 1
+        return x   # ← no stopping condition!</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Always add a stopping condition:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>def __next__(self):
+    if self.n &lt;= 10:
+        x = self.n
+        self.n += 1
+        return x
+    else:
+        raise StopIteration</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3 · Using the module name after <code>from ... import</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong
+from mymodule import greeting
+mymodule.greeting(&quot;Amaka&quot;)   # NameError: mymodule is not defined
+
+# Correct
+from mymodule import greeting
+greeting(&quot;Amaka&quot;)            # No prefix needed</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4 · Forgetting to import <code>datetime</code> or <code>math</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong
+x = datetime.datetime.now()   # NameError: datetime is not defined
+
+# Correct
+import datetime
+x = datetime.datetime.now()</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5 · Using <code>datetime()</code> directly instead of <code>datetime.datetime()</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong
+import datetime
+x = datetime(2020, 5, 17)      # TypeError
+
+# Correct
+import datetime
+x = datetime.datetime(2020, 5, 17)   # datetime module → datetime class → constructor</code></pre></div></div>
+<p class="v2-p"><strong>Or use a shortcut:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from datetime import datetime
+x = datetime(2020, 5, 17)   # Now you can use it directly</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6 · Confusing <code>math.ceil</code> and <code>math.floor</code></h3>
+<p class="v2-p">A quick reminder:</p>
+<ul class="v2-ul"><li><code>ceil</code> = <strong>ceiling</strong> = always goes <strong>UP</strong></li><li><code>floor</code> = <strong>floor</strong> = always goes <strong>DOWN</strong></li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import math
+print(math.ceil(4.1))    # 5  (goes UP)
+print(math.floor(4.9))   # 4  (goes DOWN)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 7 · Forgetting <code>import math</code> before using <code>math.sqrt</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong
+x = math.sqrt(16)   # NameError
+
+# Correct
+import math
+x = math.sqrt(16)   # 4.0</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Stage 1 · Setup: Create the data module</div><div class="build-req"><p class="v2-p">Now you will combine all four topics: iterators, modules, dates, and math.</p>
+<p class="v2-p"><strong>Project Goal:</strong> Build a simple student submission tracker that:</p>
+<ol class="v2-ol"><li>Stores student names and scores</li><li>Iterates through them with a custom iterator</li><li>Shows the current date of the report</li><li>Calculates math statistics</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Setup: Create the data module</h3>
+<p class="v2-p"><strong>Create a file called <code>student_data.py</code>:</strong></p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># student_data.py
+
+students = [&quot;Amaka&quot;, &quot;Chidi&quot;, &quot;Emeka&quot;, &quot;Ngozi&quot;, &quot;Yemi&quot;, &quot;Bola&quot;, &quot;Tunde&quot;]
+
+scores = {
+    &quot;Amaka&quot;: 85,
+    &quot;Chidi&quot;: 72,
+    &quot;Emeka&quot;: 90,
+    &quot;Ngozi&quot;: 68,
+    &quot;Yemi&quot;: 88,
+    &quot;Bola&quot;: 75,
+    &quot;Tunde&quot;: 94
+}
+
+passing_score = 70</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`# student_data.py
+
+students = [&quot;Amaka&quot;, &quot;Chidi&quot;, &quot;Emeka&quot;, &quot;Ngozi&quot;, &quot;Yemi&quot;, &quot;Bola&quot;, &quot;Tunde&quot;]
+
+scores = {
+    &quot;Amaka&quot;: 85,
+    &quot;Chidi&quot;: 72,
+    &quot;Emeka&quot;: 90,
+    &quot;Ngozi&quot;: 68,
+    &quot;Yemi&quot;: 88,
+    &quot;Bola&quot;: 75,
+    &quot;Tunde&quot;: 94
+}
+
+passing_score = 70`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-17-stage-1-setup-create-the-data-module</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 17 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 17 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1 · Python Iterators</li><li>✅ Part 2 · Python Modules</li><li>✅ Part 3 · Python Dates</li><li>✅ Part 4 · Python Math</li><li>✅ Common Beginner Mistakes</li></ul><div class="ln"><a href="lesson_16.html" class="ln-btn">&#8592; Lesson 16</a><a href="lesson_18.html" class="ln-btn primary">Lesson 18 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 17 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

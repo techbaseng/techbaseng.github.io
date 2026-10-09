@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 19: JavaScript Regular Expressions: Patterns · Flags · Characters · Meta Characters · Assertions · Quantifiers · Groups · RegExp Object · Methods — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="12" data-key="techbase_js_l19">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 19 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 19</div>
+      <h1>JavaScript Regular Expressions: Patterns · Flags · Characters · Meta Characters · Assertions · Quantifiers · Groups · RegExp Object · Methods</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: 🔵 Stage 1 · Validation Engine</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 19</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 12 phases</span><span>🏗️ 🔵 Stage 1 · Validation Engine</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">1. Background: What Are Regular Expressions?</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Imagine you receive a form submission with thousands of email addresses and need to check which ones are valid. Or you have a document full of phone numbers in inconsistent formats · <code>(080) 123-4567</code>, <code>080-123-4567</code>, <code>08012345678</code> · and need to extract and standardise them all.</p>
+<p class="v2-p">Doing this with normal string methods (<code>indexOf</code>, <code>includes</code>, <code>slice</code>) would require dozens of lines of complex logic. A <strong>regular expression</strong> (RegExp or regex) solves it in a single pattern.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Without regex — checking one simple email condition takes many lines
+function roughEmailCheck(email) {
+  const hasAt    = email.includes(&quot;@&quot;);
+  const hasDot   = email.includes(&quot;.&quot;);
+  const atIndex  = email.indexOf(&quot;@&quot;);
+  const dotAfter = email.lastIndexOf(&quot;.&quot;) &gt; atIndex;
+  return hasAt &amp;&amp; hasDot &amp;&amp; dotAfter;
+}
+
+// ✅ With regex — a full email pattern in one expression
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+console.log(emailPattern.test(&quot;alice@example.com&quot;)); // true
+console.log(emailPattern.test(&quot;not-an-email&quot;));       // false</code></pre></div></div>
+<p class="v2-p">A <strong>regular expression</strong> is a sequence of characters that defines a <strong>search pattern</strong>. It describes what to look for in a string · not by spelling out exact text, but by specifying a <em>pattern</em> of characters.</p>
+<h3 class="v2-h3">What Can You Do with Regular Expressions?</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Task</th><th>Example</th></tr></thead><tbody><tr><td><strong>Test</strong> if a string matches a pattern</td><td>Is this a valid email?</td></tr><tr><td><strong>Find</strong> all matches in a string</td><td>Find every phone number in a document</td></tr><tr><td><strong>Extract</strong> specific parts of a match</td><td>Get the area code from each phone number</td></tr><tr><td><strong>Replace</strong> matched text</td><td>Censor words, reformat dates</td></tr><tr><td><strong>Split</strong> a string on a pattern</td><td>Split CSV respecting quoted commas</td></tr><tr><td><strong>Validate</strong> user input</td><td>Forms, APIs, data pipelines</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Regex is used by every major programming language and tool. In professional JavaScript, it appears in form validation, search engines, URL routers, log parsers, code editors (search &amp; replace), data cleaning pipelines, and security filters (blocking SQL injection patterns).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Anatomy of a Regular Expression</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>/pattern/flags</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>  /  \d{3}-\d{4}  /  g
+  ↑   ↑           ↑  ↑
+  |   pattern     |  flag(s)
+  delimiter       delimiter</code></pre></div></div>
+<ul class="v2-ul"><li>The <strong>delimiters</strong> (<code>/</code>) mark the start and end · like quotes for strings</li><li>The <strong>pattern</strong> is what to search for</li><li>The <strong>flags</strong> (optional) modify how the search works (e.g. case-insensitive, global)</li></ul>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. Background: What Are Regular Expressions?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">2. Topic 1 · Creating Regular Expressions</div><div class="pc" id="chk2"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">There are two ways to create a regex in JavaScript. Understanding the difference is important for choosing the right one.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 1 · Literal Syntax (Preferred)</h3>
+<p class="v2-p">Use forward slashes to wrap the pattern. The pattern is compiled at <strong>load time</strong> · faster and cleaner for fixed patterns.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const pattern = /hello/;
+
+console.log(pattern.test(&quot;say hello world&quot;)); // true
+console.log(pattern.test(&quot;say goodbye&quot;));     // false</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Always prefer literal syntax unless the pattern is built dynamically at runtime. Literals are faster, cleaner, and checked for syntax errors when the script loads.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 2 · <code>new RegExp()</code> Constructor</h3>
+<p class="v2-p">Passes the pattern as a <strong>string</strong>. The pattern is compiled at <strong>runtime</strong> · required when the pattern is built from variables.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Static pattern — same as /hello/
+const pattern1 = new RegExp(&quot;hello&quot;);
+
+// Dynamic pattern — built from a variable
+const word    = &quot;world&quot;;
+const pattern2 = new RegExp(word);
+
+console.log(pattern1.test(&quot;say hello&quot;)); // true
+console.log(pattern2.test(&quot;hello world&quot;)); // true</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT · Escaping in Constructor Strings:</strong> In a regex literal, <code>\d</code> means "a digit". In a constructor string, the backslash must be <strong>doubled</strong> because <code>\d</code> in a JavaScript string is just <code>d</code> (unrecognised escape).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// These are EQUIVALENT:
+const a = /\d+/;             // literal — \d is the regex metachar
+const b = new RegExp(&quot;\\d+&quot;); // string — \\ is needed to produce \d
+
+console.log(a.test(&quot;abc123&quot;)); // true
+console.log(b.test(&quot;abc123&quot;)); // true</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Adding Flags at Creation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Literal — flags after the closing slash
+const lit = /hello/gi;
+
+// Constructor — flags as second argument
+const con = new RegExp(&quot;hello&quot;, &quot;gi&quot;);
+
+// Both are identical — case-insensitive, global match
+console.log(&quot;Hello World, hello!&quot;.match(lit)); // [&quot;Hello&quot;, &quot;hello&quot;]
+console.log(&quot;Hello World, hello!&quot;.match(con)); // [&quot;Hello&quot;, &quot;hello&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. Topic 1 · Creating Regular Expressions</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">3. Topic 2 · Flags (Modifiers)</div><div class="pc" id="chk3"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">Flags change how the entire regex engine behaves. They are placed after the closing <code>/</code> in a literal, or as the second argument to <code>new RegExp()</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>i</code> · Case-Insensitive</h3>
+<p class="v2-p">Makes the entire match ignore uppercase vs lowercase.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const pattern = /hello/i;
+
+console.log(pattern.test(&quot;Hello&quot;));    // true
+console.log(pattern.test(&quot;HELLO&quot;));    // true
+console.log(pattern.test(&quot;hElLo&quot;));    // true
+console.log(pattern.test(&quot;goodbye&quot;)); // false</code></pre></div></div>
+<h4 class="v2-h4">Without vs with <code>i</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(/Cat/.test(&quot;I have a cat&quot;)); // false — uppercase C doesn&#x27;t match lowercase c
+console.log(/Cat/i.test(&quot;I have a cat&quot;)); // true  — i flag ignores case</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>g</code> · Global (Find ALL Matches)</h3>
+<p class="v2-p">Without <code>g</code>, methods like <code>match()</code> return only the <strong>first</strong> match. With <code>g</code>, they return <strong>all</strong> matches.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;cat and Cat and CAT&quot;;
+
+// Without g — only first match
+console.log(text.match(/cat/i));  // [&quot;cat&quot;]  (just first)
+
+// With gi — ALL matches
+console.log(text.match(/cat/gi)); // [&quot;cat&quot;, &quot;Cat&quot;, &quot;CAT&quot;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT · <code>g</code> flag and <code>test()</code>:</strong> When you use <code>g</code> with a regex stored in a variable and call <code>.test()</code> repeatedly, the regex remembers its last position (<code>lastIndex</code>). This causes alternating true/false results in a loop!</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re = /cat/g;
+console.log(re.test(&quot;cat&quot;));   // true  (lastIndex → 3)
+console.log(re.test(&quot;cat&quot;));   // false (search starts at 3, past end!)
+console.log(re.test(&quot;cat&quot;));   // true  (lastIndex reset to 0)
+
+// Fix: use .test() without g, or reset lastIndex manually
+re.lastIndex = 0; // reset before reuse</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>m</code> · Multiline</h3>
+<p class="v2-p">Changes the meaning of <code>^</code> (start) and <code>$</code> (end) anchors. Without <code>m</code>, <code>^</code> and <code>$</code> match the start/end of the entire string. With <code>m</code>, they match the start/end of <strong>each line</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;first line\nsecond line\nthird line&quot;;
+
+// Without m — ^ only matches start of entire string
+console.log(text.match(/^\w+/));  // [&quot;first&quot;]
+
+// With m — ^ matches start of EACH line
+console.log(text.match(/^\w+/gm)); // [&quot;first&quot;, &quot;second&quot;, &quot;third&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>s</code> · Dot-All (Single-Line)</h3>
+<p class="v2-p">By default, the <code>.</code> metacharacter matches any character <strong>except newlines</strong>. The <code>s</code> flag makes <code>.</code> match newlines too.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;Hello\nWorld&quot;;
+
+console.log(/Hello.World/.test(text));  // false — . doesn&#x27;t match \n
+console.log(/Hello.World/s.test(text)); // true  — s flag makes . match \n</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>d</code> · Generate Indices</h3>
+<p class="v2-p">Makes <code>exec()</code> and <code>match()</code> include <code>indices</code> · the start/end positions of each match and capture group.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const match = /(\w+)/.exec(&quot;hello world&quot;);
+console.log(match.indices); // undefined — no d flag
+
+const matchD = /(\w+)/d.exec(&quot;hello world&quot;);
+console.log(matchD.indices); // [[0,5],[0,5]] — [full match range, group 1 range]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>u</code> · Unicode Mode</h3>
+<p class="v2-p">Enables full Unicode support, including matching Unicode code points above U+FFFF and making <code>\p{...}</code> Unicode property escapes available.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Without u — \uD83D\uDC4D is a surrogate pair (emoji 👍)
+console.log(/^.$/.test(&quot;👍&quot;));    // false — emoji is 2 &quot;characters&quot; without u
+console.log(/^.$/u.test(&quot;👍&quot;));   // true  — u mode treats it as 1 code point
+
+// Unicode property escapes (requires u flag)
+console.log(/\p{Letter}/u.test(&quot;A&quot;));  // true
+console.log(/\p{Emoji}/u.test(&quot;👍&quot;));  // true</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>v</code> · Unicode Sets Mode (ES2024)</h3>
+<p class="v2-p">An upgrade to <code>u</code> mode · enables set operations inside character classes (<code>[A · B]</code>, <code>[A&amp;&amp;B]</code>), Unicode property strings, and improved Unicode handling.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Intersection — match characters that are both letters AND ASCII
+const asciiLetter = /[\p{Letter}&amp;&amp;\p{ASCII}]/v;
+console.log(asciiLetter.test(&quot;A&quot;)); // true
+console.log(asciiLetter.test(&quot;é&quot;)); // false — not ASCII</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>y</code> · Sticky</h3>
+<p class="v2-p">The match must start at exactly <code>lastIndex</code> · it does not search forward. Used for incremental parsing.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re = /\d+/y;
+re.lastIndex = 4;
+
+console.log(re.exec(&quot;abc 123 456&quot;)); // [&quot;123&quot;] — found at exactly index 4
+re.lastIndex = 0;
+console.log(re.exec(&quot;abc 123 456&quot;)); // null — position 0 is &#x27;a&#x27;, not a digit</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Flags Summary Table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Flag</th><th>Name</th><th>Effect</th></tr></thead><tbody><tr><td><code>i</code></td><td>Case-insensitive</td><td>Ignore uppercase/lowercase</td></tr><tr><td><code>g</code></td><td>Global</td><td>Find ALL matches (not just first)</td></tr><tr><td><code>m</code></td><td>Multiline</td><td><code>^</code> and <code>$</code> match each line</td></tr><tr><td><code>s</code></td><td>Dot-all</td><td><code>.</code> matches newlines too</td></tr><tr><td><code>d</code></td><td>Indices</td><td>Include start/end positions of matches</td></tr><tr><td><code>u</code></td><td>Unicode</td><td>Full Unicode support + <code>\p{}</code> escapes</td></tr><tr><td><code>v</code></td><td>Unicode sets</td><td>Set operations in <code>[]</code>, Unicode strings</td></tr><tr><td><code>y</code></td><td>Sticky</td><td>Match only at exact <code>lastIndex</code> position</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Combining Multiple Flags</h3>
+<p class="v2-p">Flags can be combined in any order:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Case-insensitive AND global AND multiline
+const pattern = /^hello/gim;
+
+const text = &quot;Hello World\nhello there\nHELLO!&quot;;
+console.log(text.match(pattern)); // [&quot;Hello&quot;, &quot;hello&quot;, &quot;HELLO&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Topic 2 · Flags (Modifiers)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">4. Topic 3 · Character Classes &amp; Ranges</div><div class="pc" id="chk4"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">A <strong>character class</strong> (also called a character set) lets you match any one character from a defined group. They are written inside square brackets <code>[...]</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>[abc]</code> · Match Any Listed Character</h3>
+<p class="v2-p">Matches ONE character that is <code>a</code>, <code>b</code>, or <code>c</code> · any single character in the list.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// [aeiou] matches any single vowel
+const vowel = /[aeiou]/;
+
+console.log(vowel.test(&quot;apple&quot;)); // true  (contains &#x27;a&#x27;)
+console.log(vowel.test(&quot;sky&quot;));   // false (no vowels)
+console.log(vowel.test(&quot;gym&quot;));   // false (&#x27;y&#x27; not in class)</code></pre></div></div>
+<h4 class="v2-h4">Find ALL vowels with <code>g</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;Hello World&quot;;
+console.log(text.match(/[aeiou]/gi)); // [&quot;e&quot;, &quot;o&quot;, &quot;o&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>["e", "o", "o"]</code></p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>[^abc]</code> · Negated Character Class · Match Anything EXCEPT Listed</h3>
+<p class="v2-p">The <code>^</code> inside <code>[...]</code> <strong>negates</strong> the class · matches any character NOT in the list.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// [^aeiou] matches any NON-vowel character
+console.log(&quot;Hello&quot;.match(/[^aeiou]/gi)); // [&quot;H&quot;, &quot;l&quot;, &quot;l&quot;]
+
+// [^0-9] matches any non-digit character
+console.log(&quot;a1b2c3&quot;.match(/[^0-9]/g));  // [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> <code>^</code> inside <code>[...]</code> means negation. <code>^</code> outside <code>[...]</code> means start-of-string anchor. Two completely different meanings!</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>/^[abc]/  // Starts with a, b, or c
+/[^abc]/  // Any character EXCEPT a, b, c</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>[a-z]</code> · Character Range</h3>
+<p class="v2-p">A hyphen <code>-</code> inside <code>[...]</code> defines a range. Matches any character between the two endpoints (inclusive), based on Unicode code points.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Lowercase letters
+console.log(/[a-z]/.test(&quot;hello&quot;));  // true
+console.log(/[a-z]/.test(&quot;HELLO&quot;));  // false — uppercase
+
+// Uppercase letters
+console.log(/[A-Z]/.test(&quot;Hello&quot;));  // true
+
+// Digits
+console.log(/[0-9]/.test(&quot;abc5&quot;));   // true
+console.log(/[0-9]/.test(&quot;abcde&quot;));  // false
+
+// Letters AND digits combined
+console.log(/[a-zA-Z0-9]/.test(&quot;a1&quot;)); // true</code></pre></div></div>
+<h4 class="v2-h4">Practical ranges:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Extract only letters from a messy string
+const messy = &quot;H3ll0 W0rld!&quot;;
+console.log(messy.match(/[a-zA-Z]/g)); // [&quot;H&quot;, &quot;l&quot;, &quot;l&quot;, &quot;W&quot;, &quot;r&quot;, &quot;l&quot;, &quot;d&quot;]
+
+// Remove non-digit characters from phone number
+const phone = &quot;(080) 123-4567&quot;;
+console.log(phone.replace(/[^0-9]/g, &quot;&quot;)); // &quot;08012345678&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&quot;H&quot;, &quot;l&quot;, &quot;l&quot;, &quot;W&quot;, &quot;r&quot;, &quot;l&quot;, &quot;d&quot;]
+08012345678</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Combining Ranges and Characters</h3>
+<p class="v2-p">You can mix ranges and individual characters inside one class:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Alphanumeric + underscore + hyphen
+const slug = /^[a-zA-Z0-9_-]+$/;
+
+console.log(slug.test(&quot;my-blog-post&quot;));    // true
+console.log(slug.test(&quot;my blog post&quot;));    // false (space not allowed)
+console.log(slug.test(&quot;my_blog_2024&quot;));    // true
+console.log(slug.test(&quot;my@blog!post&quot;));    // false (@ and ! not allowed)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> The hyphen <code>-</code> is special inside <code>[...]</code>. To include a literal hyphen, place it at the <strong>start</strong> or <strong>end</strong> of the class, or escape it with <code>\-</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>/[a-z-]/   // letters a-z OR a literal hyphen (hyphen at end = literal)
+/[-a-z]/   // same — hyphen at start = literal
+/[a\-z]/   // escaped — also literal hyphen</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Common Character Class Patterns</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Hex digit (0-9 and a-f and A-F)
+const hex = /[0-9a-fA-F]/;
+console.log(hex.test(&quot;F&quot;)); // true
+console.log(hex.test(&quot;G&quot;)); // false
+
+// Filename character (no slashes, colons)
+const filename = /^[^/\\:*?&quot;&lt;&gt;|]+$/;
+console.log(filename.test(&quot;report_2024.pdf&quot;)); // true
+console.log(filename.test(&quot;file/path&quot;));        // false
+
+// Valid username: letters, digits, underscore, 3-20 chars
+const username = /^[a-zA-Z0-9_]{3,20}$/;
+console.log(username.test(&quot;alice_99&quot;));   // true
+console.log(username.test(&quot;a&quot;));          // false (too short)
+console.log(username.test(&quot;alice-99&quot;));   // false (hyphen not allowed)</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Topic 3 · Character Classes &amp; Ranges</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">5. Topic 4 · Meta Characters</div><div class="pc" id="chk5"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><strong>Meta characters</strong> are special characters in regex that have a meaning beyond their literal value. They are the core building blocks of every pattern.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Shorthand Character Classes</h3>
+<p class="v2-p">These are the most frequently used meta characters · each represents a common character class:</p>
+<h4 class="v2-h4"><code>\d</code> · Any Digit <code>[0-9]</code></h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(/\d/.test(&quot;abc5def&quot;)); // true  — contains a digit
+console.log(/\d/.test(&quot;abcdef&quot;));  // false — no digits
+
+// Find all digits in a string
+console.log(&quot;a1b22c333&quot;.match(/\d+/g)); // [&quot;1&quot;, &quot;22&quot;, &quot;333&quot;]</code></pre></div></div>
+<h4 class="v2-h4"><code>\D</code> · Any NON-Digit <code>[^0-9]</code></h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(&quot;a1b22c333&quot;.match(/\D+/g)); // [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]</code></pre></div></div>
+<h4 class="v2-h4"><code>\w</code> · Word Character <code>[a-zA-Z0-9_]</code></h4>
+<p class="v2-p">Matches letters, digits, and underscore · the characters valid in most identifiers.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(/\w/.test(&quot;hello&quot;)); // true
+console.log(/\w/.test(&quot;!@#$&quot;)); // false — no word characters
+
+// Extract words
+console.log(&quot;Hello, World! 2024&quot;.match(/\w+/g)); // [&quot;Hello&quot;, &quot;World&quot;, &quot;2024&quot;]</code></pre></div></div>
+<h4 class="v2-h4"><code>\W</code> · Any NON-Word Character <code>[^a-zA-Z0-9_]</code></h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Find all punctuation/spaces
+console.log(&quot;Hello, World!&quot;.match(/\W+/g)); // [&quot;,&quot;, &quot; &quot;, &quot;!&quot;]</code></pre></div></div>
+<h4 class="v2-h4"><code>\s</code> · Any Whitespace <code>[ \t\n\r\f\v]</code></h4>
+<p class="v2-p">Matches space, tab, newline, carriage return, form feed, vertical tab.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(/\s/.test(&quot;hello world&quot;)); // true  — has a space
+console.log(/\s/.test(&quot;helloworld&quot;)); // false — no whitespace
+
+// Normalise multiple spaces to one
+console.log(&quot;too   many    spaces&quot;.replace(/\s+/g, &quot; &quot;)); // &quot;too many spaces&quot;</code></pre></div></div>
+<h4 class="v2-h4"><code>\S</code> · Any NON-Whitespace</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Extract non-space &quot;tokens&quot;
+console.log(&quot;  hello   world  &quot;.match(/\S+/g)); // [&quot;hello&quot;, &quot;world&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Dot <code>.</code> · Any Character (Except Newline)</h3>
+<p class="v2-p"><code>.</code> matches <strong>any single character</strong> except a newline <code>\n</code> (unless <code>s</code> flag is used).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(/./.test(&quot;a&quot;));   // true
+console.log(/./.test(&quot;5&quot;));   // true
+console.log(/./.test(&quot;!&quot;));   // true
+console.log(/./.test(&quot;\n&quot;));  // false — newline excluded
+console.log(/./s.test(&quot;\n&quot;)); // true  — s flag includes newline
+
+// Pattern: exactly 3 characters starting with &#x27;c&#x27;
+console.log(/^c..$/. test(&quot;cat&quot;)); // true
+console.log(/^c..$/. test(&quot;cart&quot;)); // false (4 chars)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🐛 <strong>COMMON MISTAKE:</strong> Using <code>.</code> when you mean "any character" often creates <strong>overly broad patterns</strong> that match too much. Prefer <code>[^\n]</code> or specific character classes when you know what you expect. Also, to match a <strong>literal dot</strong> (e.g., in <code>example.com</code>), you must escape it: <code>\.</code></p></blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Wrong — dot matches ANY character including commas, slashes, etc.
+/www.example.com/  // also matches &quot;wwwXexampleYcom&quot;!
+
+// ✅ Correct — escape the dots to match literal periods
+/www\.example\.com/</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Escape Character <code>\</code></h3>
+<p class="v2-p">Backslash <code>\</code> turns a special character into a literal one.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match a literal dot
+console.log(/3\.14/.test(&quot;3.14&quot;)); // true
+console.log(/3\.14/.test(&quot;3X14&quot;)); // false
+
+// Match a literal dollar sign
+console.log(/\$100/.test(&quot;$100&quot;)); // true
+console.log(/\$100/.test(&quot;100&quot;));  // false
+
+// Match a literal backslash (needs \\)
+console.log(/C:\\Users/.test(&quot;C:\\Users&quot;)); // true</code></pre></div></div>
+<h4 class="v2-h4">Characters that MUST be escaped to match literally:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>. * + ? ^ $ { } [ ] | ( ) \</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match a literal question mark
+console.log(/Are you sure\?/.test(&quot;Are you sure?&quot;)); // true
+
+// Match a literal parenthesis
+console.log(/\(555\)/.test(&quot;(555)&quot;)); // true</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Alternation <code>|</code> · OR</h3>
+<p class="v2-p">The pipe <code>|</code> matches either the pattern on the left OR the pattern on the right. It is like an "or" for entire sub-expressions.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match &quot;cat&quot; OR &quot;dog&quot;
+const petPattern = /cat|dog/;
+console.log(petPattern.test(&quot;I have a cat&quot;)); // true
+console.log(petPattern.test(&quot;I have a dog&quot;)); // true
+console.log(petPattern.test(&quot;I have a bird&quot;)); // false
+
+// Find all occurrences
+const text = &quot;cat and dog and cat&quot;;
+console.log(text.match(/cat|dog/g)); // [&quot;cat&quot;, &quot;dog&quot;, &quot;cat&quot;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Alternation has the <strong>lowest precedence</strong> in regex. Use groups <code>(...)</code> to limit its scope:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>/gray|grey/    // &quot;gray&quot; OR &quot;grey&quot; ← correct
+/gr(a|e)y/     // &quot;gr&quot; then (&quot;a&quot; OR &quot;e&quot;) then &quot;y&quot; ← also correct, different structure
+/I love cat|dog/ // &quot;I love cat&quot; OR &quot;dog&quot; ← probably not what you wanted!
+/I love (cat|dog)/ // &quot;I love cat&quot; OR &quot;I love dog&quot; ← correct</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Meta Characters Reference Table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Meta Char</th><th>Meaning</th><th>Example</th><th>Matches</th></tr></thead><tbody><tr><td><code>.</code></td><td>Any char (not newline)</td><td><code>a.b</code></td><td>"aXb", "a1b"</td></tr><tr><td><code>\d</code></td><td>Digit <code>[0-9]</code></td><td><code>\d\d</code></td><td>"42", "09"</td></tr><tr><td><code>\D</code></td><td>Non-digit</td><td><code>\D+</code></td><td>"abc", "!!"</td></tr><tr><td><code>\w</code></td><td>Word char <code>[a-zA-Z0-9_]</code></td><td><code>\w+</code></td><td>"hello_2"</td></tr><tr><td><code>\W</code></td><td>Non-word char</td><td><code>\W+</code></td><td>"!@#", ", "</td></tr><tr><td><code>\s</code></td><td>Whitespace</td><td><code>\s+</code></td><td>" ", "\t\n"</td></tr><tr><td><code>\S</code></td><td>Non-whitespace</td><td><code>\S+</code></td><td>"hello", "42"</td></tr><tr><td><code>\b</code></td><td>Word boundary</td><td><code>\bcat\b</code></td><td>"cat" not "cats"</td></tr><tr><td><code>\B</code></td><td>Non-word boundary</td><td><code>\Bcat\B</code></td><td>"tomcat"</td></tr><tr><td><code>\n</code></td><td>Newline literal</td><td><code>\n</code></td><td>newline char</td></tr><tr><td><code>\t</code></td><td>Tab literal</td><td><code>\t</code></td><td>tab char</td></tr><tr><td><code>\r</code></td><td>Carriage return</td><td><code>\r</code></td><td>CR char</td></tr><tr><td><code>\0</code></td><td>Null character</td><td><code>\0</code></td><td>null</td></tr><tr><td><code>\uXXXX</code></td><td>Unicode code point</td><td><code>\u0041</code></td><td>"A"</td></tr><tr><td><code>\xHH</code></td><td>Hex character</td><td><code>\x41</code></td><td>"A"</td></tr><tr><td><code>\\</code></td><td>Literal backslash</td><td><code>C:\\</code></td><td>"C:\"</td></tr><tr><td>`\</td><td>`</td><td>Literal pipe</td><td>`a\</td><td>b`</td><td>"a</td><td>b"</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Topic 4 · Meta Characters</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">6. Topic 5 · Assertions (Anchors &amp; Lookarounds)</div><div class="pc" id="chk6"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><strong>Assertions</strong> are zero-width matches · they describe a <strong>position</strong> in the string rather than consuming characters. They are like "conditions" that must be true at a point in the string for the overall match to succeed.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>^</code> · Start of String (or Line with <code>m</code>)</h3>
+<p class="v2-p">The pattern must match at the very beginning of the string.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// String must START with &quot;Hello&quot;
+console.log(/^Hello/.test(&quot;Hello World&quot;)); // true
+console.log(/^Hello/.test(&quot;Say Hello&quot;));   // false — &quot;Hello&quot; not at start
+
+// With m flag — start of each LINE
+const text = &quot;apple\nbanana\napricot&quot;;
+console.log(text.match(/^a\w+/gm)); // [&quot;apple&quot;, &quot;apricot&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>$</code> · End of String (or Line with <code>m</code>)</h3>
+<p class="v2-p">The pattern must match at the very end of the string.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// String must END with &quot;.com&quot;
+console.log(/\.com$/.test(&quot;example.com&quot;));       // true
+console.log(/\.com$/.test(&quot;example.com/path&quot;)); // false
+
+// Validate format: digits only
+console.log(/^\d+$/.test(&quot;12345&quot;)); // true  — all digits
+console.log(/^\d+$/.test(&quot;123a5&quot;)); // false — &#x27;a&#x27; breaks the pattern</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> <code>^pattern$</code> (anchoring both ends) is the cornerstone of validation patterns · it ensures the <strong>entire</strong> string matches, with nothing extra before or after.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>\b</code> · Word Boundary</h3>
+<p class="v2-p">Matches a <strong>position</strong> between a word character (<code>\w</code>) and a non-word character (<code>\W</code>) · the invisible boundary at the edge of a word.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match the word &quot;cat&quot; but not &quot;catch&quot;, &quot;cats&quot;, &quot;tomcat&quot;
+const pattern = /\bcat\b/;
+
+console.log(pattern.test(&quot;my cat sat&quot;));  // true  — &quot;cat&quot; as a whole word
+console.log(pattern.test(&quot;my cats&quot;));     // false — &quot;cat&quot; followed by &quot;s&quot;
+console.log(pattern.test(&quot;tomcat&quot;));      // false — &quot;cat&quot; preceded by &quot;tom&quot;
+console.log(pattern.test(&quot;the cat.&quot;));    // true  — dot is non-word boundary</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> <code>\b</code> is essential for <strong>whole-word search</strong> · find the word "apple" but not "pineapple" or "apples". Every modern text editor's "Find Whole Word Only" feature uses <code>\b</code> internally.</p></blockquote>
+<h4 class="v2-h4">Extract whole words only:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;category: cats and catfish and a cat&quot;;
+console.log(text.match(/\bcat\b/g)); // [&quot;cat&quot;] — only the standalone word</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>\B</code> · Non-Word Boundary</h3>
+<p class="v2-p">Matches a position that is NOT a word boundary · inside a word.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match &quot;cat&quot; only when it&#x27;s INSIDE a larger word
+const pattern = /\Bcat\B/;
+
+console.log(pattern.test(&quot;tomcats&quot;));  // true  — &quot;cat&quot; inside &quot;tomcats&quot;
+console.log(pattern.test(&quot;my cat&quot;));   // false — &quot;cat&quot; is a whole word here</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Lookahead <code>(?=...)</code> · "Followed By"</h3>
+<p class="v2-p">A <strong>positive lookahead</strong> asserts that what follows the current position matches the given pattern · without consuming those characters.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match &quot;100&quot; only if followed by &quot; dollars&quot;
+const pattern = /\d+(?= dollars)/;
+
+console.log(pattern.exec(&quot;I have 100 dollars&quot;)); // [&quot;100&quot;]
+console.log(pattern.exec(&quot;I have 100 euros&quot;));   // null — not followed by &quot; dollars&quot;
+
+// The match is just &quot;100&quot; — &quot; dollars&quot; is NOT included in the match
+const result = /\d+(?= dollars)/.exec(&quot;I have 100 dollars&quot;);
+console.log(result[0]); // &quot;100&quot;   ← only the digits, not &quot; dollars&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&quot;100&quot;]
+null
+100</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Lookahead is "peek ahead" · it checks what comes next but doesn't eat it. Think of it as "match X only when it is followed by Y, but don't include Y in the match."</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Negative Lookahead <code>(?!...)</code> · "NOT Followed By"</h3>
+<p class="v2-p">Asserts that what follows does <strong>not</strong> match the pattern.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match &quot;100&quot; only if NOT followed by &quot; euros&quot;
+const pattern = /\d+(?! euros)/g;
+
+const text = &quot;100 dollars and 200 euros and 50 pounds&quot;;
+console.log(text.match(pattern)); // [&quot;100&quot;, &quot;50&quot;] — &quot;200&quot; is followed by &quot; euros&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>["100", "50"]</code></p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Lookbehind <code>(?&lt;=...)</code> · "Preceded By"</h3>
+<p class="v2-p">A <strong>positive lookbehind</strong> asserts that what precedes the current position matches the pattern · without consuming those characters.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match digits only if preceded by &quot;$&quot;
+const pattern = /(?&lt;=\$)\d+/g;
+
+const text = &quot;Price: $100 and €200 and $350&quot;;
+console.log(text.match(pattern)); // [&quot;100&quot;, &quot;350&quot;] — only dollar amounts</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>["100", "350"]</code></p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Negative Lookbehind <code>(?&lt;!...)</code> · "NOT Preceded By"</h3>
+<p class="v2-p">Asserts that what precedes does <strong>not</strong> match.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match digits NOT preceded by &quot;$&quot;
+const pattern = /(?&lt;!\$)\d+/g;
+
+const text = &quot;I paid $100 and owed 200 more&quot;;
+// Careful — this matches parts of numbers. Often combine with \b
+const text2 = &quot;I paid $100 and owed 200 more&quot;;
+console.log(text2.match(/(?&lt;!\$)\b\d+\b/g)); // [&quot;200&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Lookaround Summary</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Assertion</th><th>Syntax</th><th>Meaning</th></tr></thead><tbody><tr><td>Positive lookahead</td><td><code>X(?=Y)</code></td><td>Match X followed by Y</td></tr><tr><td>Negative lookahead</td><td><code>X(?!Y)</code></td><td>Match X NOT followed by Y</td></tr><tr><td>Positive lookbehind</td><td><code>(?&lt;=Y)X</code></td><td>Match X preceded by Y</td></tr><tr><td>Negative lookbehind</td><td><code>(?&lt;!Y)X</code></td><td>Match X NOT preceded by Y</td></tr><tr><td>Start of string</td><td><code>^</code></td><td>Match at string start</td></tr><tr><td>End of string</td><td><code>$</code></td><td>Match at string end</td></tr><tr><td>Word boundary</td><td><code>\b</code></td><td>Between word and non-word char</td></tr><tr><td>Non-word boundary</td><td><code>\B</code></td><td>Not between word and non-word char</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6. Topic 5 · Assertions (Anchors &amp; Lookarounds)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">7. Topic 6 · Quantifiers</div><div class="pc" id="chk7"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><strong>Quantifiers</strong> specify how many times the preceding element must occur. Without quantifiers, every character or group matches exactly once.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>*</code> · Zero or More</h3>
+<p class="v2-p">Matches <strong>zero or more</strong> repetitions of the preceding element. Even zero · the element can be completely absent.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// &quot;ab*c&quot; — &#x27;a&#x27;, then zero or more &#x27;b&#x27;, then &#x27;c&#x27;
+console.log(/ab*c/.test(&quot;ac&quot;));     // true  — zero b&#x27;s
+console.log(/ab*c/.test(&quot;abc&quot;));    // true  — one b
+console.log(/ab*c/.test(&quot;abbbbc&quot;)); // true  — four b&#x27;s
+console.log(/ab*c/.test(&quot;aXc&quot;));    // false — X is not b</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> <code><em></code> can match nothing. <code>/a</em>/</code> matches any string · even an empty one · because "zero or more a's" allows empty. This can make patterns match unexpected things.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>+</code> · One or More</h3>
+<p class="v2-p">Matches <strong>one or more</strong> repetitions. The element must appear at least once.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// &quot;ab+c&quot; — &#x27;a&#x27;, then ONE or more &#x27;b&#x27;, then &#x27;c&#x27;
+console.log(/ab+c/.test(&quot;ac&quot;));      // false — no b&#x27;s (at least 1 required)
+console.log(/ab+c/.test(&quot;abc&quot;));     // true  — one b
+console.log(/ab+c/.test(&quot;abbbbc&quot;)); // true  — four b&#x27;s</code></pre></div></div>
+<h4 class="v2-h4"><code>\d+</code> · One or more digits · the most common use:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Find all numbers in text
+const text = &quot;Order 1 has 250 items and order 12 has 3 items&quot;;
+console.log(text.match(/\d+/g)); // [&quot;1&quot;, &quot;250&quot;, &quot;12&quot;, &quot;3&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>?</code> · Zero or One (Optional)</h3>
+<p class="v2-p">Makes the preceding element <strong>optional</strong> · it can appear once or not at all.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// &quot;colou?r&quot; — optional &#x27;u&#x27; (matches British and American English)
+console.log(/colou?r/.test(&quot;color&quot;));   // true — no u
+console.log(/colou?r/.test(&quot;colour&quot;));  // true — with u
+console.log(/colou?r/.test(&quot;colouur&quot;)); // false — two u&#x27;s
+
+// Optional extension
+console.log(/https?:\/\//.test(&quot;http://&quot;));  // true
+console.log(/https?:\/\//.test(&quot;https://&quot;)); // true</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>{n}</code> · Exactly n Times</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Exactly 4 digits
+console.log(/^\d{4}$/.test(&quot;2024&quot;)); // true
+console.log(/^\d{4}$/.test(&quot;202&quot;));  // false (3 digits)
+console.log(/^\d{4}$/.test(&quot;20245&quot;)); // false (5 digits)
+
+// Exactly 3 letters
+console.log(/^[A-Z]{3}$/.test(&quot;ABC&quot;)); // true
+console.log(/^[A-Z]{3}$/.test(&quot;AB&quot;));  // false</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>{n,}</code> · n or More Times</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// 3 or more digits
+console.log(/\d{3,}/.test(&quot;12&quot;));    // false
+console.log(/\d{3,}/.test(&quot;123&quot;));   // true
+console.log(/\d{3,}/.test(&quot;12345&quot;)); // true</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>{n,m}</code> · Between n and m Times (Inclusive)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Between 2 and 5 digits
+console.log(/^\d{2,5}$/.test(&quot;1&quot;));      // false (too few)
+console.log(/^\d{2,5}$/.test(&quot;12&quot;));     // true
+console.log(/^\d{2,5}$/.test(&quot;12345&quot;)); // true
+console.log(/^\d{2,5}$/.test(&quot;123456&quot;)); // false (too many)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> <code>{n,m}</code> is the backbone of all validation patterns · password length, username length, phone number formats, postal codes, credit card numbers.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Greedy vs Lazy Quantifiers</h3>
+<p class="v2-p">By default, quantifiers are <strong>greedy</strong> · they match as much as possible while still allowing the overall pattern to succeed.</p>
+<p class="v2-p">Adding <code>?</code> after a quantifier makes it <strong>lazy</strong> · it matches as little as possible.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const html = &quot;&lt;div&gt;Hello&lt;/div&gt;&lt;div&gt;World&lt;/div&gt;&quot;;
+
+// Greedy — matches from first &lt; to LAST &gt;
+console.log(html.match(/&lt;.+&gt;/));
+// [&quot;&lt;div&gt;Hello&lt;/div&gt;&lt;div&gt;World&lt;/div&gt;&quot;] ← too much!
+
+// Lazy — matches from first &lt; to FIRST &gt;
+console.log(html.match(/&lt;.+?&gt;/));
+// [&quot;&lt;div&gt;&quot;] ← just the first tag</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&quot;&lt;div&gt;Hello&lt;/div&gt;&lt;div&gt;World&lt;/div&gt;&quot;]
+[&quot;&lt;div&gt;&quot;]</code></pre></div></div>
+<h4 class="v2-h4">Full lazy quantifier table:</h4>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Greedy</th><th>Lazy</th><th>Difference</th></tr></thead><tbody><tr><td><code>*</code></td><td><code>*?</code></td><td>Zero or more · as few as possible</td></tr><tr><td><code>+</code></td><td><code>+?</code></td><td>One or more · as few as possible</td></tr><tr><td><code>?</code></td><td><code>??</code></td><td>Zero or one · prefers zero</td></tr><tr><td><code>{n,m}</code></td><td><code>{n,m}?</code></td><td>n to m · as few as possible</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Extract content between tags lazily
+const text = &quot;&lt;b&gt;Bold&lt;/b&gt; and &lt;i&gt;italic&lt;/i&gt;&quot;;
+console.log(text.match(/&lt;[^&gt;]+&gt;[^&lt;]*&lt;\/[^&gt;]+&gt;/g));
+// [&quot;&lt;b&gt;Bold&lt;/b&gt;&quot;, &quot;&lt;i&gt;italic&lt;/i&gt;&quot;]
+
+// Or with lazy quantifier
+console.log(text.match(/&lt;.+?&gt;.+?&lt;\/.+?&gt;/g));
+// [&quot;&lt;b&gt;Bold&lt;/b&gt;&quot;, &quot;&lt;i&gt;italic&lt;/i&gt;&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Possessive Quantifiers (Atomic Matching)</h3>
+<p class="v2-p">Adding <code>+</code> after a quantifier (<code>*+</code>, <code>++</code>, <code>?+</code>, <code>{n}+</code>) prevents backtracking · once consumed, the engine won't give characters back. Used for performance and avoiding catastrophic backtracking.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>NOTE:</strong> Possessive quantifiers require JavaScript ES2018+ and are not universally supported in all environments. Check compatibility before use.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Quantifiers Summary</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Quantifier</th><th>Meaning</th></tr></thead><tbody><tr><td><code>*</code></td><td>0 or more (greedy)</td></tr><tr><td><code>+</code></td><td>1 or more (greedy)</td></tr><tr><td><code>?</code></td><td>0 or 1 (optional)</td></tr><tr><td><code>{n}</code></td><td>Exactly n</td></tr><tr><td><code>{n,}</code></td><td>n or more</td></tr><tr><td><code>{n,m}</code></td><td>Between n and m</td></tr><tr><td><code>*?</code></td><td>0 or more (lazy)</td></tr><tr><td><code>+?</code></td><td>1 or more (lazy)</td></tr><tr><td><code>??</code></td><td>0 or 1 (lazy, prefers 0)</td></tr><tr><td><code>{n,m}?</code></td><td>n to m (lazy)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>7. Topic 6 · Quantifiers</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">8. Topic 7 · Groups &amp; Patterns</div><div class="pc" id="chk8"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><strong>Groups</strong> let you treat multiple characters as a single unit · applying quantifiers to them, capturing their matched text, or creating non-capturing groupings for alternation.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>(...)</code> · Capturing Group</h3>
+<p class="v2-p">Wraps part of a pattern to:</p>
+<ol class="v2-ol"><li>Treat multiple characters as one unit (for quantifiers, alternation)</li><li><strong>Capture</strong> the matched text so you can extract it</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Without group — + applies only to &#x27;b&#x27;
+console.log(/ab+/.test(&quot;abb&quot;)); // true (a then 2 b&#x27;s)
+
+// With group — + applies to the whole &quot;(ab)&quot;
+console.log(/(ab)+/.test(&quot;ababab&quot;)); // true (ab repeated 3 times)
+console.log(/(ab)+/.test(&quot;abb&quot;));    // false — &quot;abb&quot; doesn&#x27;t have repeating &quot;ab&quot;</code></pre></div></div>
+<h4 class="v2-h4">Capturing · extracting matched substrings:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Capture year, month, day from a date string
+const datePattern = /(\d{4})-(\d{2})-(\d{2})/;
+const match = datePattern.exec(&quot;Today is 2024-03-15&quot;);
+
+console.log(match[0]); // &quot;2024-03-15&quot; — full match
+console.log(match[1]); // &quot;2024&quot;       — group 1 (year)
+console.log(match[2]); // &quot;03&quot;         — group 2 (month)
+console.log(match[3]); // &quot;15&quot;         — group 3 (day)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-15
+2024
+03
+15</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Named Capturing Groups <code>(?&lt;name&gt;...)</code></h3>
+<p class="v2-p">Instead of accessing captures by index (<code>match[1]</code>), name them for clarity using <code>(?&lt;name&gt;...)</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const datePattern = /(?&lt;year&gt;\d{4})-(?&lt;month&gt;\d{2})-(?&lt;day&gt;\d{2})/;
+const match = datePattern.exec(&quot;Today is 2024-03-15&quot;);
+
+console.log(match.groups.year);  // &quot;2024&quot;
+console.log(match.groups.month); // &quot;03&quot;
+console.log(match.groups.day);   // &quot;15&quot;
+
+// Also usable in replace with $&lt;name&gt;
+const reformatted = &quot;2024-03-15&quot;.replace(
+  /(?&lt;year&gt;\d{4})-(?&lt;month&gt;\d{2})-(?&lt;day&gt;\d{2})/,
+  &quot;$&lt;day&gt;/$&lt;month&gt;/$&lt;year&gt;&quot;
+);
+console.log(reformatted); // &quot;15/03/2024&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024
+03
+15
+15/03/2024</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Named groups make complex patterns self-documenting. A date regex with <code>.groups.year</code> is far clearer than one with <code>[1]</code> · especially when patterns have many groups.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>(?:...)</code> · Non-Capturing Group</h3>
+<p class="v2-p">Groups characters for quantifiers or alternation WITHOUT capturing the match. More efficient when you don't need the captured text.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Capturing group — creates a capture (slower, uses memory)
+const a = /(\d{3})-(\d{4})/.exec(&quot;555-1234&quot;);
+console.log(a[1], a[2]); // &quot;555&quot; &quot;1234&quot;
+
+// Non-capturing — groups for structure, no capture
+const b = /(?:\d{3})-(?:\d{4})/.exec(&quot;555-1234&quot;);
+console.log(b[1]); // undefined — no captures!
+
+// Non-capturing for alternation
+const color = /gr(?:a|e)y/; // matches &quot;gray&quot; or &quot;grey&quot;
+console.log(color.test(&quot;gray&quot;)); // true
+console.log(color.test(&quot;grey&quot;)); // true</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Use <code>(?:...)</code> whenever you need grouping but don't need to extract the captured text. It is faster and keeps your capture group numbering clean.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Backreferences <code>\1</code>, <code>\2</code> · Refer Back to a Captured Group</h3>
+<p class="v2-p">A backreference matches the <strong>same text</strong> that was captured by an earlier group. Use <code>\1</code> for group 1, <code>\2</code> for group 2, and so on.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// \1 must match the same word as group 1 captured
+const doubled = /(\b\w+\b) \1/;
+
+console.log(doubled.test(&quot;the the&quot;));    // true  — &quot;the&quot; repeated
+console.log(doubled.test(&quot;cat cat&quot;));    // true  — &quot;cat&quot; repeated
+console.log(doubled.test(&quot;the cat&quot;));    // false — different words
+
+// Find repeated words in text
+const text = &quot;I think that that is a problem problem.&quot;;
+const matches = text.match(/\b(\w+)\b \1\b/g);
+console.log(matches); // [&quot;that that&quot;, &quot;problem problem&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>true
+true
+false
+[&quot;that that&quot;, &quot;problem problem&quot;]</code></pre></div></div>
+<h4 class="v2-h4">Named backreference <code>\k&lt;name&gt;</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Match opening and closing HTML tag pairs
+const tagPattern = /&lt;(?&lt;tag&gt;\w+)&gt;[^&lt;]*&lt;\/\k&lt;tag&gt;&gt;/;
+
+console.log(tagPattern.test(&quot;&lt;div&gt;Hello&lt;/div&gt;&quot;));    // true
+console.log(tagPattern.test(&quot;&lt;b&gt;Bold&lt;/b&gt;&quot;));         // true
+console.log(tagPattern.test(&quot;&lt;div&gt;Hello&lt;/span&gt;&quot;));   // false — mismatched tags</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Common Validation Patterns</h3>
+<p class="v2-p">These patterns combine everything covered so far:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Email (simplified — RFC 5322 is much more complex)
+const email = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+console.log(email.test(&quot;alice@example.com&quot;));  // true
+console.log(email.test(&quot;alice@.com&quot;));          // false
+console.log(email.test(&quot;aliceexample.com&quot;));   // false
+
+// International phone (E.164 format)
+const phone = /^\+?[1-9]\d{7,14}$/;
+console.log(phone.test(&quot;+2348012345678&quot;)); // true
+console.log(phone.test(&quot;08012345678&quot;));    // true (no + ok)
+console.log(phone.test(&quot;123&quot;));            // false (too short)
+
+// URL (simplified)
+const url = /^https?:\/\/[a-zA-Z0-9.-]+(?:\.[a-zA-Z]{2,})(?:\/[^\s]*)?$/;
+console.log(url.test(&quot;https://example.com&quot;));          // true
+console.log(url.test(&quot;http://example.com/path?q=1&quot;)); // true
+console.log(url.test(&quot;ftp://example.com&quot;));            // false
+
+// Strong password — 8+ chars, uppercase, lowercase, digit, special
+const password = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&amp;*]).{8,}$/;
+console.log(password.test(&quot;Hello123!&quot;));   // true
+console.log(password.test(&quot;hello123!&quot;));   // false (no uppercase)
+console.log(password.test(&quot;Hello!&quot;));      // false (no digit, too short)
+
+// Nigerian BVN (Bank Verification Number) — 11 digits
+const bvn = /^\d{11}$/;
+console.log(bvn.test(&quot;12345678901&quot;)); // true
+console.log(bvn.test(&quot;1234567890&quot;));  // false (10 digits)
+
+// Postal code — US ZIP (5 digits or ZIP+4)
+const zip = /^\d{5}(?:-\d{4})?$/;
+console.log(zip.test(&quot;90210&quot;));       // true
+console.log(zip.test(&quot;90210-1234&quot;));  // true
+console.log(zip.test(&quot;9021&quot;));        // false
+
+// IPv4 address
+const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
+console.log(ipv4.test(&quot;192.168.1.1&quot;)); // true
+console.log(ipv4.test(&quot;256.0.0.1&quot;));   // false
+console.log(ipv4.test(&quot;10.0.0.1&quot;));    // true</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>8. Topic 7 · Groups &amp; Patterns</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">9. Topic 8 · The RegExp Object</div><div class="pc" id="chk9"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">When you create a regex (either with literal syntax or <code>new RegExp()</code>), you get a <strong>RegExp object</strong> with properties and methods you can use to inspect and drive the regex engine directly.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">RegExp Properties</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re = /hello\d+/gim;
+
+console.log(re.source);    // &quot;hello\d+&quot; — the pattern text (no slashes)
+console.log(re.flags);     // &quot;gim&quot;      — all flags as a string (sorted)
+console.log(re.global);    // true       — g flag set?
+console.log(re.ignoreCase);// true       — i flag set?
+console.log(re.multiline); // true       — m flag set?
+console.log(re.sticky);    // false      — y flag set?
+console.log(re.unicode);   // false      — u flag set?
+console.log(re.dotAll);    // false      — s flag set?
+console.log(re.hasIndices);// false      — d flag set?
+console.log(re.lastIndex); // 0          — position for next search (g/y only)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>hello\d+
+gim
+true
+true
+true
+false
+false
+false
+false
+0</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>re.lastIndex</code> · Position Tracking</h3>
+<p class="v2-p">When using the <code>g</code> or <code>y</code> flag, <code>lastIndex</code> tracks where the next search will start. It updates automatically after each match.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re   = /\d+/g;
+const text = &quot;12 and 34 and 56&quot;;
+
+let match;
+while ((match = re.exec(text)) !== null) {
+  console.log(`Found &quot;${match[0]}&quot; at index ${match.index}, lastIndex now ${re.lastIndex}`);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Found &quot;12&quot; at index 0, lastIndex now 2
+Found &quot;34&quot; at index 7, lastIndex now 9
+Found &quot;56&quot; at index 14, lastIndex now 16</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Inspecting a RegExp Object</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/i;
+
+console.log(&quot;Source:&quot;, emailRe.source);
+console.log(&quot;Flags:&quot;, emailRe.flags);
+console.log(&quot;Is global:&quot;, emailRe.global);
+console.log(&quot;Is case-insensitive:&quot;, emailRe.ignoreCase);
+
+// Build a new regex from an existing one, adding flags
+const withG = new RegExp(emailRe.source, emailRe.flags + &quot;g&quot;);
+console.log(&quot;New flags:&quot;, withG.flags);</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Modifying <code>lastIndex</code> Manually</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re = /\d+/g;
+const text = &quot;100 200 300 400&quot;;
+
+re.lastIndex = 8; // skip past the first two numbers
+const match = re.exec(text);
+console.log(match[0]); // &quot;300&quot; — started searching from index 8
+
+// Always reset before reusing a global regex
+re.lastIndex = 0;
+console.log(re.exec(text)[0]); // &quot;100&quot; — starts fresh</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>RegExp.prototype[Symbol.match]</code> · Used Internally by <code>String.match()</code></h3>
+<p class="v2-p">Regex objects implement <code>[Symbol.match]</code>, <code>[Symbol.replace]</code>, <code>[Symbol.search]</code>, and <code>[Symbol.split]</code>. This is how <code>String.prototype.match(re)</code> actually calls the regex's own method.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// These two are identical:
+&quot;hello world&quot;.match(/\w+/g);
+/\w+/g[Symbol.match](&quot;hello world&quot;);
+// Both: [&quot;hello&quot;, &quot;world&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>9. Topic 8 · The RegExp Object</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">10. Topic 9 · RegExp &amp; String Methods</div><div class="pc" id="chk10"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">There are <strong>six</strong> primary methods for working with regular expressions in JavaScript · four on strings, two on the RegExp object itself.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>RegExp.prototype.test(string)</code> · Quick True/False Check</h3>
+<p class="v2-p">The simplest regex method. Returns <code>true</code> if the pattern matches anywhere in the string, <code>false</code> otherwise. Use it when you just need to know <em>if</em> something matches.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const hasDigit  = /\d/;
+const isEmail   = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+console.log(hasDigit.test(&quot;hello5world&quot;)); // true
+console.log(hasDigit.test(&quot;helloworld&quot;));  // false
+
+console.log(isEmail.test(&quot;alice@example.com&quot;)); // true
+console.log(isEmail.test(&quot;not-an-email&quot;));       // false</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> <code>.test()</code> is the fastest method for pure yes/no checks · use it for form validation, filtering, and conditional logic.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>RegExp.prototype.exec(string)</code> · Detailed Match Info</h3>
+<p class="v2-p">Returns a <strong>match array</strong> with detailed information, or <code>null</code> if no match. More powerful than <code>test()</code> · gives you the matched text, index, and capture groups.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const pattern = /(\d{4})-(\d{2})-(\d{2})/;
+const result  = pattern.exec(&quot;Event date: 2024-03-15&quot;);
+
+if (result) {
+  console.log(result[0]);     // &quot;2024-03-15&quot; — full match
+  console.log(result[1]);     // &quot;2024&quot;        — group 1
+  console.log(result[2]);     // &quot;03&quot;           — group 2
+  console.log(result[3]);     // &quot;15&quot;           — group 3
+  console.log(result.index);  // 12             — position in string
+  console.log(result.input);  // &quot;Event date: 2024-03-15&quot;
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-15
+2024
+03
+15
+12
+Event date: 2024-03-15</code></pre></div></div>
+<h4 class="v2-h4">Iterate ALL matches with <code>exec()</code> in a loop:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re   = /\b\w{5}\b/g; // all 5-letter words
+const text = &quot;hello world today is a great Monday&quot;;
+let match;
+
+while ((match = re.exec(text)) !== null) {
+  console.log(`&quot;${match[0]}&quot; at index ${match.index}`);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;hello&quot; at index 0
+&quot;world&quot; at index 6
+&quot;today&quot; at index 12
+&quot;great&quot; at index 22</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>String.prototype.match(regexp)</code> · Get All Matches</h3>
+<p class="v2-p">Without <code>g</code> flag: behaves like <code>exec()</code> · returns first match with groups. With <code>g</code> flag: returns an array of all matched strings (no group info).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;Call 080-1234-5678 or 081-9876-5432 for details&quot;;
+
+// Without g — first match + groups
+const first = text.match(/(\d{3})-(\d{4})-(\d{4})/);
+console.log(first[0]); // &quot;080-1234-5678&quot;
+console.log(first[1]); // &quot;080&quot;
+console.log(first[2]); // &quot;1234&quot;
+
+// With g — ALL matches (no group info)
+const all = text.match(/\d{3}-\d{4}-\d{4}/g);
+console.log(all); // [&quot;080-1234-5678&quot;, &quot;081-9876-5432&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>080-1234-5678
+080
+1234
+[&quot;080-1234-5678&quot;, &quot;081-9876-5432&quot;]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> With the <code>g</code> flag, <code>match()</code> returns an array of strings only · capture groups are ignored. Use <code>matchAll()</code> if you need groups from all matches.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>String.prototype.matchAll(regexp)</code> · All Matches WITH Groups</h3>
+<p class="v2-p">Returns an <strong>iterator</strong> of all match results · each with full group information. The regex MUST have the <code>g</code> flag.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;2024-01-15 and 2024-03-22 and 2023-12-01&quot;;
+const re   = /(?&lt;year&gt;\d{4})-(?&lt;month&gt;\d{2})-(?&lt;day&gt;\d{2})/g;
+
+for (const match of text.matchAll(re)) {
+  const { year, month, day } = match.groups;
+  console.log(`Year: ${year}, Month: ${month}, Day: ${day}`);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Year: 2024, Month: 01, Day: 15
+Year: 2024, Month: 03, Day: 22
+Year: 2023, Month: 12, Day: 01</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> <code>matchAll()</code> is the modern replacement for <code>exec()</code> loops. It is cleaner, works with named groups, and returns an iterator you can spread into an array:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const matches = [...text.matchAll(re)];
+console.log(matches.length); // 3
+console.log(matches[0].groups.year); // &quot;2024&quot;</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>String.prototype.search(regexp)</code> · Find Position of First Match</h3>
+<p class="v2-p">Returns the <strong>index</strong> of the first match, or <code>-1</code> if not found. Like <code>indexOf</code> but for regex patterns.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const text = &quot;Hello World 2024&quot;;
+
+console.log(text.search(/\d+/));    // 12 — position of &quot;2024&quot;
+console.log(text.search(/xyz/));    // -1  — not found
+console.log(text.search(/world/i)); // 6   — case-insensitive</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> <code>search()</code> always searches from the beginning · it ignores the <code>g</code> flag and <code>lastIndex</code>. For finding a position with a literal string, <code>indexOf</code> is faster. <code>search()</code> shines when you need a pattern-based position.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>String.prototype.replace(regexp, replacement)</code> · Find and Replace</h3>
+<p class="v2-p">The most powerful string method. Replaces match(es) with a replacement string or the result of a function.</p>
+<h4 class="v2-h4">Simple replacement:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Replace first match only (no g flag)
+console.log(&quot;hello hello&quot;.replace(/hello/, &quot;goodbye&quot;)); // &quot;goodbye hello&quot;
+
+// Replace ALL matches (g flag)
+console.log(&quot;hello hello&quot;.replace(/hello/g, &quot;goodbye&quot;)); // &quot;goodbye goodbye&quot;
+
+// Case-insensitive + global
+console.log(&quot;Hello HELLO hello&quot;.replace(/hello/gi, &quot;hi&quot;)); // &quot;hi hi hi&quot;</code></pre></div></div>
+<h4 class="v2-h4">Replacement with capture group references <code>$1</code>, <code>$2</code>, <code>$&lt;name&gt;</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Reformat date: YYYY-MM-DD → DD/MM/YYYY
+const date = &quot;2024-03-15&quot;;
+const reformatted = date.replace(/(\d{4})-(\d{2})-(\d{2})/, &quot;$3/$2/$1&quot;);
+console.log(reformatted); // &quot;15/03/2024&quot;
+
+// Using named groups
+const reformatted2 = date.replace(
+  /(?&lt;y&gt;\d{4})-(?&lt;m&gt;\d{2})-(?&lt;d&gt;\d{2})/,
+  &quot;$&lt;d&gt;/$&lt;m&gt;/$&lt;y&gt;&quot;
+);
+console.log(reformatted2); // &quot;15/03/2024&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>15/03/2024
+15/03/2024</code></pre></div></div>
+<h4 class="v2-h4">Special replacement tokens:</h4>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Token</th><th>Meaning</th></tr></thead><tbody><tr><td><code>$$</code></td><td>Literal <code>$</code></td></tr><tr><td><code>$&amp;</code></td><td>Entire matched string</td></tr><tr><td>`<code> $</code> ``</td><td>Text before match</td></tr><tr><td><code>$'</code></td><td>Text after match</td></tr><tr><td><code>$n</code></td><td>n-th capture group</td></tr><tr><td><code>$&lt;name&gt;</code></td><td>Named capture group</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Wrap every number in brackets using $&amp;
+console.log(&quot;I have 5 cats and 3 dogs&quot;.replace(/\d+/g, &quot;[$&amp;]&quot;));
+// &quot;I have [5] cats and [3] dogs&quot;</code></pre></div></div>
+<h4 class="v2-h4">Replacement with a function (most powerful):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Replace numbers with their doubled values
+const result = &quot;Price: 50 and discount: 10&quot;.replace(/\d+/g, n =&gt; n * 2);
+console.log(result); // &quot;Price: 100 and discount: 20&quot;
+
+// Capitalise first letter of each word
+const title = &quot;the quick brown fox&quot;.replace(/\b\w/g, c =&gt; c.toUpperCase());
+console.log(title); // &quot;The Quick Brown Fox&quot;
+
+// Censor profanity (replace with asterisks)
+const censor = (text, words) =&gt; {
+  const re = new RegExp(`\\b(${words.join(&quot;|&quot;)})\\b`, &quot;gi&quot;);
+  return text.replace(re, w =&gt; &quot;*&quot;.repeat(w.length));
+};
+console.log(censor(&quot;What the heck is going on&quot;, [&quot;heck&quot;]));
+// &quot;What the **** is going on&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Price: 100 and discount: 20
+The Quick Brown Fox
+What the **** is going on</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>String.prototype.replaceAll(string|regexp, replacement)</code> · Replace All</h3>
+<p class="v2-p">Like <code>replace()</code> with <code>g</code>, but can also accept a plain string as the first argument (not just regex). When used with a regex, the <code>g</code> flag is <strong>required</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// With plain string
+console.log(&quot;a.b.c.d&quot;.replaceAll(&quot;.&quot;, &quot;/&quot;)); // &quot;a/b/c/d&quot;
+
+// With regex (g flag required)
+console.log(&quot;hello world&quot;.replaceAll(/\w+/g, w =&gt; w.toUpperCase()));
+// &quot;HELLO WORLD&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>String.prototype.split(regexp)</code> · Split on a Pattern</h3>
+<p class="v2-p">Splits a string into an array, using the regex as the delimiter. More flexible than splitting on a fixed string.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Split on any whitespace (including multiple spaces/tabs)
+console.log(&quot;  hello   world  &quot;.split(/\s+/).filter(Boolean));
+// [&quot;hello&quot;, &quot;world&quot;]
+
+// Split on comma or semicolon or pipe
+console.log(&quot;a,b;c|d&quot;.split(/[,;|]/));
+// [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]
+
+// Split on digit runs
+console.log(&quot;abc123def456ghi&quot;.split(/\d+/));
+// [&quot;abc&quot;, &quot;def&quot;, &quot;ghi&quot;]
+
+// Split but KEEP the delimiters (using a capturing group)
+console.log(&quot;one, two; three&quot;.split(/(,|;)\s*/));
+// [&quot;one&quot;, &quot;,&quot;, &quot;two&quot;, &quot;;&quot;, &quot;three&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[&quot;hello&quot;, &quot;world&quot;]
+[&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]
+[&quot;abc&quot;, &quot;def&quot;, &quot;ghi&quot;]
+[&quot;one&quot;, &quot;,&quot;, &quot;two&quot;, &quot;;&quot;, &quot;three&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Methods Summary Table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Use When</th></tr></thead><tbody><tr><td><code>re.test(str)</code></td><td>Boolean</td><td>Quick check: does it match?</td></tr><tr><td><code>re.exec(str)</code></td><td>Array or null</td><td>Need match position + groups, one at a time</td></tr><tr><td><code>str.match(re)</code></td><td>Array or null</td><td>Get all matched strings (with <code>g</code>)</td></tr><tr><td><code>str.matchAll(re)</code></td><td>Iterator</td><td>All matches WITH group info (needs <code>g</code>)</td></tr><tr><td><code>str.search(re)</code></td><td>Number (-1 = no match)</td><td>Find position of first match</td></tr><tr><td><code>str.replace(re, rep)</code></td><td>String</td><td>Substitute match(es) with string/function</td></tr><tr><td><code>str.replaceAll(re, rep)</code></td><td>String</td><td>Replace all (regex needs <code>g</code>)</td></tr><tr><td><code>str.split(re)</code></td><td>Array</td><td>Split string on pattern delimiter</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>10. Topic 9 · RegExp &amp; String Methods</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">11. Applied Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 2 · Applied Exercises</strong></p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1 · Pattern Detective 🔍</h3>
+<p class="v2-p"><strong>Objective:</strong> Read patterns and predict what they match before running them. Build "regex reading" skills.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are reviewing a codebase's input validation regexes. For each, explain what it validates and give a passing and failing example.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const re = /^\d{3}-\d{2}-\d{4}$/;
+// Read it: ^ start, 3 digits, literal -, 2 digits, literal -, 4 digits, $ end
+// Matches: US Social Security Number format (123-45-6789)
+
+console.log(re.test(&quot;123-45-6789&quot;)); // true
+console.log(re.test(&quot;12-345-6789&quot;)); // false</code></pre></div></div>
+<h4 class="v2-h4">Task A · Analyse These Patterns</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Pattern set to analyse:
+const patterns = {
+  p1: /^[a-zA-Z][a-zA-Z0-9_]{2,19}$/,
+  p2: /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$]).{8,}$/,
+  p3: /^\+?(\d{1,3})?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/,
+  p4: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+  p5: /^([01]?\d|2[0-3]):[0-5]\d$/,
+};
+
+// Test and explain each pattern:
+
+// p1 — Username rules
+console.log(&quot;=== p1: Username ===&quot;);
+console.log(patterns.p1.test(&quot;alice99&quot;));      // true
+console.log(patterns.p1.test(&quot;9alice&quot;));       // false — must start with letter
+console.log(patterns.p1.test(&quot;al&quot;));           // false — too short (min 3 total)
+console.log(patterns.p1.test(&quot;alice!&quot;));       // false — ! not allowed
+
+// p2 — Strong password
+console.log(&quot;\n=== p2: Password ===&quot;);
+console.log(patterns.p2.test(&quot;Secure1!pass&quot;)); // true
+console.log(patterns.p2.test(&quot;secure1!pass&quot;)); // false — no uppercase
+console.log(patterns.p2.test(&quot;Securepass!&quot;));  // false — no digit
+console.log(patterns.p2.test(&quot;Se1!&quot;));         // false — too short
+
+// p3 — Flexible phone number
+console.log(&quot;\n=== p3: Phone ===&quot;);
+console.log(patterns.p3.test(&quot;(080) 123-4567&quot;)); // true
+console.log(patterns.p3.test(&quot;080.123.4567&quot;));    // true
+console.log(patterns.p3.test(&quot;+1 800 555 1234&quot;)); // true
+console.log(patterns.p3.test(&quot;123&quot;));              // false
+
+// p4 — CSS hex color
+console.log(&quot;\n=== p4: Hex Color ===&quot;);
+console.log(patterns.p4.test(&quot;#FF5733&quot;));  // true — 6-digit hex
+console.log(patterns.p4.test(&quot;#F57&quot;));     // true — 3-digit shorthand
+console.log(patterns.p4.test(&quot;FF5733&quot;));   // false — no #
+console.log(patterns.p4.test(&quot;#GGGGGG&quot;));  // false — G not hex
+
+// p5 — 24-hour time
+console.log(&quot;\n=== p5: 24-hour Time ===&quot;);
+console.log(patterns.p5.test(&quot;00:00&quot;)); // true — midnight
+console.log(patterns.p5.test(&quot;23:59&quot;)); // true — last minute
+console.log(patterns.p5.test(&quot;24:00&quot;)); // false — 24 invalid
+console.log(patterns.p5.test(&quot;9:30&quot;));  // true — single digit hour ok</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>In <code>p2</code>, why do lookaheads <code>(?=...)</code> not conflict with each other even though they all start at the same position?</li><li>In <code>p4</code>, why does <code>|</code> inside the group give two alternatives of different lengths?</li><li>In <code>p5</code>, why does <code>[01]?\d</code> match <code>09</code> but <code>2[0-3]</code> is needed for hours 20 · 23?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Text Extractor 📤</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>match()</code>, <code>matchAll()</code>, and <code>exec()</code> to extract structured data from unstructured text.</p>
+<p class="v2-p"><strong>Scenario:</strong> You receive a raw log file. Extract all relevant data fields using regex.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const log = &quot;[2024-01-15 09:23:11] ERROR: Connection timeout&quot;;
+const ts  = log.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
+console.log(&quot;Timestamp:&quot;, ts[0]); // &quot;2024-01-15 09:23:11&quot;</code></pre></div></div>
+<h4 class="v2-h4">Task A · Log Parser</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const logData = `
+[2024-03-15 08:00:01] INFO:  Server started on port 3000
+[2024-03-15 08:01:22] INFO:  User alice@example.com logged in from 192.168.1.10
+[2024-03-15 08:05:44] WARN:  High memory usage: 87%
+[2024-03-15 08:10:03] ERROR: Database connection failed (attempt 1 of 3)
+[2024-03-15 08:10:15] ERROR: Database connection failed (attempt 2 of 3)
+[2024-03-15 08:12:00] INFO:  User bob@test.org logged in from 10.0.0.5
+[2024-03-15 08:15:33] ERROR: Disk space critical: 95% used
+[2024-03-15 08:20:11] INFO:  Cache cleared — 1250 items removed
+`.trim();
+
+// 1. Extract all timestamps
+const timestamps = logData.match(/\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/g);
+console.log(&quot;Timestamps:&quot;, timestamps.length, &quot;entries&quot;);
+
+// 2. Count log levels
+const levels = { INFO: 0, WARN: 0, ERROR: 0 };
+for (const [, level] of logData.matchAll(/\] (INFO|WARN|ERROR):/g)) {
+  levels[level]++;
+}
+console.log(&quot;\nLog level counts:&quot;, levels);
+
+// 3. Extract all email addresses
+const emails = logData.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g);
+console.log(&quot;\nEmails found:&quot;, emails);
+
+// 4. Extract all IP addresses
+const ips = logData.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g);
+console.log(&quot;IPs found:&quot;, ips);
+
+// 5. Extract ERROR entries with full details using named groups
+const errorRe = /\[(?&lt;ts&gt;\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] ERROR: (?&lt;msg&gt;.+)/g;
+console.log(&quot;\nERROR entries:&quot;);
+for (const match of logData.matchAll(errorRe)) {
+  console.log(`  [${match.groups.ts}] ${match.groups.msg}`);
+}
+
+// 6. Extract percentage values
+const percentages = logData.match(/\d+(?=%)/g);
+console.log(&quot;\nPercentages mentioned:&quot;, percentages);</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Timestamps: 8 entries
+
+Log level counts: { INFO: 4, WARN: 1, ERROR: 3 }
+
+Emails found: [&quot;alice@example.com&quot;, &quot;bob@test.org&quot;]
+IPs found: [&quot;192.168.1.10&quot;, &quot;10.0.0.5&quot;]
+
+ERROR entries:
+  [2024-03-15 08:10:03] Database connection failed (attempt 1 of 3)
+  [2024-03-15 08:10:15] Database connection failed (attempt 2 of 3)
+  [2024-03-15 08:15:33] Disk space critical: 95% used
+
+Percentages mentioned: [&quot;87&quot;, &quot;95&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why is <code>matchAll()</code> better than <code>exec()</code> in a loop for extracting multiple groups?</li><li>Why does <code>/\d+(?=%)/g</code> use a lookahead for <code>%</code> instead of <code>/\d+%/g</code>?</li><li>What would happen if you forgot the <code>g</code> flag when using <code>matchAll()</code>?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Text Transformer ✏️</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>replace()</code> with functions to transform text programmatically.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building a <strong>markdown-to-HTML converter</strong> for a blogging platform.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Bold: **text** → &lt;strong&gt;text&lt;/strong&gt;
+const bold = &quot;This is **important** text&quot;.replace(/\*\*(.+?)\*\*/g, &quot;&lt;strong&gt;$1&lt;/strong&gt;&quot;);
+console.log(bold); // &quot;This is &lt;strong&gt;important&lt;/strong&gt; text&quot;</code></pre></div></div>
+<h4 class="v2-h4">Task A · Markdown Converter</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function markdownToHtml(md) {
+  return md
+    // Headings: ### → h3, ## → h2, # → h1
+    .replace(/^### (.+)$/gm, &quot;&lt;h3&gt;$1&lt;/h3&gt;&quot;)
+    .replace(/^## (.+)$/gm,  &quot;&lt;h2&gt;$1&lt;/h2&gt;&quot;)
+    .replace(/^# (.+)$/gm,   &quot;&lt;h1&gt;$1&lt;/h1&gt;&quot;)
+
+    // Bold: **text** → &lt;strong&gt;text&lt;/strong&gt;
+    .replace(/\*\*(.+?)\*\*/g, &quot;&lt;strong&gt;$1&lt;/strong&gt;&quot;)
+
+    // Italic: *text* → &lt;em&gt;text&lt;/em&gt;
+    .replace(/\*(.+?)\*/g, &quot;&lt;em&gt;$1&lt;/em&gt;&quot;)
+
+    // Inline code: `code` → &lt;code&gt;code&lt;/code&gt;
+    .replace(/`([^`]+)`/g, &quot;&lt;code&gt;$1&lt;/code&gt;&quot;)
+
+    // Links: [text](url) → &lt;a href=&quot;url&quot;&gt;text&lt;/a&gt;
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, &#x27;&lt;a href=&quot;$2&quot;&gt;$1&lt;/a&gt;&#x27;)
+
+    // Unordered list items: - item → &lt;li&gt;item&lt;/li&gt;
+    .replace(/^- (.+)$/gm, &quot;&lt;li&gt;$1&lt;/li&gt;&quot;)
+
+    // Auto-link URLs not already in anchor tags
+    .replace(/(?&lt;!href=&quot;)https?:\/\/[\w.-]+(?:\/[\w./?=&amp;%-]*)*/g, &#x27;&lt;a href=&quot;$&amp;&quot;&gt;$&amp;&lt;/a&gt;&#x27;)
+
+    // Blank lines → paragraph breaks
+    .replace(/\n{2,}/g, &quot;\n\n&lt;hr&gt;\n\n&quot;);
+}
+
+const markdown = `
+# My Blog Post
+
+This is a **bold statement** and this is *italic*.
+</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"> · ### Exercise 1 · Pattern Detective 🔍
+
+Objective: Read patterns and predict what they match before running them. Build "regex reading" skills.
+
+Scenario: You are reviewing a codebase's input validation regexes. For each, explain what it validates and give a passing and failing example.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Features</div><div class="pc" id="chk12"></div></div><div class="pb2"><ul class="v2-ul"><li>Fast and reliable</li><li>Supports \<code>inline code\</code></li><li>Links like <a href="https://google.com" target="_blank" rel="noopener">Google</a></li></ul>
+<h3 class="v2-h3">Note</h3>
+<p class="v2-p">Visit https://example.com for more info. `.trim();</p>
+<p class="v2-p">console.log(markdownToHtml(markdown));</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>
+**Expected Output (sample):**</code></pre></div></div>
+<p class="v2-p">&lt;h1&gt;My Blog Post&lt;/h1&gt; ... &lt;strong&gt;bold statement&lt;/strong&gt; ... &lt;em&gt;italic&lt;/em&gt; ... &lt;h2&gt;Features&lt;/h2&gt; &lt;li&gt;Fast and reliable&lt;/li&gt; &lt;li&gt;Supports &lt;code&gt;inline code&lt;/code&gt;&lt;/li&gt; &lt;li&gt;Links like &lt;a href="https://google.com"&gt;Google&lt;/a&gt;&lt;/li&gt; ... &lt;a href="https://example.com"&gt;https://example.com&lt;/a&gt;</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>
+**Self-check questions:**
+- Why must `###` be replaced before `##` and `##` before `#`?
+- Why does the link pattern use `[^\]]+` inside `[...]` instead of `.+`?
+- Why does the URL auto-linker use a negative lookbehind `(?&lt;!href=&quot;)`?
+
+---
+---
+</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Features</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">🔵 Stage 1 · Validation Engine</div><div class="build-req"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 3 · Project Simulation</strong></p></blockquote>
+<p class="v2-p"><strong>Real-world scenario:</strong> You're building a <strong>registration form validator and data sanitiser</strong> for a multi-country web application. The system must:</p>
+<ul class="v2-ul"><li>Validate fields in real time (email, phone, password, username, URL)</li><li>Extract and structure data from a pasted contact list</li><li>Sanitise and redact sensitive information from text</li><li>Generate a validation report</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">🔵 Stage 1 · Validation Engine</h3>
+<p class="v2-p"><strong>Goal:</strong> Build a reusable validation system using regex patterns.</p>
+<h4 class="v2-h4">Simple stage preview:</h4></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const isEmail = str =&gt; /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+console.log(isEmail(&quot;a@b.com&quot;)); // true
+console.log(isEmail(&quot;bad&quot;));     // false</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`const isEmail = str => /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(str);
+console.log(isEmail(&quot;a@b.com&quot;)); // true
+console.log(isEmail(&quot;bad&quot;));     // false`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-19-stage-1-validation-engine</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 19 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-19-stage-1-validation-engine/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 19 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. Background: What Are Regular Expressions?</li><li>✅ 2. Topic 1 · Creating Regular Expressions</li><li>✅ 3. Topic 2 · Flags (Modifiers)</li><li>✅ 4. Topic 3 · Character Classes & Ranges</li><li>✅ 5. Topic 4 · Meta Characters</li><li>✅ 6. Topic 5 · Assertions (Anchors & Lookarounds)</li><li>✅ 7. Topic 6 · Quantifiers</li><li>✅ 8. Topic 7 · Groups & Patterns</li></ul><div class="ln"><a href="lesson_18.html" class="ln-btn">&#8592; Lesson 18</a><a href="lesson_20.html" class="ln-btn primary">Lesson 20 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 19 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

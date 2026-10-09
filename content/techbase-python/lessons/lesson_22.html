@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 22: Python Encapsulation, Inner Classes, and File Handling — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="8" data-key="techbase_python_l22">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 22 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 22</div>
+      <h1>Python Encapsulation, Inner Classes, and File Handling</h1>
+      <div class="l-hero-sub">8 phases &nbsp;·&nbsp; Build: Project Overview</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 22</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 22! This lesson covers three powerful topics that every serious Python programmer needs to understand deeply.</p>
+<p class="v2-p">We start with <strong>Encapsulation</strong> · the art of protecting your data inside a class so it cannot be changed accidentally from outside. Then we move to <strong>Inner Classes</strong> · classes that live inside other classes, useful for grouping related things together neatly. Finally, we open the door to one of the most practical programming skills of all: <strong>File Handling</strong> · how Python reads files stored on your computer.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul"><li>Understand what encapsulation is, why it matters, and how to use private and protected properties in Python</li><li>Create getter and setter methods to safely read and change private data</li><li>Understand name mangling · how Python secretly renames private attributes</li><li>Create inner classes and understand how they relate to outer classes</li><li>Open a file using Python's built-in <code>open()</code> function</li><li>Read the full contents of a file, read specific numbers of characters, and read files line by line</li><li>Use the <code>with</code> statement to open files safely and automatically close them</li></ul>
+<p class="v2-p">This lesson connects directly to the real world: from banking systems that protect your account balance, to software that reads and processes log files, sensor data, or student records.</p>
+<hr class="v2-hr"></div><div class="wm"><span>📚 8 phases</span><span>🏗️ Project Overview</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 8</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 22! This lesson covers three powerful topics that every serious Python programmer needs to understand deeply.</p>
+<p class="v2-p">We start with <strong>Encapsulation</strong> · the art of protecting your data inside a class so it cannot be changed accidentally from outside. Then we move to <strong>Inner Classes</strong> · classes that live inside other classes, useful for grouping related things together neatly. Finally, we open the door to one of the most practical programming skills of all: <strong>File Handling</strong> · how Python reads files stored on your computer.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul"><li>Understand what encapsulation is, why it matters, and how to use private and protected properties in Python</li><li>Create getter and setter methods to safely read and change private data</li><li>Understand name mangling · how Python secretly renames private attributes</li><li>Create inner classes and understand how they relate to outer classes</li><li>Open a file using Python's built-in <code>open()</code> function</li><li>Read the full contents of a file, read specific numbers of characters, and read files line by line</li><li>Use the <code>with</code> statement to open files safely and automatically close them</li></ul>
+<p class="v2-p">This lesson connects directly to the real world: from banking systems that protect your account balance, to software that reads and processes log files, sensor data, or student records.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 8</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before starting, make sure you are comfortable with these ideas from earlier lessons:</p>
+<ul class="v2-ul"><li><strong>Classes and Objects</strong> · you know how to define a class, create an object, and use <code>self</code></li><li><strong>The <code>__init__</code> method</strong> · you know how to set up a class with starting properties</li><li><strong>Class methods</strong> · you know how to define functions inside a class</li><li><strong>Inheritance and Polymorphism</strong> · you have seen how classes can share and override behaviour (Lessons 20 · 21)</li></ul>
+<p class="v2-p">If any of these feel shaky, quickly re-read those lessons before continuing. This lesson builds directly on them.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 8</div><div class="pt">Part 1: Python Encapsulation</div><div class="pc" id="chk3"></div></div><div class="pb2"><hr class="v2-hr">
+<h3 class="v2-h3">1.1 What Is Encapsulation?</h3>
+<p class="v2-p">Let us start with a real-life story.</p>
+<p class="v2-p">Imagine you walk into a bank in Lagos and ask the teller to see a customer's account balance. The teller refuses · that information is protected. You cannot just reach into the filing cabinet and read it yourself. Instead, you must go through the proper channels: fill a form, verify your identity, and only then does the bank give you what you are allowed to see.</p>
+<p class="v2-p">This is exactly what encapsulation does in programming.</p>
+<p class="v2-p"><strong>Encapsulation</strong> means keeping data (properties) and methods (functions) bundled inside a class, while controlling how that data can be accessed or changed from outside the class.</p>
+<p class="v2-p"><strong>Why does it exist?</strong></p>
+<p class="v2-p">Without encapsulation, any part of your program can directly change any variable in your class · even by accident. Imagine a <code>Student</code> class where the student's grade can be changed to <code>500</code> by mistake. Encapsulation stops this by protecting the grade behind a controlled gate.</p>
+<p class="v2-p"><strong>What problem does it solve?</strong></p>
+<p class="v2-p">It protects data from:</p>
+<ul class="v2-ul"><li>Accidental changes (a bug sets age to a negative number)</li><li>Invalid values (someone sets a student's score to <code>999</code> out of <code>100</code>)</li><li>Unauthorised access (outside code reading sensitive information)</li></ul>
+<p class="v2-p"><strong>How does it work?</strong></p>
+<p class="v2-p">Python uses special naming rules to mark properties as private or protected.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.2 Public, Protected, and Private Properties</h3>
+<p class="v2-p">Python has three levels of access for class properties:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Level</th><th>Prefix</th><th>Meaning</th></tr></thead><tbody><tr><td>Public</td><td><code>name</code></td><td>Anyone can access it</td></tr><tr><td>Protected</td><td><code>_name</code></td><td>Intended for internal/subclass use only</td></tr><tr><td>Private</td><td><code>__name</code></td><td>Strongly restricted · only the class itself can use it</td></tr></tbody></table></div>
+<p class="v2-p">Let us explore each one.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.3 Public Properties (No Prefix)</h3>
+<p class="v2-p">A normal property with no underscore is <strong>public</strong>. Anyone can read or change it freely.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Student:
+    def __init__(self, name):
+        self.name = name  # Public property — anyone can access this
+
+s = Student(&quot;Amaka&quot;)
+print(s.name)       # Access directly from outside — this is fine
+s.name = &quot;Ngozi&quot;    # Change directly — also fine for public data
+print(s.name)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Amaka
+Ngozi</code></pre></div></div>
+<p class="v2-p">Public properties are simple and fine for data that does not need protection.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.4 Protected Properties (Single Underscore <code>_</code>)</h3>
+<p class="v2-p">A single underscore <code>_</code> before a property name signals: <strong>"This is intended for internal use. Be careful with it."</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class BankAccount:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self._balance = balance  # Protected — a gentle warning, not enforced
+
+account = BankAccount(&quot;Emeka&quot;, 50000)
+print(account.owner)     # Fine — public
+print(account._balance)  # Works, but it is a signal: &quot;you shouldn&#x27;t do this&quot;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Emeka
+50000</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important:</strong> A single underscore is <strong>only a convention</strong> · a polite message to other programmers. Python does NOT actually stop anyone from accessing <code>_balance</code>. It is like a sign on a door that says "Staff Only" · people can still walk in, but they know they probably shouldn't.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.5 Private Properties (Double Underscore <code>__</code>)</h3>
+<p class="v2-p">A double underscore <code>__</code> before a property name makes it <strong>private</strong>. Python enforces this much more strongly using a technique called <strong>name mangling</strong> (we will explain this shortly).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Person:
+    def __init__(self, name, age):
+        self.name = name       # Public
+        self.__age = age       # Private — cannot be accessed directly from outside
+
+p1 = Person(&quot;Tunde&quot;, 30)
+print(p1.name)    # Works fine
+print(p1.__age)   # This will CAUSE AN ERROR</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Tunde
+AttributeError: &#x27;Person&#x27; object has no attribute &#x27;__age&#x27;</code></pre></div></div>
+<p class="v2-p">The line <code>print(p1.__age)</code> crashes because Python has hidden <code>__age</code> under a different internal name. This is intentional · Python is protecting your data.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Think about it:</strong> Why did <code>__age</code> cause an error but <code>_balance</code> did not? The double underscore triggers Python's name mangling system, which we explore in Section 1.8.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.6 Getter Methods · Reading Private Data Safely</h3>
+<p class="v2-p">Since private properties cannot be read directly from outside, we create a <strong>getter method</strong> · a specially named function inside the class that returns the private value.</p>
+<p class="v2-p"><strong>What is a getter?</strong> It is simply a method that "gets" (retrieves) the value of a private property and hands it to whoever asks, in a controlled way.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.__age = age       # Private property
+
+    def get_age(self):         # Getter method
+        return self.__age      # Returns the private value safely
+
+p1 = Person(&quot;Chioma&quot;, 25)
+print(p1.name)         # Direct access to public property — fine
+print(p1.get_age())    # Using the getter to access private age — safe and controlled</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Chioma
+25</code></pre></div></div>
+<p class="v2-p">Line by line explanation:</p>
+<ul class="v2-ul"><li><code>self.__age = age</code> · stores age as a private property; the double underscore hides it</li><li><code>def get_age(self)</code> · defines a method inside the class; only this method can touch <code>__age</code></li><li><code>return self.__age</code> · the getter reads <code>__age</code> from inside the class (where it is allowed) and returns it</li><li><code>p1.get_age()</code> · from outside the class, we call the getter and receive the age safely</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.7 Setter Methods · Changing Private Data Safely (With Validation)</h3>
+<p class="v2-p">A <strong>setter method</strong> "sets" (changes) the value of a private property. The setter's real power is that it can <strong>validate</strong> the new value before saving it, rejecting any bad input.</p>
+<p class="v2-p"><strong>Why is this powerful?</strong> Without a setter, if someone types <code>p1.__age = -5</code>, age becomes negative · which makes no real-world sense. With a setter, you write rules that reject invalid input.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.__age = age
+
+    def get_age(self):
+        return self.__age
+
+    def set_age(self, age):         # Setter method
+        if age &gt; 0:                 # Validate: age must be a positive number
+            self.__age = age        # Only update if the value is valid
+        else:
+            print(&quot;Age must be a positive number!&quot;)  # Reject invalid input
+
+p1 = Person(&quot;Tobi&quot;, 25)
+print(p1.get_age())     # 25
+
+p1.set_age(26)          # Valid change
+print(p1.get_age())     # 26
+
+p1.set_age(-10)         # Invalid — should be rejected
+print(p1.get_age())     # Still 26 — the bad value was blocked</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>25
+26
+Age must be a positive number!
+26</code></pre></div></div>
+<p class="v2-p">This is encapsulation at work: the data is protected, changes go through a validation gate, and bad values are rejected cleanly.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.8 Practical Encapsulation with Validation · A Student Grade System</h3>
+<p class="v2-p">Let us see encapsulation solving a real problem: protecting a student's grade so that no invalid score can be saved.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Student:
+    def __init__(self, name):
+        self.name = name
+        self.__grade = 0          # Private grade, starts at 0
+
+    def set_grade(self, grade):
+        if 0 &lt;= grade &lt;= 100:     # Grade must be between 0 and 100
+            self.__grade = grade
+        else:
+            print(&quot;Grade must be between 0 and 100!&quot;)
+
+    def get_grade(self):
+        return self.__grade
+
+    def get_status(self):
+        if self.__grade &gt;= 50:    # Nigerian passing mark
+            return &quot;Passed&quot;
+        else:
+            return &quot;Failed&quot;
+
+# Testing the Student class
+student = Student(&quot;Babajide&quot;)
+student.set_grade(78)
+print(f&quot;Name: {student.name}&quot;)
+print(f&quot;Grade: {student.get_grade()}&quot;)
+print(f&quot;Status: {student.get_status()}&quot;)
+
+student.set_grade(120)           # Invalid — should be rejected
+print(f&quot;Grade after invalid attempt: {student.get_grade()}&quot;)  # Still 78</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Name: Babajide
+Grade: 78
+Status: Passed
+Grade must be between 0 and 100!
+Grade after invalid attempt: 78</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world connection:</strong> School management systems, university portals (like JUPEB or JAMB), and hospital patient record systems all use encapsulation to prevent invalid data from entering their databases.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.9 Private Methods · Hiding Internal Logic</h3>
+<p class="v2-p">Just like private properties, you can also make <strong>methods</strong> private. A private method can only be called from inside the class itself · not from outside.</p>
+<p class="v2-p"><strong>Why would you want this?</strong> Sometimes a method is just a helper that does internal work that outside code should never call directly. Think of it as a factory machine's internal gears · the public only presses the button (public method), not the individual gears (private methods).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Calculator:
+    def __init__(self):
+        self.result = 0
+
+    def __validate(self, num):         # Private method — only used inside the class
+        if not isinstance(num, (int, float)):
+            return False               # Not a valid number
+        return True
+
+    def add(self, num):                # Public method — anyone can call this
+        if self.__validate(num):       # Calls the private validator internally
+            self.result += num
+        else:
+            print(f&quot;Invalid input: {num} is not a number!&quot;)
+
+# Using the Calculator
+calc = Calculator()
+calc.add(10)
+calc.add(5.5)
+calc.add(&quot;hello&quot;)         # Invalid — will be caught
+print(calc.result)        # Should be 15.5
+
+# Trying to call the private method directly
+calc.__validate(5)        # This will CAUSE AN ERROR</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Invalid input: hello is not a number!
+15.5
+AttributeError: &#x27;Calculator&#x27; object has no attribute &#x27;__validate&#x27;</code></pre></div></div>
+<p class="v2-p">The <code>__validate</code> method is invisible from outside the class · exactly as intended.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.10 Name Mangling · The Secret Behind <code>__</code></h3>
+<p class="v2-p">You now know that <code>__age</code> causes an <code>AttributeError</code> when accessed from outside the class. But here is an interesting technical detail: Python does NOT delete <code>__age</code>. Instead, it <strong>renames it</strong> automatically.</p>
+<p class="v2-p">When you write <code>__age</code> inside a class called <code>Person</code>, Python secretly renames it to <code>_Person__age</code>. This is called <strong>name mangling</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.__age = age          # Python internally stores this as _Person__age
+
+p1 = Person(&quot;Kemi&quot;, 30)
+
+# Normal access — causes an error
+# print(p1.__age)               # AttributeError
+
+# Name mangling — accessing the renamed version (NOT recommended!)
+print(p1._Person__age)           # This works, but it is bad practice</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>30</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important:</strong> Even though name mangling lets you access <code>_Person__age</code>, you should <strong>never</strong> do this in real code. It defeats the entire purpose of encapsulation. The rule exists only so Python's own internal systems (like inheritance) can still function properly.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.11 Summary: Why Use Encapsulation?</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Benefit</th><th>Explanation</th></tr></thead><tbody><tr><td><strong>Data Protection</strong></td><td>Private data cannot be changed accidentally from outside</td></tr><tr><td><strong>Validation</strong></td><td>Setters can reject invalid values before they are stored</td></tr><tr><td><strong>Flexibility</strong></td><td>You can change internal logic later without breaking external code</td></tr><tr><td><strong>Control</strong></td><td>You decide exactly what outside code is allowed to see and change</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">`
+
+Expected output in terminal:
+`
+30
+`
+
+> Important: Even though name mangling lets you access _Person__age, you should never do this in real code. It defeats the entire purpose of encapsulation. The rule exists only so Python's own internal systems (like inheritance) can still function properly. · </div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 8</div><div class="pt">Part 2: Python Inner Classes</div><div class="pc" id="chk4"></div></div><div class="pb2"><hr class="v2-hr">
+<h3 class="v2-h3">2.1 What Is an Inner Class?</h3>
+<p class="v2-p">An <strong>inner class</strong> is a class that is defined <strong>inside</strong> another class.</p>
+<p class="v2-p">Think of it like a house (outer class) that contains rooms (inner classes). The rooms exist inside the house and belong to it. Rooms are not visible from the street · you have to enter the house first.</p>
+<p class="v2-p"><strong>Why do inner classes exist?</strong></p>
+<p class="v2-p">When a class is only useful inside one specific class and nowhere else, it makes sense to define it <em>inside</em> that class. This keeps your code organised and makes it clear that the inner class is a private helper belonging to the outer class.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.2 Defining a Basic Inner Class</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Outer:
+    def __init__(self):
+        self.name = &quot;I am the Outer Class&quot;
+
+    class Inner:                           # Inner class defined inside Outer
+        def __init__(self):
+            self.name = &quot;I am the Inner Class&quot;
+
+        def display(self):
+            print(&quot;Hello from the inner class!&quot;)
+
+# Create an object of the outer class
+outer = Outer()
+print(outer.name)    # Access the outer class property directly</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>I am the Outer Class</code></pre></div></div>
+<p class="v2-p">Notice that printing <code>outer.name</code> only gives us the outer class's name. The inner class has not been used yet · it is just defined, waiting to be accessed.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.3 Accessing the Inner Class from Outside</h3>
+<p class="v2-p">To use the inner class, you first create an outer object, then use that outer object to create an inner object.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Outer:
+    def __init__(self):
+        self.name = &quot;Outer&quot;
+
+    class Inner:
+        def __init__(self):
+            self.name = &quot;Inner&quot;
+
+        def display(self):
+            print(&quot;Hello from the inner class!&quot;)
+
+# Step 1: Create an object of the outer class
+outer = Outer()
+
+# Step 2: Use the outer object to create an inner class object
+inner = outer.Inner()    # Note the syntax: outer_object.InnerClassName()
+
+# Step 3: Now use the inner object normally
+inner.display()
+print(inner.name)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello from the inner class!
+Inner</code></pre></div></div>
+<p class="v2-p">Line by line:</p>
+<ul class="v2-ul"><li><code>outer = Outer()</code> · creates the outer object as usual</li><li><code>inner = outer.Inner()</code> · creates an inner class object; notice we access <code>Inner</code> through the outer object</li><li><code>inner.display()</code> · calls the method on the inner object</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.4 Passing the Outer Object to the Inner Class</h3>
+<p class="v2-p">By default, an inner class <strong>cannot</strong> automatically see the outer class's properties. If you want the inner class to access the outer class's data, you must <strong>pass the outer object in</strong> as a parameter.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Outer:
+    def __init__(self):
+        self.name = &quot;Emeka&quot;           # Outer property
+
+    class Inner:
+        def __init__(self, outer):    # Accept the outer object as parameter
+            self.outer = outer        # Store the reference
+
+        def display(self):
+            print(f&quot;The outer class name is: {self.outer.name}&quot;)  # Access outer data
+
+# Create outer object
+outer = Outer()
+
+# Pass the outer object into the inner class
+inner = outer.Inner(outer)    # outer is passed as the argument
+
+inner.display()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>The outer class name is: Emeka</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Think about it:</strong> Why do you have to pass <code>outer</code> explicitly? Because unlike some other languages, Python inner classes do NOT automatically share a reference with their outer class. You must make the connection manually.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.5 A Practical Example · Car and Engine</h3>
+<p class="v2-p">Inner classes are very useful when you have a "contains" relationship. For example, a car <strong>contains</strong> an engine. The engine on its own means nothing · it only makes sense inside a car.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Car:
+    def __init__(self, brand, model):
+        self.brand = brand
+        self.model = model
+        self.engine = self.Engine()    # Create an Engine object as part of the Car
+
+    class Engine:
+        def __init__(self):
+            self.status = &quot;Off&quot;        # Engine starts off
+
+        def start(self):
+            self.status = &quot;Running&quot;
+            print(&quot;Engine started!&quot;)
+
+        def stop(self):
+            self.status = &quot;Off&quot;
+            print(&quot;Engine stopped!&quot;)
+
+    def drive(self):
+        if self.engine.status == &quot;Running&quot;:
+            print(f&quot;Driving the {self.brand} {self.model}. Vroom!&quot;)
+        else:
+            print(&quot;Start the engine first!&quot;)
+
+# Creating and using the Car
+toyota = Car(&quot;Toyota&quot;, &quot;Camry&quot;)
+
+toyota.drive()              # Engine is off — cannot drive yet
+toyota.engine.start()       # Start the engine
+toyota.drive()              # Now we can drive
+toyota.engine.stop()        # Stop engine</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Start the engine first!
+Engine started!
+Driving the Toyota Camry. Vroom!
+Engine stopped!</code></pre></div></div>
+<p class="v2-p">Notice how the <code>Engine</code> class is defined inside <code>Car</code>. From outside, you access it as <code>toyota.engine.start()</code>. This feels natural · you are saying "the car's engine, start."</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.6 Multiple Inner Classes</h3>
+<p class="v2-p">A single outer class can contain multiple inner classes.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Computer:
+    def __init__(self):
+        self.cpu = self.CPU()    # Create a CPU object
+        self.ram = self.RAM()    # Create a RAM object
+
+    class CPU:
+        def process(self):
+            print(&quot;CPU is processing data...&quot;)
+
+    class RAM:
+        def store(self):
+            print(&quot;RAM is storing data temporarily...&quot;)
+
+# Using the Computer
+my_pc = Computer()
+my_pc.cpu.process()
+my_pc.ram.store()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>CPU is processing data...
+RAM is storing data temporarily...</code></pre></div></div>
+<p class="v2-p">This pattern is useful when modelling systems that have multiple distinct components · a computer with a CPU and RAM, a hospital with a Reception and a Laboratory, or an e-commerce order with a Cart and a Payment system.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.7 A Nigerian Context Example · Hospital System</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Hospital:
+    def __init__(self, name, location):
+        self.name = name
+        self.location = location
+        self.reception = self.Reception()
+        self.lab = self.Laboratory()
+
+    class Reception:
+        def check_in(self, patient_name):
+            print(f&quot;Welcome, {patient_name}! Please take a seat.&quot;)
+
+    class Laboratory:
+        def run_test(self, test_name):
+            print(f&quot;Running {test_name} test. Please wait...&quot;)
+
+# Using the Hospital system
+lasuth = Hospital(&quot;LASUTH&quot;, &quot;Ikeja, Lagos&quot;)
+lasuth.reception.check_in(&quot;Adaeze Okafor&quot;)
+lasuth.lab.run_test(&quot;Malaria Parasite&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Welcome, Adaeze Okafor! Please take a seat.
+Running Malaria Parasite test. Please wait...</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Python Inner Classes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 8</div><div class="pt">Part 3: Python File Handling</div><div class="pc" id="chk5"></div></div><div class="pb2"><hr class="v2-hr">
+<h3 class="v2-h3">3.1 Why File Handling Matters</h3>
+<p class="v2-p">So far, all the data in your programs disappears when the program stops running. Variables, lists, and class objects · they all live in the computer's memory and vanish when you close the program.</p>
+<p class="v2-p"><strong>File handling</strong> solves this problem. It lets Python programs:</p>
+<ul class="v2-ul"><li>Read data saved in <code>.txt</code>, <code>.csv</code>, or other files</li><li>Save results and reports to files that persist after the program ends</li><li>Process large datasets (like patient records, sales data, or school results) stored on disk</li></ul>
+<p class="v2-p">In the real world, file handling is used in every domain: banks process transaction logs, schools process result sheets, weather stations log temperature data, and mobile apps store user preferences.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.2 The Four File Modes</h3>
+<p class="v2-p">When you open a file in Python, you must tell Python <strong>what you intend to do</strong> with it. This is called the <strong>mode</strong>.</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mode</th><th>Symbol</th><th>Meaning</th></tr></thead><tbody><tr><td>Read</td><td><code>"r"</code></td><td>Open file for reading. Error if file does not exist. (Default)</td></tr><tr><td>Append</td><td><code>"a"</code></td><td>Open file to add new content at the end. Creates file if missing.</td></tr><tr><td>Write</td><td><code>"w"</code></td><td>Open file to write (overwrite). Creates file if missing.</td></tr><tr><td>Create</td><td><code>"x"</code></td><td>Create a new file. Error if file already exists.</td></tr></tbody></table></div>
+<p class="v2-p">There are also two format modes you can combine:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Format</th><th>Symbol</th><th>Meaning</th></tr></thead><tbody><tr><td>Text</td><td><code>"t"</code></td><td>Read or write as plain text. (Default)</td></tr><tr><td>Binary</td><td><code>"b"</code></td><td>Read or write as raw bytes (for images, PDFs, etc.)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.3 The <code>open()</code> Function · The Gateway to Files</h3>
+<p class="v2-p">The <code>open()</code> function is Python's built-in way to open any file.</p>
+<p class="v2-p"><strong>Syntax:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>open(filename, mode)</code></pre></div></div>
+<p class="v2-p">The simplest usage:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;demofile.txt&quot;)          # Opens in read mode (&quot;r&quot;) and text mode (&quot;t&quot;) by default</code></pre></div></div>
+<p class="v2-p">This is exactly the same as:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;demofile.txt&quot;, &quot;rt&quot;)    # &quot;r&quot; = read, &quot;t&quot; = text — these are the defaults</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important:</strong> If the file does not exist when using <code>"r"</code> mode, Python raises a <code>FileNotFoundError</code>. Always make sure the file exists before reading it.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.4 Reading a File · The <code>read()</code> Method</h3>
+<p class="v2-p">Once you have opened a file, use the <code>read()</code> method to get all of its contents as one big string.</p>
+<p class="v2-p"><strong>First, create the file to work with.</strong> Imagine this file called <code>demofile.txt</code> exists in the same folder as your Python script, with these contents:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt
+This file is for testing purposes.
+Good Luck!</code></pre></div></div>
+<p class="v2-p">Now let us read it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;demofile.txt&quot;)    # Open the file
+content = f.read()           # Read ALL contents into a string
+print(content)               # Print the contents
+f.close()                    # Always close the file when done!</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt
+This file is for testing purposes.
+Good Luck!</code></pre></div></div>
+<p class="v2-p">Line by line:</p>
+<ul class="v2-ul"><li><code>f = open("demofile.txt")</code> · opens the file and returns a <strong>file object</strong> stored in <code>f</code></li><li><code>f.read()</code> · reads the entire content of the file as one string</li><li><code>print(content)</code> · displays the content</li><li><code>f.close()</code> · closes the file; very important! Unclosed files can waste resources or cause data loss</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.5 Reading a File from a Different Location</h3>
+<p class="v2-p">If the file is not in the same folder as your Python script, you must provide the full file path.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># On Windows:
+f = open(&quot;C:\\Users\\Babatunde\\Documents\\demofile.txt&quot;)
+print(f.read())
+f.close()
+
+# On Mac/Linux:
+f = open(&quot;/home/babatunde/Documents/demofile.txt&quot;)
+print(f.read())
+f.close()</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Note:</strong> On Windows, use double backslash <code>\\</code> or a raw string <code>r"C:\path\to\file.txt"</code> to avoid Python misreading the backslash as an escape character.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.6 The <code>with</code> Statement · The Safe Way to Open Files</h3>
+<p class="v2-p">The safest and most Pythonic way to open files is using the <code>with</code> statement. When you use <code>with</code>, Python automatically closes the file for you when the block finishes · even if an error occurs.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:     # File opens here
+    content = f.read()               # Read the content
+    print(content)
+# File is automatically closed here — no need to call f.close()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt
+This file is for testing purposes.
+Good Luck!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Best Practice:</strong> Always use the <code>with</code> statement when working with files. It is cleaner, safer, and prevents common mistakes like forgetting to close the file.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.7 Reading a Specific Number of Characters</h3>
+<p class="v2-p">Instead of reading the whole file at once, you can tell <code>read()</code> exactly how many characters to return.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:
+    print(f.read(5))    # Read only the first 5 characters</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello</code></pre></div></div>
+<p class="v2-p">"Hello" is the first 5 characters of <code>"Hello! Welcome to demofile.txt"</code>. The rest of the file is not touched.</p>
+<p class="v2-p">Another example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:
+    print(f.read(12))   # Read first 12 characters</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcom</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Think about it:</strong> What would happen if you called <code>f.read(5)</code> twice in a row? Try to predict the answer before looking at the next section!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.8 Reading One Line at a Time · The <code>readline()</code> Method</h3>
+<p class="v2-p">The <code>readline()</code> method reads one line from the file each time you call it.</p>
+<p class="v2-p"><strong>Reading one line:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:
+    print(f.readline())    # Reads the first line</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt</code></pre></div></div>
+<p class="v2-p"><strong>Reading two lines:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:
+    print(f.readline())    # First line
+    print(f.readline())    # Second line</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt
+This file is for testing purposes.</code></pre></div></div>
+<p class="v2-p">Each call to <code>readline()</code> moves forward by one line. Think of it like a cursor that moves down the page one line at a time.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.9 Reading All Lines · Looping Through the File</h3>
+<p class="v2-p">To read the entire file line by line (useful for processing large files), loop through the file object directly using a <code>for</code> loop.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:
+    for line in f:
+        print(line)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt
+
+This file is for testing purposes.
+
+Good Luck!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Why are there blank lines between each line?</strong> Each line in the file already ends with a newline character (<code>\n</code>). Then <code>print()</code> adds another newline by default. Use <code>print(line, end="")</code> to remove the extra blank lines.</p></blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;demofile.txt&quot;) as f:
+    for line in f:
+        print(line, end=&quot;&quot;)    # end=&quot;&quot; prevents double spacing</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt
+This file is for testing purposes.
+Good Luck!</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.10 Closing Files Manually</h3>
+<p class="v2-p">If you are <strong>not</strong> using the <code>with</code> statement, you <strong>must</strong> close the file manually using <code>f.close()</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;demofile.txt&quot;)
+print(f.readline())
+f.close()               # ALWAYS close the file when you are done</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Hello! Welcome to demofile.txt</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Why is closing important?</strong> When a file is open, the operating system "locks" it in memory. Unclosed files waste memory, can cause data not to be saved properly, and may prevent other programs from accessing the same file. Always close files when you are done · or better, use <code>with</code> and let Python handle it.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>: Python File Handling</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 8</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk6"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1: Encapsulation · Building a Bank Account</h3>
+<p class="v2-p"><strong>Objective:</strong> Apply encapsulation to protect sensitive financial data.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a simple bank account system for First Bank Nigeria. The account balance must be private. No one should be able to directly change the balance · all deposits and withdrawals must go through validated methods.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create a <code>BankAccount</code> class with:</li></ol>
+<p class="v2-p">- A public property: <code>owner</code> (the account holder's name)    - A private property: <code>__balance</code> (starting balance)</p>
+<ol class="v2-ol"><li>Add a getter <code>get_balance()</code> that returns the balance</li><li>Add a method <code>deposit(amount)</code> that adds to the balance (reject amounts ≤ 0)</li><li>Add a method <code>withdraw(amount)</code> that subtracts from the balance (reject if amount &gt; balance or ≤ 0)</li><li>Test your class with deposits and withdrawals</li></ol>
+<p class="v2-p"><strong>Hint:</strong> Use <code>if amount &gt; 0</code> to validate before changing <code>__balance</code>.</p>
+<p class="v2-p"><strong>Solution:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class BankAccount:
+    def __init__(self, owner, initial_balance):
+        self.owner = owner
+        self.__balance = initial_balance    # Private — cannot be changed directly
+
+    def get_balance(self):
+        return self.__balance
+
+    def deposit(self, amount):
+        if amount &gt; 0:
+            self.__balance += amount
+            print(f&quot;Deposited ₦{amount:,}. New balance: ₦{self.__balance:,}&quot;)
+        else:
+            print(&quot;Deposit amount must be greater than zero!&quot;)
+
+    def withdraw(self, amount):
+        if amount &lt;= 0:
+            print(&quot;Withdrawal amount must be greater than zero!&quot;)
+        elif amount &gt; self.__balance:
+            print(&quot;Insufficient funds!&quot;)
+        else:
+            self.__balance -= amount
+            print(f&quot;Withdrew ₦{amount:,}. New balance: ₦{self.__balance:,}&quot;)
+
+# Testing the BankAccount
+account = BankAccount(&quot;Ngozi Adeyemi&quot;, 100000)
+print(f&quot;Account owner: {account.owner}&quot;)
+print(f&quot;Opening balance: ₦{account.get_balance():,}&quot;)
+
+account.deposit(50000)
+account.withdraw(20000)
+account.withdraw(200000)     # Should fail — insufficient funds
+account.deposit(-5000)       # Should fail — invalid amount
+print(f&quot;Final balance: ₦{account.get_balance():,}&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Account owner: Ngozi Adeyemi
+Opening balance: ₦100,000
+Deposited ₦50,000. New balance: ₦150,000
+Withdrew ₦20,000. New balance: ₦130,000
+Insufficient funds!
+Deposit amount must be greater than zero!
+Final balance: ₦130,000</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What happens if you try <code>account.__balance</code>? Why?</li><li>Could you change the balance to <code>999999999</code> without going through <code>deposit()</code>? Why not?</li><li>What makes <code>deposit()</code> and <code>withdraw()</code> better than direct access?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2: Inner Classes · University Department System</h3>
+<p class="v2-p"><strong>Objective:</strong> Use inner classes to model a university with departments.</p>
+<p class="v2-p"><strong>Scenario:</strong> University of Lagos (UNILAG) needs a class to represent a department. Each department has a <code>Lecturer</code> inner class and a <code>Course</code> inner class.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create a <code>Department</code> class with properties: <code>name</code> and <code>faculty</code></li><li>Create an inner class <code>Lecturer</code> with: <code>lecturer_name</code> and a <code>teach()</code> method</li><li>Create an inner class <code>Course</code> with: <code>course_title</code>, <code>course_code</code>, and a <code>describe()</code> method</li><li>Pass the outer <code>Department</code> object to <code>Lecturer</code> so the lecturer knows which department they belong to</li><li>Create a Department, some Lecturers, and some Courses, and print information about them</li></ol>
+<p class="v2-p"><strong>Solution:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Department:
+    def __init__(self, name, faculty):
+        self.name = name
+        self.faculty = faculty
+
+    class Lecturer:
+        def __init__(self, lecturer_name, outer_dept):
+            self.lecturer_name = lecturer_name
+            self.department = outer_dept       # Reference to the outer class
+
+        def teach(self):
+            print(f&quot;Dr. {self.lecturer_name} is teaching in the {self.department.name} department.&quot;)
+
+    class Course:
+        def __init__(self, course_title, course_code):
+            self.course_title = course_title
+            self.course_code = course_code
+
+        def describe(self):
+            print(f&quot;Course: {self.course_title} ({self.course_code})&quot;)
+
+# Creating the Department
+cs_dept = Department(&quot;Computer Science&quot;, &quot;Science and Technology&quot;)
+
+# Creating Lecturers (passing the outer department object)
+lecturer1 = cs_dept.Lecturer(&quot;Adewale Ogundimu&quot;, cs_dept)
+lecturer2 = cs_dept.Lecturer(&quot;Fatima Bello&quot;, cs_dept)
+
+# Creating Courses
+course1 = cs_dept.Course(&quot;Introduction to Python&quot;, &quot;CSC 101&quot;)
+course2 = cs_dept.Course(&quot;Data Structures&quot;, &quot;CSC 202&quot;)
+
+# Using everything
+lecturer1.teach()
+lecturer2.teach()
+course1.describe()
+course2.describe()</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Dr. Adewale Ogundimu is teaching in the Computer Science department.
+Dr. Fatima Bello is teaching in the Computer Science department.
+Course: Introduction to Python (CSC 101)
+Course: Data Structures (CSC 202)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3: File Reading · Student Results Processor</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice reading a file line by line and processing each line.</p>
+<p class="v2-p"><strong>Scenario:</strong> Your school in Abuja keeps student results in a text file called <code>results.txt</code>. You need to read it and display each student's result.</p>
+<p class="v2-p"><strong>Step 1:</strong> First create the file. In your terminal or text editor, create <code>results.txt</code> with this content:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Adaobi Nwosu: 85
+Kayode Fashola: 72
+Zainab Musa: 91
+Emeka Obi: 65
+Halima Yusuf: 55</code></pre></div></div>
+<p class="v2-p"><strong>Step 2:</strong> Write Python to read and process this file.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Open <code>results.txt</code> using a <code>with</code> statement</li><li>Loop through the file line by line</li><li>Print each line cleanly (remove extra spaces with <code>.strip()</code>)</li><li>Identify students who passed (score ≥ 50) and who failed</li></ol>
+<p class="v2-p"><strong>Solution:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Reading and processing student results
+
+print(&quot;=== STUDENT RESULTS ===\n&quot;)
+
+with open(&quot;results.txt&quot;) as f:
+    for line in f:
+        line = line.strip()          # Remove any leading/trailing whitespace or newlines
+        if line:                     # Only process non-empty lines
+            # Split at the colon to get name and score
+            parts = line.split(&quot;: &quot;)
+            name = parts[0]
+            score = int(parts[1])
+
+            if score &gt;= 50:
+                status = &quot;PASSED&quot;
+            else:
+                status = &quot;FAILED&quot;
+
+            print(f&quot;{name}: {score}/100 — {status}&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output in terminal:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>=== STUDENT RESULTS ===
+
+Adaobi Nwosu: 85/100 — PASSED
+Kayode Fashola: 72/100 — PASSED
+Zainab Musa: 91/100 — PASSED
+Emeka Obi: 65/100 — PASSED
+Halima Yusuf: 55/100 — PASSED</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What does <code>.strip()</code> do? What would happen without it?</li><li>Why does the loop not need <code>f.close()</code>?</li><li>How would you change the passing mark to 60?</li></ul>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(6)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 8</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk7"></div></div><div class="pb2"><hr class="v2-hr">
+<h3 class="v2-h3">Mistake 1: Trying to access a private property directly</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Person:
+    def __init__(self, age):
+        self.__age = age
+
+p = Person(25)
+print(p.__age)    # AttributeError!</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Person:
+    def __init__(self, age):
+        self.__age = age
+
+    def get_age(self):
+        return self.__age   # Use a getter
+
+p = Person(25)
+print(p.get_age())    # Works correctly</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2: Confusing <code>_</code> (single underscore) with <code>__</code> (double underscore)</h3>
+<p class="v2-p"><strong>Common confusion:</strong> Students think <code>_salary</code> is the same as <code>__salary</code>. They are not. Single underscore is a convention with no enforcement. Double underscore triggers name mangling.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Staff:
+    def __init__(self, salary):
+        self._salary = salary     # Only a convention — still accessible
+        self.__secret = &quot;hidden&quot;  # Enforced — triggers name mangling
+
+s = Staff(50000)
+print(s._salary)    # Works (just a warning to developers)
+print(s.__secret)   # AttributeError</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3: Forgetting to pass the outer object to the inner class</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Outer:
+    def __init__(self):
+        self.city = &quot;Lagos&quot;
+
+    class Inner:
+        def show(self):
+            print(self.city)   # ERROR — Inner doesn&#x27;t know about &#x27;city&#x27;
+
+o = Outer()
+i = o.Inner()
+i.show()    # AttributeError</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class Outer:
+    def __init__(self):
+        self.city = &quot;Lagos&quot;
+
+    class Inner:
+        def __init__(self, outer):
+            self.outer = outer       # Store the outer reference
+
+        def show(self):
+            print(self.outer.city)   # Access through the stored reference
+
+o = Outer()
+i = o.Inner(o)    # Pass the outer object
+i.show()          # Lagos</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4: Forgetting to close a file (when not using <code>with</code>)</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;myfile.txt&quot;)
+print(f.read())
+# Forgot to close! Bad practice.</code></pre></div></div>
+<p class="v2-p"><strong>Correct Option A · Manual close:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;myfile.txt&quot;)
+print(f.read())
+f.close()    # Always close</code></pre></div></div>
+<p class="v2-p"><strong>Correct Option B · Using <code>with</code> (recommended):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;myfile.txt&quot;) as f:
+    print(f.read())
+# Automatically closed — no need to call f.close()</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5: Reading a file that does not exist</h3>
+<p class="v2-p"><strong>Wrong:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>f = open(&quot;missing_file.txt&quot;)    # FileNotFoundError if the file doesn&#x27;t exist</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong> Always check the file exists, or handle the error:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try:
+    with open(&quot;missing_file.txt&quot;) as f:
+        print(f.read())
+except FileNotFoundError:
+    print(&quot;Sorry, the file was not found. Please check the filename.&quot;)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6: Double-spacing in output when reading lines</h3>
+<p class="v2-p"><strong>Wrong (double spacing):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;myfile.txt&quot;) as f:
+    for line in f:
+        print(line)    # Each line already has \n, and print adds another</code></pre></div></div>
+<p class="v2-p"><strong>Correct:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>with open(&quot;myfile.txt&quot;) as f:
+    for line in f:
+        print(line, end=&quot;&quot;)    # Prevents the extra blank line
+        # OR
+        print(line.strip())    # Strips the \n before printing</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">`
+
+Correct Option A · Manual close:
+`python
+f = open("myfile.txt")
+print(f.read())
+f.close()    # Always close
+`
+
+Correct Option B · Using with (recommended):
+`python
+with open("myfile.txt") as f:
+    print(f.read())
+# Automatically closed · no need to call f.close()
+` · </div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 8</div><div class="pt">Quick Reference Card</div><div class="pc" id="chk8"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ENCAPSULATION
+─────────────────────────────────────────
+Public property:    self.name = value
+Protected property: self._name = value     (convention only)
+Private property:   self.__name = value    (enforced by Python)
+
+Getter:  def get_name(self): return self.__name
+Setter:  def set_name(self, val):
+             if valid: self.__name = val
+             else: print(&quot;Error!&quot;)
+
+Name mangling: __age → _ClassName__age
+
+─────────────────────────────────────────
+INNER CLASSES
+─────────────────────────────────────────
+class Outer:
+    class Inner:
+        def method(self): ...
+
+outer = Outer()
+inner = outer.Inner()          # Access inner class via outer object
+inner.method()
+
+# Sharing outer data with inner:
+class Inner:
+    def __init__(self, outer):
+        self.outer = outer
+inner = outer.Inner(outer)     # Pass outer object explicitly
+
+─────────────────────────────────────────
+FILE MODES
+─────────────────────────────────────────
+&quot;r&quot;  → Read (default)
+&quot;a&quot;  → Append
+&quot;w&quot;  → Write (overwrite)
+&quot;x&quot;  → Create new file
+
+&quot;t&quot;  → Text mode (default)
+&quot;b&quot;  → Binary mode
+
+─────────────────────────────────────────
+FILE READING
+─────────────────────────────────────────
+# Open and read all
+with open(&quot;file.txt&quot;) as f:
+    print(f.read())
+
+# Read specific characters
+with open(&quot;file.txt&quot;) as f:
+    print(f.read(10))
+
+# Read one line
+with open(&quot;file.txt&quot;) as f:
+    print(f.readline())
+
+# Read all lines (loop)
+with open(&quot;file.txt&quot;) as f:
+    for line in f:
+        print(line.strip())
+
+# Manual open and close
+f = open(&quot;file.txt&quot;)
+print(f.read())
+f.close()
+─────────────────────────────────────────</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Quick Reference Card</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Project Overview</div><div class="build-req"><p class="v2-p">In this project, you will combine encapsulation, inner classes, and file reading to build a simple student management system.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Project Overview</h3>
+<p class="v2-p">You will create a <code>School</code> class that:</p>
+<ul class="v2-ul"><li>Has a private <code>__school_name</code> property (encapsulation)</li><li>Contains a <code>Student</code> inner class with private <code>__grade</code> (encapsulation within inner class)</li><li>Loads student data from a file and displays a formatted report</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Setup: Build the Core Classes</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class School:
+    def __init__(self, school_name, location):
+        self.__school_name = school_name    # Private
+        self.location = location
+
+    def get_school_name(self):
+        return self.__school_name
+
+    class Student:
+        def __init__(self, name, student_id):
+            self.name = name
+            self.student_id = student_id
+            self.__grade = 0                # Private
+
+        def set_grade(self, grade):
+            if 0 &lt;= grade &lt;= 100:
+                self.__grade = grade
+            else:
+                print(f&quot;Invalid grade for {self.name}!&quot;)
+
+        def get_grade(self):
+            return self.__grade
+
+        def get_status(self):
+            if self.__grade &gt;= 50:
+                return &quot;PASSED&quot;
+            return &quot;FAILED&quot;
+
+        def display(self):
+            print(f&quot;  ID: {self.student_id} | Name: {self.name} | &quot;
+                  f&quot;Grade: {self.__grade}/100 | Status: {self.get_status()}&quot;)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`class School:
+    def __init__(self, school_name, location):
+        self.__school_name = school_name    # Private
+        self.location = location
+
+    def get_school_name(self):
+        return self.__school_name
+
+    class Student:
+        def __init__(self, name, student_id):
+            self.name = name
+            self.student_id = student_id
+            self.__grade = 0                # Private
+
+        def set_grade(self, grade):
+            if 0 <= grade <= 100:
+                self.__grade = grade
+            else:
+                print(f&quot;Invalid grade for {self.name}!&quot;)
+
+        def get_grade(self):
+            return self.__grade
+
+        def get_status(self):
+            if self.__grade >= 50:
+                return &quot;PASSED&quot;
+            return &quot;FAILED&quot;
+
+        def display(self):
+            print(f&quot;  ID: {self.student_id} | Name: {self.name} | &quot;
+                  f&quot;Grade: {self.__grade}/100 | Status: {self.get_status()}&quot;)`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-22-project-overview</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 22 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 22 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1: Python Encapsulation</li><li>✅ Part 2: Python Inner Classes</li><li>✅ Part 3: Python File Handling</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes</li><li>✅ Quick Reference Card</li></ul><div class="ln"><a href="lesson_21.html" class="ln-btn">&#8592; Lesson 21</a><a href="lesson_23.html" class="ln-btn primary">Lesson 23 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 22 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

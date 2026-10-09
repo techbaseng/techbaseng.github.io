@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% block body %}
+<main id="main" data-course-page="{{ course.slug }}" class="c-{{ course.key }}">
+<section class="hero course-hero">
+  <div class="wrap hero-grid">
+    <div>
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ root }}index.html">Academy</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">{{ course.title }}</span></nav>
+      <div style="height:1.5rem"></div>
+      <span class="tile tile-lg">{{ icon(course.icon) }}</span>
+      <span class="eyebrow">{{ course.eyebrow }}</span>
+      <h1>{{ course.h1_html|safe }}</h1>
+      <p class="hero-sub">{{ course.hero_sub_html|safe }}</p>
+      <div class="hero-actions">
+        <a class="btn btn--lg btn--course" href="lessons/{{ course.first.file }}">Start {{ course.noun }} {{ course.first.num }} {{ icon('arrow','icon-arrow') }}</a>
+        <a class="btn btn--lg btn--ghost" id="continue-btn" href="#" hidden>{{ icon('arrow','icon-arrow') }}<span data-label>Continue</span></a>
+        <a class="btn btn--lg btn--ghost" href="#lessons">Browse all {{ course.total }}</a>
+      </div>
+      <div class="stats">
+        {%- for s in course.stats %}<div class="stat"><b>{{ s.n }}</b><span>{{ s.l }}</span></div>{% endfor %}
+      </div>
+    </div>
+    <aside class="progress-card reveal" id="progress-card" aria-label="Your progress">
+      <h2>Your progress</h2>
+      <div class="bar" style="opacity:1" aria-hidden="true"><i></i></div>
+      <p data-progress-text>Not started yet. Your progress is saved on this device as you learn.</p>
+      <p style="margin-top:1rem">{{ course.level }} · {{ course.total }} {{ course.noun }}s in {{ course.phases|length }} {{ 'levels' if course.key in ('scratch',) else 'phases' }}</p>
+    </aside>
+  </div>
+</section>
+
+<section class="section" id="about" style="padding-top:2rem">
+  <div class="wrap split">
+    <div class="prose">
+      <span class="eyebrow reveal">{{ course.about.label }}</span>
+      <h2 class="h-section reveal">{{ course.about.h2_html|safe }}</h2>
+      {%- for p in course.about.paras_html %}<p class="reveal">{{ p|safe }}</p>{% endfor %}
+    </div>
+    <div class="reveal" style="margin-top:2.4rem">
+      <ul class="checks" style="margin-top:0">{%- for b in course.about.bullets_html %}<li>{{ b|safe }}</li>{% endfor %}</ul>
+      {%- if course.about.kit %}
+      <h3 style="font-size:1.1rem;margin-top:2.2rem">What you need</h3>
+      <div class="kit">{%- for k in course.about.kit %}<div><b>{{ k.name }}</b><span>{{ k.info }}</span></div>{% endfor %}</div>
+      {%- if course.about.kit_note %}<p class="muted" style="font-size:.85rem;margin-top:1rem">{{ course.about.kit_note }}</p>{% endif %}
+      {%- endif %}
+    </div>
+  </div>
+</section>
+
+<section class="section band" id="lessons">
+  <div class="wrap">
+    <span class="eyebrow">{{ course.lessons_label }}</span>
+    <h2 class="h-section">{{ course.lessons_heading }}</h2>
+    <div class="toolbar">
+      <label class="field"><span class="sr-only">Filter {{ course.noun }}s</span>{{ icon('search') }}<input id="lesson-filter" type="search" placeholder="Filter {{ course.noun }}s by title or topic…" autocomplete="off"></label>
+      {%- if course.levels %}
+      <div class="chips" role="group" aria-label="Filter by level">
+        <button class="chip" type="button" data-level-chip="all" aria-pressed="true">All</button>
+        {%- for lv in course.levels %}<button class="chip" type="button" data-level-chip="{{ lv.id }}" aria-pressed="false">{{ lv.label }}</button>{% endfor %}
+      </div>
+      {%- endif %}
+    </div>
+    {%- for ph in course.phases %}
+    <div data-phase>
+      <div class="phase-head"><h3>{{ ph.name_main }}</h3><span>{{ ph.range }}</span></div>
+      <ul class="lessons">
+        {%- for l in ph.lessons %}
+        <li><a class="lesson" href="lessons/{{ l.file }}" data-file="{{ l.file }}" data-num="{{ course.noun|capitalize }} {{ l.num }}" data-level="{{ l.level }}" data-search="{{ (l.num ~ ' ' ~ l.title ~ ' ' ~ l.desc)|lower }}"{% if l.key %} data-key="{{ l.key }}" data-total="{{ l.phases }}"{% endif %}>
+          <span class="num">{{ l.num }}</span>
+          <span>{%- if l.level %}<span class="pill pill-{{ l.level[:3] }}">{{ l.level_label }}</span>{% endif %}<b>{{ l.title }}</b>{% if l.desc %}<small>{{ l.desc }}</small>{% endif %}</span>
+          <span class="state" aria-hidden="true"></span>
+        </a></li>
+        {%- endfor %}
+      </ul>
+    </div>
+    {%- endfor %}
+    <p class="empty" id="lesson-empty">No {{ course.noun }}s match that search. Try a different word.</p>
+  </div>
+</section>
+
+{%- if course.steps %}
+<section class="section">
+  <div class="wrap">
+    <span class="eyebrow reveal">How it works</span>
+    <h2 class="h-section reveal">Learn at your own pace.</h2>
+    <div class="steps">
+      {%- for s in course.steps %}
+      <div class="step reveal" style="--i:{{ loop.index0 }}"><div class="n">{{ s.n }}</div><h3>{{ s.h }}</h3><p>{{ s.p_html|safe }}</p></div>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+{%- endif %}
+
+{%- if course.prev_course or course.next_course %}
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="pathnav">
+      {%- if course.prev_course %}<a class="c-{{ course.prev_course.key }}" href="{{ root }}{{ course.prev_course.slug }}/index.html"><small>Before this</small><b>{{ course.prev_course.title }}</b></a>{% endif %}
+      {%- if course.next_course %}<a class="c-{{ course.next_course.key }}" href="{{ root }}{{ course.next_course.slug }}/index.html"><small>Up next</small><b>{{ course.next_course.title }}</b></a>{% endif %}
+    </div>
+  </div>
+</section>
+{%- endif %}
+</main>
+{% endblock %}

@@ -1,0 +1,82 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deployment at a time; never cancel a deployment that is already running.
+concurrency:
+  group: pages-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build tools
+        run: pip install -r requirements.txt
+
+      - name: Lint (reports problems, never blocks a deploy)
+        continue-on-error: true
+        run: |
+          pip install ruff==0.12.0
+          ruff check build tools
+
+      - name: Build the site
+        run: python build/build.py
+
+      - name: Check links, ids and page structure
+        run: python build/check_site.py
+
+      - name: Lighthouse report (informational)
+        continue-on-error: true
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+
+      - name: Save a downloadable preview (pull requests)
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: site-preview
+          path: dist
+          retention-days: 7
+
+      - name: Prepare Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5.0.0
+
+      - name: Upload site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3.0.1
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4.0.5

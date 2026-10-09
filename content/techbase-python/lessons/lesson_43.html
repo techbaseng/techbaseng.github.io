@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 43: Python MongoDB · Querying, Sorting, Limiting, Updating, and Deleting Documents — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="9" data-key="techbase_python_l43">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 43 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 43</div>
+      <h1>Python MongoDB · Querying, Sorting, Limiting, Updating, and Deleting Documents</h1>
+      <div class="l-hero-sub">9 phases &nbsp;·&nbsp; Build: Project Overview</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 43</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 43! In this lesson, you will learn five of the most important and powerful skills for working with a MongoDB database using Python. Together, these skills let you <strong>find exactly the data you want</strong>, <strong>arrange it neatly</strong>, <strong>control how much you get back</strong>, <strong>change existing data</strong>, and <strong>remove data you no longer need</strong>.</p>
+<p class="v2-p">Think of a MongoDB collection like a giant filing cabinet full of folders (documents). Right now you know how to open the cabinet and read every folder. This lesson teaches you how to:</p>
+<ul class="v2-ul"><li><strong>Query</strong> · Open only the folders that match a rule (e.g. "only folders from 2024")</li><li><strong>Sort</strong> · Arrange the matching folders alphabetically or numerically</li><li><strong>Limit</strong> · Say "give me only the first 5 folders, not all 500"</li><li><strong>Update</strong> · Open a folder and change what is written inside</li><li><strong>Delete</strong> · Throw a folder (or several) in the bin</li></ul>
+<p class="v2-p">These five operations together with what you already know about inserting and finding give you complete control over a MongoDB database. By the end of this lesson you will be able to build a real working customer management system.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Why does this matter in the real world?</strong> Every app you use every day · Instagram, your banking app, Google · does all five of these operations thousands of times per second on databases exactly like this one.</p></blockquote>
+<hr class="v2-hr"></div><div class="wm"><span>📚 9 phases</span><span>🏗️ Project Overview</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 9</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 43! In this lesson, you will learn five of the most important and powerful skills for working with a MongoDB database using Python. Together, these skills let you <strong>find exactly the data you want</strong>, <strong>arrange it neatly</strong>, <strong>control how much you get back</strong>, <strong>change existing data</strong>, and <strong>remove data you no longer need</strong>.</p>
+<p class="v2-p">Think of a MongoDB collection like a giant filing cabinet full of folders (documents). Right now you know how to open the cabinet and read every folder. This lesson teaches you how to:</p>
+<ul class="v2-ul"><li><strong>Query</strong> · Open only the folders that match a rule (e.g. "only folders from 2024")</li><li><strong>Sort</strong> · Arrange the matching folders alphabetically or numerically</li><li><strong>Limit</strong> · Say "give me only the first 5 folders, not all 500"</li><li><strong>Update</strong> · Open a folder and change what is written inside</li><li><strong>Delete</strong> · Throw a folder (or several) in the bin</li></ul>
+<p class="v2-p">These five operations together with what you already know about inserting and finding give you complete control over a MongoDB database. By the end of this lesson you will be able to build a real working customer management system.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Why does this matter in the real world?</strong> Every app you use every day · Instagram, your banking app, Google · does all five of these operations thousands of times per second on databases exactly like this one.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 9</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before we dive in, make sure you understand these ideas. If anything here is new to you, read this section carefully · it will make everything else much easier.</p>
+<h3 class="v2-h3">What is MongoDB and pymongo?</h3>
+<p class="v2-p"><strong>MongoDB</strong> is a database that stores data as <strong>documents</strong>. A document is just a Python dictionary · it has keys and values. For example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&quot;name&quot;: &quot;Alice&quot;, &quot;address&quot;: &quot;Baker Street 1&quot;, &quot;age&quot;: 30}</code></pre></div></div>
+<p class="v2-p">This is one document. A <strong>collection</strong> is a group of documents (like a table in Excel). A <strong>database</strong> holds multiple collections.</p>
+<p class="v2-p"><strong>pymongo</strong> is the Python library that lets your Python code talk to MongoDB.</p>
+<h3 class="v2-h3">The Standard Setup Block</h3>
+<p class="v2-p">Every example in this lesson starts with the same three lines. Learn this block by heart:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]</code></pre></div></div>
+<p class="v2-p">Line by line:</p>
+<ul class="v2-ul"><li><code>import pymongo</code> · loads the pymongo library so we can use it</li><li><code>pymongo.MongoClient("mongodb://localhost:27017/")</code> · connects to MongoDB running on your computer at port 27017 (the default port)</li><li><code>myclient["mydatabase"]</code> · selects the database named "mydatabase"</li><li><code>mydb["customers"]</code> · selects the collection named "customers"</li></ul>
+<h3 class="v2-h3">The Sample Data We Will Use</h3>
+<p class="v2-p">All examples in this lesson assume the "customers" collection has these 14 documents:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 1,  &#x27;name&#x27;: &#x27;John&#x27;,    &#x27;address&#x27;: &#x27;Highway 37&#x27;}
+{&#x27;_id&#x27;: 2,  &#x27;name&#x27;: &#x27;Peter&#x27;,   &#x27;address&#x27;: &#x27;Lowstreet 27&#x27;}
+{&#x27;_id&#x27;: 3,  &#x27;name&#x27;: &#x27;Amy&#x27;,     &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+{&#x27;_id&#x27;: 4,  &#x27;name&#x27;: &#x27;Hannah&#x27;,  &#x27;address&#x27;: &#x27;Mountain 21&#x27;}
+{&#x27;_id&#x27;: 5,  &#x27;name&#x27;: &#x27;Michael&#x27;, &#x27;address&#x27;: &#x27;Valley 345&#x27;}
+{&#x27;_id&#x27;: 6,  &#x27;name&#x27;: &#x27;Sandy&#x27;,   &#x27;address&#x27;: &#x27;Ocean blvd 2&#x27;}
+{&#x27;_id&#x27;: 7,  &#x27;name&#x27;: &#x27;Betty&#x27;,   &#x27;address&#x27;: &#x27;Green Grass 1&#x27;}
+{&#x27;_id&#x27;: 8,  &#x27;name&#x27;: &#x27;Richard&#x27;, &#x27;address&#x27;: &#x27;Sky st 331&#x27;}
+{&#x27;_id&#x27;: 9,  &#x27;name&#x27;: &#x27;Susan&#x27;,   &#x27;address&#x27;: &#x27;One way 98&#x27;}
+{&#x27;_id&#x27;: 10, &#x27;name&#x27;: &#x27;Vicky&#x27;,   &#x27;address&#x27;: &#x27;Yellow Garden 2&#x27;}
+{&#x27;_id&#x27;: 11, &#x27;name&#x27;: &#x27;Ben&#x27;,     &#x27;address&#x27;: &#x27;Park Lane 38&#x27;}
+{&#x27;_id&#x27;: 12, &#x27;name&#x27;: &#x27;William&#x27;, &#x27;address&#x27;: &#x27;Central st 954&#x27;}
+{&#x27;_id&#x27;: 13, &#x27;name&#x27;: &#x27;Chuck&#x27;,   &#x27;address&#x27;: &#x27;Main Road 989&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;,   &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 9</div><div class="pt">Part 1 · Querying (Filtering) Documents</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is a Query?</h3>
+<p class="v2-p">A <strong>query</strong> is a set of rules you give MongoDB so it only returns documents that match those rules, instead of returning everything.</p>
+<p class="v2-p"><strong>Real-life analogy:</strong> Imagine searching your email inbox. Instead of reading all 10,000 emails, you type "subject:invoice" and only the matching emails appear. That search is a query.</p>
+<p class="v2-p">Without a query:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>You ask: &quot;Give me all customers.&quot;
+MongoDB returns: all 14 customers</code></pre></div></div>
+<p class="v2-p">With a query:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>You ask: &quot;Give me customers whose address is &#x27;Park Lane 38&#x27;.&quot;
+MongoDB returns: just Ben (document 11)</code></pre></div></div>
+<h3 class="v2-h3">How to Write a Query in Python</h3>
+<p class="v2-p">In pymongo, a query is just a <strong>Python dictionary</strong>. You pass it as the first argument to <code>find()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycol.find( { &quot;field_name&quot;: &quot;value_to_match&quot; } )</code></pre></div></div>
+<p class="v2-p">The curly braces <code>{}</code> create a dictionary. Inside, you write the field name and the exact value you are looking for.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Exact Match Query</h3>
+<p class="v2-p"><strong>Example 1 · Find a Customer by Exact Address</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;address&quot;: &quot;Park Lane 38&quot; }   # the filter rule
+
+mydoc = mycol.find(myquery)               # run the search
+
+for x in mydoc:
+    print(x)                              # print each matching document</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 11, &#x27;name&#x27;: &#x27;Ben&#x27;, &#x27;address&#x27;: &#x27;Park Lane 38&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>Line by line explanation:</strong></p>
+<ul class="v2-ul"><li><code>myquery = { "address": "Park Lane 38" }</code> · creates a dictionary that says "I only want documents where the 'address' field equals exactly 'Park Lane 38'"</li><li><code>mycol.find(myquery)</code> · sends this filter to MongoDB; it searches every document and returns only the matches</li><li><code>for x in mydoc:</code> · loops through each matching document one at a time</li><li><code>print(x)</code> · prints that document as a dictionary</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What would happen if you changed "Park Lane 38" to "park lane 38" (lowercase)? MongoDB queries are <strong>case-sensitive</strong>, so it would find nothing. Exact spelling matters!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 2 · Find a Customer by Name</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;name&quot;: &quot;Amy&quot; }
+
+mydoc = mycol.find(myquery)
+
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 3, &#x27;name&#x27;: &#x27;Amy&#x27;, &#x27;address&#x27;: &#x27;Apple st 652&#x27;}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Advanced Query: Using Comparison Operators (Modifiers)</h3>
+<p class="v2-p">Sometimes you don't want an exact match. You want something like:</p>
+<ul class="v2-ul"><li>"Give me all addresses that come after 'S' alphabetically"</li><li>"Give me all customers whose age is greater than 30"</li></ul>
+<p class="v2-p">MongoDB provides special <strong>operators</strong> (also called modifiers) for this. An operator is a keyword that starts with a dollar sign <code>$</code>. You put it inside the query dictionary as the value.</p>
+<h4 class="v2-h4">The <code>$gt</code> Operator (Greater Than)</h4>
+<p class="v2-p"><code>$gt</code> means "greater than". For text (strings), MongoDB compares alphabetically. The letter "S" comes after "A", "B", "C"... so anything starting with "S" or later is "greater than" things starting with "R" or earlier.</p>
+<p class="v2-p"><strong>Structure:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>myquery = { &quot;field_name&quot;: { &quot;$gt&quot;: &quot;comparison_value&quot; } }</code></pre></div></div>
+<p class="v2-p">The value is now itself a dictionary containing the operator.</p>
+<p class="v2-p"><strong>Example 3 · Find Addresses Starting with "S" or Later (Alphabetically)</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;address&quot;: { &quot;$gt&quot;: &quot;S&quot; } }   # address must come after &quot;S&quot; alphabetically
+
+mydoc = mycol.find(myquery)
+
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 5,  &#x27;name&#x27;: &#x27;Michael&#x27;, &#x27;address&#x27;: &#x27;Valley 345&#x27;}
+{&#x27;_id&#x27;: 8,  &#x27;name&#x27;: &#x27;Richard&#x27;, &#x27;address&#x27;: &#x27;Sky st 331&#x27;}
+{&#x27;_id&#x27;: 9,  &#x27;name&#x27;: &#x27;Susan&#x27;,   &#x27;address&#x27;: &#x27;One way 98&#x27;}  ← Wait... does &quot;One&quot; come after &quot;S&quot;?</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">Actually, MongoDB compares the whole string starting from the first character. "Valley" starts with "V" (after "S"), "Sky" starts with "S" (equal, then "k" which is after "S"), "Sideway" starts with "S". "One" starts with "O" which comes before "S", so it would NOT be in the result.</p></blockquote>
+<p class="v2-p">The actual output (addresses that are alphabetically after "S"):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 5,  &#x27;name&#x27;: &#x27;Michael&#x27;, &#x27;address&#x27;: &#x27;Valley 345&#x27;}
+{&#x27;_id&#x27;: 8,  &#x27;name&#x27;: &#x27;Richard&#x27;, &#x27;address&#x27;: &#x27;Sky st 331&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;,   &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}
+{&#x27;_id&#x27;: 10, &#x27;name&#x27;: &#x27;Vicky&#x27;,   &#x27;address&#x27;: &#x27;Yellow Garden 2&#x27;}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What happens if you change <code>"$gt"</code> to <code>"$lt"</code> (less than)? You would get all addresses that come before "S" alphabetically · the opposite!</p></blockquote>
+<hr class="v2-hr">
+<h4 class="v2-h4">Common Query Operators</h4>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr></thead><tbody><tr><td><code>$gt</code></td><td>Greater than</td><td><code>{"age": {"$gt": 18}}</code> → age &gt; 18</td></tr><tr><td><code>$lt</code></td><td>Less than</td><td><code>{"age": {"$lt": 65}}</code> → age &lt; 65</td></tr><tr><td><code>$gte</code></td><td>Greater than or equal</td><td><code>{"age": {"$gte": 18}}</code> → age &gt;= 18</td></tr><tr><td><code>$lte</code></td><td>Less than or equal</td><td><code>{"age": {"$lte": 65}}</code> → age &lt;= 65</td></tr><tr><td><code>$ne</code></td><td>Not equal</td><td><code>{"name": {"$ne": "Alice"}}</code> → name ≠ Alice</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Advanced Query: Using Regular Expressions (<code>$regex</code>)</h3>
+<p class="v2-p">A <strong>regular expression</strong> (regex) is a pattern used to search inside text. Think of it like a wildcard search.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important:</strong> <code>$regex</code> only works on text (string) fields, not numbers.</p></blockquote>
+<h4 class="v2-h4">The <code>^</code> Symbol · Starts With</h4>
+<p class="v2-p">In regex, <code>^</code> means "starts with". So <code>"^S"</code> means "starts with the letter S".</p>
+<p class="v2-p"><strong>Example 4 · Find All Customers Whose Address Starts with "S"</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;address&quot;: { &quot;$regex&quot;: &quot;^S&quot; } }   # address must start with &quot;S&quot;
+
+mydoc = mycol.find(myquery)
+
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 8,  &#x27;name&#x27;: &#x27;Richard&#x27;, &#x27;address&#x27;: &#x27;Sky st 331&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;,   &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>"$regex": "^S"</code> · the pattern <code>^S</code> means the address field must <strong>start with</strong> the letter "S"</li><li>"Sky st 331" · starts with S ✓</li><li>"Sideway 1633" · starts with S ✓</li><li>"Sandy" was removed in a previous step; "Ocean blvd 2" starts with O · does NOT match</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Comparing <code>$gt: "S"</code> vs <code>$regex: "^S"</code>:</strong></p>
+<ul class="v2-ul"><li><code>$gt: "S"</code> finds everything alphabetically after the letter S (not just things starting with S · it includes "Valley", "Yellow" etc.)</li><li><code>$regex: "^S"</code> finds ONLY things that literally start with the letter S</li></ul></blockquote>
+<p class="v2-p"><strong>Example 5 · Find Names that Start with "B"</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>myquery = { &quot;name&quot;: { &quot;$regex&quot;: &quot;^B&quot; } }
+mydoc = mycol.find(myquery)
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 7,  &#x27;name&#x27;: &#x27;Betty&#x27;, &#x27;address&#x27;: &#x27;Green Grass 1&#x27;}
+{&#x27;_id&#x27;: 11, &#x27;name&#x27;: &#x27;Ben&#x27;,   &#x27;address&#x27;: &#x27;Park Lane 38&#x27;}</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Querying (Filtering) Documents</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 9</div><div class="pt">Part 2 · Sorting Results</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is Sorting?</h3>
+<p class="v2-p"><strong>Sorting</strong> means arranging the results in a specific order before they come back to you. Without sorting, MongoDB returns documents in the order they were stored, which can feel random.</p>
+<p class="v2-p"><strong>Real-life analogy:</strong> Imagine a phone book. If it were not sorted alphabetically, you would have to read every single entry to find someone. Sorting makes data useful.</p>
+<h3 class="v2-h3">The <code>sort()</code> Method</h3>
+<p class="v2-p">You chain <code>sort()</code> after <code>find()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycol.find().sort(&quot;field_name&quot;)             # ascending (A to Z, 0 to 9)
+mycol.find().sort(&quot;field_name&quot;, 1)          # ascending (same — 1 means ascending)
+mycol.find().sort(&quot;field_name&quot;, -1)         # descending (Z to A, 9 to 0)</code></pre></div></div>
+<p class="v2-p">The second argument is the <strong>direction</strong>:</p>
+<ul class="v2-ul"><li><code>1</code> = ascending (A → Z, smallest → largest) · this is the <strong>default</strong></li><li><code>-1</code> = descending (Z → A, largest → smallest)</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 6 · Sort Customers Alphabetically by Name (A to Z)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+mydoc = mycol.find().sort(&quot;name&quot;)   # sort by &quot;name&quot; field, ascending
+
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (abbreviated · first few):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 3,  &#x27;name&#x27;: &#x27;Amy&#x27;,     &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+{&#x27;_id&#x27;: 11, &#x27;name&#x27;: &#x27;Ben&#x27;,     &#x27;address&#x27;: &#x27;Park Lane 38&#x27;}
+{&#x27;_id&#x27;: 7,  &#x27;name&#x27;: &#x27;Betty&#x27;,   &#x27;address&#x27;: &#x27;Green Grass 1&#x27;}
+{&#x27;_id&#x27;: 12, &#x27;name&#x27;: &#x27;William&#x27;, &#x27;address&#x27;: &#x27;Central st 954&#x27;}
+...</code></pre></div></div>
+<p class="v2-p">The names are now in alphabetical order: Amy, Ben, Betty ... William.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 7 · Sort Customers Reverse Alphabetically by Name (Z to A)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+mydoc = mycol.find().sort(&quot;name&quot;, -1)   # -1 means descending
+
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (abbreviated · first few):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 12, &#x27;name&#x27;: &#x27;William&#x27;, &#x27;address&#x27;: &#x27;Central st 954&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;,   &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}
+{&#x27;_id&#x27;: 10, &#x27;name&#x27;: &#x27;Vicky&#x27;,   &#x27;address&#x27;: &#x27;Yellow Garden 2&#x27;}
+...
+{&#x27;_id&#x27;: 3,  &#x27;name&#x27;: &#x27;Amy&#x27;,     &#x27;address&#x27;: &#x27;Apple st 652&#x27;}</code></pre></div></div>
+<p class="v2-p">William comes first because W is the last letter alphabetically in our list.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Combining Query and Sort</h3>
+<p class="v2-p">You can filter AND sort in one go:</p>
+<p class="v2-p"><strong>Example 8 · Find addresses starting with "S" and sort them by name</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;address&quot;: { &quot;$regex&quot;: &quot;^S&quot; } }
+mydoc = mycol.find(myquery).sort(&quot;name&quot;)   # filter THEN sort
+
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 8,  &#x27;name&#x27;: &#x27;Richard&#x27;, &#x27;address&#x27;: &#x27;Sky st 331&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;,   &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What happens if you sort by <code>"address"</code> instead of <code>"name"</code>? The order would change · Sky comes before Sideway alphabetically, so Richard appears first.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Sorting Results</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 9</div><div class="pt">Part 3 · Limiting Results</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">What is Limiting?</h3>
+<p class="v2-p"><strong>Limiting</strong> means telling MongoDB "I only want the first N documents · stop after that."</p>
+<p class="v2-p"><strong>Real-life analogy:</strong> Think of a Google search. There are millions of results, but Google only shows you 10 per page. That is limiting. You are not loading all one million results at once · that would be slow and overwhelming.</p>
+<p class="v2-p"><strong>Why use limiting in real apps?</strong></p>
+<ul class="v2-ul"><li>Your database has 500,000 customers. You only want to show 20 per page on a website.</li><li>You want to preview the first 5 results before deciding to download all of them.</li><li>You want to get the "Top 10" of something.</li></ul>
+<h3 class="v2-h3">The <code>limit()</code> Method</h3>
+<p class="v2-p">You chain <code>limit()</code> after <code>find()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycol.find().limit(5)    # return only the first 5 documents</code></pre></div></div>
+<p class="v2-p">The number inside is how many documents you want maximum.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 9 · Get Only the First 5 Customers</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myresult = mycol.find().limit(5)   # stop after 5 documents
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 1, &#x27;name&#x27;: &#x27;John&#x27;,    &#x27;address&#x27;: &#x27;Highway 37&#x27;}
+{&#x27;_id&#x27;: 2, &#x27;name&#x27;: &#x27;Peter&#x27;,   &#x27;address&#x27;: &#x27;Lowstreet 27&#x27;}
+{&#x27;_id&#x27;: 3, &#x27;name&#x27;: &#x27;Amy&#x27;,     &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+{&#x27;_id&#x27;: 4, &#x27;name&#x27;: &#x27;Hannah&#x27;,  &#x27;address&#x27;: &#x27;Mountain 21&#x27;}
+{&#x27;_id&#x27;: 5, &#x27;name&#x27;: &#x27;Michael&#x27;, &#x27;address&#x27;: &#x27;Valley 345&#x27;}</code></pre></div></div>
+<p class="v2-p">Only 5 documents come back, even though there are 14 in the collection.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 10 · Get the Top 3 Names Alphabetically</h3>
+<p class="v2-p">You can combine <code>sort()</code> and <code>limit()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myresult = mycol.find().sort(&quot;name&quot;).limit(3)   # sort A-Z, then take first 3
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 3,  &#x27;name&#x27;: &#x27;Amy&#x27;,   &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+{&#x27;_id&#x27;: 11, &#x27;name&#x27;: &#x27;Ben&#x27;,   &#x27;address&#x27;: &#x27;Park Lane 38&#x27;}
+{&#x27;_id&#x27;: 7,  &#x27;name&#x27;: &#x27;Betty&#x27;, &#x27;address&#x27;: &#x27;Green Grass 1&#x27;}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What happens if you use <code>.sort("name", -1).limit(3)</code> instead? You get the last 3 names alphabetically: William, Viola, Vicky.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Limiting Results</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 9</div><div class="pt">Part 4 · Updating Documents</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What is Updating?</h3>
+<p class="v2-p"><strong>Updating</strong> means changing the value of one or more fields inside an existing document · without deleting and recreating the whole document.</p>
+<p class="v2-p"><strong>Real-life analogy:</strong> Imagine you have a contacts app. You don't delete and re-add a contact just to change their phone number. You open the contact, change the number, and save. That is an update.</p>
+<h3 class="v2-h3">Two Update Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>What it does</th></tr></thead><tbody><tr><td><code>update_one()</code></td><td>Updates only the <strong>first</strong> document that matches the query</td></tr><tr><td><code>update_many()</code></td><td>Updates <strong>all</strong> documents that match the query</td></tr></tbody></table></div>
+<h3 class="v2-h3">The <code>$set</code> Operator</h3>
+<p class="v2-p">When updating, you must tell MongoDB <strong>what to change</strong>. You do this using the <code>$set</code> operator:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>newvalues = { &quot;$set&quot;: { &quot;field_to_change&quot;: &quot;new_value&quot; } }</code></pre></div></div>
+<ul class="v2-ul"><li><code>$set</code> tells MongoDB: "Only change these specific fields · leave everything else alone."</li><li>Without <code>$set</code>, MongoDB might replace the entire document!</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 11 · Update One Document (<code>update_one</code>)</h3>
+<p class="v2-p"><strong>Scenario:</strong> Michael moved. His address changed from "Valley 345" to "Canyon 123".</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery  = { &quot;address&quot;: &quot;Valley 345&quot; }        # find the document with this address
+newvalues = { &quot;$set&quot;: { &quot;address&quot;: &quot;Canyon 123&quot; } }  # change the address to this
+
+mycol.update_one(myquery, newvalues)    # update ONLY the first match
+
+# Verify the change by printing all customers
+for x in mycol.find():
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (Michael's record):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 5, &#x27;name&#x27;: &#x27;Michael&#x27;, &#x27;address&#x27;: &#x27;Canyon 123&#x27;}</code></pre></div></div>
+<p class="v2-p">Michael's address has been updated. All other documents are untouched.</p>
+<p class="v2-p"><strong>How <code>update_one()</code> works · input → process → output:</strong></p>
+<ol class="v2-ol"><li><strong>Input:</strong> Query <code>{"address": "Valley 345"}</code> and new values <code>{"$set": {"address": "Canyon 123"}}</code></li><li><strong>Process:</strong> MongoDB searches for a document with address "Valley 345". Finds Michael. Changes his address field to "Canyon 123".</li><li><strong>Output:</strong> Michael's document is permanently changed in the database.</li></ol>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important Warning:</strong> If the query matches MORE than one document, <code>update_one()</code> only changes the <strong>first one it finds</strong>. If you want to change all matches, use <code>update_many()</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 12 · Update Many Documents (<code>update_many</code>)</h3>
+<p class="v2-p"><strong>Scenario:</strong> All customers whose address starts with "S" have been renamed to "Minnie" in a test database exercise.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery  = { &quot;address&quot;: { &quot;$regex&quot;: &quot;^S&quot; } }   # all addresses starting with S
+newvalues = { &quot;$set&quot;: { &quot;name&quot;: &quot;Minnie&quot; } }     # change their name to Minnie
+
+x = mycol.update_many(myquery, newvalues)
+
+print(x.modified_count, &quot;documents updated.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2 documents updated.</code></pre></div></div>
+<ul class="v2-ul"><li><code>x.modified_count</code> · this is a property that tells you how many documents were actually changed</li><li>In our dataset, "Sky st 331" (Richard) and "Sideway 1633" (Viola) both start with S, so 2 documents are updated</li></ul>
+<p class="v2-p"><strong>After running this, the database would show:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 8,  &#x27;name&#x27;: &#x27;Minnie&#x27;, &#x27;address&#x27;: &#x27;Sky st 331&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Minnie&#x27;, &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> Why is it safer to use <code>update_one()</code> when you only mean to change one record? If you accidentally write a query that is too broad (matches too many documents), <code>update_many()</code> could change hundreds of records at once!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>$set</code> Operator in Detail</h3>
+<p class="v2-p"><code>$set</code> is a MongoDB <strong>update operator</strong>. It tells MongoDB to update only specific fields, leaving the rest of the document unchanged.</p>
+<p class="v2-p"><strong>Without <code>$set</code> (DANGEROUS · don't do this):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This would REPLACE the entire document with just the new address!
+mycol.update_one({&quot;name&quot;: &quot;John&quot;}, {&quot;address&quot;: &quot;New Road 1&quot;})
+# John&#x27;s name field would DISAPPEAR!</code></pre></div></div>
+<p class="v2-p"><strong>With <code>$set</code> (SAFE · always do this):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This changes ONLY the address; name and all other fields remain intact
+mycol.update_one({&quot;name&quot;: &quot;John&quot;}, {&quot;$set&quot;: {&quot;address&quot;: &quot;New Road 1&quot;}})</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">Always use <code>$set</code> when updating specific fields.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Updating Documents</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 9</div><div class="pt">Part 5 · Deleting Documents</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">What is Deleting?</h3>
+<p class="v2-p"><strong>Deleting</strong> means permanently removing one or more documents from a collection.</p>
+<p class="v2-p"><strong>Real-life analogy:</strong> When you delete a contact from your phone, or cancel an account on a website, the system is running a delete operation to remove your record from the database.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Warning:</strong> Deleting in MongoDB is <strong>permanent</strong>. There is no "undo" button. Always be careful with delete operations, especially <code>delete_many()</code>.</p></blockquote>
+<h3 class="v2-h3">Three Delete Approaches</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>What it does</th></tr></thead><tbody><tr><td><code>delete_one()</code></td><td>Deletes the <strong>first</strong> document that matches the query</td></tr><tr><td><code>delete_many()</code></td><td>Deletes <strong>all</strong> documents that match the query</td></tr><tr><td><code>delete_many({})</code></td><td>Deletes <strong>ALL</strong> documents (empty query = match everything)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 13 · Delete One Document (<code>delete_one</code>)</h3>
+<p class="v2-p"><strong>Scenario:</strong> Hannah has cancelled her account. Delete her record.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;address&quot;: &quot;Mountain 21&quot; }   # Hannah&#x27;s address — find her document
+
+mycol.delete_one(myquery)                # delete the first match</code></pre></div></div>
+<p class="v2-p">After running this, Hannah's document is gone. The collection now has 13 documents instead of 14.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Note:</strong> <code>delete_one()</code> returns a result object, but you don't have to use it. If you want to confirm the deletion, you can call <code>mycol.find()</code> afterwards to check.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 14 · Delete Many Documents (<code>delete_many</code>)</h3>
+<p class="v2-p"><strong>Scenario:</strong> All customers with an address starting with "S" are being removed from the system.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery = { &quot;address&quot;: { &quot;$regex&quot;: &quot;^S&quot; } }   # all addresses starting with &quot;S&quot;
+
+x = mycol.delete_many(myquery)
+
+print(x.deleted_count, &quot; documents deleted.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2  documents deleted.</code></pre></div></div>
+<ul class="v2-ul"><li><code>x.deleted_count</code> · tells you exactly how many documents were removed</li><li>This is useful for logging or confirming the operation worked</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Example 15 · Delete ALL Documents in a Collection</h3>
+<p class="v2-p"><strong>Warning: This removes every single document. Use with extreme caution.</strong></p>
+<p class="v2-p">To delete everything, pass an <strong>empty dictionary</strong> <code>{}</code> as the query. An empty query means "match every document":</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+x = mycol.delete_many({})    # empty query = match ALL documents
+
+print(x.deleted_count, &quot; documents deleted.&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (if all 14 documents are still present):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>14  documents deleted.</code></pre></div></div>
+<p class="v2-p">The collection now exists but is completely empty. This is different from dropping the collection entirely · the collection structure still exists, it just has no documents inside.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>When would you use this in real life?</strong></p>
+<ul class="v2-ul"><li>Clearing a test/staging database before running a fresh test</li><li>Resetting a session or cache collection</li><li>Wiping temporary data that should not persist overnight</li></ul></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Deleting Documents</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 9</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Query Practice</h3>
+<p class="v2-p"><strong>Objective:</strong> Find specific customers using different query techniques.</p>
+<p class="v2-p"><strong>Scenario:</strong> You work at a delivery company. You need to look up customers by address.</p>
+<p class="v2-p"><strong>Step 1:</strong> Find the customer at "Green Grass 1":</p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>myquery = { &quot;address&quot;: &quot;Green Grass 1&quot; }
+mydoc = mycol.find(myquery)
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 7, &#x27;name&#x27;: &#x27;Betty&#x27;, &#x27;address&#x27;: &#x27;Green Grass 1&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>Step 2:</strong> Find all customers whose name starts with "V":</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>myquery = { &quot;name&quot;: { &quot;$regex&quot;: &quot;^V&quot; } }
+mydoc = mycol.find(myquery)
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 10, &#x27;name&#x27;: &#x27;Vicky&#x27;, &#x27;address&#x27;: &#x27;Yellow Garden 2&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;, &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>Self-check Questions:</strong></p>
+<ul class="v2-ul"><li>Why do we use <code>$regex</code> instead of just <code>{ "name": "V" }</code>?</li><li>What would <code>{ "name": { "$regex": "^Vi" } }</code> return?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Sort Practice</h3>
+<p class="v2-p"><strong>Objective:</strong> Sort the customer list in different ways.</p>
+<p class="v2-p"><strong>Step 1:</strong> Sort all customers by address, A to Z:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mydoc = mycol.find().sort(&quot;address&quot;)
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (first few):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 3,  &#x27;name&#x27;: &#x27;Amy&#x27;,    &#x27;address&#x27;: &#x27;Apple st 652&#x27;}
+{&#x27;_id&#x27;: 12, &#x27;name&#x27;: &#x27;William&#x27;,&#x27;address&#x27;: &#x27;Central st 954&#x27;}
+{&#x27;_id&#x27;: 7,  &#x27;name&#x27;: &#x27;Betty&#x27;,  &#x27;address&#x27;: &#x27;Green Grass 1&#x27;}
+...</code></pre></div></div>
+<p class="v2-p"><strong>Step 2:</strong> Sort by name, Z to A, and take only the first 3:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mydoc = mycol.find().sort(&quot;name&quot;, -1).limit(3)
+for x in mydoc:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 12, &#x27;name&#x27;: &#x27;William&#x27;, &#x27;address&#x27;: &#x27;Central st 954&#x27;}
+{&#x27;_id&#x27;: 14, &#x27;name&#x27;: &#x27;Viola&#x27;,   &#x27;address&#x27;: &#x27;Sideway 1633&#x27;}
+{&#x27;_id&#x27;: 10, &#x27;name&#x27;: &#x27;Vicky&#x27;,   &#x27;address&#x27;: &#x27;Yellow Garden 2&#x27;}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Update Practice</h3>
+<p class="v2-p"><strong>Objective:</strong> Update a customer record safely.</p>
+<p class="v2-p"><strong>Scenario:</strong> Ben has moved to "Main Street 99". Update his address.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+myquery  = { &quot;name&quot;: &quot;Ben&quot; }
+newvalues = { &quot;$set&quot;: { &quot;address&quot;: &quot;Main Street 99&quot; } }
+
+mycol.update_one(myquery, newvalues)
+
+# Verify the change
+result = mycol.find_one({ &quot;name&quot;: &quot;Ben&quot; })
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>{&#x27;_id&#x27;: 11, &#x27;name&#x27;: &#x27;Ben&#x27;, &#x27;address&#x27;: &#x27;Main Street 99&#x27;}</code></pre></div></div>
+<p class="v2-p"><strong>Optional Challenge:</strong> After updating Ben, try updating all customers whose name starts with "S" and change their address to "Secret Location". How many are updated?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4 · Delete Practice</h3>
+<p class="v2-p"><strong>Objective:</strong> Safely delete a document and confirm the deletion.</p>
+<p class="v2-p"><strong>Scenario:</strong> Peter has requested account deletion. Remove his record.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Count documents before deletion
+before = mycol.count_documents({})
+print(f&quot;Before deletion: {before} documents&quot;)
+
+# Delete Peter
+mycol.delete_one({ &quot;name&quot;: &quot;Peter&quot; })
+
+# Count after deletion
+after = mycol.count_documents({})
+print(f&quot;After deletion: {after} documents&quot;)
+
+# Verify Peter is gone
+result = mycol.find_one({ &quot;name&quot;: &quot;Peter&quot; })
+print(f&quot;Peter found? {result}&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Before deletion: 14 documents
+After deletion: 13 documents
+Peter found? None</code></pre></div></div>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(8)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 9</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1 · Forgetting <code>$set</code> in Update</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — replaces the ENTIRE document with just the new address
+mycol.update_one({&quot;name&quot;: &quot;John&quot;}, {&quot;address&quot;: &quot;New Road 1&quot;})
+# John now only has _id and address — name is gone!
+
+# CORRECT — only changes the address field
+mycol.update_one({&quot;name&quot;: &quot;John&quot;}, {&quot;$set&quot;: {&quot;address&quot;: &quot;New Road 1&quot;}})</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2 · Case Sensitivity in Queries</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — will find NOTHING if the actual value is &quot;Park Lane 38&quot;
+myquery = { &quot;address&quot;: &quot;park lane 38&quot; }
+
+# CORRECT — match exactly as stored
+myquery = { &quot;address&quot;: &quot;Park Lane 38&quot; }</code></pre></div></div>
+<p class="v2-p">Use <code>$regex</code> with the <code>(?i)</code> flag for case-insensitive matching:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>myquery = { &quot;address&quot;: { &quot;$regex&quot;: &quot;park lane 38&quot;, &quot;$options&quot;: &quot;i&quot; } }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3 · Using <code>update_one</code> When You Mean <code>update_many</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># If 5 customers all have address &quot;Valley 345&quot;, this only fixes ONE of them
+mycol.update_one({&quot;address&quot;: &quot;Valley 345&quot;}, {&quot;$set&quot;: {&quot;address&quot;: &quot;Canyon 123&quot;}})
+
+# Use update_many to fix all of them
+mycol.update_many({&quot;address&quot;: &quot;Valley 345&quot;}, {&quot;$set&quot;: {&quot;address&quot;: &quot;Canyon 123&quot;}})</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4 · Accidentally Deleting Everything</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This deletes EVERY document — there is no undo!
+mycol.delete_many({})
+
+# Always add a specific query to be safe
+mycol.delete_many({&quot;address&quot;: {&quot;$regex&quot;: &quot;^S&quot;}})</code></pre></div></div>
+<p class="v2-p">Before any <code>delete_many()</code> call, it is good practice to first run <code>find()</code> with the same query to see what you are about to delete.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5 · Confusing <code>$gt</code> (Greater Than) with <code>$regex</code> (Pattern Match)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># $gt: &quot;S&quot; → all addresses that come AFTER &quot;S&quot; alphabetically (includes &quot;Valley&quot;, &quot;Yellow&quot;)
+myquery = { &quot;address&quot;: { &quot;$gt&quot;: &quot;S&quot; } }
+
+# &quot;$regex&quot;: &quot;^S&quot; → only addresses that LITERALLY START WITH the letter S
+myquery = { &quot;address&quot;: { &quot;$regex&quot;: &quot;^S&quot; } }</code></pre></div></div>
+<p class="v2-p">They are NOT the same. Use <code>$regex</code> when you want pattern matching.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6 · Forgetting to Loop Over <code>find()</code> Results</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — this prints a cursor object, not the documents
+result = mycol.find({&quot;name&quot;: &quot;Amy&quot;})
+print(result)
+# Output: &lt;pymongo.cursor.Cursor object at 0x...&gt;
+
+# CORRECT — loop through the cursor
+result = mycol.find({&quot;name&quot;: &quot;Amy&quot;})
+for x in result:
+    print(x)
+# Output: {&#x27;_id&#x27;: 3, &#x27;name&#x27;: &#x27;Amy&#x27;, &#x27;address&#x27;: &#x27;Apple st 652&#x27;}</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Project Overview</div><div class="build-req"><p class="v2-p">Let's put everything together in a realistic project. You will build a command-driven customer management system.</p>
+<h3 class="v2-h3">Project Overview</h3>
+<p class="v2-p"><strong>Goal:</strong> A Python script that can query, sort, update, and delete from the customer database in a structured way.</p>
+<h3 class="v2-h3">Stage 1 · Setup the Database</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Insert the sample customers (run once to populate)
+customers = [
+    {&quot;_id&quot;: 1,  &quot;name&quot;: &quot;John&quot;,    &quot;address&quot;: &quot;Highway 37&quot;},
+    {&quot;_id&quot;: 2,  &quot;name&quot;: &quot;Peter&quot;,   &quot;address&quot;: &quot;Lowstreet 27&quot;},
+    {&quot;_id&quot;: 3,  &quot;name&quot;: &quot;Amy&quot;,     &quot;address&quot;: &quot;Apple st 652&quot;},
+    {&quot;_id&quot;: 4,  &quot;name&quot;: &quot;Hannah&quot;,  &quot;address&quot;: &quot;Mountain 21&quot;},
+    {&quot;_id&quot;: 5,  &quot;name&quot;: &quot;Michael&quot;, &quot;address&quot;: &quot;Valley 345&quot;},
+    {&quot;_id&quot;: 6,  &quot;name&quot;: &quot;Sandy&quot;,   &quot;address&quot;: &quot;Ocean blvd 2&quot;},
+    {&quot;_id&quot;: 7,  &quot;name&quot;: &quot;Betty&quot;,   &quot;address&quot;: &quot;Green Grass 1&quot;},
+    {&quot;_id&quot;: 8,  &quot;name&quot;: &quot;Richard&quot;, &quot;address&quot;: &quot;Sky st 331&quot;},
+    {&quot;_id&quot;: 9,  &quot;name&quot;: &quot;Susan&quot;,   &quot;address&quot;: &quot;One way 98&quot;},
+    {&quot;_id&quot;: 10, &quot;name&quot;: &quot;Vicky&quot;,   &quot;address&quot;: &quot;Yellow Garden 2&quot;},
+    {&quot;_id&quot;: 11, &quot;name&quot;: &quot;Ben&quot;,     &quot;address&quot;: &quot;Park Lane 38&quot;},
+    {&quot;_id&quot;: 12, &quot;name&quot;: &quot;William&quot;, &quot;address&quot;: &quot;Central st 954&quot;},
+    {&quot;_id&quot;: 13, &quot;name&quot;: &quot;Chuck&quot;,   &quot;address&quot;: &quot;Main Road 989&quot;},
+    {&quot;_id&quot;: 14, &quot;name&quot;: &quot;Viola&quot;,   &quot;address&quot;: &quot;Sideway 1633&quot;},
+]
+
+mycol.insert_many(customers)
+print(&quot;Database ready!&quot;)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import pymongo
+
+myclient = pymongo.MongoClient(&quot;mongodb://localhost:27017/&quot;)
+mydb = myclient[&quot;mydatabase&quot;]
+mycol = mydb[&quot;customers&quot;]
+
+# Insert the sample customers (run once to populate)
+customers = [
+    {&quot;_id&quot;: 1,  &quot;name&quot;: &quot;John&quot;,    &quot;address&quot;: &quot;Highway 37&quot;},
+    {&quot;_id&quot;: 2,  &quot;name&quot;: &quot;Peter&quot;,   &quot;address&quot;: &quot;Lowstreet 27&quot;},
+    {&quot;_id&quot;: 3,  &quot;name&quot;: &quot;Amy&quot;,     &quot;address&quot;: &quot;Apple st 652&quot;},
+    {&quot;_id&quot;: 4,  &quot;name&quot;: &quot;Hannah&quot;,  &quot;address&quot;: &quot;Mountain 21&quot;},
+    {&quot;_id&quot;: 5,  &quot;name&quot;: &quot;Michael&quot;, &quot;address&quot;: &quot;Valley 345&quot;},
+    {&quot;_id&quot;: 6,  &quot;name&quot;: &quot;Sandy&quot;,   &quot;address&quot;: &quot;Ocean blvd 2&quot;},
+    {&quot;_id&quot;: 7,  &quot;name&quot;: &quot;Betty&quot;,   &quot;address&quot;: &quot;Green Grass 1&quot;},
+    {&quot;_id&quot;: 8,  &quot;name&quot;: &quot;Richard&quot;, &quot;address&quot;: &quot;Sky st 331&quot;},
+    {&quot;_id&quot;: 9,  &quot;name&quot;: &quot;Susan&quot;,   &quot;address&quot;: &quot;One way 98&quot;},
+    {&quot;_id&quot;: 10, &quot;name&quot;: &quot;Vicky&quot;,   &quot;address&quot;: &quot;Yellow Garden 2&quot;},
+    {&quot;_id&quot;: 11, &quot;name&quot;: &quot;Ben&quot;,     &quot;address&quot;: &quot;Park Lane 38&quot;},
+    {&quot;_id&quot;: 12, &quot;name&quot;: &quot;William&quot;, &quot;address&quot;: &quot;Central st 954&quot;},
+    {&quot;_id&quot;: 13, &quot;name&quot;: &quot;Chuck&quot;,   &quot;address&quot;: &quot;Main Road 989&quot;},
+    {&quot;_id&quot;: 14, &quot;name&quot;: &quot;Viola&quot;,   &quot;address&quot;: &quot;Sideway 1633&quot;},
+]
+
+mycol.insert_many(customers)
+print(&quot;Database ready!&quot;)`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-43-project-overview</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 43 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 43 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1 · Querying (Filtering) Documents</li><li>✅ Part 2 · Sorting Results</li><li>✅ Part 3 · Limiting Results</li><li>✅ Part 4 · Updating Documents</li><li>✅ Part 5 · Deleting Documents</li><li>✅ Guided Practice Exercises</li></ul><div class="ln"><a href="lesson_42.html" class="ln-btn">&#8592; Lesson 42</a><a href="lesson_44.html" class="ln-btn primary">Lesson 44 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 43 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

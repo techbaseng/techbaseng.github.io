@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 29: JavaScript Events: Introduction to Events · Mouse Events · Keyboard Events · Load Events · Timing Events · Event Management · DOM Events · EventListener API — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="12" data-key="techbase_js_l29">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 29 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 29</div>
+      <h1>JavaScript Events: Introduction to Events · Mouse Events · Keyboard Events · Load Events · Timing Events · Event Management · DOM Events · EventListener API</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Lesson 29 Project</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 29</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 12 phases</span><span>🏗️ Lesson 29 Project</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">1. What Are JavaScript Events?</div><div class="pc" id="chk1"></div></div><div class="pb2"><h3 class="v2-h3">The Core Idea</h3>
+<p class="v2-p">A webpage by itself is static · it just sits there. <strong>Events</strong> are what make it come alive.</p>
+<p class="v2-p">An <strong>event</strong> is something that happens in the browser. It could be triggered by:</p>
+<ul class="v2-ul"><li><strong>The user</strong> · clicking, typing, scrolling, hovering</li><li><strong>The browser itself</strong> · finishing loading a page, losing internet connection</li><li><strong>Time passing</strong> · a countdown reaching zero, a slideshow advancing</li></ul>
+<p class="v2-p">When an event occurs, JavaScript can <strong>listen</strong> for it and <strong>respond</strong> by running a function. That function is called an <strong>event handler</strong> or <strong>event listener</strong>.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world analogy:</strong> Think of a doorbell. The doorbell button is the element. Pressing it is the event. The chime sound is the handler (the response). You wired up the doorbell · that is registering a listener.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Three-Part Event Model</h3>
+<p class="v2-p">Every event interaction has three parts:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ Element ] ──fires──► [ Event ] ──triggers──► [ Handler Function ]
+
+   &lt;button&gt;              &quot;click&quot;              function showAlert() { ... }
+   &lt;input&gt;               &quot;keydown&quot;            function checkInput() { ... }
+   window                &quot;load&quot;               function initPage() { ... }</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">A First Event · Three Ways Side by Side</h3>
+<p class="v2-p">Before going deep, see the same result achieved three different ways. We cover each way fully in sections 7 and 8.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!-- WAY 1: Inline HTML attribute (old style) --&gt;
+&lt;button onclick=&quot;alert(&#x27;Clicked!&#x27;)&quot;&gt;Click Me&lt;/button&gt;
+
+&lt;!-- WAY 2: DOM property (classic JS style) --&gt;
+&lt;button id=&quot;btn2&quot;&gt;Click Me&lt;/button&gt;
+&lt;script&gt;
+  document.getElementById(&quot;btn2&quot;).onclick = function() {
+    alert(&quot;Clicked!&quot;);
+  };
+&lt;/script&gt;
+
+&lt;!-- WAY 3: addEventListener (modern, recommended) --&gt;
+&lt;button id=&quot;btn3&quot;&gt;Click Me&lt;/button&gt;
+&lt;script&gt;
+  document.getElementById(&quot;btn3&quot;).addEventListener(&quot;click&quot;, function() {
+    alert(&quot;Clicked!&quot;);
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p">All three produce the same visible result. The differences matter greatly in complex code · we will explain why in sections 7 and 8.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Common HTML Events Quick-Reference</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Event</th><th>Fires when...</th></tr></thead><tbody><tr><td><code>onclick</code></td><td>User clicks an element</td></tr><tr><td><code>ondblclick</code></td><td>User double-clicks an element</td></tr><tr><td><code>onmouseover</code></td><td>Mouse pointer enters an element</td></tr><tr><td><code>onmouseout</code></td><td>Mouse pointer leaves an element</td></tr><tr><td><code>onmousemove</code></td><td>Mouse pointer moves over an element</td></tr><tr><td><code>onmousedown</code></td><td>Mouse button is pressed down</td></tr><tr><td><code>onmouseup</code></td><td>Mouse button is released</td></tr><tr><td><code>onkeydown</code></td><td>A keyboard key is pressed</td></tr><tr><td><code>onkeyup</code></td><td>A keyboard key is released</td></tr><tr><td><code>onkeypress</code></td><td>A key that produces a character is pressed (deprecated)</td></tr><tr><td><code>oninput</code></td><td>Input value changes (fires instantly)</td></tr><tr><td><code>onchange</code></td><td>Input value changes and loses focus</td></tr><tr><td><code>onfocus</code></td><td>Element receives focus</td></tr><tr><td><code>onblur</code></td><td>Element loses focus</td></tr><tr><td><code>onsubmit</code></td><td>A form is submitted</td></tr><tr><td><code>onload</code></td><td>Page or resource finishes loading</td></tr><tr><td><code>onresize</code></td><td>Browser window is resized</td></tr><tr><td><code>onscroll</code></td><td>Element or page is scrolled</td></tr><tr><td><code>oncontextmenu</code></td><td>Right mouse button is clicked</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. What Are JavaScript Events?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">2. Mouse Events</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">The Full Mouse Event Sequence</h3>
+<p class="v2-p">When a user clicks the mouse, several events fire in order:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mousedown  →  mouseup  →  click</code></pre></div></div>
+<p class="v2-p">When double-clicking:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mousedown  →  mouseup  →  click  →  mousedown  →  mouseup  →  click  →  dblclick</code></pre></div></div>
+<p class="v2-p">Understanding this sequence prevents bugs where you attach a handler to <code>click</code> but it fires twice during a double-click.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">All Mouse Events Explained</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Event</th><th>Fires when...</th><th>Notes</th></tr></thead><tbody><tr><td><code>click</code></td><td>Full click (down + up) on element</td><td>Most common event</td></tr><tr><td><code>dblclick</code></td><td>Two clicks within 500ms</td><td>Can conflict with <code>click</code> handlers</td></tr><tr><td><code>mousedown</code></td><td>Button pressed down</td><td>Fires before <code>click</code></td></tr><tr><td><code>mouseup</code></td><td>Button released</td><td>Fires before <code>click</code></td></tr><tr><td><code>mousemove</code></td><td>Pointer moves over element</td><td>Fires very frequently · be careful</td></tr><tr><td><code>mouseover</code></td><td>Pointer enters element or a child</td><td>Bubbles · fires for child elements too</td></tr><tr><td><code>mouseout</code></td><td>Pointer leaves element or a child</td><td>Bubbles</td></tr><tr><td><code>mouseenter</code></td><td>Pointer enters element</td><td>Does NOT bubble</td></tr><tr><td><code>mouseleave</code></td><td>Pointer leaves element</td><td>Does NOT bubble</td></tr><tr><td><code>contextmenu</code></td><td>Right-click or context menu key</td><td>Can be prevented</td></tr><tr><td><code>wheel</code></td><td>Mouse wheel is scrolled</td><td>Also fires on trackpad</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>mouseover</code> vs <code>mouseenter</code> · A Critical Distinction</h3>
+<p class="v2-p">This confuses many beginners. The difference:</p>
+<ul class="v2-ul"><li><strong><code>mouseover</code></strong> fires when the mouse enters the element <strong>and also when it enters any child element</strong> inside it</li><li><strong><code>mouseenter</code></strong> fires <strong>only</strong> when the mouse enters the element itself, not its children</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;outer&quot; style=&quot;padding:30px; background:#ddd;&quot;&gt;
+  Outer Div
+  &lt;p id=&quot;inner&quot; style=&quot;background:#aaa;&quot;&gt;Inner Paragraph&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p id=&quot;log&quot;&gt;&lt;/p&gt;
+
+&lt;script&gt;
+  var log = document.getElementById(&quot;log&quot;);
+
+  // mouseover fires when entering outer AND when entering inner
+  document.getElementById(&quot;outer&quot;).addEventListener(&quot;mouseover&quot;, function() {
+    log.innerHTML += &quot;mouseover fired&lt;br&gt;&quot;;
+  });
+
+  // mouseenter fires ONLY when entering outer
+  document.getElementById(&quot;outer&quot;).addEventListener(&quot;mouseenter&quot;, function() {
+    log.innerHTML += &quot;mouseenter fired&lt;br&gt;&quot;;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output when you move mouse from outside → outer → inner → back to outer:</strong></p>
+<ul class="v2-ul"><li><code>mouseover</code> fires 3 times</li><li><code>mouseenter</code> fires 1 time</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Rule of thumb:</strong> Use <code>mouseenter</code>/<code>mouseleave</code> for hover effects on a container. Use <code>mouseover</code>/<code>mouseout</code> when you deliberately want child entry/exit to trigger the handler too.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mouse Coordinates · The Event Object's <code>clientX</code> and <code>clientY</code></h3>
+<p class="v2-p">Every mouse event carries coordinate data telling you exactly where the mouse was:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Description</th></tr></thead><tbody><tr><td><code>event.clientX</code></td><td>X position relative to the <strong>viewport</strong> (visible area)</td></tr><tr><td><code>event.clientY</code></td><td>Y position relative to the <strong>viewport</strong></td></tr><tr><td><code>event.pageX</code></td><td>X position relative to the <strong>full page</strong> (includes scroll)</td></tr><tr><td><code>event.pageY</code></td><td>Y position relative to the <strong>full page</strong></td></tr><tr><td><code>event.screenX</code></td><td>X position relative to the <strong>physical screen</strong></td></tr><tr><td><code>event.screenY</code></td><td>Y position relative to the <strong>physical screen</strong></td></tr><tr><td><code>event.offsetX</code></td><td>X position relative to the <strong>element itself</strong></td></tr><tr><td><code>event.offsetY</code></td><td>Y position relative to the <strong>element itself</strong></td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;canvas&quot; style=&quot;width:400px; height:200px; background:#eee; border:1px solid #ccc;&quot;&gt;
+  Move your mouse here
+&lt;/div&gt;
+&lt;p id=&quot;coords&quot;&gt;X: — | Y: —&lt;/p&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;canvas&quot;).addEventListener(&quot;mousemove&quot;, function(event) {
+    document.getElementById(&quot;coords&quot;).innerText =
+      &quot;Client: &quot; + event.clientX + &quot;, &quot; + event.clientY +
+      &quot;  |  Offset: &quot; + event.offsetX + &quot;, &quot; + event.offsetY;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> As the mouse moves over the div, the coordinates update in real time.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Which Mouse Button Was Pressed?</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>element.addEventListener(&quot;mousedown&quot;, function(event) {
+  switch(event.button) {
+    case 0: console.log(&quot;Left button&quot;);   break;
+    case 1: console.log(&quot;Middle button&quot;); break;
+    case 2: console.log(&quot;Right button&quot;);  break;
+  }
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Detecting Modifier Keys During Mouse Events</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>element.addEventListener(&quot;click&quot;, function(event) {
+  if (event.shiftKey)   console.log(&quot;Shift + Click&quot;);
+  if (event.ctrlKey)    console.log(&quot;Ctrl + Click&quot;);
+  if (event.altKey)     console.log(&quot;Alt + Click&quot;);
+  if (event.metaKey)    console.log(&quot;Cmd + Click (Mac)&quot;);
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Practical Example: Hover Card Effect</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;card&quot; style=&quot;
+  width: 180px;
+  padding: 20px;
+  background: #3498db;
+  color: white;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+&quot;&gt;
+  Hover over me!
+&lt;/div&gt;
+
+&lt;script&gt;
+  var card = document.getElementById(&quot;card&quot;);
+
+  card.addEventListener(&quot;mouseenter&quot;, function() {
+    this.style.transform = &quot;translateY(-4px)&quot;;
+    this.style.boxShadow = &quot;0 8px 20px rgba(0,0,0,0.2)&quot;;
+  });
+
+  card.addEventListener(&quot;mouseleave&quot;, function() {
+    this.style.transform = &quot;translateY(0)&quot;;
+    this.style.boxShadow = &quot;none&quot;;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> The card lifts and gains a shadow on hover, returns to normal when the mouse leaves.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>What is <code>this</code> inside an event handler?</strong> When a regular <code>function</code> is used as an event handler, <code>this</code> refers to the element the event was attached to. So <code>this.style</code> is the same as <code>card.style</code> here. (Arrow functions do NOT bind <code>this</code> this way · more on this in section 8.)</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Preventing the Default Context Menu</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;box&quot; style=&quot;width:200px; height:100px; background:#e8e8e8; padding:10px;&quot;&gt;
+  Right-click me
+&lt;/div&gt;
+&lt;div id=&quot;customMenu&quot; style=&quot;
+  display:none;
+  position:fixed;
+  background:white;
+  border:1px solid #ccc;
+  padding:8px 0;
+  border-radius:4px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  z-index: 999;
+&quot;&gt;
+  &lt;div style=&quot;padding:6px 20px; cursor:pointer;&quot;&gt;✏️ Edit&lt;/div&gt;
+  &lt;div style=&quot;padding:6px 20px; cursor:pointer;&quot;&gt;🗑️ Delete&lt;/div&gt;
+  &lt;div style=&quot;padding:6px 20px; cursor:pointer;&quot;&gt;📋 Copy&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  var box = document.getElementById(&quot;box&quot;);
+  var menu = document.getElementById(&quot;customMenu&quot;);
+
+  box.addEventListener(&quot;contextmenu&quot;, function(event) {
+    event.preventDefault(); // Suppress default right-click menu
+
+    menu.style.display = &quot;block&quot;;
+    menu.style.left = event.clientX + &quot;px&quot;;
+    menu.style.top = event.clientY + &quot;px&quot;;
+  });
+
+  document.addEventListener(&quot;click&quot;, function() {
+    menu.style.display = &quot;none&quot;; // Hide menu on any click
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> Right-clicking the box shows a custom menu at the cursor position. Clicking anywhere hides it.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. Mouse Events</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">3. Keyboard Events</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The Three Keyboard Events</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Event</th><th>Fires when...</th><th>Key property</th><th>Use for</th></tr></thead><tbody><tr><td><code>keydown</code></td><td>Key is first pressed</td><td>Physical key</td><td>Detecting any key including Shift, Ctrl, arrows</td></tr><tr><td><code>keyup</code></td><td>Key is released</td><td>Physical key</td><td>Running code after a keypress completes</td></tr><tr><td><code>keypress</code></td><td>A character key is pressed</td><td>Character produced</td><td><strong>Deprecated</strong> · use <code>keydown</code> instead</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong><code>keypress</code> is deprecated</strong> and may not work in all browsers. Always use <code>keydown</code> or <code>keyup</code> in new code.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>event.key</code> Property · What Was Pressed?</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;text&quot; id=&quot;field&quot; placeholder=&quot;Type anything...&quot;&gt;
+&lt;p id=&quot;output&quot;&gt;Press a key&lt;/p&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;field&quot;).addEventListener(&quot;keydown&quot;, function(event) {
+    document.getElementById(&quot;output&quot;).innerHTML =
+      &quot;&lt;strong&gt;Key:&lt;/strong&gt; &quot; + event.key + &quot;&lt;br&gt;&quot; +
+      &quot;&lt;strong&gt;Code:&lt;/strong&gt; &quot; + event.code + &quot;&lt;br&gt;&quot; +
+      &quot;&lt;strong&gt;KeyCode (legacy):&lt;/strong&gt; &quot; + event.keyCode;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Try pressing different keys and observe:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Key Pressed</th><th><code>event.key</code></th><th><code>event.code</code></th></tr></thead><tbody><tr><td><code>a</code></td><td><code>"a"</code></td><td><code>"KeyA"</code></td></tr><tr><td><code>A</code> (with Shift)</td><td><code>"A"</code></td><td><code>"KeyA"</code></td></tr><tr><td><code>Enter</code></td><td><code>"Enter"</code></td><td><code>"Enter"</code></td></tr><tr><td><code>ArrowLeft</code></td><td><code>"ArrowLeft"</code></td><td><code>"ArrowLeft"</code></td></tr><tr><td><code>Space</code></td><td><code>" "</code> (a space)</td><td><code>"Space"</code></td></tr><tr><td><code>1</code> (number row)</td><td><code>"1"</code></td><td><code>"Digit1"</code></td></tr><tr><td><code>1</code> (numpad)</td><td><code>"1"</code></td><td><code>"Numpad1"</code></td></tr></tbody></table></div>
+<p class="v2-p"><strong>Key difference between <code>key</code> and <code>code</code>:</strong></p>
+<ul class="v2-ul"><li><code>event.key</code> · the <strong>logical</strong> key: what character or action it produces (affected by Shift, Caps Lock, keyboard language)</li><li><code>event.code</code> · the <strong>physical</strong> key: its position on the keyboard (never changes regardless of modifier keys or language)</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Rule of thumb:</strong> Use <code>event.key</code> when you care about what character was typed. Use <code>event.code</code> when you care about which physical key was pressed (e.g., game controls where <code>W</code> should always move forward regardless of keyboard language).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Detecting Special Keys</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.addEventListener(&quot;keydown&quot;, function(event) {
+
+  // Single special keys
+  if (event.key === &quot;Enter&quot;)     console.log(&quot;Enter pressed&quot;);
+  if (event.key === &quot;Escape&quot;)    console.log(&quot;Escape pressed&quot;);
+  if (event.key === &quot;Backspace&quot;) console.log(&quot;Backspace pressed&quot;);
+  if (event.key === &quot;Tab&quot;)       console.log(&quot;Tab pressed&quot;);
+  if (event.key === &quot;Delete&quot;)    console.log(&quot;Delete pressed&quot;);
+
+  // Arrow keys
+  if (event.key === &quot;ArrowUp&quot;)    console.log(&quot;Up arrow&quot;);
+  if (event.key === &quot;ArrowDown&quot;)  console.log(&quot;Down arrow&quot;);
+  if (event.key === &quot;ArrowLeft&quot;)  console.log(&quot;Left arrow&quot;);
+  if (event.key === &quot;ArrowRight&quot;) console.log(&quot;Right arrow&quot;);
+
+  // Function keys
+  if (event.key === &quot;F1&quot;)  console.log(&quot;F1 pressed&quot;);
+  if (event.key === &quot;F12&quot;) console.log(&quot;F12 pressed&quot;);
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Modifier Key Combinations</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.addEventListener(&quot;keydown&quot;, function(event) {
+
+  // Ctrl + S (Save shortcut)
+  if (event.ctrlKey &amp;&amp; event.key === &quot;s&quot;) {
+    event.preventDefault(); // Prevent browser&#x27;s default save dialog
+    console.log(&quot;Custom save triggered!&quot;);
+  }
+
+  // Ctrl + Z (Undo)
+  if (event.ctrlKey &amp;&amp; event.key === &quot;z&quot;) {
+    event.preventDefault();
+    console.log(&quot;Undo triggered!&quot;);
+  }
+
+  // Shift + Enter (common in chat apps — send without newline)
+  if (event.shiftKey &amp;&amp; event.key === &quot;Enter&quot;) {
+    event.preventDefault();
+    console.log(&quot;Send message (without newline)!&quot;);
+  }
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Modifier key properties:</strong></p>
+<ul class="v2-ul"><li><code>event.ctrlKey</code> · Ctrl key held</li><li><code>event.shiftKey</code> · Shift key held</li><li><code>event.altKey</code> · Alt key held</li><li><code>event.metaKey</code> · Cmd (Mac) or Windows key held</li></ul></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Keyboard Event Sequence Demo</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input id=&quot;demo&quot; placeholder=&quot;Watch the log...&quot;&gt;
+&lt;div id=&quot;log&quot; style=&quot;font-family:monospace; background:#f4f4f4; padding:10px; height:120px; overflow-y:auto;&quot;&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  var log = document.getElementById(&quot;log&quot;);
+  var input = document.getElementById(&quot;demo&quot;);
+
+  function logEvent(type, event) {
+    var entry = document.createElement(&quot;div&quot;);
+    entry.innerHTML =
+      &quot;&lt;span style=&#x27;color:#888;&#x27;&gt;[&quot; + type + &quot;]&lt;/span&gt; &quot; +
+      &quot;key=&lt;strong&gt;&quot; + event.key + &quot;&lt;/strong&gt;  &quot; +
+      &quot;code=&quot; + event.code;
+    log.appendChild(entry);
+    log.scrollTop = log.scrollHeight; // Auto-scroll
+  }
+
+  input.addEventListener(&quot;keydown&quot;,  function(e) { logEvent(&quot;keydown &quot;, e); });
+  input.addEventListener(&quot;keyup&quot;,    function(e) { logEvent(&quot;keyup   &quot;, e); });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> Each key press shows both events in order, colour-coded by type.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Practical Example: Keyboard-Navigable Dropdown</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;text&quot; id=&quot;search&quot; placeholder=&quot;Search... (use ↑↓ to navigate, Enter to select)&quot;&gt;
+&lt;ul id=&quot;dropdown&quot; style=&quot;
+  border:1px solid #ccc;
+  list-style:none;
+  padding:0;
+  margin:0;
+  max-height:150px;
+  overflow-y:auto;
+  background:white;
+&quot;&gt;&lt;/ul&gt;
+
+&lt;script&gt;
+  var items = [&quot;Apple&quot;, &quot;Apricot&quot;, &quot;Banana&quot;, &quot;Blueberry&quot;, &quot;Cherry&quot;, &quot;Date&quot;, &quot;Elderberry&quot;];
+  var activeIndex = -1;
+
+  document.getElementById(&quot;search&quot;).addEventListener(&quot;keydown&quot;, function(event) {
+    var listItems = document.querySelectorAll(&quot;#dropdown li&quot;);
+
+    if (event.key === &quot;ArrowDown&quot;) {
+      event.preventDefault();
+      activeIndex = Math.min(activeIndex + 1, listItems.length - 1);
+      updateActive(listItems);
+    } else if (event.key === &quot;ArrowUp&quot;) {
+      event.preventDefault();
+      activeIndex = Math.max(activeIndex - 1, 0);
+      updateActive(listItems);
+    } else if (event.key === &quot;Enter&quot; &amp;&amp; activeIndex &gt;= 0) {
+      this.value = listItems[activeIndex].innerText;
+      document.getElementById(&quot;dropdown&quot;).innerHTML = &quot;&quot;;
+      activeIndex = -1;
+    }
+  });
+
+  document.getElementById(&quot;search&quot;).addEventListener(&quot;input&quot;, function() {
+    var query = this.value.toLowerCase();
+    var dropdown = document.getElementById(&quot;dropdown&quot;);
+    dropdown.innerHTML = &quot;&quot;;
+    activeIndex = -1;
+
+    if (query === &quot;&quot;) return;
+
+    items.filter(function(item) {
+      return item.toLowerCase().startsWith(query);
+    }).forEach(function(item) {
+      var li = document.createElement(&quot;li&quot;);
+      li.innerText = item;
+      li.style.padding = &quot;8px 12px&quot;;
+      li.style.cursor = &quot;pointer&quot;;
+      li.addEventListener(&quot;click&quot;, function() {
+        document.getElementById(&quot;search&quot;).value = item;
+        dropdown.innerHTML = &quot;&quot;;
+      });
+      dropdown.appendChild(li);
+    });
+  });
+
+  function updateActive(listItems) {
+    listItems.forEach(function(li, i) {
+      li.style.backgroundColor = i === activeIndex ? &quot;#3498db&quot; : &quot;&quot;;
+      li.style.color = i === activeIndex ? &quot;white&quot; : &quot;&quot;;
+    });
+  }
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Preventing Default Key Behaviour</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Prevent typing numbers in a &quot;letters only&quot; field
+document.getElementById(&quot;lettersOnly&quot;).addEventListener(&quot;keydown&quot;, function(event) {
+  var isLetter = /^[a-zA-Z\s]$/.test(event.key);
+  var isControl = [&quot;Backspace&quot;,&quot;Delete&quot;,&quot;ArrowLeft&quot;,&quot;ArrowRight&quot;,&quot;Tab&quot;].includes(event.key);
+
+  if (!isLetter &amp;&amp; !isControl) {
+    event.preventDefault(); // Block the character
+  }
+});</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Keyboard Events</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">4. Load Events</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What Are Load Events?</h3>
+<p class="v2-p">Load events tell you about the <strong>lifecycle of the page</strong> · from when the browser starts parsing HTML, to when every image and script has fully downloaded, to when the user is about to leave.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Page Loading Timeline</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>HTML parsing starts
+    │
+    ▼
+DOM tree built (HTML parsed)
+    │
+    ▼  ← DOMContentLoaded fires here
+    │
+    ▼
+Images, stylesheets, iframes finish loading
+    │
+    ▼  ← window &quot;load&quot; fires here
+    │
+    ▼
+User interacts with page
+    │
+    ▼
+User navigates away ← &quot;beforeunload&quot; fires
+    │
+    ▼
+Page is unloaded  ← &quot;unload&quot; fires</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>DOMContentLoaded</code> · DOM Ready, Resources May Still Be Loading</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.addEventListener(&quot;DOMContentLoaded&quot;, function() {
+  // The HTML is parsed. All elements exist. But images may still be loading.
+  console.log(&quot;DOM is ready!&quot;);
+  console.log(&quot;Number of images:&quot;, document.images.length); // Count exists
+  console.log(&quot;First image loaded?&quot;, document.images[0].complete); // May be false
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>When to use:</strong> Any initialisation code that needs DOM elements but doesn't need images to be visible yet. This is the most common place to put page initialisation code.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>window.onload</code> · Everything Fully Loaded</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;load&quot;, function() {
+  // Everything is loaded: HTML, CSS, images, scripts, fonts
+  console.log(&quot;Fully loaded!&quot;);
+
+  var img = document.getElementById(&quot;hero&quot;);
+  console.log(&quot;Image natural width:&quot;, img.naturalWidth); // Now accurate
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>When to use:</strong> When your code depends on image dimensions, canvas drawing from images, or any resources that must be fully downloaded. It fires later than <code>DOMContentLoaded</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparing <code>DOMContentLoaded</code> vs <code>load</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;script&gt;
+  document.addEventListener(&quot;DOMContentLoaded&quot;, function() {
+    console.log(&quot;1. DOM ready&quot;);
+  });
+
+  window.addEventListener(&quot;load&quot;, function() {
+    console.log(&quot;2. Everything loaded&quot;);
+  });
+
+  console.log(&quot;3. Inline script running&quot;);
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Console output order:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3. Inline script running    ← runs immediately as parser hits the script
+1. DOM ready                ← fires when HTML parsing completes
+2. Everything loaded        ← fires when all resources are done</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Load Events on Individual Resources</h3>
+<p class="v2-p">You can detect when a specific image or script finishes loading:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;img id=&quot;photo&quot; src=&quot;large-image.jpg&quot;&gt;
+
+&lt;script&gt;
+  var img = document.getElementById(&quot;photo&quot;);
+
+  img.addEventListener(&quot;load&quot;, function() {
+    console.log(&quot;Image loaded! Size:&quot;, this.naturalWidth + &quot;x&quot; + this.naturalHeight);
+  });
+
+  img.addEventListener(&quot;error&quot;, function() {
+    console.log(&quot;Image failed to load!&quot;);
+    this.src = &quot;fallback.jpg&quot;; // Show a fallback image
+  });
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>beforeunload</code> · Warn Before Leaving</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;beforeunload&quot;, function(event) {
+  // Show a confirmation dialog when the user tries to leave
+  event.preventDefault();
+
+  // Modern browsers show a generic message; you cannot customise it
+  event.returnValue = &quot;&quot;; // Required for the dialog to show in Chrome
+});</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> When the user tries to close the tab or navigate away, the browser shows: "Leave site? Changes you made may not be saved."</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ Only add <code>beforeunload</code> when there is genuinely unsaved data (like a form being filled out). Adding it unconditionally annoys users.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>unload</code> · Final Cleanup</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;unload&quot;, function() {
+  // Page is being destroyed. Very limited time to run code.
+  // Good for: sending analytics data, cleanup of resources
+  navigator.sendBeacon(&quot;/analytics&quot;, JSON.stringify({ session_end: Date.now() }));
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ The <code>unload</code> event is unreliable on mobile browsers. Prefer <code>pagehide</code> for mobile-compatible teardown.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>resize</code> · Window Dimensions Changed</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;resize&quot;, function() {
+  var w = window.innerWidth;
+  var h = window.innerHeight;
+  document.getElementById(&quot;dims&quot;).innerText = w + &quot; × &quot; + h + &quot; px&quot;;
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <code>resize</code> fires <strong>many times per second</strong> while the window is being dragged. For performance, use <strong>debouncing</strong> · wait until resizing stops before running heavy code:</p></blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var resizeTimer;
+window.addEventListener(&quot;resize&quot;, function() {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function() {
+    console.log(&quot;Resize finished. New size:&quot;, window.innerWidth);
+    // Run expensive layout recalculation here
+  }, 250); // Wait 250ms after last resize event
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>scroll</code> · Page or Element Scrolled</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;scroll&quot;, function() {
+  var scrolled = window.scrollY; // Pixels scrolled from the top
+
+  // Show/hide a &quot;Back to Top&quot; button
+  var backBtn = document.getElementById(&quot;backToTop&quot;);
+  backBtn.style.display = scrolled &gt; 300 ? &quot;block&quot; : &quot;none&quot;;
+});</code></pre></div></div>
+<p class="v2-p"><strong>Sticky header that changes style on scroll:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;scroll&quot;, function() {
+  var header = document.getElementById(&quot;header&quot;);
+  if (window.scrollY &gt; 50) {
+    header.classList.add(&quot;scrolled&quot;);    // Add compact style
+  } else {
+    header.classList.remove(&quot;scrolled&quot;);
+  }
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>online</code> and <code>offline</code> · Network Status</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window.addEventListener(&quot;online&quot;, function() {
+  document.getElementById(&quot;status&quot;).innerText = &quot;✅ Back online&quot;;
+  document.getElementById(&quot;status&quot;).style.backgroundColor = &quot;#c8f7c5&quot;;
+});
+
+window.addEventListener(&quot;offline&quot;, function() {
+  document.getElementById(&quot;status&quot;).innerText = &quot;⚠️ No internet connection&quot;;
+  document.getElementById(&quot;status&quot;).style.backgroundColor = &quot;#fdc5c5&quot;;
+});</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Load Events</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">5. Timing Events</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">What Are Timing Events?</h3>
+<p class="v2-p">Timing events are JavaScript's built-in clock tools. They let you run code <strong>after a delay</strong> or <strong>repeatedly on a schedule</strong> · without blocking other code from running.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>setTimeout</code> · Run Once After a Delay</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Syntax: setTimeout(function, milliseconds)
+// Returns a numeric ID you can use to cancel it
+
+var timerId = setTimeout(function() {
+  console.log(&quot;This runs after 3 seconds&quot;);
+}, 3000); // 3000ms = 3 seconds</code></pre></div></div>
+<p class="v2-p"><strong>Clearing a timeout (cancelling it before it fires):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var timerId = setTimeout(function() {
+  console.log(&quot;This will never run&quot;);
+}, 5000);
+
+// Cancel the timeout before the 5 seconds are up
+clearTimeout(timerId);</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>setInterval</code> · Run Repeatedly on a Schedule</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Syntax: setInterval(function, milliseconds)
+// Returns a numeric ID you can use to cancel it
+
+var count = 0;
+var intervalId = setInterval(function() {
+  count++;
+  console.log(&quot;Tick number: &quot; + count);
+
+  if (count &gt;= 5) {
+    clearInterval(intervalId); // Stop after 5 ticks
+    console.log(&quot;Done!&quot;);
+  }
+}, 1000); // Every 1000ms = every 1 second</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Tick number: 1    (after 1s)
+Tick number: 2    (after 2s)
+Tick number: 3    (after 3s)
+Tick number: 4    (after 4s)
+Tick number: 5    (after 5s)
+Done!</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Building a Digital Clock</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;clock&quot; style=&quot;font-size: 48px; font-family: monospace; text-align: center;&quot;&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  function updateClock() {
+    var now = new Date();
+
+    var hours   = String(now.getHours()).padStart(2, &quot;0&quot;);   // &quot;09&quot;, not &quot;9&quot;
+    var minutes = String(now.getMinutes()).padStart(2, &quot;0&quot;);
+    var seconds = String(now.getSeconds()).padStart(2, &quot;0&quot;);
+
+    document.getElementById(&quot;clock&quot;).innerText =
+      hours + &quot;:&quot; + minutes + &quot;:&quot; + seconds;
+  }
+
+  updateClock(); // Show immediately (no 1-second delay on first load)
+  setInterval(updateClock, 1000);
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> A live clock that ticks every second.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Why call <code>updateClock()</code> before <code>setInterval</code>?</strong> <code>setInterval</code> waits the full interval before the first call. Calling the function manually first removes the 1-second blank screen at startup.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>setTimeout</code> Inside Itself · Recursive Timeout</h3>
+<p class="v2-p">A common alternative to <code>setInterval</code> is to schedule the next call from within the function itself:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function tick() {
+  console.log(&quot;Tick at: &quot; + new Date().toLocaleTimeString());
+
+  // Schedule next call after this one finishes
+  setTimeout(tick, 1000);
+}
+
+setTimeout(tick, 1000);</code></pre></div></div>
+<p class="v2-p"><strong>Why use this pattern instead of <code>setInterval</code>?</strong></p>
+<ul class="v2-ul"><li><code>setInterval</code> fires every <code>n</code> ms regardless of whether the previous execution finished</li><li>Recursive <code>setTimeout</code> waits for each execution to complete before scheduling the next one</li><li>For API calls or any async work, recursive <code>setTimeout</code> prevents overlapping calls</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Timing Precision Warning</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// setInterval is NOT precise — it drifts over time
+var start = Date.now();
+var count = 0;
+
+var id = setInterval(function() {
+  count++;
+  var elapsed = Date.now() - start;
+  var expected = count * 1000;
+  var drift = elapsed - expected;
+  console.log(&quot;Tick &quot; + count + &quot; — drift: &quot; + drift + &quot;ms&quot;);
+
+  if (count &gt;= 5) clearInterval(id);
+}, 1000);</code></pre></div></div>
+<p class="v2-p"><strong>Why it drifts:</strong> JavaScript is single-threaded. If other code is running when the interval fires, the browser queues the timer callback and runs it as soon as the thread is free. For precise timekeeping, use <code>Date.now()</code> as the source of truth.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Debounce and Throttle · Essential Timer Patterns</h3>
+<p class="v2-p"><strong>Debounce:</strong> Wait until the user stops doing something before running the handler.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function debounce(fn, delay) {
+  var timer;
+  return function() {
+    var args = arguments;
+    var context = this;
+    clearTimeout(timer);
+    timer = setTimeout(function() {
+      fn.apply(context, args);
+    }, delay);
+  };
+}
+
+// Only runs the search 400ms after the user stops typing
+var search = debounce(function(query) {
+  console.log(&quot;Searching for:&quot;, query);
+}, 400);
+
+document.getElementById(&quot;searchInput&quot;).addEventListener(&quot;input&quot;, function() {
+  search(this.value);
+});</code></pre></div></div>
+<p class="v2-p"><strong>Throttle:</strong> Run the handler at most once per time window, even if triggered many times.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function throttle(fn, limit) {
+  var inThrottle = false;
+  return function() {
+    if (!inThrottle) {
+      fn.apply(this, arguments);
+      inThrottle = true;
+      setTimeout(function() { inThrottle = false; }, limit);
+    }
+  };
+}
+
+// Only logs scroll position at most once every 200ms
+var onScroll = throttle(function() {
+  console.log(&quot;Scroll position:&quot;, window.scrollY);
+}, 200);
+
+window.addEventListener(&quot;scroll&quot;, onScroll);</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Countdown Timer</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;h2 id=&quot;timer&quot; style=&quot;font-size: 48px; font-family: monospace;&quot;&gt;00:10&lt;/h2&gt;
+&lt;button onclick=&quot;startCountdown()&quot;&gt;Start&lt;/button&gt;
+&lt;button onclick=&quot;stopCountdown()&quot;&gt;Stop&lt;/button&gt;
+&lt;button onclick=&quot;resetCountdown()&quot;&gt;Reset&lt;/button&gt;
+
+&lt;script&gt;
+  var totalSeconds = 10;
+  var remaining = totalSeconds;
+  var intervalId = null;
+
+  function updateDisplay() {
+    var mins = Math.floor(remaining / 60);
+    var secs = remaining % 60;
+    document.getElementById(&quot;timer&quot;).innerText =
+      String(mins).padStart(2, &quot;0&quot;) + &quot;:&quot; + String(secs).padStart(2, &quot;0&quot;);
+  }
+
+  function startCountdown() {
+    if (intervalId) return; // Already running
+
+    intervalId = setInterval(function() {
+      remaining--;
+      updateDisplay();
+
+      if (remaining &lt;= 0) {
+        clearInterval(intervalId);
+        intervalId = null;
+        document.getElementById(&quot;timer&quot;).innerText = &quot;Time&#x27;s up!&quot;;
+        document.getElementById(&quot;timer&quot;).style.color = &quot;red&quot;;
+      }
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    clearInterval(intervalId);
+    intervalId = null;
+  }
+
+  function resetCountdown() {
+    stopCountdown();
+    remaining = totalSeconds;
+    document.getElementById(&quot;timer&quot;).style.color = &quot;&quot;;
+    updateDisplay();
+  }
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Timing Events</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">6. Event Management · The Event Object</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What Is the Event Object?</h3>
+<p class="v2-p">Every time an event fires, the browser creates an <strong>Event object</strong> and passes it automatically to your handler. This object is a rich package of information about what just happened.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>element.addEventListener(&quot;click&quot;, function(event) {
+  // &quot;event&quot; is the Event object — name it whatever you like
+  // Common names: event, e, evt
+  console.log(event);
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Universal Event Object Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>event.type</code></td><td>String</td><td>The event type: <code>"click"</code>, <code>"keydown"</code>, etc.</td></tr><tr><td><code>event.target</code></td><td>Element</td><td>The element that <strong>actually received</strong> the event</td></tr><tr><td><code>event.currentTarget</code></td><td>Element</td><td>The element <strong>the listener is attached to</strong></td></tr><tr><td><code>event.timeStamp</code></td><td>Number</td><td>Milliseconds since page load when event fired</td></tr><tr><td><code>event.bubbles</code></td><td>Boolean</td><td>Does this event type bubble?</td></tr><tr><td><code>event.cancelable</code></td><td>Boolean</td><td>Can the default be prevented?</td></tr><tr><td><code>event.defaultPrevented</code></td><td>Boolean</td><td>Has <code>preventDefault()</code> been called?</td></tr><tr><td><code>event.isTrusted</code></td><td>Boolean</td><td>Was this event from a real user (not programmatic)?</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>event.target</code> vs <code>event.currentTarget</code></h3>
+<p class="v2-p">This is one of the most important · and confusing · concepts in event handling.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;container&quot;&gt;
+  &lt;button id=&quot;btn&quot;&gt;Click Me&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;container&quot;).addEventListener(&quot;click&quot;, function(event) {
+    // currentTarget: always the element the listener is ON (the container div)
+    console.log(&quot;currentTarget:&quot;, event.currentTarget.id); // &quot;container&quot;
+
+    // target: the element the user ACTUALLY clicked (the button)
+    console.log(&quot;target:&quot;, event.target.id); // &quot;btn&quot;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Visual breakdown:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>User clicks the &lt;button&gt;
+        │
+        ▼ event fires on button
+  event.target = &lt;button&gt;         ← where the click physically happened
+        │
+        ▼ event bubbles up to the &lt;div&gt;
+  event.currentTarget = &lt;div&gt;     ← where the listener is attached</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Event Bubbling · The Core Mechanism</h3>
+<p class="v2-p">By default, events <strong>bubble up</strong> the DOM tree. A click on a child element also triggers click handlers on every ancestor.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;grandparent&quot; style=&quot;padding:30px; background:#fde8a0;&quot;&gt;
+  Grandparent
+  &lt;div id=&quot;parent&quot; style=&quot;padding:20px; background:#c8f7c5;&quot;&gt;
+    Parent
+    &lt;div id=&quot;child&quot; style=&quot;padding:10px; background:#c5d5fc;&quot;&gt;
+      Child (click me)
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;p id=&quot;log&quot;&gt;&lt;/p&gt;
+
+&lt;script&gt;
+  var log = document.getElementById(&quot;log&quot;);
+
+  [&quot;grandparent&quot;, &quot;parent&quot;, &quot;child&quot;].forEach(function(id) {
+    document.getElementById(id).addEventListener(&quot;click&quot;, function(e) {
+      log.innerHTML += id + &quot; handler fired (target: &quot; + e.target.id + &quot;)&lt;br&gt;&quot;;
+    });
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>When you click "Child":</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>child handler fired (target: child)
+parent handler fired (target: child)
+grandparent handler fired (target: child)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Notice:</strong> <code>event.target</code> is always <code>child</code> (where the click happened), but the handler fires three times as the event bubbles up through all three elements.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>event.stopPropagation()</code> · Stop the Bubble</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.getElementById(&quot;child&quot;).addEventListener(&quot;click&quot;, function(event) {
+  event.stopPropagation(); // Stop the event from bubbling further
+  console.log(&quot;Child handler — bubble stopped here&quot;);
+});
+
+document.getElementById(&quot;parent&quot;).addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Parent — this will NOT fire if child was clicked&quot;);
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ Use <code>stopPropagation</code> sparingly. Stopping bubbles can break other code that relies on event delegation (covered next). Think carefully before using it.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>event.preventDefault()</code> · Stop the Default Browser Action</h3>
+<p class="v2-p">Some events have built-in browser behaviours. <code>preventDefault()</code> stops those:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Event</th><th>Default behaviour prevented</th></tr></thead><tbody><tr><td>Click on <code>&lt;a href="..."&gt;</code></td><td>Navigation to the URL</td></tr><tr><td>Click submit button in <code>&lt;form&gt;</code></td><td>Form submission</td></tr><tr><td><code>keydown</code> with <code>Tab</code></td><td>Moving focus to next element</td></tr><tr><td><code>contextmenu</code></td><td>Showing right-click menu</td></tr><tr><td><code>wheel</code> over a scrollable area</td><td>Scrolling the page</td></tr><tr><td><code>dragstart</code> on an image</td><td>Browser drag-and-drop of the image</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Prevent form from submitting the normal way
+document.getElementById(&quot;myForm&quot;).addEventListener(&quot;submit&quot;, function(event) {
+  event.preventDefault(); // Now YOU control what happens
+  validateAndSubmit();
+});
+
+// Prevent link navigation
+document.getElementById(&quot;myLink&quot;).addEventListener(&quot;click&quot;, function(event) {
+  event.preventDefault();
+  console.log(&quot;Link clicked but not navigating&quot;);
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Event Delegation · Handling Events on Many Elements Efficiently</h3>
+<p class="v2-p">Instead of adding a listener to every button/item individually, add <strong>one listener to a parent</strong> and use <code>event.target</code> to detect which child was clicked.</p>
+<p class="v2-p"><strong>Without event delegation (inefficient for large lists):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Adds 100 separate event listeners
+var items = document.querySelectorAll(&quot;.menu-item&quot;);
+items.forEach(function(item) {
+  item.addEventListener(&quot;click&quot;, function() {
+    console.log(&quot;Clicked:&quot;, this.innerText);
+  });
+});</code></pre></div></div>
+<p class="v2-p"><strong>With event delegation (one listener handles all):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;ul id=&quot;menu&quot;&gt;
+  &lt;li class=&quot;menu-item&quot;&gt;Home&lt;/li&gt;
+  &lt;li class=&quot;menu-item&quot;&gt;About&lt;/li&gt;
+  &lt;li class=&quot;menu-item&quot;&gt;Services&lt;/li&gt;
+  &lt;li class=&quot;menu-item&quot;&gt;Contact&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;menu&quot;).addEventListener(&quot;click&quot;, function(event) {
+    // Check if the click was on a menu item (not the &lt;ul&gt; itself)
+    if (event.target.classList.contains(&quot;menu-item&quot;)) {
+      console.log(&quot;Clicked:&quot;, event.target.innerText);
+      // Remove active from all, add to clicked
+      document.querySelectorAll(&quot;.menu-item&quot;).forEach(function(el) {
+        el.classList.remove(&quot;active&quot;);
+      });
+      event.target.classList.add(&quot;active&quot;);
+    }
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>The huge advantage of delegation:</strong> Items added to the list AFTER the listener is registered are automatically covered. No re-attaching needed.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Event Capturing · The Other Direction</h3>
+<p class="v2-p">Events actually travel in two phases:</p>
+<ol class="v2-ol"><li><strong>Capture phase</strong> · from <code>document</code> down to the target (rarely used)</li><li><strong>Bubble phase</strong> · from the target back up to <code>document</code> (default)</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Third argument: true = capture phase, false (default) = bubble phase
+parent.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Parent — CAPTURE phase&quot;);
+}, true);  // ← true enables capture
+
+child.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Child — bubble phase&quot;);
+}, false); // ← default</code></pre></div></div>
+<p class="v2-p"><strong>Click on child · output order:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Parent — CAPTURE phase    (capture fires first, going DOWN)
+Child — bubble phase      (bubble fires second, going UP)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 In practice, use capturing only when you specifically need a parent to intercept an event before the target sees it. Default bubble phase handles 99% of use cases.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>stopImmediatePropagation()</code> · Stop Other Listeners on the Same Element</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>element.addEventListener(&quot;click&quot;, function(event) {
+  console.log(&quot;Handler 1 — runs&quot;);
+  event.stopImmediatePropagation(); // Stops all other listeners on THIS element too
+});
+
+element.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Handler 2 — NEVER runs&quot;);
+});</code></pre></div></div>
+<p class="v2-p">Compare with <code>stopPropagation()</code>: that stops the event reaching <strong>parent</strong> elements. <code>stopImmediatePropagation()</code> additionally stops other handlers on the <strong>same</strong> element.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6. Event Management · The Event Object</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">7. HTML DOM Events · Inline &amp; Property Handlers</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Three Ways to Register Event Handlers</h3>
+<p class="v2-p">Before <code>addEventListener</code> existed, there were two older approaches. All three are in active use today, so you must understand all of them.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Way 1 · HTML Inline Attribute (Oldest)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;button onclick=&quot;handleClick()&quot;&gt;Click&lt;/button&gt;
+&lt;button onmouseover=&quot;this.style.background=&#x27;yellow&#x27;&quot; onmouseout=&quot;this.style.background=&#x27;&#x27;&quot;&gt;Hover&lt;/button&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Characteristics:</strong></p>
+<ul class="v2-ul"><li>Handler code is written <strong>inside the HTML attribute</strong> as a string</li><li>The string is evaluated in the context of the element</li><li><code>this</code> refers to the element inside the string</li><li>Can only assign <strong>one handler</strong> per event per element</li></ul>
+<p class="v2-p"><strong>Limitations:</strong></p>
+<ul class="v2-ul"><li>Mixes HTML structure with JavaScript behaviour · hard to maintain</li><li>Difficult to handle dynamic elements</li><li>The attribute value is actually wrapped in a function by the browser, which can cause <code>this</code> binding confusion</li></ul>
+<p class="v2-p"><strong>When you see it:</strong> Legacy codebases, simple demos, quick prototypes. Avoid in new projects.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Way 2 · DOM Property Assignment (Classic)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;button id=&quot;btn&quot;&gt;Click Me&lt;/button&gt;
+
+&lt;script&gt;
+  var btn = document.getElementById(&quot;btn&quot;);
+
+  // Assign a function to the event property
+  btn.onclick = function() {
+    console.log(&quot;Clicked!&quot;);
+    console.log(&quot;this is:&quot;, this.id); // &quot;btn&quot; — `this` works correctly
+  };
+
+  // To remove it
+  btn.onclick = null;
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Characteristics:</strong></p>
+<ul class="v2-ul"><li>Keeps JavaScript separate from HTML</li><li><code>this</code> inside the handler correctly refers to the element</li><li>Clean syntax</li><li><strong>Critical limitation: only ONE handler per event</strong> · assigning a second one overwrites the first</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>btn.onclick = function() { console.log(&quot;First handler&quot;); };
+btn.onclick = function() { console.log(&quot;Second handler&quot;); };
+// Only &quot;Second handler&quot; runs — the first was overwritten!</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Common DOM Event Properties</h3>
+<p class="v2-p">All HTML elements have these event properties you can assign:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>element.onclick       = handler;
+element.ondblclick    = handler;
+element.onmouseover   = handler;
+element.onmouseout    = handler;
+element.onmouseenter  = handler;
+element.onmouseleave  = handler;
+element.onmousemove   = handler;
+element.onmousedown   = handler;
+element.onmouseup     = handler;
+element.onkeydown     = handler;
+element.onkeyup       = handler;
+element.oninput       = handler;
+element.onchange      = handler;
+element.onfocus       = handler;
+element.onblur        = handler;
+element.onsubmit      = handler;
+element.onload        = handler;
+element.onscroll      = handler;
+element.onresize      = handler; // (on window)
+element.oncontextmenu = handler;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>onchange</code> vs <code>oninput</code> Distinction</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Event</th><th>Fires when...</th></tr></thead><tbody><tr><td><code>oninput</code></td><td>The value changes · fires on <strong>every keystroke</strong>, immediately</td></tr><tr><td><code>onchange</code></td><td>The value changes AND the element <strong>loses focus</strong> (or Enter is pressed for selects)</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input id=&quot;demo&quot; type=&quot;text&quot; placeholder=&quot;Type here&quot;&gt;
+&lt;p&gt;oninput log: &lt;span id=&quot;inputLog&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p&gt;onchange log: &lt;span id=&quot;changeLog&quot;&gt;&lt;/span&gt;&lt;/p&gt;
+
+&lt;script&gt;
+  var el = document.getElementById(&quot;demo&quot;);
+
+  el.oninput = function() {
+    document.getElementById(&quot;inputLog&quot;).innerText = this.value;
+  };
+
+  el.onchange = function() {
+    document.getElementById(&quot;changeLog&quot;).innerText = this.value;
+  };
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Observation:</strong> <code>inputLog</code> updates on every single keystroke. <code>changeLog</code> only updates after you click away from the input.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>onfocus</code> and <code>onblur</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input id=&quot;fname&quot; placeholder=&quot;First name&quot;&gt;
+&lt;input id=&quot;lname&quot; placeholder=&quot;Last name&quot;&gt;
+
+&lt;script&gt;
+  var inputs = document.querySelectorAll(&quot;input&quot;);
+
+  inputs.forEach(function(input) {
+    input.onfocus = function() {
+      this.style.outline = &quot;3px solid #3498db&quot;;
+      this.style.backgroundColor = &quot;#eaf4fd&quot;;
+    };
+
+    input.onblur = function() {
+      this.style.outline = &quot;&quot;;
+      this.style.backgroundColor = &quot;&quot;;
+    };
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> Each input gets a blue outline and light blue background when focused, returning to normal when the user tabs away.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>7. HTML DOM Events · Inline &amp; Property Handlers</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">8. addEventListener · The Professional Way</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Why <code>addEventListener</code> Is the Right Choice</h3>
+<p class="v2-p"><code>addEventListener</code> solves every limitation of the inline and property approaches:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th>Inline HTML</th><th>Property (<code>onclick =</code>)</th><th><code>addEventListener</code></th></tr></thead><tbody><tr><td>Multiple handlers per event</td><td>❌</td><td>❌</td><td>✅</td></tr><tr><td>Easy to remove individual handlers</td><td>❌</td><td>❌ (set null removes all)</td><td>✅</td></tr><tr><td>Works on any event phase (capture/bubble)</td><td>❌</td><td>❌</td><td>✅</td></tr><tr><td>Separates HTML from JavaScript</td><td>❌</td><td>✅</td><td>✅</td></tr><tr><td>Readable for complex handler logic</td><td>❌</td><td>✅</td><td>✅</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Basic Syntax</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Syntax:
+// element.addEventListener(eventType, handlerFunction, options)
+
+element.addEventListener(&quot;click&quot;, function(event) {
+  console.log(&quot;Clicked!&quot;);
+});</code></pre></div></div>
+<ul class="v2-ul"><li><code>eventType</code> · a string like <code>"click"</code>, <code>"keydown"</code>, <code>"scroll"</code> · <strong>no "on" prefix</strong> (unlike <code>onclick</code>)</li><li><code>handlerFunction</code> · the function to call. Can be anonymous or a named reference</li><li><code>options</code> · optional: a boolean for capture phase, or an options object</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Using a Named Function Reference</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function handleClick(event) {
+  console.log(&quot;Button clicked at:&quot;, event.clientX, event.clientY);
+}
+
+var btn = document.getElementById(&quot;btn&quot;);
+
+// Pass the function REFERENCE — do NOT call it (no parentheses)
+btn.addEventListener(&quot;click&quot;, handleClick);      // ✅ correct
+btn.addEventListener(&quot;click&quot;, handleClick());    // ❌ wrong — calls it immediately</code></pre></div></div>
+<p class="v2-p">Using named functions is crucial for removal (see <code>removeEventListener</code> below).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Multiple Handlers · The Key Advantage</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var btn = document.getElementById(&quot;btn&quot;);
+
+btn.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Handler 1: analytics logged&quot;);
+});
+
+btn.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Handler 2: button animated&quot;);
+});
+
+btn.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;Handler 3: modal opened&quot;);
+});
+
+// All three run when the button is clicked, in order</code></pre></div></div>
+<p class="v2-p">This is impossible with <code>onclick =</code> assignment.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>removeEventListener</code> · Detaching Handlers</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function handleResize() {
+  console.log(&quot;Window resized to:&quot;, window.innerWidth);
+}
+
+// Add the listener
+window.addEventListener(&quot;resize&quot;, handleResize);
+
+// Remove it later (must pass the same function reference)
+window.removeEventListener(&quot;resize&quot;, handleResize);</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>You cannot remove anonymous functions:</strong></p></blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// This CANNOT be removed because there is no reference to the function
+btn.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;I can never be specifically removed&quot;);
+});
+
+// removeEventListener needs the exact same function reference:
+btn.removeEventListener(&quot;click&quot;, function() { /* ... */ }); // ❌ Does nothing</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>{ once: true }</code> Option · Run Exactly Once</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// This handler fires only the first time the button is clicked,
+// then automatically removes itself
+btn.addEventListener(&quot;click&quot;, function() {
+  console.log(&quot;First click only!&quot;);
+}, { once: true });</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Initialisation code, "intro" animations, one-time user acknowledgements ("Don't show again").</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>{ passive: true }</code> Option · Performance Boost for Scroll</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Tells the browser: &quot;this handler will NEVER call preventDefault()&quot;
+// The browser can then scroll immediately without waiting for JS to run
+window.addEventListener(&quot;scroll&quot;, function() {
+  updateScrollIndicator();
+}, { passive: true });</code></pre></div></div>
+<p class="v2-p">Using <code>{ passive: true }</code> for touch and scroll events can significantly improve scroll performance on mobile devices.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Full Options Object</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>element.addEventListener(&quot;click&quot;, handler, {
+  once:    true,   // Remove after first call
+  capture: false,  // Use bubble phase (default)
+  passive: true    // Never calls preventDefault (scroll performance)
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>this</code> in <code>addEventListener</code> vs Arrow Functions</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var btn = document.getElementById(&quot;btn&quot;);
+
+// Regular function: `this` = the element the listener is on
+btn.addEventListener(&quot;click&quot;, function() {
+  console.log(this.id);       // &quot;btn&quot; ✅
+  this.style.color = &quot;red&quot;;   // Works ✅
+});
+
+// Arrow function: `this` is inherited from the surrounding scope
+// (NOT the element)
+btn.addEventListener(&quot;click&quot;, () =&gt; {
+  console.log(this);          // window (or undefined in strict mode) ❌
+  // this.style.color = &quot;red&quot;; would fail
+});
+
+// To use an arrow function AND get the element, use event.target:
+btn.addEventListener(&quot;click&quot;, (event) =&gt; {
+  console.log(event.target.id);       // &quot;btn&quot; ✅
+  event.target.style.color = &quot;red&quot;;   // Works ✅
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Attaching Listeners to Multiple Elements</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;button class=&quot;action-btn&quot; data-action=&quot;save&quot;&gt;Save&lt;/button&gt;
+&lt;button class=&quot;action-btn&quot; data-action=&quot;print&quot;&gt;Print&lt;/button&gt;
+&lt;button class=&quot;action-btn&quot; data-action=&quot;export&quot;&gt;Export&lt;/button&gt;
+
+&lt;script&gt;
+  // Loop and attach — each button gets its own listener
+  document.querySelectorAll(&quot;.action-btn&quot;).forEach(function(btn) {
+    btn.addEventListener(&quot;click&quot;, function() {
+      var action = this.getAttribute(&quot;data-action&quot;);
+      console.log(&quot;Action triggered:&quot;, action);
+    });
+  });
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Building a Custom Event System</h3>
+<p class="v2-p">JavaScript allows you to create and dispatch your own events:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Create a custom event
+var myEvent = new CustomEvent(&quot;orderPlaced&quot;, {
+  detail: {
+    orderId: &quot;ORD-1234&quot;,
+    total: 59.99,
+    items: [&quot;Book&quot;, &quot;Pen&quot;]
+  },
+  bubbles: true,       // Should the event bubble?
+  cancelable: true     // Can it be cancelled?
+});
+
+// Listen for the custom event
+document.addEventListener(&quot;orderPlaced&quot;, function(event) {
+  console.log(&quot;Order received:&quot;, event.detail.orderId);
+  console.log(&quot;Total:&quot;, event.detail.total);
+  updateOrderUI(event.detail);
+});
+
+// Dispatch (fire) the event
+document.getElementById(&quot;checkoutBtn&quot;).addEventListener(&quot;click&quot;, function() {
+  document.dispatchEvent(myEvent);
+});</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-world use:</strong> Custom events are how large applications keep different modules loosely connected. A checkout module can fire <code>orderPlaced</code> without knowing anything about the analytics module or notification module that listen for it.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Event Listener Memory · Best Practices</h3>
+<ol class="v2-ol"><li><strong>Remove listeners when no longer needed</strong> · especially in single-page apps where components are created and destroyed</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Component setup
+function initModal() {
+  document.addEventListener(&quot;keydown&quot;, closeOnEscape);
+}
+
+function destroyModal() {
+  document.removeEventListener(&quot;keydown&quot;, closeOnEscape); // Clean up!
+}
+
+function closeOnEscape(event) {
+  if (event.key === &quot;Escape&quot;) destroyModal();
+}</code></pre></div></div>
+<ol class="v2-ol"><li><strong>Avoid creating functions inside loops</strong> · each creates a new function object</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Creates N new function objects
+items.forEach(function(item) {
+  item.addEventListener(&quot;click&quot;, function() { handleItem(item); });
+});
+
+// ✅ Reuse one function, use event delegation
+container.addEventListener(&quot;click&quot;, function(event) {
+  if (event.target.classList.contains(&quot;item&quot;)) {
+    handleItem(event.target);
+  }
+});</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 2 · APPLIED EXERCISES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>8. addEventListener · The Professional Way</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">9. Applied Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2"><hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1: Mouse Tracker with Trail Effect</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>mousemove</code> to track and display the mouse's position, and create a trailing dot effect.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> You are building a creative portfolio site and want a subtle custom cursor trail to wow visitors.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;pos&quot;&gt;Move your mouse&lt;/div&gt;
+&lt;script&gt;
+  document.addEventListener(&quot;mousemove&quot;, function(e) {
+    document.getElementById(&quot;pos&quot;).innerText = e.clientX + &quot;, &quot; + e.clientY;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Your exercise:</strong></p>
+<p class="v2-p">Build a full-page tracker that:</p>
+<ul class="v2-ul"><li>Shows <code>X, Y</code> coordinates in a corner display</li><li>Creates small coloured dots (10×10px divs) at the mouse position as it moves</li><li>Dots fade out and are removed from the DOM after 800ms</li><li>Each dot gets a random colour from a palette of 5 colours</li></ul>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Listen for <code>mousemove</code> on <code>document</code></li><li>In the handler, update the coordinate display with <code>event.clientX</code> and <code>event.clientY</code></li><li>Create a <code>&lt;div&gt;</code> positioned with <code>position:fixed</code>, <code>left: event.clientX</code>, <code>top: event.clientY</code></li><li>Set a random background colour from an array</li><li>Use <code>transition: opacity 0.8s</code> and then set <code>opacity = 0</code> after a 10ms delay</li><li>Use <code>setTimeout(dot.remove, 800)</code> to remove the element after the fade</li></ol>
+<p class="v2-p"><strong>Hints:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var colours = [&quot;#e74c3c&quot;,&quot;#3498db&quot;,&quot;#2ecc71&quot;,&quot;#f39c12&quot;,&quot;#9b59b6&quot;];
+var colour = colours[Math.floor(Math.random() * colours.length)];</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why is it important to remove the dots from the DOM after they fade? What happens if you don't?</li><li>Why use <code>setTimeout(dot.remove, 800)</code> and not <code>dot.remove()</code> directly?</li><li>The <code>mousemove</code> event fires many times per second. How would you throttle dot creation to prevent too many dots at once?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2: Keyboard-Driven Image Gallery</h3>
+<p class="v2-p"><strong>Objective:</strong> Navigate an image gallery using arrow keys and the keyboard.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> A photography portfolio where users can press left/right to browse photos and Escape to close a lightbox.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create an array of at least 5 image URLs (use placeholder URLs like <code>https://picsum.photos/600/400?random=1</code>)</li><li>Display the current image in a large <code>&lt;img&gt;</code> element</li><li>Show <code>Image 1 of 5</code> below it</li><li>Listen for <code>keydown</code> on <code>document</code>:</li></ol>
+<p class="v2-p">- <code>ArrowRight</code> or <code>ArrowDown</code> → advance to the next image    - <code>ArrowLeft</code> or <code>ArrowUp</code> → go to the previous image    - <code>Home</code> → go to the first image    - <code>End</code> → go to the last image</p>
+<ol class="v2-ol"><li>Wrap around: after the last image, go back to the first</li><li>Add <code>&lt;</code> and <code>&gt;</code> buttons for mouse users too</li><li>Show a CSS transition on the image when it changes (<code>opacity: 0 → 1</code>)</li></ol>
+<p class="v2-p"><strong>Key logic for wrapping:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>currentIndex = (currentIndex + 1 + images.length) % images.length;</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why does <code>(currentIndex - 1 + images.length) % images.length</code> work for going backwards without going negative?</li><li>How does the modulo <code>%</code> operator make the wrap-around logic work?</li><li>Why do we listen on <code>document</code> rather than a specific element?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3: Smart Form with Real-Time Validation</h3>
+<p class="v2-p"><strong>Objective:</strong> Build a registration form that validates each field live, using all three keyboard events.</p>
+<p class="v2-p"><strong>Fields:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Field</th><th>Validation</th></tr></thead><tbody><tr><td>Username</td><td>3 · 15 chars, letters/numbers/underscores only</td></tr><tr><td>Email</td><td>Valid email format</td></tr><tr><td>Password</td><td>8+ chars, 1 uppercase, 1 number, 1 special character</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Features to build:</strong></p>
+<ol class="v2-ol"><li>On <code>input</code>: Show a coloured message (green/red) updating as they type</li><li>On <code>focus</code>: Highlight the field and show a helpful hint tooltip</li><li>On <code>blur</code>: Run final validation and lock in the error/success state</li><li>On <code>keydown</code> in the password field: Show which requirements are met using live checkmarks</li></ol>
+<p class="v2-p"><strong>Password requirement list:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;ul id=&quot;passRequirements&quot;&gt;
+  &lt;li id=&quot;req-length&quot;&gt;✗ At least 8 characters&lt;/li&gt;
+  &lt;li id=&quot;req-upper&quot;&gt;✗ At least 1 uppercase letter&lt;/li&gt;
+  &lt;li id=&quot;req-number&quot;&gt;✗ At least 1 number&lt;/li&gt;
+  &lt;li id=&quot;req-special&quot;&gt;✗ At least 1 special character (!@#$%)&lt;/li&gt;
+&lt;/ul&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Hint for updating requirements:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function updateReq(id, passed) {
+  var el = document.getElementById(id);
+  el.innerText = (passed ? &quot;✓ &quot; : &quot;✗ &quot;) + el.innerText.slice(2);
+  el.style.color = passed ? &quot;green&quot; : &quot;red&quot;;
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4: Event Delegation Menu System</h3>
+<p class="v2-p"><strong>Objective:</strong> Build a dynamic navigation system using only ONE event listener.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> A CMS sidebar where menu items are loaded dynamically from an API. You can't attach individual listeners because items are added after page load.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create a <code>&lt;nav&gt;</code> with sections: Home, Products, Blog, Contact</li><li>Products has a <strong>dropdown submenu</strong> that opens on hover using <code>mouseenter</code>/<code>mouseleave</code></li><li>All navigation clicks are handled by <strong>one</strong> listener on the <code>&lt;nav&gt;</code> element</li><li>In the handler, use <code>event.target.dataset.page</code> to identify which page was clicked</li><li>Update a <code>&lt;main&gt;</code> area with fake content for each page</li><li>Add a "New Menu Item" button that:</li></ol>
+<p class="v2-p">- Adds a new <code>&lt;li&gt;</code> to the nav dynamically    - Works with the existing delegation listener immediately · no new listener needed</p>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>How does event delegation work for dynamically added items?</li><li>What is the difference between <code>event.target</code> and <code>event.currentTarget</code> in your single listener?</li><li>How would you prevent the dropdown from closing when moving from the menu item to its submenu?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 5: Stopwatch with Timing Events</h3>
+<p class="v2-p"><strong>Objective:</strong> Build a fully functional stopwatch.</p>
+<p class="v2-p"><strong>Features:</strong></p>
+<ul class="v2-ul"><li>Start / Stop / Reset / Lap buttons</li><li>Displays <code>MM:SS.ms</code> (minutes, seconds, milliseconds)</li><li>Lap times stored and displayed in a list</li><li>Start button label changes to "Pause" when running</li></ul>
+<p class="v2-p"><strong>Key logic:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var startTime = null;
+var elapsedTime = 0; // ms
+var timerInterval = null;
+
+function start() {
+  startTime = Date.now() - elapsedTime; // Resume from where we stopped
+  timerInterval = setInterval(update, 10); // Update every 10ms
+}
+
+function stop() {
+  elapsedTime = Date.now() - startTime;
+  clearInterval(timerInterval);
+}
+
+function update() {
+  var elapsed = Date.now() - startTime;
+  var ms = Math.floor((elapsed % 1000) / 10);
+  var s  = Math.floor((elapsed / 1000) % 60);
+  var m  = Math.floor(elapsed / 60000);
+  document.getElementById(&quot;display&quot;).innerText =
+    pad(m) + &quot;:&quot; + pad(s) + &quot;.&quot; + pad(ms);
+}
+
+function pad(n) { return String(n).padStart(2, &quot;0&quot;); }</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why do we use <code>Date.now()</code> as the source of truth rather than incrementing a counter in <code>setInterval</code>?</li><li>What does <code>elapsedTime = Date.now() - startTime</code> save when the user clicks Stop?</li><li>Why set the interval to 10ms but display only 2 digits of milliseconds?</li></ol>
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 3 · PROJECT SIMULATION</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>9. Applied Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">10. Project Simulation: Interactive Quiz App</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Project Overview</h3>
+<p class="v2-p">You are a developer at <strong>LearnFast</strong>, an online education platform. You are building a <strong>timed multiple-choice quiz engine</strong> · a single-page app that:</p>
+<ul class="v2-ul"><li>Presents questions one at a time</li><li>Tracks time per question and total time</li><li>Accepts keyboard shortcuts (number keys 1 · 4 to answer, Escape to skip)</li><li>Shows animated progress and score tracking</li><li>Validates hover/click interactions with visual feedback</li><li>Ends with a results screen and replay option</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1: Setup &amp; Core Quiz Logic</h3>
+<p class="v2-p"><strong>Goal:</strong> Display questions, handle answers via mouse click and keyboard.</p>
+<p class="v2-p"><strong>Preview micro-example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var questions = [
+  {
+    question: &quot;Which keyword declares a variable in modern JavaScript?&quot;,
+    options: [&quot;var&quot;, &quot;let&quot;, &quot;dim&quot;, &quot;local&quot;],
+    correct: 1  // Index of correct answer
+  }
+];
+
+var currentQuestion = 0;
+var score = 0;
+
+function showQuestion() {
+  var q = questions[currentQuestion];
+  document.getElementById(&quot;questionText&quot;).innerText = q.question;
+
+  var optionsList = document.getElementById(&quot;options&quot;);
+  optionsList.innerHTML = &quot;&quot;;
+
+  q.options.forEach(function(option, index) {
+    var li = document.createElement(&quot;li&quot;);
+    li.innerText = (index + 1) + &quot;. &quot; + option;
+    li.dataset.index = index;
+    li.classList.add(&quot;option&quot;);
+    optionsList.appendChild(li);
+  });
+}</code></pre></div></div>
+<p class="v2-p"><strong>Milestones:</strong></p>
+<ul class="v2-ul"><li>[ ] Array of at least 8 quiz questions with 4 options each and a correct index</li><li>[ ] <code>showQuestion()</code> renders the current question</li><li>[ ] Clicking an option: highlights it (green if correct, red if wrong), shows correct answer</li><li>[ ] After 1.5 seconds, auto-advances to the next question</li><li>[ ] Score increments on correct answers</li><li>[ ] <strong>Keyboard shortcut:</strong> pressing <code>1</code>, <code>2</code>, <code>3</code>, or <code>4</code> selects the corresponding option</li><li>[ ] <strong>Escape key:</strong> skips the current question (marks as skipped, advances)</li><li>[ ] Progress bar fills proportionally as questions are answered</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 2: Timer and Event Delegation</h3>
+<p class="v2-p"><strong>Goal:</strong> Add per-question time pressure and efficient event handling.</p>
+<p class="v2-p"><strong>Preview micro-example · per-question timer:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var timePerQuestion = 15; // seconds
+var timeLeft;
+var questionTimer;
+
+function startQuestionTimer() {
+  timeLeft = timePerQuestion;
+  updateTimerDisplay();
+
+  questionTimer = setInterval(function() {
+    timeLeft--;
+    updateTimerDisplay();
+
+    if (timeLeft &lt;= 0) {
+      clearInterval(questionTimer);
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  var el = document.getElementById(&quot;timer&quot;);
+  el.innerText = timeLeft + &quot;s&quot;;
+  el.style.color = timeLeft &lt;= 5 ? &quot;red&quot; : &quot;#333&quot;;
+}
+
+function handleTimeout() {
+  // Mark as wrong, show correct answer, then advance
+  markAnswerAs(&quot;timeout&quot;);
+  setTimeout(nextQuestion, 1500);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Milestones:</strong></p>
+<ul class="v2-ul"><li>[ ] 15-second countdown per question, displayed visually</li><li>[ ] Timer turns red when ≤ 5 seconds remain</li><li>[ ] Timer resets for each new question</li><li>[ ] Auto-submits and marks wrong if time runs out</li><li>[ ] Event delegation on the options container · one listener handles all option clicks</li><li>[ ] <code>mouseover</code>/<code>mouseleave</code> on options for hover styling (without affecting already-answered questions)</li><li>[ ] <code>beforeunload</code> warning if quiz is in progress: "Your quiz progress will be lost"</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 3: Results and Replay</h3>
+<p class="v2-p"><strong>Goal:</strong> Show final results with animation, replay capability, and review mode.</p>
+<p class="v2-p"><strong>Preview micro-example · building result summary:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function showResults() {
+  var percentage = Math.round((score / questions.length) * 100);
+  var grade = percentage &gt;= 90 ? &quot;A&quot; :
+              percentage &gt;= 80 ? &quot;B&quot; :
+              percentage &gt;= 70 ? &quot;C&quot; :
+              percentage &gt;= 60 ? &quot;D&quot; : &quot;F&quot;;
+
+  var resultsDiv = document.getElementById(&quot;results&quot;);
+  resultsDiv.innerHTML =
+    &quot;&lt;h2&gt;Quiz Complete!&lt;/h2&gt;&quot; +
+    &quot;&lt;p class=&#x27;score-display&#x27;&gt;&quot; + score + &quot;/&quot; + questions.length + &quot;&lt;/p&gt;&quot; +
+    &quot;&lt;p&gt;&quot; + percentage + &quot;% — Grade: &quot; + grade + &quot;&lt;/p&gt;&quot;;
+
+  // Animate score counting up from 0
+  var displayScore = 0;
+  var counter = setInterval(function() {
+    displayScore++;
+    document.querySelector(&quot;.score-display&quot;).innerText =
+      displayScore + &quot;/&quot; + questions.length;
+    if (displayScore &gt;= score) clearInterval(counter);
+  }, 100);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Milestones:</strong></p>
+<ul class="v2-ul"><li>[ ] Results screen shows score, percentage, grade, and total time taken</li><li>[ ] Score number animates counting up from 0</li><li>[ ] "Review Answers" button shows each question with user's answer vs. correct answer</li><li>[ ] Questions answered correctly shown in green, incorrectly in red, skipped in grey</li><li>[ ] "Try Again" button resets all state and restarts the quiz</li><li>[ ] A confetti animation (using <code>setInterval</code> + <code>createElement</code>) fires if score ≥ 80%</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Complete Project Template</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;LearnFast Quiz Engine&lt;/title&gt;
+  &lt;style&gt;
+    * { box-sizing: border-box; }
+    body {
+      font-family: &#x27;Segoe UI&#x27;, Arial, sans-serif;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f0f2f5;
+    }
+
+    #quizCard {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    /* Progress bar */
+    #progressBar {
+      height: 8px;
+      background: #ecf0f1;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    #progressFill {
+      height: 100%;
+      background: linear-gradient(to right, #3498db, #2ecc71);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    /* Header row */
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    #questionNumber { color: #888; font-size: 0.9em; }
+    #score-display { font-weight: bold; color: #2ecc71; }
+    #timer {
+      font-size: 1.4em;
+      font-weight: bold;
+      font-family: monospace;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* Question */
+    #questionText {
+      font-size: 1.3em;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* Options */
+    #options {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #options li {
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.1s;
+      user-select: none;
+    }
+
+    #options li:hover:not(.answered) {
+      border-color: #3498db;
+      background: #eaf4fd;
+      transform: translateX(4px);
+    }
+
+    #options li.correct {
+      border-color: #2ecc71;
+      background: #d5f5e3;
+    }
+
+    #options li.wrong {
+      border-color: #e74c3c;
+      background: #fde8e6;
+    }
+
+    #options li.reveal {
+      border-color: #2ecc71;
+      background: #eafaf1;
+    }
+
+    #options li.answered { cursor: default; }
+
+    /* Feedback */
+    #feedback {
+      text-align: center;
+      font-size: 1.1em;
+      min-height: 28px;
+      margin-top: 16px;
+      font-weight: bold;
+    }
+
+    /* Keyboard hint */
+    .keyboard-hint {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.8em;
+      margin-top: 12px;
+    }
+
+    /* Results */
+    #resultsScreen {
+      display: none;
+      text-align: center;
+    }
+
+    .big-score {
+      font-size: 72px;
+      font-weight: bold;
+      color: #3498db;
+      margin: 10px 0;
+    }
+
+    .grade-badge {
+      display: inline-block;
+      width: 70px;
+      height: 70px;
+      line-height: 70px;
+      border-radius: 50%;
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+      margin: 10px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      margin: 6px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-success { background: #2ecc71; color: white; }
+    .btn-secondary { background: #95a5a6; color: white; }
+
+    /* Review */
+    #reviewSection { margin-top: 20px; text-align: left; }
+    .review-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+    .review-item.correct-review { background: #d5f5e3; border-color: #2ecc71; }
+    .review-item.wrong-review   { background: #fde8e6; border-color: #e74c3c; }
+    .review-item.skip-review    { background: #f0f0f0; border-color: #ccc; }
+
+    /* Confetti particle */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      animation: fall 1.5s ease-in forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div id=&quot;quizCard&quot;&gt;
+
+  &lt;!-- QUIZ SCREEN --&gt;
+  &lt;div id=&quot;quizScreen&quot;&gt;
+    &lt;div id=&quot;progressBar&quot;&gt;&lt;div id=&quot;progressFill&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+
+    &lt;div class=&quot;quiz-header&quot;&gt;
+      &lt;span id=&quot;questionNumber&quot;&gt;Question 1 of 8&lt;/span&gt;
+      &lt;span id=&quot;score-display&quot;&gt;Score: 0&lt;/span&gt;
+      &lt;span id=&quot;timer&quot;&gt;15s&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;p id=&quot;questionText&quot;&gt;Loading question...&lt;/p&gt;
+
+    &lt;ul id=&quot;options&quot;&gt;&lt;/ul&gt;
+
+    &lt;p id=&quot;feedback&quot;&gt;&lt;/p&gt;
+    &lt;p class=&quot;keyboard-hint&quot;&gt;Press 1–4 to answer · ESC to skip&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;!-- RESULTS SCREEN --&gt;
+  &lt;div id=&quot;resultsScreen&quot;&gt;
+    &lt;h2&gt;🎉 Quiz Complete!&lt;/h2&gt;
+    &lt;div class=&quot;big-score&quot; id=&quot;animatedScore&quot;&gt;0/8&lt;/div&gt;
+    &lt;div id=&quot;gradeBadge&quot; class=&quot;grade-badge&quot;&gt;?&lt;/div&gt;
+    &lt;p id=&quot;percentText&quot;&gt;&lt;/p&gt;
+    &lt;p id=&quot;timeText&quot;&gt;&lt;/p&gt;
+    &lt;div&gt;
+      &lt;button class=&quot;btn btn-primary&quot; onclick=&quot;replayQuiz()&quot;&gt;🔄 Try Again&lt;/button&gt;
+      &lt;button class=&quot;btn btn-secondary&quot; onclick=&quot;toggleReview()&quot;&gt;📖 Review Answers&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;div id=&quot;reviewSection&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// ── DATA ──────────────────────────────────────────────────────────────────────
+var questions = [
+  {
+    q: &quot;What does DOM stand for?&quot;,
+    options: [&quot;Document Object Model&quot;,&quot;Display Object Method&quot;,&quot;Data Output Mode&quot;,&quot;Dynamic Object Map&quot;],
+    correct: 0
+  },
+  {
+    q: &quot;Which method finds an element by its id?&quot;,
+    options: [&quot;querySelector&quot;,&quot;getElementsByTagName&quot;,&quot;getElementById&quot;,&quot;findElement&quot;],
+    correct: 2
+  },
+  {
+    q: &quot;Which event fires instantly on every keystroke?&quot;,
+    options: [&quot;onchange&quot;,&quot;onblur&quot;,&quot;oninput&quot;,&quot;onkeypress&quot;],
+    correct: 2
+  },
+  {
+    q: &quot;What does event.preventDefault() do?&quot;,
+    options: [
+      &quot;Stops the event from bubbling&quot;,
+      &quot;Stops the browser&#x27;s default action&quot;,
+      &quot;Removes the event listener&quot;,
+      &quot;Cancels all pending timers&quot;
+    ],
+    correct: 1
+  },
+  {
+    q: &quot;Which function runs code once after a delay?&quot;,
+    options: [&quot;setInterval&quot;,&quot;setTimeout&quot;,&quot;requestAnimationFrame&quot;,&quot;clearInterval&quot;],
+    correct: 1
+  },
+  {
+    q: &quot;What is the correct way to attach multiple handlers to one event?&quot;,
+    options: [
+      &quot;element.onclick = fn1; element.onclick = fn2;&quot;,
+      &quot;element.on(&#x27;click&#x27;, fn1, fn2)&quot;,
+      &quot;element.addEventListener(&#x27;click&#x27;, fn1); element.addEventListener(&#x27;click&#x27;, fn2);&quot;,
+      &quot;element.attachEvent(fn1); element.attachEvent(fn2);&quot;
+    ],
+    correct: 2
+  },
+  {
+    q: &quot;Which fires ONLY when the mouse enters the element itself (not children)?&quot;,
+    options: [&quot;mouseover&quot;,&quot;mouseenter&quot;,&quot;mousemove&quot;,&quot;mousedown&quot;],
+    correct: 1
+  },
+  {
+    q: &quot;What does event.stopPropagation() do?&quot;,
+    options: [
+      &quot;Prevents the default browser action&quot;,
+      &quot;Stops the event from reaching parent elements&quot;,
+      &quot;Removes the event from the queue&quot;,
+      &quot;Stops all timers&quot;
+    ],
+    correct: 1
+  }
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+var currentQ = 0;
+var score = 0;
+var answered = false;
+var timeLeft = 15;
+var questionTimer = null;
+var quizStartTime = null;
+var userAnswers = []; // Stores { selectedIndex, correct, skipped }
+var reviewVisible = false;
+var gradeColors = { A:&quot;#2ecc71&quot;, B:&quot;#27ae60&quot;, C:&quot;#f39c12&quot;, D:&quot;#e67e22&quot;, F:&quot;#e74c3c&quot; };
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function initQuiz() {
+  currentQ = 0;
+  score = 0;
+  answered = false;
+  userAnswers = [];
+  quizStartTime = Date.now();
+  document.getElementById(&quot;quizScreen&quot;).style.display = &quot;block&quot;;
+  document.getElementById(&quot;resultsScreen&quot;).style.display = &quot;none&quot;;
+  showQuestion();
+}
+
+// ── SHOW QUESTION ─────────────────────────────────────────────────────────────
+function showQuestion() {
+  answered = false;
+  var q = questions[currentQ];
+
+  document.getElementById(&quot;questionText&quot;).innerText = q.q;
+  document.getElementById(&quot;questionNumber&quot;).innerText =
+    &quot;Question &quot; + (currentQ + 1) + &quot; of &quot; + questions.length;
+  document.getElementById(&quot;feedback&quot;).innerText = &quot;&quot;;
+
+  // Progress bar
+  document.getElementById(&quot;progressFill&quot;).style.width =
+    (currentQ / questions.length * 100) + &quot;%&quot;;
+
+  // Build options
+  var ol = document.getElementById(&quot;options&quot;);
+  ol.innerHTML = &quot;&quot;;
+
+  q.options.forEach(function(opt, i) {
+    var li = document.createElement(&quot;li&quot;);
+    li.innerHTML = &quot;&lt;strong&gt;&quot; + (i + 1) + &quot;.&lt;/strong&gt; &quot; + opt;
+    li.dataset.index = i;
+    ol.appendChild(li);
+  });
+
+  startTimer();
+}
+
+// ── TIMER ─────────────────────────────────────────────────────────────────────
+function startTimer() {
+  clearInterval(questionTimer);
+  timeLeft = 15;
+  updateTimer();
+
+  questionTimer = setInterval(function() {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft &lt;= 0) {
+      clearInterval(questionTimer);
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  var el = document.getElementById(&quot;timer&quot;);
+  el.innerText = timeLeft + &quot;s&quot;;
+  el.style.color = timeLeft &lt;= 5 ? &quot;#e74c3c&quot; : &quot;#333&quot;;
+}
+
+function handleTimeout() {
+  if (answered) return;
+  answered = true;
+  revealAnswer(null, &quot;timeout&quot;);
+}
+
+// ── EVENT DELEGATION on options list ─────────────────────────────────────────
+document.getElementById(&quot;options&quot;).addEventListener(&quot;click&quot;, function(event) {
+  var li = event.target.closest(&quot;li&quot;);
+  if (!li || answered) return;
+  selectAnswer(parseInt(li.dataset.index));
+});
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+document.addEventListener(&quot;keydown&quot;, function(event) {
+  if (document.getElementById(&quot;quizScreen&quot;).style.display === &quot;none&quot;) return;
+
+  if (!answered &amp;&amp; [&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;].includes(event.key)) {
+    var idx = parseInt(event.key) - 1;
+    if (idx &lt; questions[currentQ].options.length) {
+      selectAnswer(idx);
+    }
+  }
+
+  if (event.key === &quot;Escape&quot; &amp;&amp; !answered) {
+    answered = true;
+    revealAnswer(null, &quot;skipped&quot;);
+  }
+});
+
+// ── ANSWER LOGIC ──────────────────────────────────────────────────────────────
+function selectAnswer(selectedIndex) {
+  if (answered) return;
+  answered = true;
+  clearInterval(questionTimer);
+
+  var correct = questions[currentQ].correct;
+  var isRight = selectedIndex === correct;
+  if (isRight) score++;
+
+  userAnswers.push({
+    selected: selectedIndex,
+    correct: correct,
+    skipped: false,
+    wasRight: isRight
+  });
+
+  revealAnswer(selectedIndex, isRight ? &quot;correct&quot; : &quot;wrong&quot;);
+}
+
+function revealAnswer(selectedIndex, result) {
+  var items = document.querySelectorAll(&quot;#options li&quot;);
+  var correct = questions[currentQ].correct;
+
+  items.forEach(function(li) { li.classList.add(&quot;answered&quot;); });
+
+  if (result === &quot;correct&quot;) {
+    items[selectedIndex].classList.add(&quot;correct&quot;);
+    document.getElementById(&quot;feedback&quot;).innerHTML =
+      &#x27;&lt;span style=&quot;color:#2ecc71&quot;&gt;✓ Correct!&lt;/span&gt;&#x27;;
+  } else if (result === &quot;wrong&quot;) {
+    items[selectedIndex].classList.add(&quot;wrong&quot;);
+    items[correct].classList.add(&quot;reveal&quot;);
+    document.getElementById(&quot;feedback&quot;).innerHTML =
+      &#x27;&lt;span style=&quot;color:#e74c3c&quot;&gt;✗ Wrong.&lt;/span&gt; Correct: &lt;strong&gt;&#x27; +
+      questions[currentQ].options[correct] + &#x27;&lt;/strong&gt;&#x27;;
+  } else if (result === &quot;timeout&quot;) {
+    items[correct].classList.add(&quot;reveal&quot;);
+    document.getElementById(&quot;feedback&quot;).innerHTML =
+      &#x27;&lt;span style=&quot;color:#e67e22&quot;&gt;⏱ Time\&#x27;s up!&lt;/span&gt; Correct: &lt;strong&gt;&#x27; +
+      questions[currentQ].options[correct] + &#x27;&lt;/strong&gt;&#x27;;
+    userAnswers.push({ selected: null, correct: correct, skipped: false, wasRight: false });
+  } else if (result === &quot;skipped&quot;) {
+    items[correct].classList.add(&quot;reveal&quot;);
+    document.getElementById(&quot;feedback&quot;).innerHTML =
+      &#x27;&lt;span style=&quot;color:#95a5a6&quot;&gt;⏭ Skipped.&lt;/span&gt; Correct: &lt;strong&gt;&#x27; +
+      questions[currentQ].options[correct] + &#x27;&lt;/strong&gt;&#x27;;
+    userAnswers.push({ selected: null, correct: correct, skipped: true, wasRight: false });
+  }
+
+  document.getElementById(&quot;score-display&quot;).innerText = &quot;Score: &quot; + score;
+
+  setTimeout(nextQuestion, 1800);
+}
+
+// ── ADVANCE ───────────────────────────────────────────────────────────────────
+function nextQuestion() {
+  currentQ++;
+  if (currentQ &gt;= questions.length) {
+    showResults();
+  } else {
+    showQuestion();
+  }
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────────
+function showResults() {
+  clearInterval(questionTimer);
+  document.getElementById(&quot;quizScreen&quot;).style.display = &quot;none&quot;;
+  var results = document.getElementById(&quot;resultsScreen&quot;);
+  results.style.display = &quot;block&quot;;
+
+  document.getElementById(&quot;progressFill&quot;).style.width = &quot;100%&quot;;
+
+  var totalTime = Math.round((Date.now() - quizStartTime) / 1000);
+  var pct = Math.round(score / questions.length * 100);
+  var grade = pct &gt;= 90 ? &quot;A&quot; : pct &gt;= 80 ? &quot;B&quot; : pct &gt;= 70 ? &quot;C&quot; : pct &gt;= 60 ? &quot;D&quot; : &quot;F&quot;;
+
+  document.getElementById(&quot;percentText&quot;).innerText = pct + &quot;% — Grade: &quot; + grade;
+  document.getElementById(&quot;timeText&quot;).innerText = &quot;Completed in &quot; + totalTime + &quot; seconds&quot;;
+
+  var badge = document.getElementById(&quot;gradeBadge&quot;);
+  badge.innerText = grade;
+  badge.style.backgroundColor = gradeColors[grade];
+
+  // Animate score counting up
+  var display = 0;
+  var counter = setInterval(function() {
+    display++;
+    document.getElementById(&quot;animatedScore&quot;).innerText = display + &quot;/&quot; + questions.length;
+    if (display &gt;= score) clearInterval(counter);
+  }, 120);
+
+  if (pct &gt;= 80) launchConfetti();
+}
+
+// ── REVIEW ────────────────────────────────────────────────────────────────────
+function toggleReview() {
+  reviewVisible = !reviewVisible;
+  var section = document.getElementById(&quot;reviewSection&quot;);
+
+  if (!reviewVisible) {
+    section.innerHTML = &quot;&quot;;
+    return;
+  }
+
+  section.innerHTML = &quot;&lt;h3&gt;Answer Review&lt;/h3&gt;&quot;;
+
+  questions.forEach(function(q, i) {
+    var answer = userAnswers[i];
+    if (!answer) return;
+
+    var div = document.createElement(&quot;div&quot;);
+    div.className = &quot;review-item &quot; +
+      (answer.skipped ? &quot;skip-review&quot; : answer.wasRight ? &quot;correct-review&quot; : &quot;wrong-review&quot;);
+
+    var userAnswerText = answer.selected !== null
+      ? q.options[answer.selected]
+      : (answer.skipped ? &quot;Skipped&quot; : &quot;Timed out&quot;);
+
+    div.innerHTML =
+      &quot;&lt;strong&gt;Q&quot; + (i+1) + &quot;:&lt;/strong&gt; &quot; + q.q + &quot;&lt;br&gt;&quot; +
+      &quot;&lt;span&gt;Your answer: &lt;em&gt;&quot; + userAnswerText + &quot;&lt;/em&gt;&lt;/span&gt;&lt;br&gt;&quot; +
+      (!answer.wasRight
+        ? &quot;&lt;span style=&#x27;color:#2ecc71&#x27;&gt;Correct: &lt;em&gt;&quot; + q.options[answer.correct] + &quot;&lt;/em&gt;&lt;/span&gt;&quot;
+        : &quot;&quot;);
+
+    section.appendChild(div);
+  });
+}
+
+// ── REPLAY ────────────────────────────────────────────────────────────────────
+function replayQuiz() {
+  reviewVisible = false;
+  document.getElementById(&quot;reviewSection&quot;).innerHTML = &quot;&quot;;
+  // Shuffle questions
+  questions.sort(function() { return Math.random() - 0.5; });
+  initQuiz();
+}
+
+// ── CONFETTI ─────────────────────────────────────────────────────────────────
+function launchConfetti() {
+  var colours = [&quot;#e74c3c&quot;,&quot;#3498db&quot;,&quot;#2ecc71&quot;,&quot;#f1c40f&quot;,&quot;#9b59b6&quot;,&quot;#e67e22&quot;];
+  var count = 0;
+  var burst = setInterval(function() {
+    for (var i = 0; i &lt; 5; i++) {
+      var dot = document.createElement(&quot;div&quot;);
+      dot.className = &quot;confetti&quot;;
+      dot.style.left = Math.random() * 100 + &quot;vw&quot;;
+      dot.style.top = &quot;-10px&quot;;
+      dot.style.backgroundColor = colours[Math.floor(Math.random() * colours.length)];
+      dot.style.transform = &quot;rotate(&quot; + Math.random() * 360 + &quot;deg)&quot;;
+      document.body.appendChild(dot);
+      setTimeout(function(d) { d.remove(); }, 1600, dot);
+    }
+    count++;
+    if (count &gt;= 10) clearInterval(burst);
+  }, 120);
+}
+
+// ── BEFOREUNLOAD WARNING ──────────────────────────────────────────────────────
+window.addEventListener(&quot;beforeunload&quot;, function(event) {
+  if (currentQ &gt; 0 &amp;&amp; currentQ &lt; questions.length &amp;&amp;
+      document.getElementById(&quot;quizScreen&quot;).style.display !== &quot;none&quot;) {
+    event.preventDefault();
+    event.returnValue = &quot;&quot;;
+  }
+});
+
+// ── START ─────────────────────────────────────────────────────────────────────
+initQuiz();
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reflection Questions</h3>
+<ol class="v2-ol"><li><strong>Event delegation is used on the options list.</strong> Why is this better than adding a click listener to each <code>&lt;li&gt;</code> individually? What would happen if you needed to dynamically add more options?</li></ol>
+<ol class="v2-ol"><li><strong>Both keyboard and mouse can trigger the same action (answer a question).</strong> How does the code ensure that answering via keyboard does not conflict with a simultaneous mouse click?</li></ol>
+<ol class="v2-ol"><li><strong>The <code>beforeunload</code> listener has conditions before showing the warning.</strong> Why are those conditions important? What would the user experience be without them?</li></ol>
+<ol class="v2-ol"><li><strong>The confetti uses <code>setInterval</code> with a nested <code>setTimeout</code>.</strong> What role does each timer play, and why are both needed?</li></ol>
+<ol class="v2-ol"><li><strong>How would this project change in a real company?</strong> Consider: loading questions from a database, saving progress if the user refreshes, supporting multiple users, tracking analytics per question.</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Optional Advanced Features</h3>
+<ul class="v2-ul"><li>[ ] <strong>Difficulty levels:</strong> <code>easy</code> (30s), <code>medium</code> (15s), <code>hard</code> (8s) · selected before quiz starts</li><li>[ ] <strong>Category filter:</strong> Tag each question with a category; let users choose which categories to include</li><li>[ ] <strong>LocalStorage resume:</strong> Save quiz progress so a page refresh can resume from where the user left off</li><li>[ ] <strong>Leaderboard:</strong> Record name + score + time in <code>localStorage</code>, show top 5 scores</li><li>[ ] <strong>Sound effects:</strong> Use the Web Audio API to play a short tone on correct/wrong answers</li><li>[ ] <strong>Custom events:</strong> Dispatch a custom <code>quizComplete</code> event when finished; have a separate analytics listener handle it</li></ul>
+<hr class="v2-hr">
+<p class="v2-p"># 11. Completion Checklist &amp; Summary</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>10. Project Simulation: Interactive Quiz App</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Errors · Quick Reference</div><div class="pc" id="chk11"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td><code>addEventListener("onclick", ...)</code> · notice the "on"</td><td>Mixing property style with addEventListener</td><td>Remove "on": use <code>"click"</code>, not <code>"onclick"</code></td></tr><tr><td>Handler fires immediately: <code>btn.addEventListener("click", fn())</code></td><td>Called the function instead of passing a reference</td><td>Pass reference: <code>fn</code>, not <code>fn()</code></td></tr><tr><td><code>removeEventListener</code> does nothing</td><td>Trying to remove an anonymous function</td><td>Always use named functions when removal is needed</td></tr><tr><td>Multiple <code>setInterval</code> stacking up</td><td>Starting a new interval without clearing the old one</td><td>Always <code>clearInterval(id)</code> before starting a new one</td></tr><tr><td><code>this</code> is <code>undefined</code> in arrow function handler</td><td>Arrow functions don't bind their own <code>this</code></td><td>Use regular <code>function</code> or use <code>event.target</code></td></tr><tr><td><code>event.key</code> returns wrong value</td><td>Using <code>keyCode</code> (deprecated)</td><td>Use <code>event.key</code> for reliable modern key detection</td></tr><tr><td><code>stopPropagation</code> breaks unrelated listeners</td><td>Stopping bubbling too aggressively</td><td>Use event delegation; only stop propagation when truly necessary</td></tr><tr><td><code>DOMContentLoaded</code> fires too late (after script runs inline)</td><td>Script placed at top of <code>&lt;head&gt;</code> without <code>defer</code></td><td>Move scripts to end of <code>&lt;body&gt;</code> or use <code>defer</code> attribute</td></tr><tr><td><code>onchange</code> not firing while typing</td><td>Expecting it to fire on every keystroke</td><td>Use <code>oninput</code> for real-time feedback, <code>onchange</code> for final value</td></tr><tr><td>Double <code>setInterval</code> ticking (interval not cleared on re-start)</td><td>Start function called twice</td><td>Guard with <code>if (intervalId) return;</code> or clear first</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Errors · Quick Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">One-Sentence Summary</div><div class="pc" id="chk12"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>JavaScript events transform static pages into interactive experiences · by mastering the three-part model (element → event → handler), the bubbling mechanism, the Event Object, and <code>addEventListener</code>'s full capabilities, you gain complete control over every user interaction and browser lifecycle moment.</strong></p></blockquote>
+<hr class="v2-hr">
+<p class="v2-p"><em>Tutorial generated by AI_TUTORIAL_GENERATOR · Source: W3Schools JavaScript Events series (8 pages) · Format: Markdown</em></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>One-Sentence Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lesson 29 Project</div><div class="build-req"><p class="v2-p">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code h</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>My Project</title>
+</head>
+<body>
+<!-- Your code here -->
+</body>
+</html>`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-29-lesson-29-project</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 29 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-29-lesson-29-project/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 29 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. What Are JavaScript Events?</li><li>✅ 2. Mouse Events</li><li>✅ 3. Keyboard Events</li><li>✅ 4. Load Events</li><li>✅ 5. Timing Events</li><li>✅ 6. Event Management · The Event Object</li><li>✅ 7. HTML DOM Events · Inline & Property Handlers</li><li>✅ 8. addEventListener · The Professional Way</li></ul><div class="ln"><a href="lesson_28.html" class="ln-btn">&#8592; Lesson 28</a><a href="lesson_30.html" class="ln-btn primary">Lesson 30 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 29 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

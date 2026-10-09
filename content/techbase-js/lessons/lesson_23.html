@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 23: JavaScript Debugging: Debugging Basics · The Console · Breakpoints · Error Types · Async Debugging — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="10" data-key="techbase_js_l23">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 23 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 23</div>
+      <h1>JavaScript Debugging: Debugging Basics · The Console · Breakpoints · Error Types · Async Debugging</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Lesson 23 Project</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 23</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 10 phases</span><span>🏗️ Lesson 23 Project</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">1. What Is Debugging?</div><div class="pc" id="chk1"></div></div><div class="pb2"><h3 class="v2-h3">1.1 The Big Picture</h3>
+<p class="v2-p">Imagine you bake a cake and it comes out flat. You don't throw away your entire kitchen · you <strong>investigate</strong>. Did you forget baking powder? Did you use the wrong oven temperature? The process of finding and fixing that mistake is <em>debugging</em>.</p>
+<p class="v2-p">In programming, <strong>debugging</strong> is the process of finding, understanding, and fixing errors (called <strong>bugs</strong>) in your code. The term "bug" actually comes from a real moth found in a 1940s computer that caused a malfunction · engineers "debugged" the machine by removing it.</p>
+<p class="v2-p"><strong>Why debugging matters in real life:</strong></p>
+<ul class="v2-ul"><li>A bank transfers the wrong amount because of a floating-point bug → millions lost</li><li>A hospital dosage calculator has an off-by-one error → patient safety risk</li><li>An e-commerce checkout crashes → sales lost every minute</li></ul>
+<p class="v2-p">As a JavaScript developer, debugging will consume a significant portion of your working day. Learning it properly is as important as learning to write code.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.2 How Bugs Enter Your Code</h3>
+<p class="v2-p">Bugs are introduced in three main ways:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Source</th><th>Example</th></tr></thead><tbody><tr><td><strong>Typing mistakes</strong></td><td>Writing <code>lenght</code> instead of <code>length</code></td></tr><tr><td><strong>Logic errors</strong></td><td>Dividing instead of multiplying</td></tr><tr><td><strong>Missing knowledge</strong></td><td>Not knowing that <code>typeof null === "object"</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.3 The JavaScript Debugging Toolkit</h3>
+<p class="v2-p">JavaScript gives you several tools to find bugs:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Tool</th><th>What It Does</th></tr></thead><tbody><tr><td><code>console.log()</code></td><td>Prints values to the browser console</td></tr><tr><td>Browser DevTools</td><td>A full debugging environment built into every browser</td></tr><tr><td><code>debugger</code> statement</td><td>Pauses code execution right in your script</td></tr><tr><td>Error messages</td><td>JavaScript tells you what went wrong and where</td></tr><tr><td>Breakpoints</td><td>Points where the browser pauses and lets you inspect state</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.4 The <code>debugger</code> Statement</h3>
+<p class="v2-p">The <code>debugger</code> keyword is a built-in JavaScript instruction that <strong>pauses execution</strong> of your program · but only if the browser's developer tools are open. If DevTools is closed, <code>debugger</code> does nothing.</p>
+<p class="v2-p"><strong>Simple Example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let price = 100;
+let discount = 0.2;
+
+debugger; // ← Execution pauses HERE when DevTools is open
+
+let finalPrice = price - (price * discount);
+console.log(&quot;Final price:&quot;, finalPrice);
+// Expected Output (in console): Final price: 80</code></pre></div></div>
+<p class="v2-p"><strong>What happens step by step:</strong></p>
+<ol class="v2-ol"><li><code>price</code> is set to <code>100</code></li><li><code>discount</code> is set to <code>0.2</code></li><li>The browser hits <code>debugger</code> and <strong>freezes</strong></li><li>You can now inspect <code>price</code> and <code>discount</code> in DevTools before the calculation runs</li><li>When you press "Resume", the rest of the code continues</li></ol>
+<p class="v2-p"><strong>Real-world use:</strong> You place <code>debugger</code> just <em>before</em> the line you think is causing a problem, so you can check what all the variables contain at that exact moment.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Thinking Question:</strong> What if you placed <code>debugger</code> <em>after</em> line 5 instead of before line 4? What would you see differently?</p></blockquote>
+<p class="v2-p"><strong>Common Beginner Mistake:</strong> Forgetting to remove <code>debugger</code> statements before publishing your code. Always search for and remove them before deployment.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.5 The General Debugging Workflow</h3>
+<p class="v2-p">Before diving into specific tools, here's the mindset:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1. Observe the problem   → &quot;The total shows as NaN&quot;
+2. Form a hypothesis     → &quot;Maybe one input is undefined&quot;
+3. Test your hypothesis  → Add console.log / breakpoint
+4. Fix and verify        → Make the change, re-run
+5. Repeat if needed      → Until the bug is gone</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. What Is Debugging?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">2. The Console Object</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">2.1 What Is the Console?</h3>
+<p class="v2-p">The <strong>console</strong> is a panel inside your browser's developer tools where JavaScript can print messages. Think of it as a "communication channel" between your code and yourself. When something goes wrong, you ask your code: <em>"What are you doing right now?"</em> · and the console answers.</p>
+<p class="v2-p"><strong>How to open the console:</strong></p>
+<ul class="v2-ul"><li><strong>Chrome/Edge/Firefox:</strong> Press <code>F12</code> → click the <strong>Console</strong> tab</li><li><strong>Mac:</strong> <code>Cmd + Option + J</code></li><li><strong>Windows/Linux:</strong> <code>Ctrl + Shift + J</code></li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.2 <code>console.log()</code> · The Foundation</h3>
+<p class="v2-p"><code>console.log()</code> prints any value to the console. It is the most used debugging tool in JavaScript.</p>
+<p class="v2-p"><strong>Micro-demo · Logging a single value:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let userName = &quot;Babatunde&quot;;
+console.log(userName);
+// Expected Output: Babatunde</code></pre></div></div>
+<p class="v2-p"><strong>Micro-demo · Logging multiple values:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let age = 25;
+let city = &quot;Lagos&quot;;
+console.log(&quot;Name:&quot;, userName, &quot;| Age:&quot;, age, &quot;| City:&quot;, city);
+// Expected Output: Name: Babatunde | Age: 25 | City: Lagos</code></pre></div></div>
+<p class="v2-p"><strong>Why add labels?</strong> Without labels, multiple <code>log()</code> calls look identical:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(100);   // Is this price? tax? quantity?
+console.log(100);   // Impossible to tell
+
+// Better:
+console.log(&quot;price:&quot;, 100);
+console.log(&quot;tax:&quot;, 100);  // Now clearly different</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.3 <code>console.warn()</code> · Yellow Warnings</h3>
+<p class="v2-p"><code>console.warn()</code> prints a <strong>yellow warning</strong> message. Use it when something is not broken but is potentially dangerous or unexpected.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let userAge = 17;
+
+if (userAge &lt; 18) {
+  console.warn(&quot;User is under 18 — some features will be restricted.&quot;);
+}
+// Expected Output: ⚠️ User is under 18 — some features will be restricted.</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> API rate limit approaching, optional config missing, deprecated method used.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.4 <code>console.error()</code> · Red Errors</h3>
+<p class="v2-p"><code>console.error()</code> prints a <strong>red error</strong> message with a stack trace (a list of which functions called which). Use it when something has actually gone wrong.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function getUser(id) {
+  if (!id) {
+    console.error(&quot;getUser() called without an ID. This will cause a database failure.&quot;);
+    return null;
+  }
+  return { id: id, name: &quot;Alice&quot; };
+}
+
+getUser(); // No argument provided
+// Expected Output: ❌ getUser() called without an ID. This will cause a database failure.</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.5 <code>console.table()</code> · Display Arrays and Objects as Tables</h3>
+<p class="v2-p"><code>console.table()</code> takes an array or object and displays it as a <strong>formatted table</strong> in the console · much easier to read than a raw object.</p>
+<p class="v2-p"><strong>Without table:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let students = [
+  { name: &quot;Alice&quot;, grade: &quot;A&quot; },
+  { name: &quot;Bob&quot;,   grade: &quot;B&quot; },
+  { name: &quot;Carol&quot;, grade: &quot;A&quot; }
+];
+
+console.log(students);
+// Output: Array(3) [ {...}, {...}, {...} ] ← hard to read</code></pre></div></div>
+<p class="v2-p"><strong>With table:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.table(students);
+// Expected Output:
+// ┌─────────┬─────────┬───────┐
+// │ (index) │  name   │ grade │
+// ├─────────┼─────────┼───────┤
+// │    0    │ &quot;Alice&quot; │  &quot;A&quot;  │
+// │    1    │  &quot;Bob&quot;  │  &quot;B&quot;  │
+// │    2    │ &quot;Carol&quot; │  &quot;A&quot;  │
+// └─────────┴─────────┴───────┘</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Inspecting API response data, reviewing form inputs, checking shopping cart contents.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.6 <code>console.group()</code> and <code>console.groupEnd()</code> · Organised Output</h3>
+<p class="v2-p">When you have many log statements, grouping them keeps the console clean and readable.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.group(&quot;Order Summary&quot;);
+  console.log(&quot;Item: Laptop&quot;);
+  console.log(&quot;Quantity: 1&quot;);
+  console.log(&quot;Price: ₦450,000&quot;);
+console.groupEnd();
+
+console.group(&quot;Customer Info&quot;);
+  console.log(&quot;Name: Tunde&quot;);
+  console.log(&quot;Email: tunde@email.com&quot;);
+console.groupEnd();
+
+// Expected Output:
+// ▼ Order Summary
+//     Item: Laptop
+//     Quantity: 1
+//     Price: ₦450,000
+// ▼ Customer Info
+//     Name: Tunde
+//     Email: tunde@email.com</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 Use <code>console.groupCollapsed()</code> to start a group in a <strong>collapsed</strong> state · useful when you don't always need to see the details.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.7 <code>console.time()</code> and <code>console.timeEnd()</code> · Performance Timing</h3>
+<p class="v2-p">These measure how long a block of code takes to run. Use the same label string for both.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.time(&quot;loopTimer&quot;);
+
+let total = 0;
+for (let i = 0; i &lt; 1_000_000; i++) {
+  total += i;
+}
+
+console.timeEnd(&quot;loopTimer&quot;);
+// Expected Output: loopTimer: 3.45ms  (time will vary)</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Comparing two sorting algorithms, measuring API call duration, optimising render time.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.8 <code>console.count()</code> · Count How Many Times Something Runs</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function processOrder(order) {
+  console.count(&quot;Orders processed&quot;);
+  // ... processing logic
+}
+
+processOrder({ id: 1 });
+processOrder({ id: 2 });
+processOrder({ id: 3 });
+
+// Expected Output:
+// Orders processed: 1
+// Orders processed: 2
+// Orders processed: 3</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Verifying that a callback fires the expected number of times, debugging event listeners firing repeatedly.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.9 <code>console.assert()</code> · Conditional Error Logging</h3>
+<p class="v2-p"><code>console.assert(condition, message)</code> only logs the message if the condition is <strong>false</strong>. Think of it as a built-in sanity check.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let quantity = -5;
+
+console.assert(quantity &gt; 0, &quot;❌ Quantity must be positive! Got:&quot;, quantity);
+// Expected Output: Assertion failed: ❌ Quantity must be positive! Got: -5
+
+let price = 100;
+console.assert(price &gt; 0, &quot;Price must be positive&quot;);
+// No output — condition is true, so nothing is logged</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.10 <code>console.clear()</code> · Clean Slate</h3>
+<p class="v2-p">Clears all previous console output. Useful at the start of a function you're debugging to avoid confusion with old messages.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.clear();
+console.log(&quot;Fresh start!&quot;);</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.11 Labelled Object Logging with <code>{}</code></h3>
+<p class="v2-p">A neat shortcut: wrap variables in <code>{}</code> to log their names and values together.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let firstName = &quot;Tunde&quot;;
+let score = 95;
+let passed = true;
+
+console.log({ firstName, score, passed });
+// Expected Output: { firstName: &quot;Tunde&quot;, score: 95, passed: true }</code></pre></div></div>
+<p class="v2-p">This is far more readable than:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(firstName, score, passed);
+// Output: Tunde 95 true  ← which variable is which?</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.12 Console Method Reference Table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Colour</th><th>Use For</th></tr></thead><tbody><tr><td><code>console.log()</code></td><td>White/default</td><td>General values, debugging</td></tr><tr><td><code>console.warn()</code></td><td>Yellow ⚠️</td><td>Non-critical issues</td></tr><tr><td><code>console.error()</code></td><td>Red ❌</td><td>Actual errors</td></tr><tr><td><code>console.info()</code></td><td>Blue ℹ️</td><td>Informational messages</td></tr><tr><td><code>console.table()</code></td><td>Table</td><td>Arrays and objects</td></tr><tr><td><code>console.group()</code></td><td>Grouped</td><td>Organising related logs</td></tr><tr><td><code>console.time()</code></td><td>Timer</td><td>Performance measurement</td></tr><tr><td><code>console.count()</code></td><td>Counter</td><td>How often code runs</td></tr><tr><td><code>console.assert()</code></td><td>Red if false</td><td>Sanity checks</td></tr><tr><td><code>console.clear()</code></td><td> · </td><td>Wipe the console</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. The Console Object</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">3. Breakpoints &amp; DevTools</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">3.1 What Is a Breakpoint?</h3>
+<p class="v2-p">A <strong>breakpoint</strong> is a marker you place on a line of code that tells the browser: <em>"Stop here. Freeze everything. Let me look around."</em></p>
+<p class="v2-p">When the browser hits a breakpoint:</p>
+<ul class="v2-ul"><li>All JavaScript execution <strong>pauses</strong></li><li>You can see the <strong>exact value</strong> of every variable at that moment</li><li>You can step through the code <strong>one line at a time</strong></li><li>You can inspect the <strong>call stack</strong> (which functions led to this point)</li></ul>
+<p class="v2-p"><strong>Real-world analogy:</strong> A breakpoint is like hitting <code>Pause</code> during a sports replay · you can see exactly what position every player is in at that precise moment.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.2 Opening Chrome DevTools Sources Panel</h3>
+<ol class="v2-ol"><li>Open Chrome and navigate to your page</li><li>Press <strong>F12</strong> to open DevTools</li><li>Click the <strong>Sources</strong> tab</li><li>In the left panel, find and click your JavaScript file</li><li>Your code appears in the centre panel with line numbers</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.3 Setting a Breakpoint in DevTools</h3>
+<p class="v2-p">To set a breakpoint:</p>
+<ol class="v2-ol"><li>Click on the <strong>line number</strong> in the Sources panel</li><li>A blue marker appears · that's your breakpoint</li><li>Reload the page or trigger the function</li><li>The browser pauses at your breakpoint</li></ol>
+<p class="v2-p"><strong>Example code:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function calculateTotal(price, quantity, taxRate) {
+  let subtotal = price * quantity;         // Line 2
+  let tax = subtotal * taxRate;            // Line 3
+  let total = subtotal + tax;              // Line 4
+  return total;                            // Line 5
+}
+
+let result = calculateTotal(50, 3, 0.1);
+console.log(&quot;Total:&quot;, result);
+// Expected final output: Total: 165</code></pre></div></div>
+<p class="v2-p">If you set a breakpoint on <strong>Line 3</strong>, when the function runs:</p>
+<ul class="v2-ul"><li>Line 2 has already executed → <code>subtotal = 150</code></li><li>You can hover over <code>subtotal</code> and see <code>150</code></li><li>Line 3 has <strong>not</strong> run yet → <code>tax</code> is undefined</li><li>You can now step forward to watch <code>tax</code> get its value</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.4 Stepping Controls · Moving Through Code</h3>
+<p class="v2-p">Once paused at a breakpoint, you use the control buttons in DevTools:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Button</th><th>Keyboard</th><th>What It Does</th></tr></thead><tbody><tr><td>▶ Resume</td><td>F8</td><td>Continue running until the next breakpoint</td></tr><tr><td>↷ Step Over</td><td>F10</td><td>Run the current line, stay in current function</td></tr><tr><td>↓ Step Into</td><td>F11</td><td>Jump inside a function call on the current line</td></tr><tr><td>↑ Step Out</td><td>Shift+F11</td><td>Finish current function, return to caller</td></tr><tr><td>↺ Restart Frame</td><td> · </td><td>Re-run from the start of the current function</td></tr></tbody></table></div>
+<p class="v2-p"><strong>When to use each:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function greet(name) {         // Step Into goes here
+  return &quot;Hello, &quot; + name;
+}
+
+function welcome() {
+  let msg = greet(&quot;Tunde&quot;);    // ← Paused here
+  console.log(msg);
+}</code></pre></div></div>
+<ul class="v2-ul"><li>Press <strong>Step Over (F10):</strong> <code>greet("Tunde")</code> runs completely, you land on <code>console.log(msg)</code>, <code>msg</code> is now <code>"Hello, Tunde"</code></li><li>Press <strong>Step Into (F11):</strong> You jump <em>inside</em> the <code>greet</code> function to watch it run line by line</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.5 The Scope Panel</h3>
+<p class="v2-p">While paused, the <strong>Scope panel</strong> (on the right side of Sources) shows you:</p>
+<ul class="v2-ul"><li><strong>Local:</strong> Variables in the current function</li><li><strong>Closure:</strong> Variables from outer functions</li><li><strong>Global:</strong> Window-level variables</li></ul>
+<p class="v2-p">This is incredibly powerful · you see the <em>entire state</em> of your program at one moment in time.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.6 Watch Expressions</h3>
+<p class="v2-p">You can add <strong>Watch Expressions</strong> in DevTools to monitor specific variables or expressions across steps:</p>
+<ol class="v2-ol"><li>In the Sources panel, find "Watch" on the right</li><li>Click the <code>+</code> button</li><li>Type any expression, e.g., <code>subtotal * 2</code> or <code>users.length</code></li></ol>
+<p class="v2-p">As you step through code, the watch panel automatically updates with the current value.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.7 Conditional Breakpoints</h3>
+<p class="v2-p">Sometimes a bug only occurs on a specific iteration of a loop (e.g., when <code>i === 500</code>). You don't want to click Resume 500 times. Use a <strong>conditional breakpoint</strong>:</p>
+<ol class="v2-ol"><li><strong>Right-click</strong> a line number</li><li>Select <strong>"Add conditional breakpoint"</strong></li><li>Type a condition: <code>i === 500</code></li></ol>
+<p class="v2-p">The browser only pauses when that condition is <code>true</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>for (let i = 0; i &lt; 1000; i++) {
+  processItem(items[i]);  // ← Conditional breakpoint: i === 500
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.8 Logpoints · Breakpoints That Log Without Stopping</h3>
+<p class="v2-p">A <strong>logpoint</strong> is like a <code>console.log()</code> you add through DevTools without modifying your code:</p>
+<ol class="v2-ol"><li>Right-click a line number</li><li>Select <strong>"Add logpoint"</strong></li><li>Type a message like: <code>"i is: " + i</code></li></ol>
+<p class="v2-p">The message is printed to the console every time that line runs · without pausing execution. This is ideal when stopping would change the behaviour (e.g., timing-sensitive code).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.9 The <code>debugger</code> Statement vs DevTools Breakpoints</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th><code>debugger</code> statement</th><th>DevTools Breakpoint</th></tr></thead><tbody><tr><td>In your code?</td><td>Yes</td><td>No</td></tr><tr><td>Must be removed before deploy</td><td>Yes</td><td>No (it's in the browser)</td></tr><tr><td>Works without DevTools open</td><td>No</td><td>Yes</td></tr><tr><td>Conditional?</td><td>With <code>if</code> statement</td><td>Built-in</td></tr><tr><td>Portable?</td><td>Yes (anyone can run it)</td><td>Only on your machine</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Best practice:</strong> Use the <code>debugger</code> statement during fast iteration. Use DevTools breakpoints for structured investigation.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.10 The Call Stack Panel</h3>
+<p class="v2-p">The <strong>Call Stack</strong> panel shows the chain of function calls that led to the current breakpoint. It reads from bottom (first call) to top (current position).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function step3() {
+  debugger; // ← We&#x27;re paused here
+}
+
+function step2() {
+  step3();
+}
+
+function step1() {
+  step2();
+}
+
+step1();</code></pre></div></div>
+<p class="v2-p"><strong>Call Stack will show:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>step3   ← current position (top)
+step2
+step1
+(anonymous)</code></pre></div></div>
+<p class="v2-p">Clicking any entry <strong>jumps you to that function's context</strong>, letting you inspect its local variables.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.11 Event Listener Breakpoints</h3>
+<p class="v2-p">DevTools lets you pause on any <strong>DOM event</strong> without writing any code. In the Sources panel, look for <strong>"Event Listener Breakpoints"</strong> and expand it. You can check things like:</p>
+<ul class="v2-ul"><li>Mouse → click</li><li>Keyboard → keydown</li><li>XHR/Fetch → request started</li></ul>
+<p class="v2-p">This is useful when you can't figure out which piece of code is triggering a behaviour.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Breakpoints &amp; DevTools</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">4. JavaScript Error Types</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">4.1 Why Understanding Error Types Matters</h3>
+<p class="v2-p">When JavaScript encounters a problem, it throws an <strong>Error object</strong> with:</p>
+<ul class="v2-ul"><li>A <strong>type</strong> (what kind of error)</li><li>A <strong>message</strong> (what went wrong)</li><li>A <strong>stack trace</strong> (where it happened)</li></ul>
+<p class="v2-p">Reading errors correctly is the fastest way to debug. The error message is JavaScript telling you <em>exactly</em> what is wrong.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ReferenceError: userName is not defined
+    at greetUser (app.js:5)
+    at main (app.js:12)</code></pre></div></div>
+<p class="v2-p">This tells you:</p>
+<ol class="v2-ol"><li><strong>Type:</strong> <code>ReferenceError</code></li><li><strong>Message:</strong> <code>userName is not defined</code></li><li><strong>Location:</strong> Line 5 in <code>greetUser</code>, called from line 12 in <code>main</code></li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.2 SyntaxError · Code That Cannot Be Parsed</h3>
+<p class="v2-p">A <strong>SyntaxError</strong> happens before your code even runs. JavaScript's parser reads your file and finds something that isn't valid JavaScript syntax.</p>
+<p class="v2-p"><strong>Think of it as:</strong> A grammar mistake so severe that the sentence cannot be understood.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Missing closing parenthesis
+let result = (5 + 3;
+
+// SyntaxError: Unexpected token &#x27;;&#x27;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Misspelled keyword
+funtion greet() {
+  return &quot;hello&quot;;
+}
+
+// SyntaxError: Unexpected identifier &#x27;greet&#x27;</code></pre></div></div>
+<p class="v2-p"><strong>Common causes:</strong></p>
+<ul class="v2-ul"><li>Missing <code>{</code>, <code>}</code>, <code>(</code>, <code>)</code>, <code>[</code>, <code>]</code></li><li>Misspelled <code>function</code>, <code>return</code>, <code>const</code>, <code>let</code></li><li>Missing commas in object/array literals</li><li>Invalid template literal syntax</li></ul>
+<p class="v2-p"><strong>How to fix:</strong> The line number in the error message is where the <em>parser got confused</em>, not always where the actual typo is. Often the mistake is one line <strong>above</strong> the reported line.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Thinking Question:</strong> If a <code>{</code> is missing on line 3, JavaScript might only report an error on line 10. Why?</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.3 ReferenceError · Using Something That Doesn't Exist</h3>
+<p class="v2-p">A <strong>ReferenceError</strong> occurs when you try to use a variable that has not been declared or is out of scope.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(customerName);
+// ReferenceError: customerName is not defined</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function getDiscount() {
+  let rate = 0.1;
+}
+
+console.log(rate); // rate only exists inside getDiscount
+// ReferenceError: rate is not defined</code></pre></div></div>
+<p class="v2-p"><strong>Common causes:</strong></p>
+<ul class="v2-ul"><li>Typo in a variable name (<code>usreName</code> instead of <code>userName</code>)</li><li>Using a variable before declaring it (with <code>let</code> or <code>const</code>)</li><li>Accessing a <code>let</code>/<code>const</code> variable in its Temporal Dead Zone</li><li>Variable declared inside a function, used outside</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Temporal Dead Zone example
+console.log(myVar); // ReferenceError
+let myVar = 10;     // Declaration is here</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Note:</strong> <code>var</code> behaves differently · it is <strong>hoisted</strong> and gives <code>undefined</code> instead of a ReferenceError. This is why <code>let</code> and <code>const</code> are safer.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.4 TypeError · Wrong Type for the Operation</h3>
+<p class="v2-p">A <strong>TypeError</strong> occurs when you perform an operation on a value that is the wrong type · or when you try to call something that isn't a function, or access a property on <code>null</code>/<code>undefined</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let count = 42;
+count(); // Trying to call a number as a function
+// TypeError: count is not a function</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let user = null;
+console.log(user.name);
+// TypeError: Cannot read properties of null (reading &#x27;name&#x27;)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let total = &quot;100&quot; * &quot;hello&quot;;
+// Result: NaN (Not a Number) — not a TypeError but a logic error</code></pre></div></div>
+<p class="v2-p"><strong>Common causes:</strong></p>
+<ul class="v2-ul"><li>Calling a non-function</li><li>Accessing a property on <code>null</code> or <code>undefined</code> (the #1 most common bug)</li><li>Using array methods on non-arrays</li><li>Wrong data type passed to a function</li></ul>
+<p class="v2-p"><strong>Real-world fix pattern:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Instead of:
+console.log(user.name); // Might crash
+
+// Use optional chaining:
+console.log(user?.name); // Returns undefined safely if user is null</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.5 RangeError · Value Outside Acceptable Range</h3>
+<p class="v2-p">A <strong>RangeError</strong> occurs when a value is outside the valid range for an operation.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let arr = new Array(-5);
+// RangeError: Invalid array length
+
+let num = 3.14159;
+console.log(num.toFixed(200));
+// RangeError: toFixed() digits argument must be between 0 and 100</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Stack overflow from infinite recursion
+function countdown(n) {
+  return countdown(n - 1); // No stopping condition!
+}
+countdown(10);
+// RangeError: Maximum call stack size exceeded</code></pre></div></div>
+<p class="v2-p"><strong>Common causes:</strong></p>
+<ul class="v2-ul"><li>Infinite recursion (function calling itself with no base case)</li><li>Invalid array length</li><li>Passing too large a number to formatting methods</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.6 URIError · Invalid URI Operations</h3>
+<p class="v2-p">A <strong>URIError</strong> is thrown when <code>decodeURIComponent()</code> or similar functions receive an invalid URI sequence.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>decodeURIComponent(&quot;%&quot;);
+// URIError: URI malformed</code></pre></div></div>
+<p class="v2-p">This is rare in everyday code but can appear when handling URL parameters from external sources.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.7 EvalError · Legacy <code>eval()</code> Errors</h3>
+<p class="v2-p"><strong>EvalError</strong> was historically thrown for errors in <code>eval()</code>. Modern JavaScript no longer throws it, but it exists for legacy compatibility. Avoid using <code>eval()</code> entirely · it is a security and performance risk.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.8 Custom Errors with <code>throw</code></h3>
+<p class="v2-p">You can create your own error messages using <code>throw</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function divide(a, b) {
+  if (b === 0) {
+    throw new Error(&quot;Division by zero is not allowed.&quot;);
+  }
+  return a / b;
+}
+
+try {
+  let result = divide(10, 0);
+} catch (error) {
+  console.error(&quot;Caught an error:&quot;, error.message);
+}
+// Expected Output: Caught an error: Division by zero is not allowed.</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> Validating function inputs, enforcing business rules, signalling impossible states.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.9 <code>try</code>, <code>catch</code>, <code>finally</code> · Handling Errors Gracefully</h3>
+<p class="v2-p">These three keywords let you <strong>catch errors before they crash your program</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  // Code that might throw an error
+  let data = JSON.parse(&quot;{ invalid json }&quot;);
+} catch (error) {
+  // Runs only if an error occurred
+  console.error(&quot;Failed to parse JSON:&quot;, error.message);
+} finally {
+  // ALWAYS runs, error or not
+  console.log(&quot;Parsing attempt complete.&quot;);
+}
+
+// Expected Output:
+// Failed to parse JSON: Unexpected token &#x27;i&#x27;, &quot;{ invalid json }&quot; is not valid JSON
+// Parsing attempt complete.</code></pre></div></div>
+<p class="v2-p"><strong>The <code>error</code> object has:</strong></p>
+<ul class="v2-ul"><li><code>error.name</code> · Type of error (e.g., <code>"SyntaxError"</code>)</li><li><code>error.message</code> · Human-readable description</li><li><code>error.stack</code> · Full stack trace</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.10 Reading a Stack Trace</h3>
+<p class="v2-p">A <strong>stack trace</strong> tells you the sequence of function calls that led to an error. Read it <strong>top-to-bottom</strong> · the top is where the error occurred, the bottom is where execution started.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>TypeError: Cannot read properties of undefined (reading &#x27;price&#x27;)
+    at calculateTotal (checkout.js:15:18)
+    at processCart (checkout.js:42:5)
+    at handleCheckout (app.js:103:3)
+    at HTMLButtonElement.onclick (app.js:87:1)</code></pre></div></div>
+<p class="v2-p"><strong>Reading this:</strong></p>
+<ol class="v2-ol"><li>Error happened in <code>calculateTotal</code> at line 15, column 18 of <code>checkout.js</code></li><li><code>calculateTotal</code> was called from <code>processCart</code> at line 42</li><li><code>processCart</code> was called from <code>handleCheckout</code> at line 103 of <code>app.js</code></li><li><code>handleCheckout</code> was triggered by a button click</li></ol>
+<p class="v2-p"><strong>Action:</strong> Open <code>checkout.js</code>, go to line 15, inspect what object <code>price</code> is being read from.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.11 Error Type Summary</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Error Type</th><th>When It Happens</th><th>Classic Example</th></tr></thead><tbody><tr><td><code>SyntaxError</code></td><td>Invalid syntax, code won't parse</td><td>Missing <code>}</code> or <code>)</code></td></tr><tr><td><code>ReferenceError</code></td><td>Variable doesn't exist</td><td>Using <code>x</code> before <code>let x</code></td></tr><tr><td><code>TypeError</code></td><td>Wrong type, null access</td><td><code>null.name</code></td></tr><tr><td><code>RangeError</code></td><td>Value out of bounds</td><td>Infinite recursion</td></tr><tr><td><code>URIError</code></td><td>Malformed URI</td><td><code>decodeURIComponent("%")</code></td></tr><tr><td><code>EvalError</code></td><td>Legacy <code>eval()</code> issue</td><td>Rarely seen today</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. JavaScript Error Types</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">5. Debugging Asynchronous Code</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">5.1 Why Async Code Is Harder to Debug</h3>
+<p class="v2-p">Synchronous code runs in order · line 1, then line 2, then line 3. Errors appear exactly where they happen.</p>
+<p class="v2-p">Asynchronous code is different. A fetch request, a setTimeout, or a database query happens <strong>in the future</strong>. When it completes, a callback or Promise resolves. Errors may appear in a completely different place from where the async operation was started.</p>
+<p class="v2-p"><strong>The core challenge:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(&quot;1 - Start&quot;);
+
+setTimeout(() =&gt; {
+  console.log(&quot;2 - Inside timeout&quot;);
+  throw new Error(&quot;Async error!&quot;); // ← Where does this error appear?
+}, 1000);
+
+console.log(&quot;3 - End&quot;);
+
+// Output:
+// 1 - Start
+// 3 - End
+// (1 second later...)
+// 2 - Inside timeout
+// Uncaught Error: Async error!</code></pre></div></div>
+<p class="v2-p">The code after the timeout (<code>"3 - End"</code>) runs before the timeout's callback. The error appears 1 second later, seemingly disconnected from the rest of the code.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.2 Async/Await vs Callbacks vs Promises</h3>
+<p class="v2-p">JavaScript has three ways to handle async code. Understanding each is key to debugging them.</p>
+<p class="v2-p"><strong>Callbacks (old way):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>fs.readFile(&quot;data.txt&quot;, function(err, data) {
+  if (err) {
+    console.error(&quot;Error reading file:&quot;, err);
+    return;
+  }
+  console.log(&quot;File contents:&quot;, data);
+});</code></pre></div></div>
+<p class="v2-p"><strong>Promises (modern way):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>fetch(&quot;https://api.example.com/users&quot;)
+  .then(response =&gt; response.json())
+  .then(data =&gt; console.log(data))
+  .catch(error =&gt; console.error(&quot;Fetch failed:&quot;, error));</code></pre></div></div>
+<p class="v2-p"><strong>Async/Await (cleanest syntax):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function getUsers() {
+  try {
+    let response = await fetch(&quot;https://api.example.com/users&quot;);
+    let data = await response.json();
+    console.log(data);
+  } catch (error) {
+    console.error(&quot;Fetch failed:&quot;, error);
+  }
+}</code></pre></div></div>
+<p class="v2-p">All three do the same thing. Async/await is the easiest to debug because it reads like synchronous code.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.3 Debugging Promises</h3>
+<p class="v2-p"><strong>Problem:</strong> An unhandled Promise rejection.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function getUserData(id) {
+  return fetch(`https://api.example.com/users/${id}`)
+    .then(res =&gt; res.json());
+}
+
+getUserData(999); // No .catch() — if this fails, error is silent or printed as warning</code></pre></div></div>
+<p class="v2-p"><strong>Fix · Always add <code>.catch()</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>getUserData(999)
+  .then(data =&gt; console.log(&quot;User:&quot;, data))
+  .catch(error =&gt; console.error(&quot;Could not load user:&quot;, error.message));</code></pre></div></div>
+<p class="v2-p"><strong>Simulating a rejection for debugging:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let brokenPromise = Promise.reject(new Error(&quot;Simulated failure&quot;));
+
+brokenPromise.catch(err =&gt; {
+  console.error(&quot;Caught:&quot;, err.message);
+});
+// Expected Output: Caught: Simulated failure</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.4 Debugging with <code>async</code>/<code>await</code> and <code>try</code>/<code>catch</code></h3>
+<p class="v2-p">Using <code>try/catch</code> with <code>async/await</code> is the gold standard for handling async errors:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function loadProduct(productId) {
+  try {
+    console.log(&quot;Fetching product...&quot;);
+    
+    let response = await fetch(`/api/products/${productId}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    let product = await response.json();
+    console.log(&quot;Product loaded:&quot;, product.name);
+    return product;
+    
+  } catch (error) {
+    console.error(&quot;Failed to load product:&quot;, error.message);
+    return null;
+  }
+}
+
+loadProduct(42);
+// If successful: Fetching product... → Product loaded: Laptop
+// If failed: Fetching product... → Failed to load product: HTTP error! Status: 404</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.5 Async Stack Traces in DevTools</h3>
+<p class="v2-p">Modern DevTools (Chrome, Firefox, Edge) support <strong>async stack traces</strong> · they show you not just where the error occurred, but also the <em>asynchronous chain</em> that led there.</p>
+<p class="v2-p">When you see a stack trace like:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Error: Network failure
+    at processResponse (api.js:12)
+    at async loadUser (user.js:8)     ← async frame
+    at async renderProfile (app.js:45) ← async frame</code></pre></div></div>
+<p class="v2-p">The <code>async</code> labels show you which parts of the chain are asynchronous.</p>
+<p class="v2-p"><strong>Enabling Async Stack Traces:</strong> In Chrome DevTools → Settings (⚙️) → "Capture async stack traces" → Enable</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.6 Debugging <code>setTimeout</code> and <code>setInterval</code></h3>
+<p class="v2-p">These create <strong>deferred execution</strong> · code that runs after a delay. If they contain bugs, the error appears after the delay with no obvious connection to where the timer was set.</p>
+<p class="v2-p"><strong>Debugging strategy: add logging before, inside, and after:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(&quot;Timer is being set...&quot;);
+
+let counter = 0;
+let intervalId = setInterval(() =&gt; {
+  counter++;
+  console.log(&quot;Interval tick:&quot;, counter);
+  
+  if (counter &gt;= 5) {
+    console.log(&quot;Clearing interval after 5 ticks&quot;);
+    clearInterval(intervalId);
+  }
+}, 500);
+
+// Expected Output (every 500ms):
+// Timer is being set...
+// Interval tick: 1
+// Interval tick: 2
+// Interval tick: 3
+// Interval tick: 4
+// Interval tick: 5
+// Clearing interval after 5 ticks</code></pre></div></div>
+<p class="v2-p"><strong>Common mistake:</strong> Forgetting to clear an interval, causing it to run forever.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.7 Debugging Parallel Async Operations with <code>Promise.all()</code></h3>
+<p class="v2-p">When running multiple async operations at once, you need to handle errors for the whole group:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function loadDashboard(userId) {
+  try {
+    let [user, orders, notifications] = await Promise.all([
+      fetch(`/api/users/${userId}`).then(r =&gt; r.json()),
+      fetch(`/api/orders/${userId}`).then(r =&gt; r.json()),
+      fetch(`/api/notifications/${userId}`).then(r =&gt; r.json())
+    ]);
+    
+    console.log(&quot;User:&quot;, user.name);
+    console.log(&quot;Orders count:&quot;, orders.length);
+    console.log(&quot;Notifications:&quot;, notifications.length);
+    
+  } catch (error) {
+    // If ANY of the three requests fail, we land here
+    console.error(&quot;Dashboard failed to load:&quot;, error.message);
+  }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Debugging tip:</strong> If <code>Promise.all()</code> fails and you don't know which request caused it, use <code>Promise.allSettled()</code> during debugging · it resolves with the status of <em>all</em> promises, succeeded or failed:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let results = await Promise.allSettled([
+  fetch(&quot;/api/users/1&quot;).then(r =&gt; r.json()),
+  fetch(&quot;/api/orders/1&quot;).then(r =&gt; r.json()),
+  fetch(&quot;/api/broken-endpoint&quot;).then(r =&gt; r.json())
+]);
+
+results.forEach((result, index) =&gt; {
+  if (result.status === &quot;fulfilled&quot;) {
+    console.log(`Request ${index} succeeded:`, result.value);
+  } else {
+    console.error(`Request ${index} FAILED:`, result.reason.message);
+  }
+});</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.8 The Async XHR/Fetch Breakpoints</h3>
+<p class="v2-p">In DevTools → Sources panel → Event Listener Breakpoints → expand <strong>XHR/fetch</strong>:</p>
+<ul class="v2-ul"><li>Check <strong>"Request is sent"</strong> to pause when any fetch starts</li><li>Check <strong>"Request is completed"</strong> to pause when the response arrives</li></ul>
+<p class="v2-p">This is powerful for debugging API calls without adding any <code>console.log()</code> to your code.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.9 Common Async Debugging Mistakes</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Effect</th><th>Fix</th></tr></thead><tbody><tr><td>No <code>.catch()</code> on a Promise</td><td>Silent failure</td><td>Always chain <code>.catch()</code></td></tr><tr><td><code>await</code> outside <code>async</code> function</td><td>SyntaxError</td><td>Wrap in <code>async function</code></td></tr><tr><td>Forgetting <code>await</code> on a Promise</td><td>Operates on Promise object, not resolved value</td><td>Add <code>await</code></td></tr><tr><td>Not checking <code>response.ok</code></td><td>Treats HTTP error responses as success</td><td>Check <code>response.ok</code></td></tr><tr><td>Infinite <code>setInterval</code></td><td>Memory leak, performance issues</td><td>Always <code>clearInterval()</code></td></tr></tbody></table></div>
+<p class="v2-p"><strong>The "missing await" bug is particularly sneaky:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function processData() {
+  let data = fetch(&quot;/api/data&quot;); // ← Missing await!
+  console.log(data);             // Logs a Promise object, not the data
+  // Expected (wrong): Promise { &lt;pending&gt; }
+  // Should be: { ...actual data... }
+}
+
+// Fix:
+async function processData() {
+  let data = await fetch(&quot;/api/data&quot;); // ← Fixed
+  let json = await data.json();
+  console.log(json); // Now logs actual data
+}</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 2 · APPLIED EXERCISES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Debugging Asynchronous Code</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Exercise 1 · Console Detective</div><div class="pc" id="chk6"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Use multiple <code>console</code> methods to investigate a shopping cart calculation.</p>
+<p class="v2-p"><strong>Scenario:</strong> You're building the shopping cart for an online store. The total seems wrong but you don't know where the error is.</p>
+<p class="v2-p"><strong>Warm-up example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 1 · Console Detective</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Before starting — practice console.table:
+let items = [
+  { name: &quot;Pen&quot;,   qty: 3, price: 50 },
+  { name: &quot;Book&quot;,  qty: 1, price: 800 },
+  { name: &quot;Ruler&quot;, qty: 2, price: 150 }
+];
+console.table(items);</code></pre></div></div>
+<p class="v2-p"><strong>Your task · debug this cart function:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function calculateCartTotal(items) {
+  let total = 0;
+  
+  for (let i = 0; i &lt; items.length; i++) {
+    let item = items[i];
+    let itemTotal = item.qty * item.price;
+    total = total + itemTotal;
+  }
+  
+  let discount = 0.10;
+  let discountAmount = total / discount; // ← Possible bug here?
+  let finalTotal = total - discountAmount;
+  
+  return finalTotal;
+}
+
+let cart = [
+  { name: &quot;Headphones&quot;, qty: 1, price: 15000 },
+  { name: &quot;USB Cable&quot;,  qty: 2, price: 1500  },
+  { name: &quot;Mouse&quot;,      qty: 1, price: 8000  }
+];
+
+console.log(&quot;Cart total:&quot;, calculateCartTotal(cart));
+// This gives a strange answer — find and fix the bug!</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Add <code>console.group("Cart Debug")</code> at the start of the function</li><li>Inside the loop, add <code>console.log("Item:", item.name, "| Item total:", itemTotal)</code></li><li>After the loop, log <code>total</code> with a label</li><li>Log <code>discount</code>, <code>discountAmount</code>, and <code>finalTotal</code> separately</li><li>Close the group with <code>console.groupEnd()</code></li><li>Read the output and identify the bug</li><li>Fix it and verify the correct total</li></ol>
+<p class="v2-p"><strong>Hints:</strong></p>
+<ul class="v2-ul"><li>Look carefully at the discount formula: should <code>total / discount</code> give you 10% of the total?</li><li>10% of <code>₦26,000</code> should be <code>₦2,600</code>, not <code>₦260,000</code></li></ul>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What is <code>total</code> after the loop completes?</li><li>What does <code>total / 0.10</code> produce vs <code>total * 0.10</code>?</li><li>What should <code>finalTotal</code> be after a 10% discount?</li></ul>
+<p class="v2-p"><strong>What-if challenge:</strong> What happens if one of the cart items has <code>price: undefined</code>? Add a <code>console.assert()</code> check to catch this.</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(6)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Exercise 2 · DevTools Breakpoint Investigation</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Use breakpoints to step through a grade calculation function.</p>
+<p class="v2-p"><strong>Scenario:</strong> A school app calculates student grades. A student scored 72 on all three tests but their final grade is showing incorrectly.</p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 2 · DevTools Breakpoint Investigation</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function calculateGrade(scores) {
+  let total = 0;
+  
+  for (let score of scores) {
+    total = total + score;
+  }
+  
+  let average = total / scores.length;
+  let grade;
+  
+  if (average &gt;= 90) {
+    grade = &quot;A&quot;;
+  } else if (average &gt;= 80) {
+    grade = &quot;B&quot;;
+  } else if (average &gt;= 70) {
+    grade = &quot;C&quot;;
+  } else if (average &gt;= 60) {
+    grade = &quot;D&quot;;
+  } else {
+    grade = &quot;F&quot;;
+  }
+  
+  return { average, grade };
+}
+
+let studentScores = [72, 72, 72];
+let result = calculateGrade(studentScores);
+console.log(`Average: ${result.average}, Grade: ${result.grade}`);
+// Expected Output: Average: 72, Grade: C</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Open this code in a browser (create a simple <code>.html</code> file)</li><li>Open DevTools → Sources</li><li>Set a breakpoint on the line <code>let average = total / scores.length;</code></li><li>Reload the page</li><li>When paused, check the Scope panel · what is <code>total</code>?</li><li>Step over to the next line · what is <code>average</code> now?</li><li>Continue stepping until <code>grade</code> is assigned</li><li>Verify that <code>grade === "C"</code> for an average of 72</li></ol>
+<p class="v2-p"><strong>Optional challenge:</strong> Change the scores array to <code>[55, 90, 78]</code> and set a <strong>conditional breakpoint</strong> that only fires when <code>average &lt; 70</code>. Observe the grade assignment.</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(7)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Exercise 3 · Error Type Identification</div><div class="pc" id="chk8"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Read JavaScript errors and identify their type and cause without running the code.</p>
+<p class="v2-p"><strong>Instructions:</strong> For each snippet, predict the error type and message, then explain the fix.</p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 3 · Error Type Identification</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Snippet A
+function showGreeting() {
+  console.log(welcomeMessage);
+}
+showGreeting();</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Snippet B
+let data = null;
+console.log(data.username);</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Snippet C
+function countDown(n) {
+  console.log(n);
+  countDown(n - 1); // No base case
+}
+countDown(5);</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Snippet D
+let numbers = [1, 2, 3];
+numbers.forEach(console.log);
+let reversed = numbers.reverse(10); // reverse() takes no arguments, but this won&#x27;t error — what DOES the call return?
+let bad = numbers.toUpperCase(); // Arrays don&#x27;t have this method</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Snippet E
+let json = &#x27;{ &quot;name&quot;: &quot;Tunde&quot;, &quot;age&quot;: }&#x27;; // Invalid JSON
+JSON.parse(json);</code></pre></div></div>
+<p class="v2-p"><strong>Expected answers (for self-check):</strong></p>
+<ul class="v2-ul"><li>A: <code>ReferenceError</code> · <code>welcomeMessage</code> not declared</li><li>B: <code>TypeError</code> · Cannot read properties of null</li><li>C: <code>RangeError</code> · Maximum call stack size exceeded</li><li>D: <code>TypeError</code> · <code>numbers.toUpperCase is not a function</code></li><li>E: <code>SyntaxError</code> · Unexpected token <code>}</code> in JSON</li></ul>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(8)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Exercise 4 · Async Debugging Challenges</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Fix three async bugs.</p>
+<p class="v2-p"><strong>Bug 1 · Missing await:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 4 · Async Debugging Challenges</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function getProductName(id) {
+  let response = fetch(`/api/products/${id}`);
+  let product = response.json(); // Both missing await
+  return product.name;
+}
+
+// Fix this function so it correctly returns the product name</code></pre></div></div>
+<p class="v2-p"><strong>Bug 2 · No error handling:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function deleteUser(userId) {
+  let response = await fetch(`/api/users/${userId}`, {
+    method: &quot;DELETE&quot;
+  });
+  let data = await response.json();
+  console.log(&quot;User deleted:&quot;, data);
+}
+
+// This function has no error handling
+// Add try/catch and check response.ok</code></pre></div></div>
+<p class="v2-p"><strong>Bug 3 · Infinite interval:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function startLiveScoreUpdater(matchId) {
+  setInterval(async () =&gt; {
+    let res = await fetch(`/api/scores/${matchId}`);
+    let score = await res.json();
+    document.getElementById(&quot;score&quot;).textContent = score.current;
+  }, 2000);
+  // This interval runs forever — how would you stop it?
+}
+
+// Fix: return the interval ID and call clearInterval() when the match ends</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 3 · PROJECT SIMULATION</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(9)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Project: Personal Finance Debugger Dashboard</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Overview:</strong> You are building a personal finance tracker. The application loads transactions from an API, categorises expenses, and displays a summary. But the code has bugs · your job is to find and fix all of them using the techniques from this tutorial.</p>
+<p class="v2-p"><strong>Real-world connection:</strong> Every fintech product (Paystack, Flutterwave, bank apps) has transaction processing code just like this. Debugging it correctly can mean the difference between correct and incorrect balances.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Setup and Core Logic</h3>
+<p class="v2-p"><strong>Simple example first:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Micro-example: basic transaction processing
+let transactions = [
+  { id: 1, type: &quot;income&quot;,  amount: 50000, category: &quot;Salary&quot; },
+  { id: 2, type: &quot;expense&quot;, amount: 3000,  category: &quot;Food&quot;   }
+];
+
+let total = transactions.reduce((acc, t) =&gt; {
+  return t.type === &quot;income&quot; ? acc + t.amount : acc - t.amount;
+}, 0);
+
+console.log(&quot;Net balance:&quot;, total); // Expected: 47000</code></pre></div></div>
+<p class="v2-p"><strong>Full stage 1 code with bugs to find:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const transactions = [
+  { id: 1, type: &quot;income&quot;,  amount: 150000, category: &quot;Salary&quot;,   date: &quot;2024-01-01&quot; },
+  { id: 2, type: &quot;expense&quot;, amount: 12000,  category: &quot;Rent&quot;,     date: &quot;2024-01-02&quot; },
+  { id: 3, type: &quot;expense&quot;, amount: 3500,   category: &quot;Food&quot;,     date: &quot;2024-01-05&quot; },
+  { id: 4, type: &quot;income&quot;,  amount: 25000,  category: &quot;Freelance&quot;,date: &quot;2024-01-10&quot; },
+  { id: 5, type: &quot;expense&quot;, amount: 8000,   category: &quot;Transport&quot;,date: &quot;2024-01-15&quot; },
+  { id: 6, type: &quot;expense&quot;, amount: 5000,   category: &quot;Food&quot;,     date: &quot;2024-01-20&quot; }
+];
+
+function getNetBalance(transactions) {
+  let balance = 0;
+  for (let t of transactions) {
+    if (t.type === &quot;income&quot;) {
+      balance = balance + t.amount;
+    } else {
+      balance = balance - t.amount;  
+    }
+  }
+  return balance;
+}
+
+function getTotalByCategory(transactions, category) {
+  return transactions
+    .filter(t =&gt; t.category = category)  // Bug: = instead of ===
+    .reduce((sum, t) =&gt; sum + t.amount, 0);
+}
+
+function getMostExpensiveCategory(transactions) {
+  let expenses = transactions.filter(t =&gt; t.type === &quot;expense&quot;);
+  
+  let categoryTotals = {};
+  for (let t of expenses) {
+    if (categoryTotals[t.category]) {
+      categoryTotals[t.category] += t.amount;
+    } else {
+      categoryTotals[t.category] = t.amount;
+    }
+  }
+  
+  let maxCategory = null;
+  let maxAmount = 0;
+  
+  for (let [category, amount] of Object.entries(categoryTotals)) {
+    if (amount &gt; maxAmount) {
+      maxAmount = amount;
+      maxCategory = category;
+    }
+  }
+  
+  return { category: maxCategory, total: maxAmount };
+}
+
+// Test the functions:
+console.log(&quot;Net balance:&quot;, getNetBalance(transactions));
+// Expected: 146500
+
+console.log(&quot;Food total:&quot;, getTotalByCategory(transactions, &quot;Food&quot;));
+// Expected: 8500 (3500 + 5000)
+// Bug in filter will make this wrong!
+
+console.log(&quot;Most expensive:&quot;, getMostExpensiveCategory(transactions));
+// Expected: { category: &quot;Rent&quot;, total: 12000 }
+
+console.table(transactions);</code></pre></div></div>
+<p class="v2-p"><strong>Your tasks:</strong></p>
+<ol class="v2-ol"><li>Add <code>console.group</code> and <code>console.log</code> statements to each function</li><li>Identify the bug in <code>getTotalByCategory()</code> (Hint: assignment vs comparison)</li><li>Set a breakpoint inside <code>getMostExpensiveCategory()</code> to watch <code>categoryTotals</code> build up</li><li>Fix all bugs and verify all three expected outputs</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 2 · Adding Async Data Loading</h3>
+<p class="v2-p"><strong>Simple example first:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Micro-example: basic async fetch
+async function loadData(url) {
+  try {
+    let res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (e) {
+    console.error(&quot;Load failed:&quot;, e.message);
+    return [];
+  }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Full stage 2 · async data loading with bugs:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Simulated API using local data (for practice without a real server)
+function simulateAPI(delay = 300) {
+  return new Promise((resolve) =&gt; {
+    setTimeout(() =&gt; {
+      resolve([
+        { id: 7, type: &quot;income&quot;,  amount: 75000, category: &quot;Bonus&quot;,    date: &quot;2024-02-01&quot; },
+        { id: 8, type: &quot;expense&quot;, amount: 15000, category: &quot;Rent&quot;,     date: &quot;2024-02-02&quot; },
+        { id: 9, type: &quot;expense&quot;, amount: 4200,  category: &quot;Utilities&quot;,date: &quot;2024-02-10&quot; }
+      ]);
+    }, delay);
+  });
+}
+
+async function loadAndProcessTransactions() {
+  console.time(&quot;data-load&quot;);
+  
+  // Bug 1: no await
+  let newTransactions = simulateAPI(500);
+  
+  console.timeEnd(&quot;data-load&quot;);
+  
+  // Bug 2: newTransactions is a Promise, not an array — this will fail
+  let allTransactions = [...transactions, ...newTransactions];
+  
+  console.log(&quot;Total transactions:&quot;, allTransactions.length);
+  // Expected: 9 (6 original + 3 from API)
+  
+  let balance = getNetBalance(allTransactions);
+  console.log(&quot;Updated balance:&quot;, balance);
+  // Expected: 206300
+  
+  return allTransactions;
+}
+
+loadAndProcessTransactions();</code></pre></div></div>
+<p class="v2-p"><strong>Your tasks:</strong></p>
+<ol class="v2-ol"><li>Identify why <code>allTransactions.length</code> is wrong</li><li>Fix the missing <code>await</code></li><li>Add a <code>try/catch</code> block around the entire function body</li><li>Add <code>console.assert(allTransactions.length === 9, "Expected 9 transactions")</code></li><li>Verify the balance is <code>206300</code> after the fix</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 3 · Error Reporting and Display</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Final stage: a complete, production-ready version
+
+async function runFinanceDashboard() {
+  console.group(&quot;💰 Finance Dashboard&quot;);
+  
+  try {
+    console.log(&quot;Loading transactions...&quot;);
+    let apiTransactions = await simulateAPI(300);
+    let allTransactions = [...transactions, ...apiTransactions];
+    
+    // Validate data
+    for (let t of allTransactions) {
+      console.assert(
+        typeof t.amount === &quot;number&quot; &amp;&amp; t.amount &gt; 0,
+        `Invalid amount in transaction ID ${t.id}:`, t.amount
+      );
+      console.assert(
+        t.type === &quot;income&quot; || t.type === &quot;expense&quot;,
+        `Invalid type in transaction ID ${t.id}:`, t.type
+      );
+    }
+    
+    // Display summary
+    console.group(&quot;Summary&quot;);
+    console.log(&quot;Total transactions:&quot;, allTransactions.length);
+    console.log(&quot;Net balance: ₦&quot; + getNetBalance(allTransactions).toLocaleString());
+    console.log(&quot;Food spending: ₦&quot; + getTotalByCategory(allTransactions, &quot;Food&quot;).toLocaleString());
+    let top = getMostExpensiveCategory(allTransactions);
+    console.log(`Top expense: ${top.category} (₦${top.total.toLocaleString()})`);
+    console.groupEnd();
+    
+    // Display table
+    console.table(allTransactions.map(t =&gt; ({
+      ID:       t.id,
+      Type:     t.type,
+      Category: t.category,
+      Amount:   `₦${t.amount.toLocaleString()}`,
+      Date:     t.date
+    })));
+    
+  } catch (error) {
+    console.error(&quot;Dashboard crashed:&quot;, error.message);
+    console.error(error.stack);
+  } finally {
+    console.groupEnd();
+    console.log(&quot;Dashboard run complete.&quot;);
+  }
+}
+
+runFinanceDashboard();</code></pre></div></div>
+<p class="v2-p"><strong>Expected final output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>▼ 💰 Finance Dashboard
+  Loading transactions...
+  ▼ Summary
+    Total transactions: 9
+    Net balance: ₦206,300
+    Food spending: ₦8,500 (or ₦12,700 with Food from month 2 if any)
+    Top expense: Rent (₦27,000)
+  [table of all 9 transactions]
+Dashboard run complete.</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reflection Questions</h3>
+<ol class="v2-ol"><li><strong>Why is <code>console.group()</code> more professional than plain <code>console.log()</code> for dashboard output?</strong></li><li><strong>In Stage 2, how did the missing <code>await</code> cause the spread operator to fail?</strong></li><li><strong>If this were a real bank app with 50,000 transactions, how would you modify <code>loadAndProcessTransactions()</code> to handle pagination and progressive loading?</strong></li><li><strong>What is the difference between an error that crashes your app and one that you <code>catch</code> and handle gracefully? Which is better from a user experience perspective?</strong></li><li><strong>How would you use <code>console.time()</code> to compare two different implementations of <code>getMostExpensiveCategory()</code>?</strong></li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Advanced Challenges (Optional)</h3>
+<ol class="v2-ol"><li><strong>Source Maps:</strong> Research what source maps are and why they're needed when debugging minified production code.</li><li><strong>Error Monitoring:</strong> Look up Sentry or LogRocket · tools that automatically capture and report JavaScript errors from real users.</li><li><strong>Custom Error Classes:</strong> Create <code>class ValidationError extends Error</code> and <code>class NetworkError extends Error</code> and throw them appropriately from your functions.</li><li><strong>Performance Profiling:</strong> Use the Chrome DevTools <strong>Performance</strong> tab to record and analyse a heavy computation in your dashboard.</li></ol>
+<hr class="v2-hr">
+<p class="v2-p"># Completion Checklist</p>
+<ul class="v2-ul"><li>[x] <strong>Debugging basics:</strong> Understand what bugs are, how they enter code, and the general debugging workflow</li><li>[x] <strong><code>debugger</code> statement:</strong> Know when to use it and remember to remove it before deployment</li><li>[x] <strong>Console methods:</strong> <code>log</code>, <code>warn</code>, <code>error</code>, <code>table</code>, <code>group</code>, <code>time</code>, <code>count</code>, <code>assert</code>, <code>clear</code> · all explained with examples</li><li>[x] <strong>DevTools breakpoints:</strong> Set, remove, and use conditional breakpoints and logpoints</li><li>[x] <strong>Stepping controls:</strong> Step Over, Step Into, Step Out · know which to use when</li><li>[x] <strong>Call Stack and Scope panels:</strong> Understand the state of the program at any paused moment</li><li>[x] <strong>Error types:</strong> SyntaxError, ReferenceError, TypeError, RangeError · causes and fixes</li><li>[x] <strong><code>try/catch/finally</code>:</strong> Handle errors gracefully without crashing the app</li><li>[x] <strong>Stack traces:</strong> Read and interpret them to locate bugs quickly</li><li>[x] <strong>Async debugging:</strong> Promises, async/await, missing <code>await</code>, unhandled rejections</li><li>[x] <strong><code>Promise.allSettled()</code>:</strong> Debug parallel async operations</li><li>[x] <strong>Exercises completed:</strong> Console detective, breakpoint investigation, error identification, async fixes</li><li>[x] <strong>Project built:</strong> Finance Dashboard with debugging instrumentation across all three stages</li><li>[x] <strong>Common mistakes highlighted:</strong> missing <code>await</code>, <code>=</code> vs <code>===</code>, no <code>.catch()</code>, infinite intervals</li><li>[x] <strong>Reflection questions answered</strong></li></ul>
+<hr class="v2-hr">
+<p class="v2-p"><strong>One-sentence summary:</strong> Debugging is the systematic process of finding and fixing errors using JavaScript's built-in error types, the browser console, DevTools breakpoints, and async-aware error handling · skills that transform you from someone who writes code into someone who <em>understands</em> code.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">1. Add console.group and console.log statements to each function
+2. Identify the bug in getTotalByCategory() (Hint: assignment vs comparison)
+3. Set a breakpoint inside getMostExpensiveCategory() to watch categoryTotals build up
+4. Fix all bugs and verify all three expected outputs · </div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lesson 23 Project</div><div class="build-req"><p class="v2-p">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code h</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>My Project</title>
+</head>
+<body>
+<!-- Your code here -->
+</body>
+</html>`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-23-lesson-23-project</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 23 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-23-lesson-23-project/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 23 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. What Is Debugging?</li><li>✅ 2. The Console Object</li><li>✅ 3. Breakpoints & DevTools</li><li>✅ 4. JavaScript Error Types</li><li>✅ 5. Debugging Asynchronous Code</li><li>✅ Exercise 1 · Console Detective</li><li>✅ Exercise 2 · DevTools Breakpoint Investigation</li><li>✅ Exercise 3 · Error Type Identification</li></ul><div class="ln"><a href="lesson_22.html" class="ln-btn">&#8592; Lesson 22</a><a href="lesson_24.html" class="ln-btn primary">Lesson 24 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 23 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

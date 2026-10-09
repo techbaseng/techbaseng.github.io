@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 25: NumPy Deep Dive: Data Types, Copy vs View, Shape, Reshape, Iterating, and Joining Arrays — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="10" data-key="techbase_python_l25">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 25 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 25</div>
+      <h1>NumPy Deep Dive: Data Types, Copy vs View, Shape, Reshape, Iterating, and Joining Arrays</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Stage 1 · Setup and Data Inspection</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 25</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 25! By now you know how to create NumPy arrays and access elements inside them. In this lesson, we go deeper. We will learn:</p>
+<ul class="v2-ul"><li>What <strong>data types</strong> are and how NumPy manages them</li><li>The difference between <strong>copying</strong> and <strong>viewing</strong> an array (a concept that surprises even experienced programmers)</li><li>How to understand and inspect the <strong>shape</strong> of an array</li><li>How to <strong>reshape</strong> arrays from one structure into another</li><li>How to <strong>iterate</strong> (loop) through arrays of any number of dimensions</li><li>How to <strong>join</strong> multiple arrays together into one</li></ul>
+<p class="v2-p">Each concept builds on the last. By the end, you will be able to manipulate arrays like a data science professional.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world relevance:</strong> In machine learning, you constantly reshape arrays to feed them into models. In data analysis, you join datasets together. In scientific computing, you iterate through large arrays to process measurements. Everything in this lesson is used daily by professional data scientists and engineers.</p></blockquote>
+<hr class="v2-hr"></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Stage 1 · Setup and Data Inspection</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 25! By now you know how to create NumPy arrays and access elements inside them. In this lesson, we go deeper. We will learn:</p>
+<ul class="v2-ul"><li>What <strong>data types</strong> are and how NumPy manages them</li><li>The difference between <strong>copying</strong> and <strong>viewing</strong> an array (a concept that surprises even experienced programmers)</li><li>How to understand and inspect the <strong>shape</strong> of an array</li><li>How to <strong>reshape</strong> arrays from one structure into another</li><li>How to <strong>iterate</strong> (loop) through arrays of any number of dimensions</li><li>How to <strong>join</strong> multiple arrays together into one</li></ul>
+<p class="v2-p">Each concept builds on the last. By the end, you will be able to manipulate arrays like a data science professional.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world relevance:</strong> In machine learning, you constantly reshape arrays to feed them into models. In data analysis, you join datasets together. In scientific computing, you iterate through large arrays to process measurements. Everything in this lesson is used daily by professional data scientists and engineers.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisites · What You Need to Know First</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before we begin, let us quickly review some ideas we depend on:</p>
+<p class="v2-p"><strong>What is a NumPy array?</strong> A NumPy array is an ordered list of values stored in a grid. Every element in the array must be of the same type (like all integers, or all floats). This is different from a Python list, where you can mix types.</p>
+<p class="v2-p"><strong>What is a dimension?</strong> A dimension (also called an axis) is a direction in which data is arranged.</p>
+<ul class="v2-ul"><li>A flat list like <code>[1, 2, 3]</code> is 1-dimensional (1D).</li><li>A table like <code>[[1,2],[3,4]]</code> is 2-dimensional (2D) · it has rows and columns.</li><li>A cube like <code>[[[1,2],[3,4]],[[5,6],[7,8]]]</code> is 3-dimensional (3D).</li></ul>
+<p class="v2-p"><strong>What is a data type?</strong> A data type defines the kind of value being stored · for example, a whole number (integer), a decimal number (float), or text (string).</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisites · What You Need to Know First</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Part 1 · NumPy Data Types</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">1.1 What Is a Data Type, and Why Does It Matter?</h3>
+<p class="v2-p">Imagine you are filling out a form. Some fields only accept whole numbers (your age), some accept text (your name), and some accept decimals (your weight). A data type is exactly that · a rule about what kind of value a slot can hold.</p>
+<p class="v2-p">In Python, you have basic built-in types like <code>int</code>, <code>float</code>, <code>str</code>, and <code>bool</code>. NumPy adds its own more precise types, because when you are working with millions of numbers, using the right type saves memory and makes calculations faster.</p>
+<p class="v2-p">Think of it this way: storing the number 5 as a 64-bit integer uses 8 bytes of memory. If you have one billion numbers and use the wrong type, you could waste gigabytes of RAM unnecessarily.</p>
+<h3 class="v2-h3">1.2 Python's Built-in Data Types (Quick Review)</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Type</th><th>What it holds</th><th>Example</th></tr></thead><tbody><tr><td><code>str</code></td><td>Text</td><td><code>"Hello"</code></td></tr><tr><td><code>int</code></td><td>Whole numbers</td><td><code>-3, 0, 42</code></td></tr><tr><td><code>float</code></td><td>Decimal numbers</td><td><code>3.14, -0.5</code></td></tr><tr><td><code>bool</code></td><td>True or False</td><td><code>True, False</code></td></tr><tr><td><code>complex</code></td><td>Complex numbers</td><td><code>1.0 + 2.0j</code></td></tr></tbody></table></div>
+<h3 class="v2-h3">1.3 NumPy's Data Type System</h3>
+<p class="v2-p">NumPy uses short one-character codes to refer to types. Here is the full list:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Code</th><th>Full Name</th><th>What it Means</th></tr></thead><tbody><tr><td><code>i</code></td><td>integer</td><td>Whole numbers (positive and negative)</td></tr><tr><td><code>b</code></td><td>boolean</td><td>True or False</td></tr><tr><td><code>u</code></td><td>unsigned integer</td><td>Whole numbers (positive only, no negatives)</td></tr><tr><td><code>f</code></td><td>float</td><td>Numbers with decimals</td></tr><tr><td><code>c</code></td><td>complex float</td><td>Complex numbers with real and imaginary parts</td></tr><tr><td><code>m</code></td><td>timedelta</td><td>A difference between two times</td></tr><tr><td><code>M</code></td><td>datetime</td><td>A specific date and time</td></tr><tr><td><code>O</code></td><td>object</td><td>Any Python object</td></tr><tr><td><code>S</code></td><td>string (bytes)</td><td>Fixed-length byte strings</td></tr><tr><td><code>U</code></td><td>unicode string</td><td>Text (Unicode characters)</td></tr><tr><td><code>V</code></td><td>void</td><td>Fixed chunk of memory for other types</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Key insight:</strong> NumPy stores data much more efficiently than Python lists because every element in a NumPy array has the exact same type. A list can hold a mix; a NumPy array cannot.</p></blockquote>
+<h3 class="v2-h3">1.4 Checking the Data Type of an Array</h3>
+<p class="v2-p">Every NumPy array has a property called <code>.dtype</code> that tells you the type of its elements.</p>
+<p class="v2-p"><strong>What does <code>.dtype</code> mean?</strong> It stands for "data type." It is like asking: "What kind of values are stored inside this array?"</p>
+<p class="v2-p"><strong>Example 1 · Integer array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4])
+
+print(arr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>int64</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>import numpy as np</code> · brings in the NumPy library and gives it the short name <code>np</code></li><li><code>arr = np.array([1, 2, 3, 4])</code> · creates a NumPy array from a Python list of whole numbers</li><li><code>print(arr.dtype)</code> · prints the data type. <code>int64</code> means a 64-bit integer (a whole number using 64 bits of memory)</li></ul>
+<p class="v2-p"><strong>Example 2 · String array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([&#x27;apple&#x27;, &#x27;banana&#x27;, &#x27;cherry&#x27;])
+
+print(arr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;U6</code></pre></div></div>
+<p class="v2-p"><strong>Explanation of <code>&lt;U6</code>:</strong></p>
+<ul class="v2-ul"><li><code>U</code> means Unicode string</li><li><code>6</code> means the longest string in the array has 6 characters ("banana" and "cherry" both have 6)</li><li><code>&lt;</code> means little-endian byte order (a low-level storage detail you can ignore for now)</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What do you think would happen if you added a longer string like <code>"watermelon"</code> to this array? How would the dtype change?</p></blockquote>
+<h3 class="v2-h3">1.5 Creating an Array With a Specific Data Type</h3>
+<p class="v2-p">You can tell NumPy exactly what data type to use when creating an array. You do this with the <code>dtype</code> parameter inside <code>np.array()</code>.</p>
+<p class="v2-p"><strong>What is a parameter?</strong> A parameter is an optional instruction you give to a function to customize how it works.</p>
+<p class="v2-p"><strong>Example · Create a string array from numbers:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4], dtype=&#x27;S&#x27;)
+
+print(arr)
+print(arr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[b&#x27;1&#x27; b&#x27;2&#x27; b&#x27;3&#x27; b&#x27;4&#x27;]
+|S1</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>dtype='S'</code> · tells NumPy to store these values as byte strings</li><li>The <code>b</code> prefix in <code>b'1'</code> means "bytes literal" · it is a string stored as raw bytes</li><li><code>|S1</code> means each element takes up 1 byte (since <code>'1'</code>, <code>'2'</code>, etc. are each 1 character)</li></ul>
+<p class="v2-p"><strong>Example · Create a 4-byte integer array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4], dtype=&#x27;i4&#x27;)
+
+print(arr)
+print(arr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3 4]
+int32</code></pre></div></div>
+<p class="v2-p"><strong>Explanation of <code>'i4'</code>:</strong></p>
+<ul class="v2-ul"><li><code>i</code> = integer</li><li><code>4</code> = 4 bytes (32 bits)</li><li>So <code>i4</code> creates 32-bit integers, also known as <code>int32</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p">For <code>i</code>, <code>u</code>, <code>f</code>, <code>S</code>, and <code>U</code>, you can specify a byte size like <code>i4</code>, <code>f8</code>, <code>S10</code>, etc.</p></blockquote>
+<h3 class="v2-h3">1.6 What Happens When Conversion Fails?</h3>
+<p class="v2-p">If you try to force NumPy to convert values that cannot be converted, it raises a <code>ValueError</code>.</p>
+<p class="v2-p"><strong>What is a ValueError?</strong> It is Python's way of saying: "The type of value you gave me makes no sense for this operation."</p>
+<p class="v2-p"><strong>Example · Trying to convert non-numeric text to integer:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([&#x27;a&#x27;, &#x27;2&#x27;, &#x27;3&#x27;], dtype=&#x27;i&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (Error):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ValueError: invalid literal for int() with base 10: &#x27;a&#x27;</code></pre></div></div>
+<p class="v2-p"><strong>Why?</strong> The letter <code>'a'</code> cannot be converted to a number. <code>'2'</code> and <code>'3'</code> could be, but <code>'a'</code> cannot · so the whole operation fails.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Beginner mistake warning:</strong> You might think <code>'2'</code> will become <code>2</code> and <code>'a'</code> will just become <code>0</code>. It will NOT. NumPy fails completely if even one element cannot be converted.</p></blockquote>
+<h3 class="v2-h3">1.7 Converting an Array to a Different Data Type (astype)</h3>
+<p class="v2-p">What if you already have an array and want to change its type? You cannot change it in-place (directly). Instead, you create a <strong>copy</strong> of the array with the new type using the <code>.astype()</code> method.</p>
+<p class="v2-p"><strong>What does "in-place" mean?</strong> It means changing the actual original thing, rather than making a new version. NumPy requires you to make a new array when changing types.</p>
+<p class="v2-p"><strong>Example 1 · Convert float to integer using <code>'i'</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1.1, 2.1, 3.1])
+
+newarr = arr.astype(&#x27;i&#x27;)
+
+print(newarr)
+print(newarr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3]
+int32</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>arr = np.array([1.1, 2.1, 3.1])</code> · creates a float array</li><li><code>newarr = arr.astype('i')</code> · creates a NEW array where each value is converted to integer. The decimal part is simply cut off (truncated), not rounded</li><li><code>1.1</code> becomes <code>1</code>, <code>2.1</code> becomes <code>2</code>, <code>3.1</code> becomes <code>3</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What do you think <code>3.9</code> would become? Try it! (Answer: <code>3</code> · it is truncated, not rounded)</p></blockquote>
+<p class="v2-p"><strong>Example 2 · Convert float to integer using Python's built-in <code>int</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1.1, 2.1, 3.1])
+
+newarr = arr.astype(int)
+
+print(newarr)
+print(newarr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3]
+int64</code></pre></div></div>
+<p class="v2-p">Both <code>'i'</code> and <code>int</code> work, but they may produce slightly different integer sizes.</p>
+<p class="v2-p"><strong>Example 3 · Convert integer to boolean:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 0, 3])
+
+newarr = arr.astype(bool)
+
+print(newarr)
+print(newarr.dtype)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ True False  True]
+bool</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> In Python (and NumPy), any non-zero number converts to <code>True</code>, and <code>0</code> converts to <code>False</code>. This is called "truthiness."</p>
+<ul class="v2-ul"><li><code>1</code> → <code>True</code></li><li><code>0</code> → <code>False</code></li><li><code>3</code> → <code>True</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Converting to boolean is very common in data analysis. For example, you might have a column of scores and want to mark which ones are passing (non-zero = True) vs failing (zero = False).</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>NumPy Data Types</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Part 2 · Copy vs View</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">2.1 The Big Idea: What Are We Really Talking About?</h3>
+<p class="v2-p">This is one of the most important · and most misunderstood · concepts in NumPy. Let us start with a real-world analogy.</p>
+<p class="v2-p"><strong>Analogy · The Whiteboard and the Photo:</strong></p>
+<p class="v2-p">Imagine a whiteboard in your classroom with some numbers written on it. Now consider two different actions:</p>
+<ol class="v2-ol"><li><strong>Taking a photo of the whiteboard</strong> · The photo shows the numbers, but if someone erases the whiteboard and writes new numbers, your photo still shows the old numbers. They are separate.</li></ol>
+<ol class="v2-ol"><li><strong>Looking at the whiteboard through a window</strong> · You can see the current numbers. If someone erases them and writes new ones, you immediately see the new numbers through the window.</li></ol>
+<p class="v2-p">In NumPy:</p>
+<ul class="v2-ul"><li><strong>Copy</strong> = the photo (completely independent)</li><li><strong>View</strong> = the window (connected to the original)</li></ul>
+<h3 class="v2-h3">2.2 What Is a Copy?</h3>
+<p class="v2-p">A <strong>copy</strong> is a brand-new, completely separate array. It takes the values from the original and stores them in a new location in memory. Changes to the copy do not affect the original. Changes to the original do not affect the copy.</p>
+<p class="v2-p"><strong>Example · Make a copy, change the original:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+x = arr.copy()
+arr[0] = 42
+
+print(arr)
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[42  2  3  4  5]
+[1 2 3 4 5]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<ul class="v2-ul"><li><code>arr = np.array([1, 2, 3, 4, 5])</code> · creates the original array</li><li><code>x = arr.copy()</code> · creates a brand-new separate array <code>x</code> with the same values</li><li><code>arr[0] = 42</code> · changes the first element of <code>arr</code> to 42</li><li><code>print(arr)</code> · shows <code>[42 2 3 4 5]</code> (the original changed)</li><li><code>print(x)</code> · shows <code>[1 2 3 4 5]</code> (the copy is unchanged · they are independent)</li></ul>
+<blockquote class="v2-bq"><p class="v2-p">The copy <strong>SHOULD NOT</strong> be affected by changes to the original.</p></blockquote>
+<h3 class="v2-h3">2.3 What Is a View?</h3>
+<p class="v2-p">A <strong>view</strong> is like a window into the same data. It does not create a new copy of the data. Both the view and the original point to the same memory. If you change one, the other changes too.</p>
+<p class="v2-p"><strong>Example 1 · Make a view, change the original:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+x = arr.view()
+arr[0] = 42
+
+print(arr)
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[42  2  3  4  5]
+[42  2  3  4  5]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> <code>arr[0]</code> was set to 42. Both <code>arr</code> and <code>x</code> show 42 because they share the same underlying data.</p>
+<blockquote class="v2-bq"><p class="v2-p">The view <strong>SHOULD</strong> be affected by changes to the original.</p></blockquote>
+<p class="v2-p"><strong>Example 2 · Make a view, change the VIEW:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+x = arr.view()
+x[0] = 31
+
+print(arr)
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[31  2  3  4  5]
+[31  2  3  4  5]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> This time we changed <code>x[0]</code> (the view). Because the view and the original share the same memory, the original <code>arr</code> also changed.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Common beginner mistake:</strong> Many beginners accidentally modify data they wanted to keep. They create a view thinking it is a copy, then modify it, and are surprised when the original changes too. <strong>Always use <code>.copy()</code> when you want an independent copy.</strong></p></blockquote>
+<h3 class="v2-h3">2.4 How to Check: Does This Array Own Its Data?</h3>
+<p class="v2-p">NumPy gives every array a special attribute called <code>.base</code>. This attribute tells you whether the array owns its own data or is borrowing it from somewhere else.</p>
+<ul class="v2-ul"><li>If <code>.base</code> returns <code>None</code> → the array <strong>owns</strong> its data (it is a copy or the original)</li><li>If <code>.base</code> returns another array → the array is a <strong>view</strong> of that other array</li></ul>
+<p class="v2-p"><strong>Example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+
+x = arr.copy()
+y = arr.view()
+
+print(x.base)
+print(y.base)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>None
+[1 2 3 4 5]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>x.base</code> is <code>None</code> · <code>x</code> is a copy; it owns its own data</li><li><code>y.base</code> is <code>[1 2 3 4 5]</code> · <code>y</code> is a view; it points back to <code>arr</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Quick mental test:</strong> Before printing <code>.base</code>, ask yourself: "Is this a copy or a view?" Then check. This builds your intuition.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Copy vs View</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Part 3 · Array Shape</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">3.1 What Is "Shape"?</h3>
+<p class="v2-p">The <strong>shape</strong> of an array describes how many elements it has in each dimension. It is like describing the dimensions of a box:</p>
+<ul class="v2-ul"><li>A 1D array of 5 elements has shape <code>(5,)</code> · it is like a single row with 5 slots</li><li>A 2D array with 2 rows and 4 columns has shape <code>(2, 4)</code> · like a table</li><li>A 3D array with 2 groups, 3 rows, 4 columns has shape <code>(2, 3, 4)</code> · like a stack of tables</li></ul>
+<p class="v2-p">Think of shape as the answer to: "How is this data organized?"</p>
+<h3 class="v2-h3">3.2 Getting the Shape with <code>.shape</code></h3>
+<p class="v2-p">Every NumPy array has a <code>.shape</code> attribute that returns a tuple describing its dimensions.</p>
+<p class="v2-p"><strong>What is a tuple?</strong> A tuple is like a list, but it cannot be changed. It uses round brackets <code>()</code> instead of square brackets <code>[]</code>.</p>
+<p class="v2-p"><strong>Example 1 · Shape of a 2D array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
+
+print(arr.shape)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(2, 4)</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>The outer list <code>[[...], [...]]</code> has 2 inner lists → 2 rows</li><li>Each inner list has 4 elements → 4 columns</li><li>Shape = <code>(2, 4)</code> = 2 rows, 4 columns</li></ul>
+<p class="v2-p"><strong>How to read shape tuples:</strong></p>
+<ul class="v2-ul"><li>First number = number of rows (or "how many groups at the outermost level")</li><li>Second number = number of columns (or "how many elements in each group")</li><li>Third number (if present) = elements in the next level deeper</li></ul>
+<p class="v2-p"><strong>Example 2 · Creating an array with 5 dimensions:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4], ndmin=5)
+
+print(arr)
+print(&#x27;shape of array :&#x27;, arr.shape)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[[[[1 2 3 4]]]]]
+shape of array : (1, 1, 1, 1, 4)</code></pre></div></div>
+<p class="v2-p"><strong>Explanation of <code>ndmin=5</code>:</strong></p>
+<ul class="v2-ul"><li><code>ndmin</code> = minimum number of dimensions</li><li>We have 4 elements but we asked for 5 dimensions</li><li>NumPy wraps them in enough brackets to reach 5 dimensions</li><li>Shape <code>(1, 1, 1, 1, 4)</code> means: 1 group at levels 1 · 4, then 4 elements at the deepest level</li></ul>
+<p class="v2-p"><strong>Understanding the shape tuple position by position:</strong></p>
+<ul class="v2-ul"><li>Index 0 → outermost dimension has 1 element</li><li>Index 1 → next dimension has 1 element</li><li>Index 2 → next dimension has 1 element</li><li>Index 3 → next dimension has 1 element</li><li>Index 4 → innermost dimension has 4 elements</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> If you have <code>arr.shape = (3, 4, 5)</code>, how many total elements does the array contain? (Answer: 3 × 4 × 5 = 60 elements)</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Array Shape</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Part 4 · Array Reshape</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">4.1 What Does "Reshape" Mean?</h3>
+<p class="v2-p">Reshaping an array means <strong>changing how the same data is organized</strong> · rearranging the elements into a different dimensional structure · without changing the values themselves.</p>
+<p class="v2-p">Think of it like rearranging 12 books:</p>
+<ul class="v2-ul"><li>You can put them in one long row: 12 books in a line (1D, shape <code>(12,)</code>)</li><li>Or 3 rows of 4 books (2D, shape <code>(3, 4)</code>)</li><li>Or 2 shelves, each with 2 rows of 3 books (3D, shape <code>(2, 2, 3)</code>)</li></ul>
+<p class="v2-p">The books are the same · only the arrangement changes.</p>
+<h3 class="v2-h3">4.2 Reshape from 1D to 2D</h3>
+<p class="v2-p"><strong>Example · Convert 12 elements into a 4×3 table:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
+newarr = arr.reshape(4, 3)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[ 1  2  3]
+ [ 4  5  6]
+ [ 7  8  9]
+ [10 11 12]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>Original: 12 elements in a flat line</li><li><code>reshape(4, 3)</code> = make 4 rows, 3 columns</li><li>4 × 3 = 12 ✓ (the total must match!)</li><li>Elements fill in row by row: first row is <code>1, 2, 3</code>; second row is <code>4, 5, 6</code>; etc.</li></ul>
+<h3 class="v2-h3">4.3 Reshape from 1D to 3D</h3>
+<p class="v2-p"><strong>Example · Convert 12 elements into a 3D array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+
+newarr = arr.reshape(2, 3, 2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[[ 1  2]
+  [ 3  4]
+  [ 5  6]]
+
+ [[ 7  8]
+  [ 9 10]
+  [11 12]]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>reshape(2, 3, 2)</code> = 2 outer groups, each containing 3 rows, each row containing 2 elements</li><li>2 × 3 × 2 = 12 ✓</li><li>Think of it as 2 small tables, each with 3 rows and 2 columns</li></ul>
+<h3 class="v2-h3">4.4 The Golden Rule of Reshaping</h3>
+<p class="v2-p"><strong>You can only reshape if the total number of elements stays the same.</strong></p>
+<ul class="v2-ul"><li>8 elements can become shape <code>(2, 4)</code>, <code>(4, 2)</code>, <code>(8, 1)</code>, <code>(1, 8)</code>, <code>(2, 2, 2)</code></li><li>8 elements CANNOT become shape <code>(3, 3)</code> because 3×3=9 ≠ 8</li></ul>
+<p class="v2-p"><strong>Example · Attempting an invalid reshape:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5, 6, 7, 8])
+
+newarr = arr.reshape(3, 3)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (Error):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ValueError: cannot reshape array of size 8 into shape (3,3)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Beginner mistake:</strong> Always check that <code>rows × columns × depth... = total number of elements</code> before reshaping.</p></blockquote>
+<h3 class="v2-h3">4.5 Does Reshape Return a Copy or a View?</h3>
+<p class="v2-p"><strong>Example · Check what reshape returns:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5, 6, 7, 8])
+
+print(arr.reshape(2, 4).base)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3 4 5 6 7 8]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> The <code>.base</code> attribute returns the original array (not <code>None</code>), which means <code>reshape()</code> returns a <strong>view</strong>, not a copy. The reshaped array shares data with the original.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important implication:</strong> If you modify elements of a reshaped array, the original will also change, because they share the same memory.</p></blockquote>
+<h3 class="v2-h3">4.6 The Unknown Dimension: Using -1</h3>
+<p class="v2-p">Sometimes you know one dimension but want NumPy to figure out the other. You can pass <code>-1</code> as a placeholder for one unknown dimension. NumPy will calculate the correct value automatically.</p>
+<p class="v2-p"><strong>Example · Let NumPy figure out one dimension:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5, 6, 7, 8])
+
+newarr = arr.reshape(2, 2, -1)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[[1 2]
+  [3 4]]
+
+ [[5 6]
+  [7 8]]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>We told NumPy: "Make it 2 groups of 2 rows, and figure out the rest."</li><li>Total = 8 elements. 2 × 2 × ? = 8. So ? = 2.</li><li>NumPy calculates the <code>-1</code> dimension as 2.</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Note:</strong> You can only use <code>-1</code> for ONE dimension at a time. If you use it twice, NumPy cannot figure out two unknowns at once.</p></blockquote>
+<h3 class="v2-h3">4.7 Flattening: Converting Any Array Back to 1D</h3>
+<p class="v2-p">Flattening means converting a multi-dimensional array into a simple 1D array. Use <code>reshape(-1)</code> to do this.</p>
+<p class="v2-p"><strong>Example · Flatten a 2D array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[1, 2, 3], [4, 5, 6]])
+
+newarr = arr.reshape(-1)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3 4 5 6]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>reshape(-1)</code> tells NumPy: "I want 1D, figure out the length."</li><li>The 2D array <code>[[1,2,3],[4,5,6]]</code> becomes <code>[1, 2, 3, 4, 5, 6]</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Flattening is extremely common in machine learning. Image data is often stored as 2D or 3D arrays, but many models require a flat 1D input vector.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Note:</strong> Other functions like <code>flatten()</code> and <code>ravel()</code> also flatten arrays. <code>flatten()</code> always returns a copy. <code>ravel()</code> returns a view when possible. <code>reshape(-1)</code> is the most flexible approach.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Array Reshape</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Part 5 · Array Iterating</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">5.1 What Does "Iterating" Mean?</h3>
+<p class="v2-p">Iterating means going through each element of a collection, one at a time, and doing something with each one · like checking each item in a shopping cart at checkout.</p>
+<p class="v2-p">In NumPy, you can iterate through arrays using Python's <code>for</code> loop, just like with regular Python lists. The behaviour depends on how many dimensions the array has.</p>
+<h3 class="v2-h3">5.2 Iterating a 1D Array</h3>
+<p class="v2-p">With a 1D array, <code>for x in arr</code> gives you one element at a time.</p>
+<p class="v2-p"><strong>Example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3])
+
+for x in arr:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>for x in arr:</code> · loops over each element</li><li><code>x</code> takes the value of each element one at a time: first <code>1</code>, then <code>2</code>, then <code>3</code></li><li><code>print(x)</code> · prints each value on its own line</li></ul>
+<h3 class="v2-h3">5.3 Iterating a 2D Array</h3>
+<p class="v2-p">With a 2D array, <code>for x in arr</code> gives you <strong>one row at a time</strong> · not individual elements.</p>
+<p class="v2-p"><strong>Example 1 · Iterate rows:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[1, 2, 3], [4, 5, 6]])
+
+for x in arr:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3]
+[4 5 6]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> <code>x</code> is each row (sub-array), not each individual number.</p>
+<p class="v2-p"><strong>Example 2 · Iterate individual elements of a 2D array (nested loops):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[1, 2, 3], [4, 5, 6]])
+
+for x in arr:
+    for y in x:
+        print(y)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5
+6</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>The outer <code>for x in arr</code> loops over rows</li><li>The inner <code>for y in x</code> loops over each element within each row</li><li>Together they reach every individual number</li></ul>
+<h3 class="v2-h3">5.4 Iterating a 3D Array</h3>
+<p class="v2-p">With a 3D array, the outermost <code>for</code> loop gives you 2D slices (layers), not rows or individual values.</p>
+<p class="v2-p"><strong>Example 1 · Iterate 2D layers:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+
+for x in arr:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[1 2 3]
+ [4 5 6]]
+[[ 7  8  9]
+ [10 11 12]]</code></pre></div></div>
+<p class="v2-p"><strong>Example 2 · Iterate down to individual scalar values:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+
+for x in arr:
+    for y in x:
+        for z in y:
+            print(z)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> Three nested loops for a 3D array: one per dimension.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Pattern to remember:</strong> For an N-dimensional array, you need N nested <code>for</code> loops to reach each individual scalar (single value). This gets impractical for very high dimensions · which is why <code>nditer()</code> exists.</p></blockquote>
+<h3 class="v2-h3">5.5 Smart Iteration with nditer()</h3>
+<p class="v2-p"><code>nditer()</code> is a powerful NumPy function that lets you iterate over every scalar element of an array of ANY number of dimensions, using just a single loop. It removes the need for deeply nested <code>for</code> loops.</p>
+<p class="v2-p"><strong>Example · Iterate through a 3D array with just one loop:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
+
+for x in np.nditer(arr):
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+2
+3
+4
+5
+6
+7
+8</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>np.nditer(arr)</code> automatically handles all dimensions</li><li><code>x</code> is each individual scalar value, in order</li><li>No nested loops needed!</li></ul>
+<h3 class="v2-h3">5.6 Iterating with a Different Data Type Using nditer()</h3>
+<p class="v2-p">You can change the data type of elements during iteration using the <code>op_dtypes</code> argument. But since NumPy cannot change data in-place during iteration, it needs a temporary buffer. Enable the buffer using <code>flags=['buffered']</code>.</p>
+<p class="v2-p"><strong>What is a buffer?</strong> Think of it as a temporary scratch pad. NumPy converts each element to the new type in this temporary space, then gives it to you.</p>
+<p class="v2-p"><strong>Example · Iterate and read values as strings:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3])
+
+for x in np.nditer(arr, flags=[&#x27;buffered&#x27;], op_dtypes=[&#x27;S&#x27;]):
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>b&#x27;1&#x27;
+b&#x27;2&#x27;
+b&#x27;3&#x27;</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>op_dtypes=['S']</code> · convert each element to string (bytes) type</li><li><code>flags=['buffered']</code> · allow a buffer for temporary type conversion</li><li>The <code>b</code> prefix shows these are byte strings</li></ul>
+<h3 class="v2-h3">5.7 Iterating with a Step (Skipping Elements)</h3>
+<p class="v2-p">You can iterate with a step size (skip every other element) by using array slicing inside <code>nditer()</code>.</p>
+<p class="v2-p"><strong>Example · Skip every other element in a 2D array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
+
+for x in np.nditer(arr[:, ::2]):
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1
+3
+5
+7</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>arr[:, ::2]</code> · selects all rows (<code>:</code>), but only every 2nd column (<code>::2</code>)</li><li>Columns selected: 0, 2 (indices 0 and 2 = values 1,3 in row 1 and 5,7 in row 2)</li><li><code>nditer()</code> then iterates over this filtered selection</li></ul>
+<h3 class="v2-h3">5.8 Enumerated Iteration with ndenumerate()</h3>
+<p class="v2-p">Sometimes you need both the <strong>index (position)</strong> and the <strong>value</strong> of each element as you iterate. <code>ndenumerate()</code> provides both.</p>
+<p class="v2-p"><strong>What is enumeration?</strong> It is the process of attaching a sequence number or position label to each item as you loop through them.</p>
+<p class="v2-p"><strong>Example 1 · Enumerate a 1D array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3])
+
+for idx, x in np.ndenumerate(arr):
+    print(idx, x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(0,) 1
+(1,) 2
+(2,) 3</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>idx</code> is the index (position) as a tuple · <code>(0,)</code> means "position 0 in dimension 0"</li><li><code>x</code> is the value at that position</li></ul>
+<p class="v2-p"><strong>Example 2 · Enumerate a 2D array:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([[1, 2, 3, 4], [5, 6, 7, 8]])
+
+for idx, x in np.ndenumerate(arr):
+    print(idx, x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(0, 0) 1
+(0, 1) 2
+(0, 2) 3
+(0, 3) 4
+(1, 0) 5
+(1, 1) 6
+(1, 2) 7
+(1, 3) 8</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>(0, 0)</code> means row 0, column 0 → value is 1</li><li><code>(0, 1)</code> means row 0, column 1 → value is 2</li><li><code>(1, 3)</code> means row 1, column 3 → value is 8</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> <code>ndenumerate()</code> is very useful when you need to find the position of specific values in a 2D array, like finding the location of a maximum temperature in a weather grid.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Array Iterating</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Part 6 · Joining Arrays</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">6.1 What Does "Joining" Mean?</h3>
+<p class="v2-p">Joining (also called concatenating or stacking) means combining two or more arrays into one single array. This is similar to merging spreadsheets or combining datasets.</p>
+<p class="v2-p">In NumPy, you join arrays <strong>along an axis</strong>. Remember, an axis is just a direction:</p>
+<ul class="v2-ul"><li>Axis 0 = along rows (top to bottom, stacking vertically)</li><li>Axis 1 = along columns (left to right, combining side by side)</li></ul>
+<h3 class="v2-h3">6.2 Joining with concatenate()</h3>
+<p class="v2-p"><code>np.concatenate()</code> is the main function for joining arrays. You pass it a tuple (or list) of arrays to combine, and optionally specify the axis.</p>
+<p class="v2-p"><strong>Important:</strong> <code>np.concatenate()</code> requires all arrays to have the <strong>same number of dimensions</strong> and <strong>matching sizes in all axes except the one being concatenated</strong>.</p>
+<p class="v2-p"><strong>Example 1 · Join two 1D arrays:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+
+arr2 = np.array([4, 5, 6])
+
+arr = np.concatenate((arr1, arr2))
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3 4 5 6]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>arr1</code> = <code>[1, 2, 3]</code> and <code>arr2</code> = <code>[4, 5, 6]</code></li><li><code>np.concatenate((arr1, arr2))</code> · note the double parentheses: the outer ones are the function call, the inner ones are a tuple holding the two arrays</li><li>Default axis is 0. For 1D arrays, this simply joins them end-to-end</li><li>Result: <code>[1 2 3 4 5 6]</code></li></ul>
+<p class="v2-p"><strong>Example 2 · Join two 2D arrays along columns (axis=1):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([[1, 2], [3, 4]])
+
+arr2 = np.array([[5, 6], [7, 8]])
+
+arr = np.concatenate((arr1, arr2), axis=1)
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[1 2 5 6]
+ [3 4 7 8]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>arr1</code> has shape <code>(2, 2)</code>: two rows, two columns</li><li><code>arr2</code> has shape <code>(2, 2)</code>: two rows, two columns</li><li><code>axis=1</code> means join along columns (side by side)</li><li>Row 0: <code>[1, 2]</code> from arr1 + <code>[5, 6]</code> from arr2 = <code>[1, 2, 5, 6]</code></li><li>Row 1: <code>[3, 4]</code> from arr1 + <code>[7, 8]</code> from arr2 = <code>[3, 4, 7, 8]</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Axis 0 vs Axis 1 intuition:</strong></p>
+<ul class="v2-ul"><li><code>axis=0</code> → stack one ON TOP OF the other (add more rows)</li><li><code>axis=1</code> → place one BESIDE the other (add more columns)</li></ul></blockquote>
+<h3 class="v2-h3">6.3 Joining with stack()</h3>
+<p class="v2-p"><code>np.stack()</code> is similar to <code>concatenate()</code>, but with one important difference: <strong>stacking creates a NEW axis</strong>, while concatenating joins along an existing axis.</p>
+<p class="v2-p"><strong>Analogy:</strong></p>
+<ul class="v2-ul"><li><code>concatenate()</code> = laying sheets of paper end-to-end on the same table</li><li><code>stack()</code> = placing sheets of paper on top of each other to create a pile (a new dimension)</li></ul>
+<p class="v2-p"><strong>Example · Stack two 1D arrays along axis=1:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+
+arr2 = np.array([4, 5, 6])
+
+arr = np.stack((arr1, arr2), axis=1)
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[1 4]
+ [2 5]
+ [3 6]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>Both arrays have 3 elements</li><li><code>axis=1</code> creates a new second dimension (columns)</li><li>Element <code>arr1[0]=1</code> and <code>arr2[0]=4</code> become the first row <code>[1, 4]</code></li><li>Element <code>arr1[1]=2</code> and <code>arr2[1]=5</code> become the second row <code>[2, 5]</code></li><li>Element <code>arr1[2]=3</code> and <code>arr2[2]=6</code> become the third row <code>[3, 6]</code></li><li>Result shape: <code>(3, 2)</code> · 3 rows, 2 columns</li></ul>
+<h3 class="v2-h3">6.4 Convenience Stacking Functions</h3>
+<p class="v2-p">NumPy also provides three helper functions for common stacking directions:</p>
+<h4 class="v2-h4">hstack() · Stack Horizontally (Along Rows)</h4>
+<p class="v2-p">"h" stands for horizontal. <code>hstack()</code> joins arrays side by side · adding columns.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([4, 5, 6])
+
+arr = np.hstack((arr1, arr2))
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 3 4 5 6]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> Elements placed next to each other horizontally (in the same row). For 1D arrays, this is the same as <code>concatenate()</code>.</p>
+<h4 class="v2-h4">vstack() · Stack Vertically (Along Columns)</h4>
+<p class="v2-p">"v" stands for vertical. <code>vstack()</code> stacks arrays on top of each other · adding rows.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([4, 5, 6])
+
+arr = np.vstack((arr1, arr2))
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[1 2 3]
+ [4 5 6]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> <code>arr2</code> is placed as a new row beneath <code>arr1</code>. The result has 2 rows and 3 columns.</p>
+<h4 class="v2-h4">dstack() · Stack Along Depth (Height)</h4>
+<p class="v2-p">"d" stands for depth. <code>dstack()</code> stacks arrays along a third axis · going deep, like layers.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([4, 5, 6])
+
+arr = np.dstack((arr1, arr2))
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[[1 4]
+  [2 5]
+  [3 6]]]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>This creates a 3D array with shape <code>(1, 3, 2)</code></li><li>Each pair of matching-index elements is combined into the depth dimension</li><li>Position 0: <code>[1, 4]</code> (1 from arr1, 4 from arr2)</li><li>Position 1: <code>[2, 5]</code></li><li>Position 2: <code>[3, 6]</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Quick summary table:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Function</th><th>Direction</th><th>Adds New Axis?</th></tr></thead><tbody><tr><td><code>hstack()</code></td><td>Horizontal (side by side)</td><td>No</td></tr><tr><td><code>vstack()</code></td><td>Vertical (top and bottom)</td><td>No</td></tr><tr><td><code>dstack()</code></td><td>Depth (3rd dimension)</td><td>Yes</td></tr><tr><td><code>stack()</code></td><td>Any axis</td><td>Yes</td></tr><tr><td><code>concatenate()</code></td><td>Any existing axis</td><td>No</td></tr></tbody></table></div></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Joining Arrays</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Data Types</h3>
+<p class="v2-p"><strong>Objective:</strong> Practise checking and converting data types.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have a list of temperature readings stored as floats. You want to check the type, convert them to integers (for approximate comparison), and verify.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create an array: <code>temperatures = np.array([36.6, 37.1, 38.2, 36.9, 37.5])</code></li><li>Print the dtype</li><li>Convert to integers using <code>.astype(int)</code></li><li>Print the new array and its dtype</li><li>Check: what happened to the decimal parts?</li></ol>
+<p class="v2-p"><strong>Expected output after step 4:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[36 37 38 36 37]
+int64</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Was 37.1 rounded to 37 or truncated to 37? (Both give 37 here, but what about 37.9?)</li><li>What would <code>astype(bool)</code> give for these temperature values?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Copy vs View</h3>
+<p class="v2-p"><strong>Objective:</strong> Understand when data is shared and when it is independent.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have a student grade array. You make a copy for a "backup" and a view for "display". You then update a grade.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create: <code>grades = np.array([85, 90, 78, 92, 88])</code></li><li>Make a copy: <code>backup = grades.copy()</code></li><li>Make a view: <code>display = grades.view()</code></li><li>Update: <code>grades[2] = 100</code></li><li>Print <code>grades</code>, <code>backup</code>, and <code>display</code></li><li>Check <code>.base</code> for both <code>backup</code> and <code>display</code></li></ol>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[85 90 100 92 88]   # grades (original, changed)
+[85 90  78 92 88]   # backup (copy, unchanged)
+[85 90 100 92 88]   # display (view, changed with original)</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What does <code>backup.base</code> return?</li><li>What does <code>display.base</code> return?</li><li>Why is it important to use <code>.copy()</code> when you need an independent backup?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Shape and Reshape</h3>
+<p class="v2-p"><strong>Objective:</strong> Practise understanding and changing array structures.</p>
+<p class="v2-p"><strong>Scenario:</strong> A data scientist has 24 daily measurements and needs to organise them into a weekly table.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create: <code>data = np.arange(1, 25)</code> (creates an array from 1 to 24)</li><li>Print the shape</li><li>Reshape into 4 weeks × 6 days: <code>data.reshape(4, 6)</code></li><li>Print the reshaped array</li><li>Reshape into 3D: 2 groups × 3 rows × 4 columns</li><li>Flatten back to 1D using <code>reshape(-1)</code></li></ol>
+<p class="v2-p"><strong>Hints:</strong></p>
+<ul class="v2-ul"><li><code>np.arange(1, 25)</code> creates <code>[1, 2, 3, ..., 24]</code></li><li>4 × 6 = 24 ✓</li><li>2 × 3 × 4 = 24 ✓</li></ul>
+<p class="v2-p"><strong>Expected output for step 3:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[ 1  2  3  4  5  6]
+ [ 7  8  9 10 11 12]
+ [13 14 15 16 17 18]
+ [19 20 21 22 23 24]]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4 · Iterating</h3>
+<p class="v2-p"><strong>Objective:</strong> Practise looping through multi-dimensional arrays.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have a 3×3 multiplication table and need to print every value.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create: <code>table = np.array([[1,2,3],[2,4,6],[3,6,9]])</code></li><li>Use nested <code>for</code> loops to print every element</li><li>Repeat using <code>np.nditer()</code></li><li>Use <code>np.ndenumerate()</code> to print each element with its position</li></ol>
+<p class="v2-p"><strong>Expected output for step 4:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(0, 0) 1
+(0, 1) 2
+(0, 2) 3
+(1, 0) 2
+(1, 1) 4
+(1, 2) 6
+(2, 0) 3
+(2, 1) 6
+(2, 2) 9</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 5 · Joining Arrays</h3>
+<p class="v2-p"><strong>Objective:</strong> Practise combining arrays in different directions.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have two student score tables from two classes and want to combine them.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Create: <code>class1 = np.array([[80, 85], [90, 88]])</code></li><li>Create: <code>class2 = np.array([[75, 79], [95, 91]])</code></li><li>Use <code>concatenate(axis=0)</code> to stack classes vertically (add more students)</li><li>Use <code>concatenate(axis=1)</code> to add more subjects (side by side)</li><li>Use <code>vstack()</code> for step 3 and <code>hstack()</code> for step 4</li></ol>
+<p class="v2-p"><strong>Expected output for step 3:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[80 85]
+ [90 88]
+ [75 79]
+ [95 91]]</code></pre></div></div>
+<p class="v2-p"><strong>Expected output for step 4:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[80 85 75 79]
+ [90 88 95 91]]</code></pre></div></div>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(9)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1 · Assuming astype() Rounds (It Does Not)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG assumption:
+arr = np.array([2.9, 3.7])
+result = arr.astype(int)
+# Beginner expects: [3, 4]
+# Reality: [2, 3]  &lt;- truncated, not rounded!</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Use <code>np.round()</code> first if you need rounding, then convert.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([2.9, 3.7])
+result = np.round(arr).astype(int)
+print(result)  # Output: [3 4]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2 · Treating a View Like a Copy</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([1, 2, 3, 4, 5])
+x = arr.view()        # NOT a copy!
+x[0] = 999            # This changes arr too!
+print(arr)            # [999  2  3  4  5] — surprise!</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Use <code>.copy()</code> when you need independence.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = arr.copy()        # Now truly independent
+x[0] = 999
+print(arr)            # [1 2 3 4 5] — original is safe</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3 · Invalid Reshape (Forgetting to Check Total Elements)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([1, 2, 3, 4, 5, 6])
+# WRONG: 6 elements cannot form a 2x4 grid (2x4=8, not 6)
+result = arr.reshape(2, 4)  # ValueError!</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Always verify that <code>new_shape[0] × new_shape[1] × ... = original_total_elements</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Correct options for 6 elements:
+arr.reshape(2, 3)   # 2x3=6 ✓
+arr.reshape(3, 2)   # 3x2=6 ✓
+arr.reshape(6, 1)   # 6x1=6 ✓
+arr.reshape(1, 6)   # 1x6=6 ✓
+arr.reshape(2, 3, 1) # 2x3x1=6 ✓</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4 · Using -1 in More Than One Dimension</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([1, 2, 3, 4, 5, 6])
+# WRONG: can only use -1 once
+result = arr.reshape(-1, -1)  # ValueError!</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Only one dimension can be -1. Specify all other dimensions explicitly.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>result = arr.reshape(2, -1)  # NumPy calculates: 6/2=3, so shape (2,3) ✓</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5 · Concatenating Arrays with Mismatched Shapes</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr1 = np.array([[1, 2, 3]])      # shape (1, 3)
+arr2 = np.array([[4, 5], [6, 7]]) # shape (2, 2)
+result = np.concatenate((arr1, arr2), axis=0)  # Error! Different column counts</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> All arrays being concatenated must match in ALL dimensions except the one being combined.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr1 = np.array([[1, 2], [3, 4]])  # shape (2, 2)
+arr2 = np.array([[5, 6], [7, 8]])  # shape (2, 2)
+result = np.concatenate((arr1, arr2), axis=0)  # shape (4, 2) ✓</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Stage 1 · Setup and Data Inspection</div><div class="build-req"><p class="v2-p"><strong>Goal:</strong> Build a small data pipeline that uses all six topics from this lesson.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are a data analyst at a school. You have raw exam score data as a flat list of 12 scores (from 4 students across 3 subjects). You need to organise, inspect, and extend this data.</p>
+<h3 class="v2-h3">Stage 1 · Setup and Data Inspection</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+# 12 raw scores: 4 students, 3 subjects each
+raw_scores = np.array([72, 85, 90, 68, 79, 88, 95, 77, 82, 55, 91, 63])
+
+# Step 1: Check the dtype
+print(&quot;Data type:&quot;, raw_scores.dtype)
+
+# Step 2: Check the shape
+print(&quot;Shape:&quot;, raw_scores.shape)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import numpy as np
+
+# 12 raw scores: 4 students, 3 subjects each
+raw_scores = np.array([72, 85, 90, 68, 79, 88, 95, 77, 82, 55, 91, 63])
+
+# Step 1: Check the dtype
+print(&quot;Data type:&quot;, raw_scores.dtype)
+
+# Step 2: Check the shape
+print(&quot;Shape:&quot;, raw_scores.shape)`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-25-stage-1-setup-and-data-inspection</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 25 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 25 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisites · What You Need to Know First</li><li>✅ Part 1 · NumPy Data Types</li><li>✅ Part 2 · Copy vs View</li><li>✅ Part 3 · Array Shape</li><li>✅ Part 4 · Array Reshape</li><li>✅ Part 5 · Array Iterating</li><li>✅ Part 6 · Joining Arrays</li></ul><div class="ln"><a href="lesson_24.html" class="ln-btn">&#8592; Lesson 24</a><a href="lesson_26.html" class="ln-btn primary">Lesson 26 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 25 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 28: NumPy ufuncs · Creating Functions, Arithmetic, Rounding, Logs &amp; Summations — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="10" data-key="techbase_python_l28">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 28 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 28</div>
+      <h1>NumPy ufuncs · Creating Functions, Arithmetic, Rounding, Logs &amp; Summations</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Scenario</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 28</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 28! In this lesson you will learn about one of NumPy's most powerful features: <strong>ufuncs</strong> (Universal Functions).</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul"><li>Understand what a ufunc is and why it exists</li><li>Create your own custom ufunc using <code>frompyfunc()</code></li><li>Use built-in ufuncs for arithmetic: add, subtract, multiply, divide, power, mod</li><li>Round decimal numbers using truncation, fix, around, floor, and ceil</li><li>Work with logarithms at base 2, base 10, base e, and any custom base</li><li>Use <code>sum()</code>, axis-based summation, and cumulative sum (<code>cumsum()</code>)</li><li>Build a realistic mini-project combining all of these skills</li></ul>
+<p class="v2-p">No prior knowledge of ufuncs is needed. We will build everything from scratch.</p>
+<hr class="v2-hr"></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Scenario</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 28! In this lesson you will learn about one of NumPy's most powerful features: <strong>ufuncs</strong> (Universal Functions).</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul"><li>Understand what a ufunc is and why it exists</li><li>Create your own custom ufunc using <code>frompyfunc()</code></li><li>Use built-in ufuncs for arithmetic: add, subtract, multiply, divide, power, mod</li><li>Round decimal numbers using truncation, fix, around, floor, and ceil</li><li>Work with logarithms at base 2, base 10, base e, and any custom base</li><li>Use <code>sum()</code>, axis-based summation, and cumulative sum (<code>cumsum()</code>)</li><li>Build a realistic mini-project combining all of these skills</li></ul>
+<p class="v2-p">No prior knowledge of ufuncs is needed. We will build everything from scratch.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before diving in, let's make sure you understand a few building blocks.</p>
+<h3 class="v2-h3">What is NumPy?</h3>
+<p class="v2-p">NumPy is a Python library used for working with numbers in large collections called <strong>arrays</strong>. Instead of writing a loop to process 1000 numbers one by one, NumPy lets you do it all at once in a single line · much faster and cleaner.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([10, 20, 30, 40])
+print(arr * 2)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[20 40 60 80]</code></pre></div></div>
+<p class="v2-p">Every number in the array was multiplied by 2 in one step. That is the power of NumPy.</p>
+<h3 class="v2-h3">What is a Regular Python Function?</h3>
+<p class="v2-p">A regular function in Python takes one or more inputs and returns an output:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>def double(x):
+    return x * 2
+
+print(double(5))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>10</code></pre></div></div>
+<p class="v2-p">This works fine for a single number, but it cannot automatically work on an entire array. That is where ufuncs come in.</p>
+<h3 class="v2-h3">What is an Array?</h3>
+<p class="v2-p">An array is like a list, but optimised for math. It can hold many numbers:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+scores = np.array([85, 90, 78, 92, 88])
+print(scores)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[85 90 78 92 88]</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Part 1 · What is a ufunc (Universal Function)?</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is it?</h3>
+<p class="v2-p">A <strong>ufunc</strong> (short for Universal Function) is a special kind of function in NumPy that operates <strong>element by element</strong> on entire arrays automatically.</p>
+<p class="v2-p">Think of it like this: imagine you have a factory assembly line. A regular function processes one item, picks it up, works on it, and puts it down. A ufunc is like an advanced machine that can process all items on the belt simultaneously · every element at the same time.</p>
+<h3 class="v2-h3">Why does it exist?</h3>
+<p class="v2-p">Without ufuncs, you would need to write a loop like this to add two arrays:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>a = [1, 2, 3]
+b = [4, 5, 6]
+result = []
+
+for i in range(len(a)):
+    result.append(a[i] + b[i])
+
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[5, 7, 9]</code></pre></div></div>
+<p class="v2-p">This works, but it is slow and verbose. A ufunc does this in one line and runs much faster because it is written in optimised low-level code (C language) under the hood.</p>
+<h3 class="v2-h3">NumPy already has many ufuncs built in</h3>
+<p class="v2-p">Functions like <code>np.add()</code>, <code>np.multiply()</code>, <code>np.log()</code>, and <code>np.sqrt()</code> are all ufuncs. You can also <strong>create your own</strong>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What is a ufunc (Universal Function)?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Part 2 · Creating Your Own ufunc with `frompyfunc()`</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">How to create a custom ufunc</h3>
+<p class="v2-p">To turn your own Python function into a NumPy ufunc, you use the method <code>np.frompyfunc()</code>.</p>
+<p class="v2-p">It takes three arguments:</p>
+<ol class="v2-ol"><li>The <strong>function</strong> you want to convert</li><li>The <strong>number of input arrays</strong> (inputs)</li><li>The <strong>number of output arrays</strong> (outputs)</li></ol>
+<h3 class="v2-h3">Syntax</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>np.frompyfunc(function_name, number_of_inputs, number_of_outputs)</code></pre></div></div>
+<h3 class="v2-h3">Step-by-step simple example</h3>
+<p class="v2-p">Let's create a ufunc that adds two numbers together.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+# Step 1: Define a regular Python function
+def myadd(x, y):
+    return x + y
+
+# Step 2: Convert it into a ufunc
+myadd = np.frompyfunc(myadd, 2, 1)
+# Arguments: function, 2 inputs (x and y), 1 output
+
+# Step 3: Use it on two arrays
+result = myadd([1, 2, 3, 4], [5, 6, 7, 8])
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[6 8 10 12]</code></pre></div></div>
+<p class="v2-p"><strong>Breaking it down line by line:</strong></p>
+<ul class="v2-ul"><li><code>def myadd(x, y):</code> · defines a regular function that adds two values</li><li><code>return x + y</code> · returns the sum</li><li><code>np.frompyfunc(myadd, 2, 1)</code> · wraps <code>myadd</code> into a ufunc. <code>2</code> means it takes 2 inputs; <code>1</code> means it produces 1 output</li><li><code>myadd([1,2,3,4], [5,6,7,8])</code> · applies the ufunc to every pair: <code>1+5</code>, <code>2+6</code>, <code>3+7</code>, <code>4+8</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What would happen if you changed <code>[5, 6, 7, 8]</code> to <code>[10, 10, 10, 10]</code>? Try to predict the output before running it.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">How to check if a function is a ufunc</h3>
+<p class="v2-p">You can check whether any NumPy function is a ufunc by checking its <strong>type</strong>. A genuine ufunc will return <code>&lt;class 'numpy.ufunc'&gt;</code>.</p>
+<h4 class="v2-h4">Example 1 · Check a known ufunc</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+print(type(np.add))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;class &#x27;numpy.ufunc&#x27;&gt;</code></pre></div></div>
+<p class="v2-p"><code>np.add</code> is a ufunc · confirmed.</p>
+<h4 class="v2-h4">Example 2 · Check a non-ufunc function</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+print(type(np.concatenate))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;class &#x27;builtin_function_or_method&#x27;&gt;</code></pre></div></div>
+<p class="v2-p"><code>np.concatenate</code> is a built-in NumPy function but <strong>not</strong> a ufunc · notice the different type.</p>
+<h4 class="v2-h4">Example 3 · Check something that doesn't exist (produces an error)</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+print(type(np.blahblah))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>AttributeError: module &#x27;numpy&#x27; has no attribute &#x27;blahblah&#x27;</code></pre></div></div>
+<p class="v2-p">NumPy raises an error if the function doesn't exist at all.</p>
+<h4 class="v2-h4">Example 4 · Use an if statement to check</h4>
+<p class="v2-p">You can write a proper check using an <code>if</code> statement:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+if type(np.add) == np.ufunc:
+    print(&#x27;add is ufunc&#x27;)
+else:
+    print(&#x27;add is not ufunc&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>add is ufunc</code></pre></div></div>
+<p class="v2-p"><strong>Why is this useful?</strong> In real projects, you might receive a function from someone else or load it dynamically. This check lets you verify it behaves like a ufunc before using it on large arrays.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Second custom ufunc example · squaring a number</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+def mysquare(x):
+    return x * x
+
+mysquare = np.frompyfunc(mysquare, 1, 1)
+# 1 input, 1 output
+
+result = mysquare([2, 3, 4, 5])
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[4 9 16 25]</code></pre></div></div>
+<p class="v2-p">Every number in the array was squared automatically.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> In physics, squaring values is common · for example, calculating kinetic energy (<code>½mv²</code>) for every object in a simulation simultaneously.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Creating Your Own ufunc with <code>frompyfunc()</code></strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Part 3 · Simple Arithmetic ufuncs</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">NumPy provides ready-made ufuncs for all common arithmetic operations. The big advantage over using Python's <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> operators directly is that these functions can accept lists, tuples, or any array-like object, and they support an optional <code>where</code> parameter that lets you apply the operation <strong>only where a condition is true</strong>.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Key concept · Arithmetic Conditionally:</strong> You can tell NumPy to only perform the calculation on elements that meet a condition. We will focus on the core functions first, then explore conditional usage.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.1 Addition · <code>np.add()</code></h3>
+<p class="v2-p">The <code>add()</code> function adds corresponding elements from two arrays and returns a new array.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 11, 12, 13, 14, 15])
+arr2 = np.array([20, 21, 22, 23, 24, 25])
+
+newarr = np.add(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[30 32 34 36 38 40]</code></pre></div></div>
+<p class="v2-p"><strong>How it works:</strong> Each pair is added position by position · <code>10+20=30</code>, <code>11+21=32</code>, <code>12+22=34</code>, and so on.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking Prompt:</strong> What would happen if arr1 had 6 elements and arr2 had only 3?</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.2 Subtraction · <code>np.subtract()</code></h3>
+<p class="v2-p">The <code>subtract()</code> function subtracts corresponding elements of the second array from the first.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 20, 30, 40, 50, 60])
+arr2 = np.array([20, 21, 22, 23, 24, 25])
+
+newarr = np.subtract(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[-10  -1   8  17  26  35]</code></pre></div></div>
+<p class="v2-p"><strong>How it works:</strong> <code>10-20=-10</code>, <code>20-21=-1</code>, <code>30-22=8</code>, <code>40-23=17</code>, <code>50-24=26</code>, <code>60-25=35</code>.</p>
+<p class="v2-p">Notice that negative results are perfectly fine · NumPy handles them automatically.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.3 Multiplication · <code>np.multiply()</code></h3>
+<p class="v2-p">The <code>multiply()</code> function multiplies corresponding elements.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 20, 30, 40, 50, 60])
+arr2 = np.array([20, 21, 22, 23, 24, 25])
+
+newarr = np.multiply(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ 200  420  660  920 1200 1500]</code></pre></div></div>
+<p class="v2-p"><strong>How it works:</strong> <code>10×20=200</code>, <code>20×21=420</code>, <code>30×22=660</code>, and so on.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> In finance, you might multiply an array of quantities by an array of unit prices to get the total cost for each item in an order.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.4 Division · <code>np.divide()</code></h3>
+<p class="v2-p">The <code>divide()</code> function divides elements of the first array by corresponding elements of the second.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 20, 30, 40, 50, 60])
+arr2 = np.array([ 3,  5, 10,  8,  2, 33])
+
+newarr = np.divide(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ 3.33333333  4.          3.          5.         25.          1.81818182]</code></pre></div></div>
+<p class="v2-p"><strong>How it works:</strong> <code>10÷3≈3.333</code>, <code>20÷5=4.0</code>, <code>30÷10=3.0</code>, <code>40÷8=5.0</code>, <code>50÷2=25.0</code>, <code>60÷33≈1.818</code>.</p>
+<p class="v2-p">NumPy always returns decimal (float) results for division.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.5 Power · <code>np.power()</code></h3>
+<p class="v2-p">The <code>power()</code> function raises each element of the first array to the power of the corresponding element in the second array.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 20, 30, 40, 50, 60])
+arr2 = np.array([ 3,  5,  6,  8,  2, 33])
+
+newarr = np.power(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[      1000    3200000  729000000 6553600000000000        2500            0]</code></pre></div></div>
+<p class="v2-p"><em>(Note: 60^33 overflows a standard integer and wraps to 0 in some NumPy versions)</em></p>
+<p class="v2-p"><strong>How it works:</strong> <code>10³=1000</code>, <code>20⁵=3,200,000</code>, <code>30⁶=729,000,000</code>, etc.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Used in exponential growth models · population growth, compound interest, signal processing, and scientific simulations.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.6 Remainder / Modulo · <code>np.mod()</code> and <code>np.remainder()</code></h3>
+<p class="v2-p">The <strong>remainder</strong> (also called <strong>modulo</strong>) is what is left over after integer division. For example, <code>10 ÷ 3 = 3 remainder 1</code> · so <code>10 % 3 = 1</code>.</p>
+<p class="v2-p">Both <code>np.mod()</code> and <code>np.remainder()</code> do the same thing.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 20, 30, 40, 50, 60])
+arr2 = np.array([ 3,  7,  9,  8,  2, 33])
+
+newarr = np.mod(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ 1  6  3  0  0 27]</code></pre></div></div>
+<p class="v2-p"><strong>How it works:</strong></p>
+<ul class="v2-ul"><li><code>10 % 3 = 1</code> (10 = 3×3 + 1)</li><li><code>20 % 7 = 6</code> (20 = 7×2 + 6)</li><li><code>30 % 9 = 3</code> (30 = 9×3 + 3)</li><li><code>40 % 8 = 0</code> (40 = 8×5 + 0, divides evenly)</li><li><code>50 % 2 = 0</code> (50 is even)</li><li><code>60 % 33 = 27</code> (60 = 33×1 + 27)</li></ul>
+<p class="v2-p">Using <code>np.remainder()</code> gives exactly the same result:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>newarr = np.remainder(arr1, arr2)
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ 1  6  3  0  0 27]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Modulo is used in cryptography, scheduling (what day of the week will it be in 100 days?), and game programming (wrapping a position around a boundary).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.7 Quotient and Mod Together · <code>np.divmod()</code></h3>
+<p class="v2-p">The <code>divmod()</code> function returns <strong>both</strong> the integer quotient <strong>and</strong> the remainder in one call. It returns two arrays at once.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([10, 20, 30, 40, 50, 60])
+arr2 = np.array([ 3,  7,  9,  8,  2, 33])
+
+newarr = np.divmod(arr1, arr2)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(array([ 3,  2,  3,  5, 25,  1]), array([ 1,  6,  3,  0,  0, 27]))</code></pre></div></div>
+<p class="v2-p"><strong>Breaking it down:</strong></p>
+<ul class="v2-ul"><li>The <strong>first array</strong> <code>[3, 2, 3, 5, 25, 1]</code> contains the <strong>quotients</strong> (how many times the divisor fits in whole)</li><li>The <strong>second array</strong> <code>[1, 6, 3, 0, 0, 27]</code> contains the <strong>remainders</strong> (what is left over)</li></ul>
+<p class="v2-p">For <code>10 ÷ 3</code>: quotient is <code>3</code>, remainder is <code>1</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.8 Absolute Values · <code>np.absolute()</code></h3>
+<p class="v2-p">The <strong>absolute value</strong> of a number is its distance from zero · it removes the negative sign.</p>
+<ul class="v2-ul"><li><code>absolute(-5) = 5</code></li><li><code>absolute(5) = 5</code></li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([-1, -2, 1, 2, 3, -4])
+
+newarr = np.absolute(arr)
+
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 2 1 2 3 4]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important note:</strong> NumPy also has <code>np.abs()</code> which does the same thing. However, it is recommended to use <code>np.absolute()</code> to avoid confusion with Python's built-in <code>math.abs()</code>. Using the wrong one in certain contexts can cause unexpected results.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> In engineering and data science, absolute values are used to measure error · the difference between a predicted value and the actual value, regardless of direction.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Simple Arithmetic ufuncs</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Part 4 · Rounding Decimals</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When working with real-world data (prices, measurements, scientific readings), you often get messy decimal numbers like <code>3.1666667</code> or <code>-2.9999</code>. NumPy provides five different ways to clean up decimals.</p>
+<h3 class="v2-h3">The five rounding methods at a glance</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Function</th><th>What it does</th></tr></thead><tbody><tr><td>Truncation</td><td><code>np.trunc()</code></td><td>Chops off the decimal, keeps integer part</td></tr><tr><td>Fix</td><td><code>np.fix()</code></td><td>Same as trunc · towards zero</td></tr><tr><td>Rounding</td><td><code>np.around()</code></td><td>Standard rounding (≥5 rounds up)</td></tr><tr><td>Floor</td><td><code>np.floor()</code></td><td>Always rounds <strong>down</strong> to nearest integer</td></tr><tr><td>Ceil</td><td><code>np.ceil()</code></td><td>Always rounds <strong>up</strong> to nearest integer</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.1 Truncation · <code>np.trunc()</code> and <code>np.fix()</code></h3>
+<p class="v2-p"><strong>Truncation</strong> simply removes the decimal part and returns the integer part · it always moves towards zero regardless of the decimal value.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.trunc([-3.1666, 3.6667])
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[-3.  3.]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>-3.1666</code> → remove <code>.1666</code> → result is <code>-3.0</code> (moved towards zero, not towards <code>-4</code>)</li><li><code>3.6667</code> → remove <code>.6667</code> → result is <code>3.0</code> (even though it's close to 4, truncation ignores that)</li></ul>
+<p class="v2-p">Using <code>np.fix()</code> gives the same result:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.fix([-3.1666, 3.6667])
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[-3.  3.]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Common Beginner Mistake:</strong> Beginners often confuse truncation with floor. They behave differently for <strong>negative numbers</strong>. Truncation of <code>-3.7</code> gives <code>-3</code> (towards zero), but floor of <code>-3.7</code> gives <code>-4</code> (always down). We will see this clearly in 4.4.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.2 Standard Rounding · <code>np.around()</code></h3>
+<p class="v2-p">The <code>around()</code> function applies the standard mathematical rounding rule: if the digit after the rounding position is <strong>5 or more</strong>, round up; if it is <strong>less than 5</strong>, round down.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.around(3.1666, 2)
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3.17</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> We are rounding to 2 decimal places. The third decimal is <code>6</code>, which is ≥5, so the second decimal rounds up from <code>6</code> to <code>7</code>. Final result: <code>3.17</code>.</p>
+<p class="v2-p">More examples:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+print(np.around(3.1444, 2))   # third decimal is 4, so round down
+print(np.around(3.1500, 2))   # third decimal is 5, so round up
+print(np.around(7.55, 1))     # second decimal is 5, so round up
+print(np.around(100.456, 0))  # round to whole number</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3.14
+3.15
+7.6
+100.0</code></pre></div></div>
+<p class="v2-p">The second argument to <code>np.around()</code> is the <strong>number of decimal places</strong> to keep.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Used any time you display prices, grades, or measurements that need a fixed number of decimal places.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.3 Floor · <code>np.floor()</code></h3>
+<p class="v2-p">The <strong>floor</strong> of a number is the <strong>largest integer that is less than or equal to it</strong>. In simple terms: always round down to the next lower whole number.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.floor([-3.1666, 3.6667])
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[-4.  3.]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>floor(-3.1666)</code> = <code>-4</code> · the next integer going <strong>downward</strong> from <code>-3.1666</code> is <code>-4</code></li><li><code>floor(3.6667)</code> = <code>3</code> · the next integer going <strong>downward</strong> from <code>3.6667</code> is <code>3</code></li></ul>
+<p class="v2-p">Think of a number line:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>... -4  -3.1666  -3  ...  3  3.6667  4 ...
+floor(-3.1666) = -4            floor(3.6667) = 3</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Floor is like an elevator that always takes you to the floor <strong>below</strong> where you are, not the floor above.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.4 Ceil · <code>np.ceil()</code></h3>
+<p class="v2-p">The <strong>ceil</strong> (ceiling) of a number is the <strong>smallest integer that is greater than or equal to it</strong>. In simple terms: always round up to the next higher whole number.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.ceil([-3.1666, 3.6667])
+
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[-3.  4.]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>ceil(-3.1666)</code> = <code>-3</code> · the next integer going <strong>upward</strong> from <code>-3.1666</code> is <code>-3</code></li><li><code>ceil(3.6667)</code> = <code>4</code> · the next integer going <strong>upward</strong> from <code>3.6667</code> is <code>4</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Ceil is like an elevator that always takes you to the floor <strong>above</strong> where you are.</p></blockquote>
+<h3 class="v2-h3">Quick comparison of all four rounding behaviours</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+value = 3.4
+print(&quot;trunc:&quot;, np.trunc(value))    # → 3.0
+print(&quot;around:&quot;, np.around(value))  # → 3.0
+print(&quot;floor:&quot;, np.floor(value))    # → 3.0
+print(&quot;ceil:&quot;, np.ceil(value))      # → 4.0
+
+value = 3.6
+print(&quot;trunc:&quot;, np.trunc(value))    # → 3.0
+print(&quot;around:&quot;, np.around(value))  # → 4.0
+print(&quot;floor:&quot;, np.floor(value))    # → 3.0
+print(&quot;ceil:&quot;, np.ceil(value))      # → 4.0
+
+value = -3.4
+print(&quot;trunc:&quot;, np.trunc(value))    # → -3.0  (towards zero)
+print(&quot;floor:&quot;, np.floor(value))    # → -4.0  (always down)
+print(&quot;ceil:&quot;, np.ceil(value))      # → -3.0  (always up)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>trunc: 3.0
+around: 3.0
+floor: 3.0
+ceil: 4.0
+trunc: 3.0
+around: 4.0
+floor: 3.0
+ceil: 4.0
+trunc: -3.0
+floor: -4.0
+ceil: -3.0</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Rounding Decimals</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Part 5 · Logarithms with NumPy ufuncs</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">What is a logarithm?</h3>
+<p class="v2-p">A <strong>logarithm</strong> answers this question: "How many times do I multiply this base number by itself to get the result?"</p>
+<p class="v2-p">For example:</p>
+<ul class="v2-ul"><li><code>log₂(8) = 3</code> because <code>2 × 2 × 2 = 8</code></li><li><code>log₁₀(1000) = 3</code> because <code>10 × 10 × 10 = 1000</code></li><li><code>logₑ(e) = 1</code> because <code>e¹ = e</code></li></ul>
+<p class="v2-p">Logarithms are the <strong>inverse of exponentiation</strong>. If <code>2³ = 8</code>, then <code>log₂(8) = 3</code>.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Logarithms appear everywhere · measuring earthquake magnitude (Richter scale), sound intensity (decibels), pH in chemistry, information theory, machine learning (log loss), and financial models (log returns).</p></blockquote>
+<p class="v2-p">NumPy provides functions to compute logs at base 2, base 10, and base e. It also lets you compute logs at <strong>any</strong> custom base using <code>frompyfunc()</code>.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important note:</strong> If NumPy cannot compute a log (e.g., log of zero or a negative number), it places <code>-inf</code> or <code>inf</code> in that position instead of crashing.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.1 Log base 2 · <code>np.log2()</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.arange(1, 10)
+# arange(1, 10) creates [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+print(np.log2(arr))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[0.         1.         1.58496250 2.         2.32192809 2.58496250
+ 2.80735492 3.         3.16992500]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>log₂(1) = 0</code> because <code>2⁰ = 1</code></li><li><code>log₂(2) = 1</code> because <code>2¹ = 2</code></li><li><code>log₂(4) = 2</code> because <code>2² = 4</code></li><li><code>log₂(8) = 3</code> because <code>2³ = 8</code></li><li>Non-powers-of-2 like <code>3</code> give decimals: <code>log₂(3) ≈ 1.585</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>About <code>np.arange(1, 10)</code>:</strong> This creates a NumPy array of integers from 1 to 9 (the end value 10 is excluded). It is like Python's <code>range()</code> but returns a NumPy array.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Log base 2 is used heavily in computer science · measuring bits of information, binary tree depth, and algorithm complexity analysis.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.2 Log base 10 · <code>np.log10()</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.arange(1, 10)
+
+print(np.log10(arr))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[0.         0.30103000 0.47712125 0.60205999 0.69897000 0.77815125
+ 0.84509804 0.90308999 0.95424251]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>log₁₀(1) = 0</code> because <code>10⁰ = 1</code></li><li><code>log₁₀(10) = 1</code> because <code>10¹ = 10</code> (not in this range but the pattern holds)</li><li><code>log₁₀(100) = 2</code> because <code>10² = 100</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> The Richter scale for earthquakes uses log base 10. An earthquake of magnitude 6 is 10× stronger than magnitude 5.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.3 Natural log (base e) · <code>np.log()</code></h3>
+<p class="v2-p">The <strong>natural logarithm</strong> uses base <strong>e</strong>, where <code>e ≈ 2.71828</code>. It is written as <code>ln</code> in mathematics but as <code>np.log()</code> in NumPy.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.arange(1, 10)
+
+print(np.log(arr))</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[0.         0.69314718 1.09861229 1.38629436 1.60943791 1.79175947
+ 1.94591015 2.07944154 2.19722458]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>ln(1) = 0</code> because <code>e⁰ = 1</code></li><li><code>ln(e) = 1</code> (approximately <code>ln(2.718) ≈ 1</code>)</li><li><code>ln(2) ≈ 0.693</code></li><li><code>ln(8) ≈ 2.079</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Natural logs are fundamental in calculus, continuous compound interest formulas, population growth models, and neural network training.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.4 Log at any custom base</h3>
+<p class="v2-p">NumPy does not have a built-in function for arbitrary bases, but you can create one using <code>frompyfunc()</code> with Python's built-in <code>math.log()</code>.</p>
+<p class="v2-p"><code>math.log(value, base)</code> calculates the log of <code>value</code> at the given <code>base</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from math import log
+import numpy as np
+
+# Create a custom ufunc for log at any base
+nplog = np.frompyfunc(log, 2, 1)
+# 2 inputs: the value and the base
+# 1 output: the log result
+
+result = nplog(100, 15)
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1.6728419785793796</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> <code>log₁₅(100) ≈ 1.673</code> means <code>15^1.673 ≈ 100</code>. We are asking: "To what power must 15 be raised to get 100?"</p>
+<p class="v2-p">You can now apply this to an entire array:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from math import log
+import numpy as np
+
+nplog = np.frompyfunc(log, 2, 1)
+
+values = np.array([10, 100, 1000])
+result = nplog(values, 10)  # log base 10 of each value
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1.0 2.0 3.0]</code></pre></div></div>
+<p class="v2-p">This confirms: <code>log₁₀(10)=1</code>, <code>log₁₀(100)=2</code>, <code>log₁₀(1000)=3</code>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Logarithms with NumPy ufuncs</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Part 6 · Summations</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Addition vs Summation · what is the difference?</h3>
+<p class="v2-p">These two concepts sound similar but are different in NumPy:</p>
+<ul class="v2-ul"><li><strong>Addition</strong> (<code>np.add</code>) operates between <strong>two arrays</strong>, element by element · pairing up positions and adding each pair</li><li><strong>Summation</strong> (<code>np.sum</code>) adds up elements <strong>across</strong> one or more arrays · collapsing them into a single number (or fewer numbers)</li></ul>
+<h3 class="v2-h3">6.1 Addition (review)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([1, 2, 3])
+
+newarr = np.add(arr1, arr2)
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[2 4 6]</code></pre></div></div>
+<p class="v2-p">Result is still an array of the same length: <code>1+1=2</code>, <code>2+2=4</code>, <code>3+3=6</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.2 Summation · <code>np.sum()</code></h3>
+<p class="v2-p"><code>np.sum()</code> adds up all elements across all arrays passed to it, returning a <strong>single number</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([1, 2, 3])
+
+newarr = np.sum([arr1, arr2])
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>12</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong> All elements combined: <code>1 + 2 + 3 + 1 + 2 + 3 = 12</code>. Everything is added up into one total.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.3 Summation over an axis · <code>axis=1</code></h3>
+<p class="v2-p">Sometimes you don't want the total of everything · you want the total <strong>per array</strong>. You can control this with the <code>axis</code> parameter.</p>
+<ul class="v2-ul"><li><code>axis=0</code> · sum <strong>across</strong> arrays (add corresponding positions)</li><li><code>axis=1</code> · sum <strong>within</strong> each array (total of each individual array)</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([1, 2, 3])
+
+newarr = np.sum([arr1, arr2], axis=1)
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[6 6]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li>Sum of <code>arr1</code> alone: <code>1 + 2 + 3 = 6</code></li><li>Sum of <code>arr2</code> alone: <code>1 + 2 + 3 = 6</code></li><li>Result: <code>[6, 6]</code> · one total per array</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Imagine two students each took a 3-question test. <code>axis=1</code> gives the total score per student. <code>axis=0</code> without axis gives the grand total of all marks.</p></blockquote>
+<p class="v2-p">Let's try a more illustrative example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+store_a_sales = np.array([100, 200, 150])   # sales on 3 days
+store_b_sales = np.array([80, 170, 210])    # sales on 3 days
+
+# Total sales per store
+per_store = np.sum([store_a_sales, store_b_sales], axis=1)
+print(&quot;Per store totals:&quot;, per_store)
+
+# Grand total of all sales
+grand_total = np.sum([store_a_sales, store_b_sales])
+print(&quot;Grand total:&quot;, grand_total)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Per store totals: [450 460]
+Grand total: 910</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.4 Cumulative Sum · <code>np.cumsum()</code></h3>
+<p class="v2-p">A <strong>cumulative sum</strong> (also called a <strong>running total</strong> or <strong>partial sum</strong>) means you keep a rolling total as you go through the array · each position shows the sum of all elements up to and including that position.</p>
+<p class="v2-p"><strong>Example:</strong> For the array <code>[1, 2, 3, 4]</code>, the cumulative sum is:</p>
+<ul class="v2-ul"><li>Position 0: <code>1</code> (just the first element)</li><li>Position 1: <code>1 + 2 = 3</code></li><li>Position 2: <code>1 + 2 + 3 = 6</code></li><li>Position 3: <code>1 + 2 + 3 + 4 = 10</code></li></ul>
+<p class="v2-p">Result: <code>[1, 3, 6, 10]</code></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3])
+
+newarr = np.cumsum(arr)
+print(newarr)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 3 6]</code></pre></div></div>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul"><li><code>[1]</code> → <code>1</code></li><li><code>[1, 2]</code> → <code>1+2=3</code></li><li><code>[1, 2, 3]</code> → <code>1+2+3=6</code></li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> Cumulative sums are used in sales tracking (running total of revenue over a month), sports statistics (cumulative points scored), finance (running portfolio value), and science (accumulated rainfall).</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Summations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Custom ufunc for Doubling</h3>
+<p class="v2-p"><strong>Objective:</strong> Create a custom ufunc that doubles any number.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have a list of item prices and need to find double each price for a "buy 2 get 1 free" display.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Define a regular Python function <code>double(x)</code> that returns <code>x * 2</code></li><li>Convert it to a ufunc using <code>np.frompyfunc()</code></li><li>Apply it to a prices array</li></ol>
+<p class="v2-p"><strong>Starting code:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">abs_diff = np.absolute(diff)
+print("Absolute differences:", abs_diff)
+`
+
+Expected output:
+`
+Total scores: [160 164 180 131 154]
+Differences: [ -4   6   4 -11  -6]
+Absolute differences: [ 4  6  4 11  6]
+`
+
+What-if challenge: What if you used np.multiply(maths, english)? What does that represent? · </div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+prices = np.array([5.99, 12.50, 3.25, 8.75])
+
+# Your code here</code></pre></div></div>
+<p class="v2-p"><strong>Hints:</strong> The function takes 1 input and returns 1 output.</p>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[11.98 25.0  6.5  17.5 ]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>How many inputs and outputs did you specify in <code>frompyfunc()</code>?</li><li>What type does <code>type(double)</code> show after conversion?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Arithmetic on Student Data</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice <code>np.add</code>, <code>np.subtract</code>, and <code>np.absolute</code> with realistic data.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have the exam scores of 5 students in two subjects. You want to find the total, the difference, and the absolute difference (regardless of which is higher).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+maths   = np.array([78, 85, 92, 60, 74])
+english = np.array([82, 79, 88, 71, 80])
+
+# Task 1: Find total score per student (maths + english)
+total = np.add(maths, english)
+print(&quot;Total scores:&quot;, total)
+
+# Task 2: Find the difference (maths - english)
+diff = np.subtract(maths, english)
+print(&quot;Differences:&quot;, diff)
+
+# Task 3: Find absolute difference (remove negative signs)
+abs_diff = np.absolute(diff)
+print(&quot;Absolute differences:&quot;, abs_diff)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Total scores: [160 164 180 131 154]
+Differences: [ -4   6   4 -11  -6]
+Absolute differences: [ 4  6  4 11  6]</code></pre></div></div>
+<p class="v2-p"><strong>What-if challenge:</strong> What if you used <code>np.multiply(maths, english)</code>? What does that represent?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Rounding a Financial Dataset</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice all five rounding methods on real-looking currency values.</p>
+<p class="v2-p"><strong>Scenario:</strong> A store calculates prices after tax and gets messy decimals. You need to round them different ways for different reports.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+prices_after_tax = np.array([12.3499, 7.5001, 99.9999, 5.5000, 3.1111])
+
+print(&quot;Original:   &quot;, prices_after_tax)
+print(&quot;Truncated:  &quot;, np.trunc(prices_after_tax))
+print(&quot;Around 2dp: &quot;, np.around(prices_after_tax, 2))
+print(&quot;Floor:      &quot;, np.floor(prices_after_tax))
+print(&quot;Ceil:       &quot;, np.ceil(prices_after_tax))</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Original:    [12.3499  7.5001 99.9999  5.5      3.1111]
+Truncated:   [12.  7. 99.  5.  3.]
+Around 2dp:  [12.35  7.5  100.    5.5    3.11]
+Floor:       [12.  7. 99.  5.  3.]
+Ceil:        [13.  8. 100.   6.  4.]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check:</strong> Why does <code>floor(99.9999)</code> give <code>99.0</code> but <code>around(99.9999, 2)</code> gives <code>100.0</code>?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4 · Summation of Daily Sales</h3>
+<p class="v2-p"><strong>Objective:</strong> Use <code>np.sum()</code>, axis-based summation, and <code>np.cumsum()</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> Three shops recorded their daily sales over 4 days. Find totals and running totals.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+shop1 = np.array([200, 350, 180, 420])
+shop2 = np.array([310, 290, 400, 250])
+shop3 = np.array([150, 460, 220, 380])
+
+# Task 1: Total sales per shop (axis=1)
+per_shop = np.sum([shop1, shop2, shop3], axis=1)
+print(&quot;Total per shop:&quot;, per_shop)
+
+# Task 2: Grand total across all shops and days
+grand = np.sum([shop1, shop2, shop3])
+print(&quot;Grand total:&quot;, grand)
+
+# Task 3: Running total for shop1
+running = np.cumsum(shop1)
+print(&quot;Shop1 running total:&quot;, running)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Total per shop: [1150 1250 1210]
+Grand total: 3610
+Shop1 running total: [ 200  550  730 1150]</code></pre></div></div>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(9)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake 1 · Wrong number of inputs in <code>frompyfunc()</code></strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG: function takes 2 args but frompyfunc says 1 input
+def myadd(x, y):
+    return x + y
+
+myadd = np.frompyfunc(myadd, 1, 1)  # ← Error! Should be 2, not 1</code></pre></div></div>
+<p class="v2-p"><strong>Fix:</strong> Count the arguments in your function and match that number.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>myadd = np.frompyfunc(myadd, 2, 1)  # ← Correct</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Mistake 2 · Confusing <code>floor</code> and <code>trunc</code> for negative numbers</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+print(np.floor(-2.3))   # -3.0  ← goes DOWN (further from zero)
+print(np.trunc(-2.3))   # -2.0  ← goes TOWARDS ZERO</code></pre></div></div>
+<p class="v2-p">Remember: floor always goes down the number line; trunc always moves towards zero.</p>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Mistake 3 · Expecting <code>np.sum</code> to behave like <code>np.add</code></strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+a = np.array([1, 2, 3])
+b = np.array([4, 5, 6])
+
+print(np.add(a, b))       # [5 7 9]  — element-wise addition
+print(np.sum([a, b]))     # 21       — total of everything</code></pre></div></div>
+<p class="v2-p">Use <code>np.add()</code> when you want a result array; use <code>np.sum()</code> when you want a total.</p>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Mistake 4 · Calling log on zero</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+print(np.log(0))   # -inf   (not an error, but -infinity)
+print(np.log(-1))  # nan    (not a number — can&#x27;t take log of negative)</code></pre></div></div>
+<p class="v2-p">Always filter out zeros and negatives from your data before applying log functions.</p>
+<hr class="v2-hr">
+<p class="v2-p"><strong>Mistake 5 · Using <code>np.abs()</code> instead of <code>np.absolute()</code></strong></p>
+<p class="v2-p">Both work in most cases, but <code>np.absolute()</code> is the preferred NumPy way to avoid potential naming conflicts with Python's <code>abs()</code> in complex code.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Scenario</div><div class="build-req"><p class="v2-p">In this project, you will build a complete student grade analysis tool using all the concepts covered in this lesson.</p>
+<h3 class="v2-h3">Scenario</h3>
+<p class="v2-p">You are a school data analyst. You have the scores of 5 students across 3 subjects: Maths, Science, and English. Your job is to:</p>
+<ol class="v2-ol"><li>Calculate total scores using arithmetic ufuncs</li><li>Round averages cleanly</li><li>Compute log-scaled scores for a special grade report</li><li>Show cumulative totals to track how marks accumulate across subjects</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Setup</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+from math import log
+
+# Student scores (5 students × 3 subjects)
+maths   = np.array([78, 85, 92, 60, 74])
+science = np.array([82, 79, 88, 71, 80])
+english = np.array([70, 90, 85, 65, 77])</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`import numpy as np
+from math import log
+
+# Student scores (5 students × 3 subjects)
+maths   = np.array([78, 85, 92, 60, 74])
+science = np.array([82, 79, 88, 71, 80])
+english = np.array([70, 90, 85, 65, 77])`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-28-scenario</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 28 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 28 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1 · What is a ufunc (Universal Function)?</li><li>✅ Part 2 · Creating Your Own ufunc with `frompyfunc()`</li><li>✅ Part 3 · Simple Arithmetic ufuncs</li><li>✅ Part 4 · Rounding Decimals</li><li>✅ Part 5 · Logarithms with NumPy ufuncs</li><li>✅ Part 6 · Summations</li></ul><div class="ln"><a href="lesson_27.html" class="ln-btn">&#8592; Lesson 27</a><a href="lesson_29.html" class="ln-btn primary">Lesson 29 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 28 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

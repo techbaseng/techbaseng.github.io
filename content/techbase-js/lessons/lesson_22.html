@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 22: JavaScript Errors · Introduction, Silent Errors, Handling &amp; the Error Object — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="12" data-key="techbase_js_l22">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 22 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 22</div>
+      <h1>JavaScript Errors · Introduction, Silent Errors, Handling &amp; the Error Object</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Project Overview</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 22</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 12 phases</span><span>🏗️ Project Overview</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">1.1 What Is an Error?</div><div class="pc" id="chk1"></div></div><div class="pb2"><h3 class="v2-h3">The Real-World Analogy</h3>
+<p class="v2-p">Imagine you are a chef following a recipe. Halfway through, you reach for the salt · but the bottle is empty. You have a choice:</p>
+<ul class="v2-ul"><li><strong>Ignore it</strong> and serve unseasoned food (silent failure · the dish is wrong but nobody told the kitchen)</li><li><strong>Stop and report it</strong> so the kitchen manager can decide: get more salt, use a substitute, or cancel the dish (handled error · a decision is made)</li><li><strong>Crash the entire kitchen</strong> and serve no food to anyone (unhandled error · the whole program stops)</li></ul>
+<p class="v2-p">JavaScript programs face the same situation constantly. Something unexpected happens · a value is missing, a network request fails, a user types text where a number was expected · and the program must decide what to do.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Definition:</strong> An error in JavaScript is an unexpected event that disrupts the normal flow of a program. JavaScript represents errors as objects containing information about what went wrong, where, and why.</p></blockquote>
+<h3 class="v2-h3">Why learning error handling matters</h3>
+<p class="v2-p">In a real job, bugs do not stop at development. Data arrives in unexpected shapes from APIs. Users behave unpredictably. Networks drop out. A well-written program <strong>anticipates</strong> these situations and handles them gracefully · showing the user a meaningful message instead of a blank screen or a cryptic console dump.</p>
+<p class="v2-p">Error handling is the difference between software that fails loudly and helplessly, and software that fails <em>safely</em> and <em>informedly</em>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.1 What Is an Error?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">1.2 The Two Worlds of Errors: Loud and Silent</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">JavaScript errors divide into two fundamental categories:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Category</th><th>What Happens</th><th>JavaScript's Reaction</th><th>Example</th></tr></thead><tbody><tr><td><strong>Loud Errors</strong></td><td>Something clearly fails</td><td>Throws an error; stops execution at that line</td><td>Calling a method on <code>undefined</code></td></tr><tr><td><strong>Silent Errors</strong></td><td>Something goes wrong but JavaScript keeps running</td><td>No error is thrown; wrong result produced</td><td>Assigning to a non-existent object property</td></tr></tbody></table></div>
+<p class="v2-p">This distinction is critical because <strong>silent errors are the most dangerous</strong> · they do not crash your program, so you may not notice them until much later, when wrong data has already been stored in a database or sent to a user.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.2 The Two Worlds of Errors: Loud and Silent</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">1.3 Silent Errors · When JavaScript Says Nothing</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is a silent error?</h3>
+<p class="v2-p">A silent error (sometimes called a "silent failure") is a situation where JavaScript <em>could</em> tell you something is wrong but chooses not to · it simply continues running, producing incorrect or undefined behaviour without any warning.</p>
+<h3 class="v2-h3">Example 1: Writing to a read-only property</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let PI = Math.PI;         // PI = 3.141592653589793
+PI = 99;                  // Attempt to reassign a read-only value
+
+console.log(PI);
+// Expected Output: 3.141592653589793</code></pre></div></div>
+<p class="v2-p">Nothing happened. No error. <code>PI</code> is still <code>3.141592653589793</code>. The assignment <code>PI = 99</code> was silently ignored.</p>
+<blockquote class="v2-bq"><p class="v2-p">💡 JavaScript simply did nothing. In strict mode, this would throw a <code>TypeError</code>. In normal mode, it fails silently.</p></blockquote>
+<h3 class="v2-h3">Example 2: Writing to a non-existent property of a primitive</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let score = 42;
+score.bonus = 10;         // Numbers cannot have properties
+
+console.log(score.bonus);
+// Expected Output: undefined</code></pre></div></div>
+<p class="v2-p">No error is thrown. The property assignment is silently discarded. Reading it back returns <code>undefined</code> · but no warning was given.</p>
+<h3 class="v2-h3">Example 3: Deleting a non-configurable property</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>delete Math.PI;           // Attempt to delete a core property
+
+console.log(Math.PI);
+// Expected Output: 3.141592653589793</code></pre></div></div>
+<p class="v2-p"><code>Math.PI</code> cannot be deleted. JavaScript ignores the <code>delete</code> and moves on.</p>
+<h3 class="v2-h3">Example 4: Duplicate parameter names</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function greet(name, name) {   // Two parameters with the same name!
+  console.log(name);
+}
+
+greet(&quot;Amara&quot;, &quot;Kofi&quot;);
+// Expected Output: Kofi   (second value wins — first is silently overwritten)</code></pre></div></div>
+<p class="v2-p">No error. The function runs. The first <code>name</code> is silently replaced by the second. This is a common source of confusing bugs.</p>
+<h3 class="v2-h3">Example 5: Using an undeclared variable</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function saveStudent() {
+  studentName = &quot;Amara&quot;;    // No let, const, or var!
+}
+
+saveStudent();
+console.log(studentName);
+// Expected Output: Amara</code></pre></div></div>
+<p class="v2-p">JavaScript creates a <strong>global variable</strong> automatically. This is a serious silent error · you did not ask for a global variable, but now one exists, potentially contaminating other parts of your program.</p>
+<h3 class="v2-h3">Why silent errors are so dangerous</h3>
+<p class="v2-p">Imagine the following scenario at a bank:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function applyInterest(account) {
+  account.balance = account.Balance * 1.05;  // typo: &quot;Balance&quot; vs &quot;balance&quot;
+}
+
+let account = { balance: 1000 };
+applyInterest(account);
+console.log(account.balance); // 1000   ← unchanged — NaN was silently discarded</code></pre></div></div>
+<p class="v2-p"><code>account.Balance</code> (capital B) is <code>undefined</code>. <code>undefined * 1.05</code> is <code>NaN</code>. Assigning <code>NaN</code> to <code>account.balance</code> fails silently in some configurations, or worse · <code>account.balance</code> becomes <code>NaN</code> and no interest was applied. Your bank customer just lost their interest payment with zero warning.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.3 Silent Errors · When JavaScript Says Nothing</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">1.4 Strict Mode · Making Silent Errors Loud</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is strict mode?</h3>
+<p class="v2-p"><strong>Strict mode</strong> is a setting you activate to make JavaScript <em>stricter</em> · it turns many silent errors into loud, thrown errors that you can detect and fix.</p>
+<h3 class="v2-h3">How to enable strict mode</h3>
+<p class="v2-p">Write <code>"use strict";</code> as the very first statement in a script or a function:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;use strict&quot;;              // Enable for the entire script
+
+// Or inside a function only:
+function strictFunction() {
+  &quot;use strict&quot;;
+  // strict mode applies only inside here
+}</code></pre></div></div>
+<h3 class="v2-h3">What strict mode catches</h3>
+<p class="v2-p">Let's revisit the silent errors from above · now with strict mode:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;use strict&quot;;
+
+// 1. Undeclared variable → now throws ReferenceError
+function saveStudent() {
+  studentName = &quot;Amara&quot;;   // ❌ ReferenceError: studentName is not defined
+}
+
+// 2. Writing to a read-only property → now throws TypeError
+let PI = Math.PI;
+PI = 99;                   // ❌ TypeError: Assignment to constant variable
+
+// 3. Duplicate parameter names → now throws SyntaxError
+function greet(name, name) { // ❌ SyntaxError: Duplicate parameter name
+  console.log(name);
+}
+
+// 4. Deleting an undeletable property → now throws TypeError
+delete Math.PI;            // ❌ TypeError: Cannot delete property &#x27;PI&#x27; of #&lt;Object&gt;</code></pre></div></div>
+<h3 class="v2-h3">Complete list of what strict mode prevents</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Silent Error</th><th>Without Strict</th><th>With Strict</th></tr></thead><tbody><tr><td>Undeclared variable</td><td>Creates global</td><td><code>ReferenceError</code></td></tr><tr><td>Write to read-only property</td><td>Silently ignored</td><td><code>TypeError</code></td></tr><tr><td>Write to non-writable property</td><td>Silently ignored</td><td><code>TypeError</code></td></tr><tr><td>Duplicate parameter names</td><td>Second wins silently</td><td><code>SyntaxError</code></td></tr><tr><td>Delete non-configurable property</td><td>Silently ignored</td><td><code>TypeError</code></td></tr><tr><td>Using <code>with</code> statement</td><td>Allowed</td><td><code>SyntaxError</code></td></tr><tr><td><code>this</code> in function (non-method)</td><td>Refers to <code>window</code></td><td><code>undefined</code></td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Best Practice:</strong> Always use <code>"use strict";</code> at the top of your scripts. Modern JavaScript modules (<code>import</code>/<code>export</code>) have strict mode <em>on by default</em>. All major style guides (Airbnb, Google, StandardJS) require strict mode.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.4 Strict Mode · Making Silent Errors Loud</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">1.5 Loud Errors · try, catch, finally, and throw</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">The big idea</h3>
+<p class="v2-p">When JavaScript encounters a loud error (called an <strong>exception</strong>), it immediately stops running the current block of code and <em>throws</em> the error · it looks for a handler. If no handler is found, the program crashes.</p>
+<p class="v2-p">The <code>try...catch</code> structure lets you <em>handle</em> that thrown error gracefully instead of crashing.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>try</code> · the risky zone</h3>
+<p class="v2-p">The <code>try</code> block contains code that <em>might</em> throw an error. JavaScript runs this code normally. If an error occurs anywhere inside, JavaScript immediately jumps to the <code>catch</code> block.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  // Code that might go wrong
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>catch</code> · the safety net</h3>
+<p class="v2-p">The <code>catch</code> block runs <em>only if</em> an error was thrown in the <code>try</code> block. It receives the error object as a parameter.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>catch (error) {
+  // Handle the error here
+  // error.message tells you what went wrong
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>finally</code> · the cleanup crew</h3>
+<p class="v2-p">The <code>finally</code> block runs <em>always</em> · whether an error occurred or not. It is used for cleanup: closing files, stopping loading spinners, resetting state.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>finally {
+  // Always runs — error or no error
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Full Structure</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  // Attempt something risky
+} catch (error) {
+  // Handle the error if it happens
+} finally {
+  // Always runs regardless
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Micro-Demo 1: Basic try/catch</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  let result = null;
+  console.log(result.toUpperCase()); // ❌ result is null — can&#x27;t call method on null
+} catch (error) {
+  console.log(&quot;Something went wrong: &quot; + error.message);
+}
+
+// Expected Output: Something went wrong: Cannot read properties of null (reading &#x27;toUpperCase&#x27;)</code></pre></div></div>
+<p class="v2-p">Without <code>try/catch</code>, this would crash the program. With it, we capture the error and continue.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Micro-Demo 2: try/catch/finally</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function loadData() {
+  console.log(&quot;Loading started...&quot;);
+
+  try {
+    let data = JSON.parse(&quot;{ invalid json }&quot;);  // ❌ bad JSON
+    console.log(&quot;Data loaded:&quot;, data);
+  } catch (error) {
+    console.log(&quot;Failed to parse data: &quot; + error.message);
+  } finally {
+    console.log(&quot;Loading finished.&quot;);  // always runs
+  }
+}
+
+loadData();</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Loading started...
+Failed to parse data: Unexpected token i in JSON at position 2
+Loading finished.</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <code>finally</code> is critical for cleaning up resources. Even if the catch block throws <em>another</em> error, <code>finally</code> still runs.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Micro-Demo 3: catch is optional, finally is optional (but not both)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// try with only finally (no catch) — error still propagates but finally runs
+try {
+  undeclaredVariable;
+} finally {
+  console.log(&quot;Cleanup ran.&quot;);   // runs before the error propagates
+}
+// Output: Cleanup ran.
+// Then: ReferenceError: undeclaredVariable is not defined</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>throw</code> · creating your own errors</h3>
+<p class="v2-p">The <code>throw</code> statement lets you deliberately create and throw an error · on your own terms, based on your own business logic.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>throw expression;</code></pre></div></div>
+<p class="v2-p">You can throw any value, but the best practice is to throw an <code>Error</code> object (covered in 1.6):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>throw new Error(&quot;Something went wrong&quot;);
+throw new TypeError(&quot;Expected a number&quot;);
+throw new RangeError(&quot;Value must be between 0 and 100&quot;);</code></pre></div></div>
+<h3 class="v2-h3">Micro-Demo 4: throw with custom validation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function setAge(age) {
+  if (typeof age !== &quot;number&quot;) {
+    throw new TypeError(&quot;Age must be a number. Got: &quot; + typeof age);
+  }
+  if (age &lt; 0 || age &gt; 150) {
+    throw new RangeError(&quot;Age must be between 0 and 150. Got: &quot; + age);
+  }
+  console.log(&quot;Age set to: &quot; + age);
+}
+
+try {
+  setAge(&quot;twenty&quot;);
+} catch (error) {
+  console.log(error.name + &quot;: &quot; + error.message);
+}
+
+try {
+  setAge(-5);
+} catch (error) {
+  console.log(error.name + &quot;: &quot; + error.message);
+}
+
+try {
+  setAge(25);
+} catch (error) {
+  console.log(error.name + &quot;: &quot; + error.message);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>TypeError: Age must be a number. Got: string
+RangeError: Age must be between 0 and 150. Got: -5
+Age set to: 25</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Re-throwing errors</h3>
+<p class="v2-p">Sometimes you catch an error, check if it is the kind you can handle, and if not · rethrow it for a higher-level handler:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function processInput(input) {
+  try {
+    if (typeof input !== &quot;number&quot;) {
+      throw new TypeError(&quot;Input must be a number&quot;);
+    }
+    return input * 2;
+  } catch (error) {
+    if (error instanceof TypeError) {
+      console.log(&quot;Handled TypeError: &quot; + error.message);
+      return 0;  // provide a default
+    }
+    throw error;  // rethrow anything we didn&#x27;t expect
+  }
+}
+
+console.log(processInput(&quot;hello&quot;)); // Handled TypeError: Input must be a number → 0
+console.log(processInput(5));       // 10</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Handled TypeError: Input must be a number
+0
+10</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">⚠️ Common Beginner Mistake · Swallowing errors silently</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Bad — this hides the error completely
+try {
+  riskyOperation();
+} catch (error) {
+  // empty catch — the error disappears!
+}
+
+// ✅ Better — always log or handle meaningfully
+try {
+  riskyOperation();
+} catch (error) {
+  console.error(&quot;riskyOperation failed:&quot;, error.message);
+}</code></pre></div></div>
+<p class="v2-p">An empty <code>catch</code> block is one of the most dangerous patterns in JavaScript. The error is swallowed, the program continues with wrong state, and you have no idea anything went wrong.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">`javascript
+throw new Error("Something went wrong");
+throw new TypeError("Expected a number");
+throw new RangeError("Value must be between 0 and 100");
+`</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">1.6 The Error Object</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What is the Error object?</h3>
+<p class="v2-p">When JavaScript throws an error, it creates an <strong>Error object</strong> · a structured package of information about the failure. The <code>catch</code> block receives this object.</p>
+<h3 class="v2-h3">The core properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>What it contains</th></tr></thead><tbody><tr><td><code>name</code></td><td>String</td><td>The type of error: <code>"TypeError"</code>, <code>"RangeError"</code>, etc.</td></tr><tr><td><code>message</code></td><td>String</td><td>A human-readable description of what went wrong</td></tr><tr><td><code>stack</code></td><td>String</td><td>A trace of which functions were called before the error</td></tr></tbody></table></div>
+<h3 class="v2-h3">Micro-Demo: Inspecting an Error object</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  null.toString();
+} catch (error) {
+  console.log(&quot;name:    &quot; + error.name);
+  console.log(&quot;message: &quot; + error.message);
+  console.log(&quot;stack:\n&quot; + error.stack);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>name:    TypeError
+message: Cannot read properties of null (reading &#x27;toString&#x27;)
+stack:
+TypeError: Cannot read properties of null (reading &#x27;toString&#x27;)
+    at &lt;anonymous&gt;:2:8
+    at ...</code></pre></div></div>
+<h3 class="v2-h3">The <code>stack</code> trace · your debugging map</h3>
+<p class="v2-p">The <code>stack</code> property shows the <strong>call stack</strong> · the sequence of function calls that led to the error. Reading it from bottom to top shows you the path JavaScript took to reach the error:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function c() { null.toString(); }
+function b() { c(); }
+function a() { b(); }
+
+try {
+  a();
+} catch (error) {
+  console.log(error.stack);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (simplified):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>TypeError: Cannot read properties of null (reading &#x27;toString&#x27;)
+    at c (&lt;anonymous&gt;:1:14)   ← error happened here
+    at b (&lt;anonymous&gt;:2:14)   ← b called c
+    at a (&lt;anonymous&gt;:3:14)   ← a called b
+    at &lt;anonymous&gt;:6:3        ← top-level called a</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 Reading stack traces is one of the most valuable debugging skills. In a real job, when a bug report comes in, the stack trace is your first clue about where to look.</p></blockquote>
+<h3 class="v2-h3">Creating an Error object manually</h3>
+<p class="v2-p">You can create Error objects using the <code>new</code> keyword without throwing them:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let myError = new Error(&quot;Something failed&quot;);
+console.log(myError.name);    // &quot;Error&quot;
+console.log(myError.message); // &quot;Something failed&quot;
+console.log(typeof myError);  // &quot;object&quot;</code></pre></div></div>
+<p class="v2-p">You can also create specific error types (see Section 1.7):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let typeErr  = new TypeError(&quot;Expected a string&quot;);
+let rangeErr = new RangeError(&quot;Value out of bounds&quot;);</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.6 The Error Object</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">1.7 The Six Built-In Error Types</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">JavaScript has six specific error types, each representing a different category of failure. They all extend the base <code>Error</code> type, so they all have <code>name</code>, <code>message</code>, and <code>stack</code>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">1. <code>RangeError</code></h3>
+<p class="v2-p">Thrown when a value is not within the allowed range of values.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Array with negative length
+try {
+  let arr = new Array(-1);
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // RangeError: Invalid array length
+}
+
+// toFixed with invalid decimal count
+try {
+  let num = 3.14;
+  num.toFixed(200);   // max allowed is 100
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // RangeError: toFixed() digits argument must be between 0 and 100
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-World Use:</strong> Validation of ages, percentages, scores · any numeric value with defined boundaries.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2. <code>ReferenceError</code></h3>
+<p class="v2-p">Thrown when code refers to a variable that does not exist in the current scope.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  console.log(studentName);   // never declared
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // ReferenceError: studentName is not defined
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;use strict&quot;;
+try {
+  undeclaredVar = 10;         // no let/const/var
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // ReferenceError: undeclaredVar is not defined
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-World Use:</strong> This is extremely common. Typos in variable names, using a variable before it is declared, or accessing something outside its scope all produce <code>ReferenceError</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">3. <code>SyntaxError</code></h3>
+<p class="v2-p">Thrown when JavaScript cannot parse the code · the grammar rules of the language are broken. This usually happens at <strong>parse time</strong>, before the program even runs.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  eval(&quot;let x = ;&quot;);   // invalid JavaScript syntax
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // SyntaxError: Unexpected token &#x27;;&#x27;
+}
+
+try {
+  JSON.parse(&quot;{ name: Amara }&quot;);  // invalid JSON — keys must be quoted
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // SyntaxError: Unexpected token n in JSON at position 2
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 Most <code>SyntaxError</code>s in your own code are caught by the browser/Node before execution. But <code>JSON.parse()</code> throws <code>SyntaxError</code> at runtime, which is very commonly caught in real programs.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">4. <code>TypeError</code></h3>
+<p class="v2-p">Thrown when an operation is performed on a value of the wrong type.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Calling a non-function
+try {
+  let x = 42;
+  x();             // 42 is not callable
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // TypeError: x is not a function
+}
+
+// Accessing property of null or undefined
+try {
+  let user = null;
+  console.log(user.name);
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // TypeError: Cannot read properties of null (reading &#x27;name&#x27;)
+}
+
+// Wrong argument type
+try {
+  &quot;use strict&quot;;
+  Object.defineProperty({}, &quot;x&quot;, { value: 1, writable: false });
+  // Trying to write to it:
+  let obj = {};
+  Object.defineProperty(obj, &quot;y&quot;, { value: 42, writable: false });
+  obj.y = 99;      // TypeError in strict mode
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Most common error in production JavaScript.</strong> Accessing <code>.name</code>, <code>.length</code>, or calling a method on <code>null</code> or <code>undefined</code> is the #1 cause of TypeError crashes in real apps. Always check that a value exists before accessing its properties.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5. <code>URIError</code></h3>
+<p class="v2-p">Thrown when <code>encodeURI()</code> or <code>decodeURI()</code> are passed malformed URI sequences.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  decodeURIComponent(&quot;%&quot;);   // incomplete percent-encoding
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+  // URIError: URI malformed
+}</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Real-World Use:</strong> When working with URLs from external sources (APIs, user input), always wrap <code>decodeURIComponent()</code> in try/catch.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">6. <code>EvalError</code></h3>
+<p class="v2-p">This was thrown historically for errors in <code>eval()</code>. Modern JavaScript engines no longer throw it in practice, but the type still exists for legacy compatibility. You are unlikely to encounter it in real code.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>let evalErr = new EvalError(&quot;eval is disabled here&quot;);
+console.log(evalErr.name);    // &quot;EvalError&quot;
+console.log(evalErr.message); // &quot;eval is disabled here&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Quick Reference · Which Error for Which Situation?</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Situation</th><th>Error Type</th></tr></thead><tbody><tr><td>Value outside allowed range</td><td><code>RangeError</code></td></tr><tr><td>Variable not declared / not in scope</td><td><code>ReferenceError</code></td></tr><tr><td>Invalid code syntax / bad JSON</td><td><code>SyntaxError</code></td></tr><tr><td>Wrong type used / null property access</td><td><code>TypeError</code></td></tr><tr><td>Malformed URI string</td><td><code>URIError</code></td></tr><tr><td>Generic / custom errors</td><td><code>Error</code></td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">`javascript
+let evalErr = new EvalError("eval is disabled here");
+console.log(evalErr.name);    // "EvalError"
+console.log(evalErr.message); // "eval is disabled here"
+` · </div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">1.8 Creating Custom Errors</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Why create custom errors?</h3>
+<p class="v2-p">Built-in error types describe <em>technical</em> failures. In real applications, you also need to describe <em>business logic</em> failures:</p>
+<ul class="v2-ul"><li>"User not found" · not a <code>TypeError</code>, not a <code>RangeError</code> · it is a domain-specific failure</li><li>"Insufficient funds" · meaningful to the application but not to JavaScript</li><li>"Session expired" · needs special handling in the UI</li></ul>
+<p class="v2-p">Custom errors let you create named, meaningful error types for your application's domain.</p>
+<h3 class="v2-h3">Method 1: Extending the Error class</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);           // pass message to parent Error
+    this.name = &quot;ValidationError&quot;;
+    this.field = field;       // add extra context
+  }
+}
+
+class NetworkError extends Error {
+  constructor(message, statusCode) {
+    super(message);
+    this.name = &quot;NetworkError&quot;;
+    this.statusCode = statusCode;
+  }
+}</code></pre></div></div>
+<h3 class="v2-h3">Using custom errors</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function validateEmail(email) {
+  if (typeof email !== &quot;string&quot;) {
+    throw new ValidationError(&quot;Email must be a string&quot;, &quot;email&quot;);
+  }
+  if (!email.includes(&quot;@&quot;)) {
+    throw new ValidationError(&quot;Email must contain @&quot;, &quot;email&quot;);
+  }
+  return true;
+}
+
+try {
+  validateEmail(&quot;amara-at-school.com&quot;);
+} catch (error) {
+  if (error instanceof ValidationError) {
+    console.log(&quot;Validation failed on field: &quot; + error.field);
+    console.log(&quot;Reason: &quot; + error.message);
+  } else {
+    throw error;   // rethrow unexpected errors
+  }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Validation failed on field: email
+Reason: Email must contain @</code></pre></div></div>
+<h3 class="v2-h3">Using <code>instanceof</code> to identify error types</h3>
+<p class="v2-p"><code>instanceof</code> lets you check what kind of error you caught:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>try {
+  riskyOperation();
+} catch (error) {
+  if (error instanceof TypeError) {
+    console.log(&quot;Type problem:&quot;, error.message);
+  } else if (error instanceof RangeError) {
+    console.log(&quot;Range problem:&quot;, error.message);
+  } else if (error instanceof ValidationError) {
+    console.log(&quot;Validation problem:&quot;, error.message);
+  } else {
+    console.log(&quot;Unknown error:&quot;, error);
+    throw error;  // always rethrow what you can&#x27;t handle
+  }
+}</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.8 Creating Custom Errors</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">1.9 Error Handling Patterns and Best Practices</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Pattern 1: Guard clauses · validate early, throw early</h3>
+<p class="v2-p">Catch problems at the entrance of a function before doing any work:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function processPayment(amount, currency) {
+  // Guard clauses — check inputs first
+  if (typeof amount !== &quot;number&quot;)   throw new TypeError(&quot;Amount must be a number&quot;);
+  if (amount &lt;= 0)                  throw new RangeError(&quot;Amount must be positive&quot;);
+  if (typeof currency !== &quot;string&quot;) throw new TypeError(&quot;Currency must be a string&quot;);
+  if (currency.length !== 3)        throw new RangeError(&quot;Currency must be a 3-letter code&quot;);
+
+  // Main logic — only reached if all guards pass
+  console.log(`Processing ${currency} ${amount.toFixed(2)}`);
+}
+
+try {
+  processPayment(100.50, &quot;GHS&quot;);
+  processPayment(-50, &quot;USD&quot;);
+} catch (error) {
+  console.log(error.name + &quot;: &quot; + error.message);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Processing GHS 100.50
+RangeError: Amount must be positive</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Pattern 2: Wrapping async operations</h3>
+<p class="v2-p">In real applications, many operations are asynchronous (network requests, file reads). Errors in async code must be handled with <code>.catch()</code> or <code>try/catch</code> inside <code>async/await</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// With async/await (preview — you&#x27;ll learn this fully in async tutorials)
+async function fetchStudent(id) {
+  try {
+    let response = await fetch(&quot;https://api.school.com/students/&quot; + id);
+    if (!response.ok) {
+      throw new NetworkError(&quot;Student not found&quot;, response.status);
+    }
+    let data = await response.json();
+    return data;
+  } catch (error) {
+    if (error instanceof NetworkError) {
+      console.log(&quot;Network issue (&quot; + error.statusCode + &quot;): &quot; + error.message);
+    } else {
+      console.log(&quot;Unexpected error: &quot; + error.message);
+    }
+    return null;
+  }
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Pattern 3: Always log enough context</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Vague — useless in production
+catch (error) {
+  console.log(&quot;Error occurred&quot;);
+}
+
+// ✅ Informative — helps debugging
+catch (error) {
+  console.error(`[processPayment] Failed for amount=${amount}: ${error.name}: ${error.message}`);
+  console.error(error.stack);
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Pattern 4: Never catch what you cannot handle</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Dangerous — catches everything, even programmer mistakes
+try {
+  doSomething();
+} catch (error) {
+  console.log(&quot;error happened&quot;);
+  // doesn&#x27;t rethrow — error disappears
+}
+
+// ✅ Selective — catch known errors, rethrow the rest
+try {
+  doSomething();
+} catch (error) {
+  if (error instanceof ValidationError) {
+    showUserMessage(error.message);
+  } else {
+    throw error;  // programmer errors should propagate
+  }
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">⚠️ Summary of Common Beginner Mistakes</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Problem</th><th>Fix</th></tr></thead><tbody><tr><td>Empty <code>catch</code> block</td><td>Error disappears silently</td><td>Always log or handle</td></tr><tr><td>Catching too broadly</td><td>Masks real bugs</td><td>Use <code>instanceof</code> to be specific</td></tr><tr><td>Not rethrowing</td><td>Unknown errors get hidden</td><td>Rethrow what you can't handle</td></tr><tr><td>Ignoring silent errors</td><td>Wrong data silently propagates</td><td>Use <code>"use strict"</code> always</td></tr><tr><td>Not using <code>finally</code></td><td>Resources left open on error</td><td>Use <code>finally</code> for cleanup</td></tr><tr><td>Throwing plain strings</td><td>No stack trace, no type info</td><td>Always <code>throw new Error(...)</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<p class="v2-p"># Section 2 · Applied Exercises</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.9 Error Handling Patterns and Best Practices</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Exercise 1 · Form Input Validator</div><div class="pc" id="chk10"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Warm-Up Mini-Example</h3></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">> Modify validateForm to collect all errors instead of stopping at the first one. Return an array of error messages. (Hint: remove the try/catch from inside the function and wrap each validator call in its own try/catch.) · </div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function checkInput(value, fieldName) {
+  try {
+    if (!value) throw new Error(fieldName + &quot; cannot be empty&quot;);
+    console.log(fieldName + &quot; is valid: &quot; + value);
+  } catch (error) {
+    console.log(&quot;❌ &quot; + error.message);
+  }
+}
+
+checkInput(&quot;Amara&quot;, &quot;Name&quot;);  // Name is valid: Amara
+checkInput(&quot;&quot;, &quot;Email&quot;);      // ❌ Email cannot be empty</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Objective</h3>
+<p class="v2-p">Build a complete form validator that uses custom error types, <code>try/catch</code>, and strict mode to validate a user registration form.</p>
+<h3 class="v2-h3">Scenario</h3>
+<p class="v2-p">You are building a student registration portal. The server receives form data and must validate it before saving to the database. Invalid data must be rejected with clear error messages.</p>
+<h3 class="v2-h3">Requirements</h3>
+<p class="v2-p">The form has these fields:</p>
+<ul class="v2-ul"><li><code>username</code> · string, 3 · 20 characters, letters and numbers only</li><li><code>email</code> · string, must contain <code>@</code> and <code>.</code></li><li><code>age</code> · number or numeric string, must be between 16 and 100</li><li><code>password</code> · string, at least 8 characters</li></ul>
+<h3 class="v2-h3">Step-by-Step Instructions</h3>
+<p class="v2-p"><strong>Step 1:</strong> Enable strict mode at the top.</p>
+<p class="v2-p"><strong>Step 2:</strong> Create a <code>ValidationError</code> class with <code>field</code> and <code>message</code> properties.</p>
+<p class="v2-p"><strong>Step 3:</strong> Write individual validator functions that throw <code>ValidationError</code> when a field is invalid.</p>
+<p class="v2-p"><strong>Step 4:</strong> Write a <code>validateForm(data)</code> function that calls all validators in a <code>try/catch</code> block.</p>
+<p class="v2-p"><strong>Step 5:</strong> Test with both valid and invalid data.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;use strict&quot;;
+
+class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = &quot;ValidationError&quot;;
+    this.field = field;
+  }
+}
+
+function validateUsername(username) {
+  if (typeof username !== &quot;string&quot;) {
+    throw new ValidationError(&quot;Username must be a string&quot;, &quot;username&quot;);
+  }
+  if (username.length &lt; 3 || username.length &gt; 20) {
+    throw new ValidationError(&quot;Username must be 3–20 characters&quot;, &quot;username&quot;);
+  }
+  if (!/^[a-zA-Z0-9]+$/.test(username)) {
+    throw new ValidationError(&quot;Username can only contain letters and numbers&quot;, &quot;username&quot;);
+  }
+}
+
+function validateEmail(email) {
+  if (typeof email !== &quot;string&quot;) {
+    throw new ValidationError(&quot;Email must be a string&quot;, &quot;email&quot;);
+  }
+  if (!email.includes(&quot;@&quot;) || !email.includes(&quot;.&quot;)) {
+    throw new ValidationError(&quot;Email must be a valid format (contains @ and .)&quot;, &quot;email&quot;);
+  }
+}
+
+function validateAge(age) {
+  let numAge = Number(age);
+  if (isNaN(numAge)) {
+    throw new ValidationError(&quot;Age must be a number&quot;, &quot;age&quot;);
+  }
+  if (numAge &lt; 16 || numAge &gt; 100) {
+    throw new RangeError(&quot;Age must be between 16 and 100&quot;);
+  }
+}
+
+function validatePassword(password) {
+  if (typeof password !== &quot;string&quot;) {
+    throw new ValidationError(&quot;Password must be a string&quot;, &quot;password&quot;);
+  }
+  if (password.length &lt; 8) {
+    throw new ValidationError(&quot;Password must be at least 8 characters&quot;, &quot;password&quot;);
+  }
+}
+
+function validateForm(data) {
+  console.log(&quot;Validating form for: &quot; + data.username);
+  try {
+    validateUsername(data.username);
+    validateEmail(data.email);
+    validateAge(data.age);
+    validatePassword(data.password);
+    console.log(&quot;✅ All fields valid. Registration successful.\n&quot;);
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      console.log(`❌ Validation error on &#x27;${error.field}&#x27;: ${error.message}\n`);
+    } else if (error instanceof RangeError) {
+      console.log(&quot;❌ Range error: &quot; + error.message + &quot;\n&quot;);
+    } else {
+      console.log(&quot;❌ Unexpected error: &quot; + error.message + &quot;\n&quot;);
+      throw error;
+    }
+  }
+}
+
+// Test 1: Valid registration
+validateForm({
+  username: &quot;amara99&quot;,
+  email:    &quot;amara@school.com&quot;,
+  age:      17,
+  password: &quot;securePass1&quot;
+});
+
+// Test 2: Username too short
+validateForm({
+  username: &quot;am&quot;,
+  email:    &quot;amara@school.com&quot;,
+  age:      17,
+  password: &quot;securePass1&quot;
+});
+
+// Test 3: Invalid email
+validateForm({
+  username: &quot;kofi2024&quot;,
+  email:    &quot;kofi-school&quot;,
+  age:      20,
+  password: &quot;mypassword&quot;
+});
+
+// Test 4: Age out of range
+validateForm({
+  username: &quot;ama2024&quot;,
+  email:    &quot;ama@school.com&quot;,
+  age:      12,
+  password: &quot;mypassword&quot;
+});</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Validating form for: amara99
+✅ All fields valid. Registration successful.
+
+Validating form for: am
+❌ Validation error on &#x27;username&#x27;: Username must be 3–20 characters
+
+Validating form for: kofi2024
+❌ Validation error on &#x27;email&#x27;: Email must be a valid format (contains @ and .)
+
+Validating form for: ama2024
+❌ Range error: Age must be between 16 and 100</code></pre></div></div>
+<h3 class="v2-h3">Self-Check Questions</h3>
+<ol class="v2-ol"><li>Why does <code>validateForm</code> stop at the <em>first</em> error instead of collecting all errors? How would you modify it to collect <em>all</em> validation errors before reporting?</li><li><code>validateAge</code> can receive a string and convert it · why is this useful in a real form?</li><li>What would happen if we caught <code>Error</code> instead of <code>ValidationError</code> and <code>RangeError</code> separately? Would we lose any information?</li><li>Why do we <code>throw error</code> at the end of the <code>else</code> branch in <code>validateForm</code>?</li></ol>
+<h3 class="v2-h3">What-If Challenge</h3>
+<blockquote class="v2-bq"><p class="v2-p">Modify <code>validateForm</code> to collect <strong>all</strong> errors instead of stopping at the first one. Return an array of error messages. (Hint: remove the <code>try/catch</code> from inside the function and wrap each validator call in its own <code>try/catch</code>.)</p></blockquote>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(10)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Exercise 2 · Safe JSON Parser</div><div class="pc" id="chk11"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Warm-Up Mini-Example</h3></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 2 · Safe JSON Parser</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function safeJSON(str) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return null;
+  }
+}
+
+console.log(safeJSON(&#x27;{&quot;name&quot;:&quot;Amara&quot;}&#x27;)); // { name: &#x27;Amara&#x27; }
+console.log(safeJSON(&quot;not valid json&quot;));   // null</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Objective</h3>
+<p class="v2-p">Build a robust data importer that reads JSON strings from multiple sources, handles malformed data gracefully, and reports what was successfully imported vs. what failed.</p>
+<h3 class="v2-h3">Scenario</h3>
+<p class="v2-p">You work at a school that receives student data exports from three different systems. Each system produces JSON, but some files are occasionally malformed. Your importer must process all files and report results · without crashing on bad data.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;use strict&quot;;
+
+let dataFiles = [
+  { source: &quot;SystemA&quot;, data: &#x27;{&quot;name&quot;:&quot;Amara Osei&quot;,&quot;age&quot;:17,&quot;gpa&quot;:3.85}&#x27; },
+  { source: &quot;SystemB&quot;, data: &#x27;{&quot;name&quot;:&quot;Kofi Mensah&quot;,&quot;age&quot;:20,&quot;gpa&quot;:3.1}&#x27; },
+  { source: &quot;SystemC&quot;, data: &#x27;{name:&quot;Ama Darko&quot;,age:18}&#x27; },          // invalid JSON
+  { source: &quot;SystemD&quot;, data: &#x27;{&quot;name&quot;:&quot;Kweku&quot;,&quot;age&quot;:&quot;twenty&quot;}&#x27; },    // age is a string
+  { source: &quot;SystemE&quot;, data: &quot;&quot; }                                    // empty
+];
+
+let imported = [];
+let failed   = [];
+
+dataFiles.forEach(function(file) {
+  try {
+    if (!file.data || file.data.trim() === &quot;&quot;) {
+      throw new Error(&quot;File is empty&quot;);
+    }
+
+    let parsed = JSON.parse(file.data);   // SyntaxError if malformed
+
+    // Validate age field
+    let age = Number(parsed.age);
+    if (isNaN(age)) {
+      throw new TypeError(&quot;Age is not a valid number: &quot; + parsed.age);
+    }
+
+    imported.push({ source: file.source, student: parsed });
+    console.log(`✅ ${file.source}: Imported ${parsed.name}`);
+
+  } catch (error) {
+    failed.push({ source: file.source, error: error.name + &quot;: &quot; + error.message });
+    console.log(`❌ ${file.source}: Failed — ${error.name}: ${error.message}`);
+  }
+});
+
+console.log(&quot;\n--- Import Summary ---&quot;);
+console.log(&quot;Successfully imported: &quot; + imported.length);
+console.log(&quot;Failed: &quot; + failed.length);
+failed.forEach(f =&gt; console.log(&quot;  &quot; + f.source + &quot;: &quot; + f.error));</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>✅ SystemA: Imported Amara Osei
+✅ SystemB: Imported Kofi Mensah
+❌ SystemC: Failed — SyntaxError: Unexpected token n in JSON at position 1
+❌ SystemD: Failed — TypeError: Age is not a valid number: twenty
+❌ SystemE: Failed — Error: File is empty
+
+--- Import Summary ---
+Successfully imported: 2
+Failed: 3
+  SystemC: SyntaxError: Unexpected token n in JSON at position 1
+  SystemD: TypeError: Age is not a valid number: twenty
+  SystemE: Error: File is empty</code></pre></div></div>
+<h3 class="v2-h3">Self-Check Questions</h3>
+<ol class="v2-ol"><li>Why is it important to keep the <code>forEach</code> loop running even after a <code>catch</code>? What would happen if we used a regular <code>for</code> loop and did not catch the error?</li><li>The <code>SyntaxError</code> from <code>JSON.parse()</code> and the <code>TypeError</code> we throw manually are both caught by the same <code>catch</code> block. How could you handle them differently?</li><li><code>SystemD</code> has <code>age: "twenty"</code> · what is <code>Number("twenty")</code>? Why does <code>isNaN</code> catch this?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(11)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Exercise 3 · Stack Trace Reader</div><div class="pc" id="chk12"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Objective</h3>
+<p class="v2-p">Build a function call chain, deliberately introduce an error deep in the chain, catch it at the top level, and read and interpret the stack trace.</p>
+<h3 class="v2-h3">Scenario</h3>
+<p class="v2-p">Understanding stack traces is a critical skill for debugging in a real job. This exercise builds that skill deliberately.</p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 3 · Stack Trace Reader</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&quot;use strict&quot;;
+
+function calculateFinalGrade(scores) {
+  return computeAverage(scores);
+}
+
+function computeAverage(scores) {
+  return sumScores(scores) / scores.length;
+}
+
+function sumScores(scores) {
+  if (!Array.isArray(scores)) {
+    throw new TypeError(&quot;scores must be an array. Got: &quot; + typeof scores);
+  }
+  return scores.reduce((total, score) =&gt; {
+    if (typeof score !== &quot;number&quot;) {
+      throw new TypeError(&quot;Each score must be a number. Got: &quot; + typeof score + &quot; (&quot; + score + &quot;)&quot;);
+    }
+    return total + score;
+  }, 0);
+}
+
+// Test 1: Valid
+try {
+  let grade = calculateFinalGrade([85, 90, 78]);
+  console.log(&quot;Final grade: &quot; + grade.toFixed(1));
+} catch (e) {
+  console.log(e.name + &quot;: &quot; + e.message);
+}
+
+// Test 2: Non-array input
+try {
+  calculateFinalGrade(&quot;85, 90, 78&quot;);
+} catch (e) {
+  console.log(&quot;\n&quot; + e.name + &quot;: &quot; + e.message);
+  console.log(&quot;\nStack trace:&quot;);
+  console.log(e.stack);
+}
+
+// Test 3: Array with non-number
+try {
+  calculateFinalGrade([85, &quot;ninety&quot;, 78]);
+} catch (e) {
+  console.log(&quot;\n&quot; + e.name + &quot;: &quot; + e.message);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Final grade: 84.3
+
+TypeError: scores must be an array. Got: string
+
+Stack trace:
+TypeError: scores must be an array. Got: string
+    at sumScores (&lt;anonymous&gt;:9:11)
+    at computeAverage (&lt;anonymous&gt;:5:10)
+    at calculateFinalGrade (&lt;anonymous&gt;:1:10)
+    at &lt;anonymous&gt;:22:3
+
+TypeError: Each score must be a number. Got: string (ninety)</code></pre></div></div>
+<h3 class="v2-h3">Self-Check Questions</h3>
+<ol class="v2-ol"><li>Reading the stack trace for Test 2 from bottom to top · what was the order of function calls?</li><li>The error was thrown in <code>sumScores</code> but caught in the <code>try</code> block that called <code>calculateFinalGrade</code>. How did the error "travel" up through the call stack?</li><li>Why is knowing which function threw the error (from the stack trace) more useful than just knowing the error message?</li></ol>
+<hr class="v2-hr">
+<p class="v2-p"># Section 3 · Project Simulation</p></div><button class="ub" onclick="unlockNext(12)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Project Overview</div><div class="build-req"><h3 class="v2-h3">Project Overview</h3>
+<p class="v2-p">You will build a <strong>Bank Transaction Processor</strong> · a JavaScript program that:</p>
+<ol class="v2-ol"><li>Manages a simple bank account with a balance</li><li>Processes a batch of transactions (deposits and withdrawals)</li><li>Uses custom errors, strict mode, try/catch/finally, and meaningful error reporting</li><li>Produces a full transaction log with success/failure status for each transaction</li></ol>
+<h3 class="v2-h3">Real-World Context</h3>
+<p class="v2-p">Banking systems must never crash silently. Every failed transaction must be logged with a reason. A programmer's error (like passing the wrong type) must be distinguishable from a business-logic error (like insufficient funds). This project simulates that discipline.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Setup: Account and Custom Errors</h3>
+<p class="v2-p"><strong>Illustrative Example First:</strong></p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Understand the structure before building
+let account = { id: &quot;ACC001&quot;, owner: &quot;Amara&quot;, balance: 500 };
+
+// A transaction attempt
+function withdraw(account, amount) {
+  if (amount &gt; account.balance) {
+    throw new Error(&quot;Insufficient funds&quot;);
+  }
+  account.balance -= amount;
+}
+
+try {
+  withdraw(account, 600);
+} catch (e) {
+  console.log(&quot;Transaction failed: &quot; + e.message);
+  // Transaction failed: Insufficient funds
+}</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`// Understand the structure before building
+let account = { id: &quot;ACC001&quot;, owner: &quot;Amara&quot;, balance: 500 };
+
+// A transaction attempt
+function withdraw(account, amount) {
+  if (amount > account.balance) {
+    throw new Error(&quot;Insufficient funds&quot;);
+  }
+  account.balance -= amount;
+}
+
+try {
+  withdraw(account, 600);
+} catch (e) {
+  console.log(&quot;Transaction failed: &quot; + e.message);
+  // Transaction failed: Insufficient funds
+}`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-22-project-overview</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 22 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-22-project-overview/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 22 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1.1 What Is an Error?</li><li>✅ 1.2 The Two Worlds of Errors: Loud and Silent</li><li>✅ 1.3 Silent Errors · When JavaScript Says Nothing</li><li>✅ 1.4 Strict Mode · Making Silent Errors Loud</li><li>✅ 1.5 Loud Errors · try, catch, finally, and throw</li><li>✅ 1.6 The Error Object</li><li>✅ 1.7 The Six Built-In Error Types</li><li>✅ 1.8 Creating Custom Errors</li></ul><div class="ln"><a href="lesson_21.html" class="ln-btn">&#8592; Lesson 21</a><a href="lesson_23.html" class="ln-btn primary">Lesson 23 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 22 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

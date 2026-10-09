@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 28: JavaScript HTML DOM: Introduction to the DOM · DOM Methods · Finding Elements · Changing HTML · Changing CSS · Form Validation · Animations · The Document Object · Element Reference — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="13" data-key="techbase_js_l28">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 28 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 28</div>
+      <h1>JavaScript HTML DOM: Introduction to the DOM · DOM Methods · Finding Elements · Changing HTML · Changing CSS · Form Validation · Animations · The Document Object · Element Reference</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Lesson 28 Project</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 28</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 13 phases</span><span>🏗️ Lesson 28 Project</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">1. What is the HTML DOM?</div><div class="pc" id="chk1"></div></div><div class="pb2"><h3 class="v2-h3">The Big Picture</h3>
+<p class="v2-p">When a browser loads an HTML page, it does not just display it · it <strong>reads every tag, builds a structured map of the entire page in memory, and hands that map to JavaScript</strong>. That map is called the <strong>DOM</strong>: the <strong>Document Object Model</strong>.</p>
+<p class="v2-p">Think of a webpage like a family tree:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document
+└── &lt;html&gt;
+    ├── &lt;head&gt;
+    │   └── &lt;title&gt;My Page&lt;/title&gt;
+    └── &lt;body&gt;
+        ├── &lt;h1&gt;Hello World&lt;/h1&gt;
+        └── &lt;p id=&quot;intro&quot;&gt;Welcome!&lt;/p&gt;</code></pre></div></div>
+<p class="v2-p">Every tag becomes a <strong>node</strong> in that tree. JavaScript can walk up and down the tree, read any node, change it, add new ones, or delete them · all without reloading the page.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world analogy:</strong> A DOM is like a company org chart. The CEO is <code>&lt;html&gt;</code>, departments are <code>&lt;head&gt;</code> and <code>&lt;body&gt;</code>, and individual employees are your tags like <code>&lt;p&gt;</code>, <code>&lt;h1&gt;</code>, <code>&lt;button&gt;</code>. JavaScript is like a manager who can rename employees, add new ones, or fire them · instantly, without rebuilding the company.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Why Does the DOM Exist?</h3>
+<p class="v2-p">Before the DOM, if you wanted to update a webpage you had to reload the entire page from the server. The DOM was invented so that:</p>
+<ul class="v2-ul"><li>Pages could <strong>react to users</strong> (clicks, typing, hovering)</li><li>Content could <strong>update in real time</strong> (live scores, chat messages)</li><li>Forms could <strong>validate input</strong> before submitting</li><li>Elements could <strong>animate</strong> without Flash or plugins</li></ul>
+<p class="v2-p">Today, every interactive website you use · from Google Docs to YouTube · is built on DOM manipulation.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The DOM is a Standard</h3>
+<p class="v2-p">The DOM is not invented by a browser. It is a <strong>W3C standard</strong> · a set of rules every browser must follow. This means the same JavaScript DOM code works in Chrome, Firefox, Safari, and Edge.</p>
+<p class="v2-p">The standard defines:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Standard</th><th>What it covers</th></tr></thead><tbody><tr><td>Core DOM</td><td>All document types (XML, HTML)</td></tr><tr><td>XML DOM</td><td>XML-specific features</td></tr><tr><td><strong>HTML DOM</strong></td><td>HTML-specific features · this is what we learn</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">The DOM Standard Defines:</h3>
+<ul class="v2-ul"><li><strong>HTML elements as objects</strong> · each tag in your HTML becomes a JavaScript object</li><li><strong>Properties</strong> · the data inside that object (e.g., <code>innerHTML</code>, <code>id</code>, <code>style</code>)</li><li><strong>Methods</strong> · the actions you can call on it (e.g., <code>getElementById()</code>, <code>appendChild()</code>)</li><li><strong>Events</strong> · triggers that fire when something happens (e.g., <code>onclick</code>, <code>onchange</code>)</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Micro-Demo 1 · The DOM in One Line</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;demo&quot;&gt;I am original text.&lt;/p&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;demo&quot;).innerHTML = &quot;DOM changed me!&quot;;
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>What happens:</strong></p>
+<ol class="v2-ol"><li>Browser builds the DOM from the HTML</li><li><code>document</code> is the entry point to the entire tree</li><li><code>.getElementById("demo")</code> finds the <code>&lt;p&gt;</code> node with <code>id="demo"</code></li><li><code>.innerHTML = "DOM changed me!"</code> replaces the text inside it</li></ol>
+<p class="v2-p"><strong>Expected output in browser:</strong> The paragraph now reads: <code>DOM changed me!</code></p>
+<hr class="v2-hr">
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Thinking question:</strong> What would happen if you used an <code>id</code> that doesn't exist in the page? Try <code>document.getElementById("ghost")</code> · what would JavaScript return? <strong>Answer:</strong> It returns <code>null</code>. Trying to set <code>.innerHTML</code> on <code>null</code> will throw an error. Always check that your element exists!</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. What is the HTML DOM?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">2. DOM Methods · Your First Tools</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">What is a Method?</h3>
+<p class="v2-p">A <strong>method</strong> is an action you can perform. Just like a TV remote has buttons (change channel, adjust volume), DOM objects have methods (find element, change content, add child).</p>
+<p class="v2-p">The two most foundational DOM methods are:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>What it does</th></tr></thead><tbody><tr><td><code>document.getElementById(id)</code></td><td>Finds one element by its <code>id</code> attribute</td></tr><tr><td><code>document.createElement(tag)</code></td><td>Creates a brand new HTML element</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>getElementById</code> · Your Most-Used Tool</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+
+  &lt;p id=&quot;greet&quot;&gt;Good morning!&lt;/p&gt;
+  &lt;button onclick=&quot;changeGreeting()&quot;&gt;Change Greeting&lt;/button&gt;
+
+  &lt;script&gt;
+    function changeGreeting() {
+      // Step 1: Find the element
+      var element = document.getElementById(&quot;greet&quot;);
+
+      // Step 2: Change its content
+      element.innerHTML = &quot;Good evening!&quot;;
+    }
+  &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line breakdown:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Line</th><th>Meaning</th></tr></thead><tbody><tr><td><code>document.getElementById("greet")</code></td><td>Searches the entire DOM for a tag with <code>id="greet"</code> and returns it as a JavaScript object</td></tr><tr><td><code>element.innerHTML</code></td><td>A <strong>property</strong> of the element object · it holds the HTML content inside the tags</td></tr><tr><td><code>= "Good evening!"</code></td><td>Assigns a new value, replacing the old content</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Expected output:</strong> After clicking the button, the paragraph changes from "Good morning!" to "Good evening!" without any page reload.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>innerHTML</code> vs <code>innerText</code> · An Important Difference</h3>
+<p class="v2-p">These two properties look similar but behave differently:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;box&quot;&gt;Hello&lt;/div&gt;
+
+&lt;script&gt;
+  var el = document.getElementById(&quot;box&quot;);
+
+  // innerHTML treats the value as HTML markup
+  el.innerHTML = &quot;&lt;strong&gt;Bold text&lt;/strong&gt;&quot;;
+  // → Displays bold text in the browser
+
+  // innerText treats the value as plain text
+  el.innerText = &quot;&lt;strong&gt;Bold text&lt;/strong&gt;&quot;;
+  // → Displays the literal string: &lt;strong&gt;Bold text&lt;/strong&gt;
+&lt;/script&gt;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Common beginner mistake:</strong> Using <code>innerHTML</code> to insert user-typed content directly. If a user types <code>&lt;script&gt;alert("hacked")&lt;/script&gt;</code>, it will execute! For user input, always use <code>innerText</code> or sanitize the input first.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>document</code> Object · Your Gateway</h3>
+<p class="v2-p"><code>document</code> is a special built-in JavaScript object that represents the entire loaded page. Every DOM method starts from <code>document</code> because it is the <strong>root of the tree</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>window
+  └── document        ← your starting point
+        ├── head
+        └── body
+              ├── h1
+              └── p</code></pre></div></div>
+<p class="v2-p">You do not create <code>document</code> · the browser creates it automatically when the page loads.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Defining HTML Elements · The id Attribute</h3>
+<p class="v2-p"><code>getElementById</code> works because HTML allows every tag to carry a unique identifier:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;score&quot;&gt;0&lt;/p&gt;
+&lt;p id=&quot;status&quot;&gt;Not started&lt;/p&gt;</code></pre></div></div>
+<p class="v2-p">The <code>id</code> must be <strong>unique per page</strong> · just like a national ID number. If two elements share the same <code>id</code>, <code>getElementById</code> will only find the first one, and your code will behave unpredictably.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. DOM Methods · Your First Tools</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">3. Finding HTML Elements</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Six Ways to Find Elements</h3>
+<p class="v2-p">Once you have the <code>document</code>, you need to locate the specific elements you want to work with. JavaScript gives you six main strategies:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Use when...</th></tr></thead><tbody><tr><td><code>getElementById(id)</code></td><td>Single element</td><td>You know the exact <code>id</code></td></tr><tr><td><code>getElementsByTagName(tag)</code></td><td>HTMLCollection</td><td>You want all <code>&lt;p&gt;</code>, all <code>&lt;li&gt;</code>, etc.</td></tr><tr><td><code>getElementsByClassName(cls)</code></td><td>HTMLCollection</td><td>You want all elements sharing a CSS class</td></tr><tr><td><code>querySelector(selector)</code></td><td>Single element</td><td>You want the first match using CSS selector syntax</td></tr><tr><td><code>querySelectorAll(selector)</code></td><td>NodeList</td><td>You want all matches using CSS selector syntax</td></tr><tr><td><code>getElementsByName(name)</code></td><td>NodeList</td><td>Used with form inputs sharing a <code>name</code> attribute</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 1: <code>getElementById</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;h2 id=&quot;title&quot;&gt;JavaScript DOM&lt;/h2&gt;
+
+&lt;script&gt;
+  var title = document.getElementById(&quot;title&quot;);
+  console.log(title.innerHTML); // Output: JavaScript DOM
+&lt;/script&gt;</code></pre></div></div>
+<ul class="v2-ul"><li>Returns <strong>one element</strong> (or <code>null</code> if not found)</li><li>Fastest method · browser optimises id lookups</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 2: <code>getElementsByTagName</code></h3>
+<p class="v2-p">Returns an <strong>HTMLCollection</strong> · like an array of all matching elements.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p&gt;First paragraph&lt;/p&gt;
+&lt;p&gt;Second paragraph&lt;/p&gt;
+&lt;p&gt;Third paragraph&lt;/p&gt;
+
+&lt;script&gt;
+  var paragraphs = document.getElementsByTagName(&quot;p&quot;);
+
+  console.log(paragraphs.length);     // Output: 3
+  console.log(paragraphs[0].innerHTML); // Output: First paragraph
+  console.log(paragraphs[2].innerHTML); // Output: Third paragraph
+&lt;/script&gt;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🔍 <strong>What is an HTMLCollection?</strong> It is a live list of DOM elements. "Live" means: if you add a new <code>&lt;p&gt;</code> to the page later, <code>paragraphs</code> automatically includes it · you don't need to call the method again.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Looping Through a Collection</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;ul&gt;
+  &lt;li&gt;Apple&lt;/li&gt;
+  &lt;li&gt;Banana&lt;/li&gt;
+  &lt;li&gt;Cherry&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script&gt;
+  var items = document.getElementsByTagName(&quot;li&quot;);
+
+  for (var i = 0; i &lt; items.length; i++) {
+    items[i].style.color = &quot;green&quot;;  // Makes each item text green
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> All three list items turn green in the browser.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 3: <code>getElementsByClassName</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p class=&quot;highlight&quot;&gt;This is highlighted.&lt;/p&gt;
+&lt;p&gt;This is not.&lt;/p&gt;
+&lt;p class=&quot;highlight&quot;&gt;This is also highlighted.&lt;/p&gt;
+
+&lt;script&gt;
+  var highlighted = document.getElementsByClassName(&quot;highlight&quot;);
+  console.log(highlighted.length); // Output: 2
+&lt;/script&gt;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 Multiple classes: <code>document.getElementsByClassName("box active")</code> finds elements that have <strong>both</strong> classes.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 4: <code>querySelector</code> · CSS Selector Power</h3>
+<p class="v2-p"><code>querySelector</code> accepts any CSS selector string · giving you tremendous flexibility:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div class=&quot;card&quot;&gt;
+  &lt;p id=&quot;first&quot;&gt;Hello&lt;/p&gt;
+  &lt;p&gt;World&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  // By id (like getElementById)
+  var el1 = document.querySelector(&quot;#first&quot;);
+  console.log(el1.innerHTML); // Output: Hello
+
+  // By class
+  var el2 = document.querySelector(&quot;.card&quot;);
+
+  // By tag
+  var el3 = document.querySelector(&quot;p&quot;);
+
+  // By attribute
+  var el4 = document.querySelector(&quot;input[type=&#x27;text&#x27;]&quot;);
+
+  // By nesting — the first &lt;p&gt; inside .card
+  var el5 = document.querySelector(&quot;.card p&quot;);
+  console.log(el5.innerHTML); // Output: Hello
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 5: <code>querySelectorAll</code></h3>
+<p class="v2-p">Like <code>querySelector</code> but returns <strong>all</strong> matches as a NodeList.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p class=&quot;item&quot;&gt;One&lt;/p&gt;
+&lt;p class=&quot;item&quot;&gt;Two&lt;/p&gt;
+&lt;p class=&quot;item&quot;&gt;Three&lt;/p&gt;
+
+&lt;script&gt;
+  var items = document.querySelectorAll(&quot;.item&quot;);
+
+  items.forEach(function(item) {
+    item.style.fontWeight = &quot;bold&quot;;
+  });
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> All three paragraphs become bold.</p>
+<blockquote class="v2-bq"><p class="v2-p">🔑 <strong>Difference from HTMLCollection:</strong> NodeList returned by <code>querySelectorAll</code> is <strong>static</strong> · it does not update if you add new matching elements later.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Searching Within an Element (Not Just the Document)</h3>
+<p class="v2-p">You can call these methods on <strong>any element</strong>, not just <code>document</code>. This lets you narrow your search:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;section-a&quot;&gt;
+  &lt;p&gt;Paragraph in A&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;section-b&quot;&gt;
+  &lt;p&gt;Paragraph in B&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  var sectionA = document.getElementById(&quot;section-a&quot;);
+  var pInA = sectionA.getElementsByTagName(&quot;p&quot;);
+  console.log(pInA[0].innerHTML); // Output: Paragraph in A
+  // Does NOT find the paragraph in section-b
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Navigating the DOM Tree with Relationships</h3>
+<p class="v2-p">Every element knows about its relatives:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>What it returns</th></tr></thead><tbody><tr><td><code>element.parentNode</code></td><td>The direct parent element</td></tr><tr><td><code>element.childNodes</code></td><td>All child nodes (including text nodes)</td></tr><tr><td><code>element.children</code></td><td>Only child <strong>elements</strong> (no text nodes)</td></tr><tr><td><code>element.firstChild</code></td><td>First child node</td></tr><tr><td><code>element.lastChild</code></td><td>Last child node</td></tr><tr><td><code>element.nextSibling</code></td><td>Next node at the same level</td></tr><tr><td><code>element.previousSibling</code></td><td>Previous node at the same level</td></tr><tr><td><code>element.firstElementChild</code></td><td>First child that is an element</td></tr><tr><td><code>element.lastElementChild</code></td><td>Last child that is an element</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;ul id=&quot;menu&quot;&gt;
+  &lt;li&gt;Home&lt;/li&gt;
+  &lt;li&gt;About&lt;/li&gt;
+  &lt;li&gt;Contact&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script&gt;
+  var menu = document.getElementById(&quot;menu&quot;);
+  var first = menu.firstElementChild;
+  var last = menu.lastElementChild;
+
+  console.log(first.innerHTML); // Output: Home
+  console.log(last.innerHTML);  // Output: Contact
+  console.log(menu.children.length); // Output: 3
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Finding HTML Elements</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">4. Changing HTML Content</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What Can You Change?</h3>
+<p class="v2-p">Once you have found an element, you can change almost anything about it:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>What to change</th><th>Property / Method</th></tr></thead><tbody><tr><td>Text/HTML inside a tag</td><td><code>.innerHTML</code> or <code>.innerText</code></td></tr><tr><td>An attribute value (src, href, alt…)</td><td><code>.setAttribute()</code> or direct property</td></tr><tr><td>The entire element</td><td><code>.outerHTML</code></td></tr><tr><td>Append new child elements</td><td><code>.appendChild()</code>, <code>.insertBefore()</code></td></tr><tr><td>Remove elements</td><td><code>.removeChild()</code>, <code>.remove()</code></td></tr><tr><td>Write directly to the page (during load)</td><td><code>document.write()</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Changing innerHTML</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;h1 id=&quot;heading&quot;&gt;Old Title&lt;/h1&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;heading&quot;).innerHTML = &quot;New Title&quot;;
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> The page displays "New Title".</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Changing an Attribute</h3>
+<p class="v2-p">HTML attributes (like <code>src</code>, <code>href</code>, <code>value</code>, <code>alt</code>) can be changed by:</p>
+<p class="v2-p"><strong>Method A · Direct property access:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;img id=&quot;photo&quot; src=&quot;cat.jpg&quot; alt=&quot;A cat&quot;&gt;
+
+&lt;script&gt;
+  var img = document.getElementById(&quot;photo&quot;);
+  img.src = &quot;dog.jpg&quot;;   // Changes the image source
+  img.alt = &quot;A dog&quot;;     // Changes the alt text
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Method B · Using <code>setAttribute</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;a id=&quot;link&quot; href=&quot;https://google.com&quot;&gt;Visit&lt;/a&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;link&quot;).setAttribute(&quot;href&quot;, &quot;https://bing.com&quot;);
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Read an attribute with <code>getAttribute</code>:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;script&gt;
+  var href = document.getElementById(&quot;link&quot;).getAttribute(&quot;href&quot;);
+  console.log(href); // Output: https://bing.com
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>document.write()</code> · Use With Caution</h3>
+<p class="v2-p"><code>document.write()</code> adds content directly into the HTML stream as the page loads:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;script&gt;
+  document.write(&quot;&lt;p&gt;Written during page load&lt;/p&gt;&quot;);
+&lt;/script&gt;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Critical warning:</strong> If you call <code>document.write()</code> <strong>after</strong> the page has finished loading, it <strong>overwrites the entire page</strong>. This is almost never what you want. Use <code>innerHTML</code> instead for post-load changes.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating and Inserting New Elements</h3>
+<p class="v2-p">This is one of the most powerful DOM skills: building elements from scratch and inserting them into the page.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;ul id=&quot;list&quot;&gt;
+  &lt;li&gt;Item 1&lt;/li&gt;
+  &lt;li&gt;Item 2&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;button onclick=&quot;addItem()&quot;&gt;Add Item&lt;/button&gt;
+
+&lt;script&gt;
+  function addItem() {
+    // Step 1: Create the new element
+    var newItem = document.createElement(&quot;li&quot;);
+
+    // Step 2: Give it content
+    newItem.innerHTML = &quot;Item 3&quot;;
+
+    // Step 3: Find where to put it
+    var list = document.getElementById(&quot;list&quot;);
+
+    // Step 4: Append it as the last child
+    list.appendChild(newItem);
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> Each button click adds a new <code>&lt;li&gt;Item 3&lt;/li&gt;</code> to the list.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Inserting Before a Specific Element</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;ul id=&quot;list&quot;&gt;
+  &lt;li id=&quot;second&quot;&gt;Second&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;script&gt;
+  var newItem = document.createElement(&quot;li&quot;);
+  newItem.innerHTML = &quot;First (inserted)&quot;;
+
+  var list = document.getElementById(&quot;list&quot;);
+  var secondItem = document.getElementById(&quot;second&quot;);
+
+  // insertBefore(newNode, referenceNode)
+  list.insertBefore(newItem, secondItem);
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> The list now shows "First (inserted)" above "Second".</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Removing Elements</h3>
+<p class="v2-p"><strong>Modern approach (on the element itself):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;remove-me&quot;&gt;Delete me!&lt;/p&gt;
+
+&lt;script&gt;
+  document.getElementById(&quot;remove-me&quot;).remove();
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Classic approach (via parent):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;script&gt;
+  var child = document.getElementById(&quot;remove-me&quot;);
+  child.parentNode.removeChild(child);
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p">Both achieve the same result. The <code>.remove()</code> approach is shorter but slightly less supported in very old browsers.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Replacing an Element</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;old&quot;&gt;Old paragraph&lt;/p&gt;
+
+&lt;script&gt;
+  var newPara = document.createElement(&quot;p&quot;);
+  newPara.innerHTML = &quot;New paragraph&quot;;
+
+  var old = document.getElementById(&quot;old&quot;);
+  old.parentNode.replaceChild(newPara, old);
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>outerHTML</code> · Replace Including the Tag Itself</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;box&quot;&gt;Hello&lt;/p&gt;
+
+&lt;script&gt;
+  // innerHTML changes only the CONTENT inside the tag
+  // outerHTML changes the ENTIRE element including the tag itself
+
+  document.getElementById(&quot;box&quot;).outerHTML = &quot;&lt;h2&gt;I replaced the paragraph!&lt;/h2&gt;&quot;;
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> The <code>&lt;p&gt;</code> tag is completely replaced by an <code>&lt;h2&gt;</code>.</p>
+<hr class="v2-hr">
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Thinking question:</strong> After the code above runs, <code>document.getElementById("box")</code> will return <code>null</code>. Why? <strong>Answer:</strong> The element with <code>id="box"</code> no longer exists · it was replaced. The new <code>&lt;h2&gt;</code> doesn't have that id.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Changing HTML Content</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">5. Changing CSS Styles</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">The <code>style</code> Property</h3>
+<p class="v2-p">Every DOM element has a <code>.style</code> property that maps directly to its inline CSS. You can read and write any CSS property through it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;message&quot;&gt;Style me!&lt;/p&gt;
+
+&lt;script&gt;
+  var el = document.getElementById(&quot;message&quot;);
+
+  el.style.color = &quot;red&quot;;
+  el.style.fontSize = &quot;24px&quot;;
+  el.style.fontWeight = &quot;bold&quot;;
+  el.style.backgroundColor = &quot;yellow&quot;;
+  el.style.padding = &quot;10px&quot;;
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> The paragraph appears large, bold, red text on a yellow background with padding.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">CSS Property Name Conversion Rule</h3>
+<p class="v2-p">CSS uses <strong>hyphens</strong>: <code>background-color</code>, <code>font-size</code>, <code>border-radius</code>. JavaScript uses <strong>camelCase</strong>: <code>backgroundColor</code>, <code>fontSize</code>, <code>borderRadius</code>.</p>
+<p class="v2-p">The rule: <strong>remove the hyphen and capitalise the next letter</strong>.</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>CSS Property</th><th>JavaScript Property</th></tr></thead><tbody><tr><td><code>background-color</code></td><td><code>backgroundColor</code></td></tr><tr><td><code>font-size</code></td><td><code>fontSize</code></td></tr><tr><td><code>border-top-width</code></td><td><code>borderTopWidth</code></td></tr><tr><td><code>z-index</code></td><td><code>zIndex</code></td></tr><tr><td><code>flex-direction</code></td><td><code>flexDirection</code></td></tr><tr><td><code>text-decoration</code></td><td><code>textDecoration</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Toggle Visibility</h3>
+<p class="v2-p">A classic pattern: show or hide an element based on its current state.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;panel&quot; style=&quot;display:block;&quot;&gt;
+  &lt;p&gt;I am visible!&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;button onclick=&quot;togglePanel()&quot;&gt;Toggle&lt;/button&gt;
+
+&lt;script&gt;
+  function togglePanel() {
+    var panel = document.getElementById(&quot;panel&quot;);
+
+    if (panel.style.display === &quot;none&quot;) {
+      panel.style.display = &quot;block&quot;;
+    } else {
+      panel.style.display = &quot;none&quot;;
+    }
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> Each button click hides/shows the div.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Using CSS Classes Instead of Inline Styles</h3>
+<p class="v2-p">Inline styles are powerful but mix logic with presentation. A cleaner approach is to <strong>add and remove CSS classes</strong> using JavaScript.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;style&gt;
+  .highlighted {
+    background-color: yellow;
+    font-weight: bold;
+    border: 2px solid orange;
+  }
+&lt;/style&gt;
+
+&lt;p id=&quot;note&quot;&gt;Click a button to style me.&lt;/p&gt;
+
+&lt;button onclick=&quot;addStyle()&quot;&gt;Add Style&lt;/button&gt;
+&lt;button onclick=&quot;removeStyle()&quot;&gt;Remove Style&lt;/button&gt;
+&lt;button onclick=&quot;toggleStyle()&quot;&gt;Toggle Style&lt;/button&gt;
+
+&lt;script&gt;
+  var note = document.getElementById(&quot;note&quot;);
+
+  function addStyle() {
+    note.classList.add(&quot;highlighted&quot;);
+  }
+
+  function removeStyle() {
+    note.classList.remove(&quot;highlighted&quot;);
+  }
+
+  function toggleStyle() {
+    note.classList.toggle(&quot;highlighted&quot;);
+  }
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>classList</code> API · Full Reference</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method / Property</th><th>What it does</th></tr></thead><tbody><tr><td><code>classList.add("cls")</code></td><td>Adds a class</td></tr><tr><td><code>classList.remove("cls")</code></td><td>Removes a class</td></tr><tr><td><code>classList.toggle("cls")</code></td><td>Adds if missing, removes if present</td></tr><tr><td><code>classList.contains("cls")</code></td><td>Returns <code>true</code> if the class is present</td></tr><tr><td><code>classList.replace("old", "new")</code></td><td>Swaps one class for another</td></tr><tr><td><code>classList.length</code></td><td>Number of classes on the element</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;box&quot; class=&quot;card active large&quot;&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  var box = document.getElementById(&quot;box&quot;);
+
+  console.log(box.classList.contains(&quot;active&quot;)); // true
+  console.log(box.classList.length);             // 3
+
+  box.classList.remove(&quot;large&quot;);
+  console.log(box.classList.length);             // 2
+
+  box.classList.replace(&quot;active&quot;, &quot;disabled&quot;);
+  // Now: class=&quot;card disabled&quot;
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reading Computed Styles</h3>
+<p class="v2-p"><code>.style</code> only reads <strong>inline</strong> styles. If a style comes from a CSS file or <code>&lt;style&gt;</code> tag, you need <code>getComputedStyle</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;style&gt;
+  #text { color: blue; font-size: 18px; }
+&lt;/style&gt;
+
+&lt;p id=&quot;text&quot;&gt;Blue text&lt;/p&gt;
+
+&lt;script&gt;
+  var el = document.getElementById(&quot;text&quot;);
+
+  // This reads the COMPUTED (final applied) style
+  var computed = window.getComputedStyle(el);
+  console.log(computed.color);    // Output: rgb(0, 0, 255)
+  console.log(computed.fontSize); // Output: 18px
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Changing CSS Styles</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">6. Form Validation with the DOM</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Why Validate on the Client Side?</h3>
+<p class="v2-p">When a user fills out a form and clicks Submit, the data travels to a server. Sending invalid data (empty fields, wrong email format) wastes bandwidth and frustrates users with slow error feedback. <strong>Client-side validation</strong> catches errors instantly, before the data ever leaves the browser.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Important:</strong> Client-side validation is for <strong>user experience</strong>. Always also validate on the <strong>server side</strong>, because users can bypass JavaScript.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">A Basic Required-Field Check</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;form name=&quot;myForm&quot; onsubmit=&quot;return validateForm()&quot;&gt;
+  &lt;label&gt;Name:&lt;/label&gt;
+  &lt;input type=&quot;text&quot; id=&quot;name&quot; placeholder=&quot;Enter your name&quot;&gt;
+  &lt;br&gt;
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  function validateForm() {
+    var nameInput = document.getElementById(&quot;name&quot;).value;
+
+    // .trim() removes leading/trailing spaces
+    if (nameInput.trim() === &quot;&quot;) {
+      alert(&quot;Name is required!&quot;);
+      return false; // Stops form submission
+    }
+
+    return true; // Allows form submission
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Key concept:</strong> <code>return false</code> from an <code>onsubmit</code> handler <strong>prevents the form from submitting</strong>. <code>return true</code> allows it.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Validating an Email Address</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;text&quot; id=&quot;email&quot; placeholder=&quot;Enter email&quot;&gt;
+&lt;span id=&quot;emailError&quot; style=&quot;color:red;&quot;&gt;&lt;/span&gt;
+
+&lt;script&gt;
+  function validateEmail() {
+    var email = document.getElementById(&quot;email&quot;).value;
+    var errorSpan = document.getElementById(&quot;emailError&quot;);
+
+    // A simple email pattern check
+    var pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!pattern.test(email)) {
+      errorSpan.innerText = &quot;Please enter a valid email.&quot;;
+      return false;
+    } else {
+      errorSpan.innerText = &quot;&quot;;
+      return true;
+    }
+  }
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Numeric Range Validation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;label&gt;Age (18–65):&lt;/label&gt;
+&lt;input type=&quot;number&quot; id=&quot;age&quot;&gt;
+&lt;p id=&quot;ageError&quot; style=&quot;color:red;&quot;&gt;&lt;/p&gt;
+
+&lt;script&gt;
+  function validateAge() {
+    var age = Number(document.getElementById(&quot;age&quot;).value);
+    var error = document.getElementById(&quot;ageError&quot;);
+
+    if (isNaN(age) || age &lt; 18 || age &gt; 65) {
+      error.innerText = &quot;Age must be between 18 and 65.&quot;;
+      return false;
+    }
+    error.innerText = &quot;&quot;;
+    return true;
+  }
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Automatic HTML5 Validation vs JavaScript Validation</h3>
+<p class="v2-p">Modern HTML5 includes built-in validation attributes:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Attribute</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>required</code></td><td>Field must not be empty</td></tr><tr><td><code>type="email"</code></td><td>Must match email format</td></tr><tr><td><code>type="number"</code></td><td>Must be a number</td></tr><tr><td><code>min</code> / <code>max</code></td><td>Number must be in range</td></tr><tr><td><code>minlength</code> / <code>maxlength</code></td><td>Text length limits</td></tr><tr><td><code>pattern</code></td><td>Must match a regex pattern</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;email&quot; required placeholder=&quot;your@email.com&quot;&gt;
+&lt;input type=&quot;number&quot; min=&quot;18&quot; max=&quot;65&quot; required&gt;</code></pre></div></div>
+<p class="v2-p">HTML5 validation fires automatically on submit. JavaScript validation gives you <strong>more control</strong> over the error messages and timing.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Real-Time Validation with Events</h3>
+<p class="v2-p">Instead of waiting for form submission, validate as the user types:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;text&quot; id=&quot;username&quot; oninput=&quot;checkUsername(this.value)&quot;&gt;
+&lt;small id=&quot;usernameMsg&quot;&gt;&lt;/small&gt;
+
+&lt;script&gt;
+  function checkUsername(value) {
+    var msg = document.getElementById(&quot;usernameMsg&quot;);
+
+    if (value.length &lt; 3) {
+      msg.style.color = &quot;red&quot;;
+      msg.innerText = &quot;Too short (minimum 3 characters)&quot;;
+    } else if (value.length &gt; 20) {
+      msg.style.color = &quot;red&quot;;
+      msg.innerText = &quot;Too long (maximum 20 characters)&quot;;
+    } else {
+      msg.style.color = &quot;green&quot;;
+      msg.innerText = &quot;✓ Username looks good!&quot;;
+    }
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> As the user types, the message updates instantly with colour-coded feedback.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Password Confirmation Check</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;password&quot; id=&quot;pass1&quot; placeholder=&quot;Password&quot;&gt;
+&lt;input type=&quot;password&quot; id=&quot;pass2&quot; placeholder=&quot;Confirm Password&quot;&gt;
+&lt;p id=&quot;matchMsg&quot;&gt;&lt;/p&gt;
+
+&lt;script&gt;
+  function checkPasswords() {
+    var p1 = document.getElementById(&quot;pass1&quot;).value;
+    var p2 = document.getElementById(&quot;pass2&quot;).value;
+    var msg = document.getElementById(&quot;matchMsg&quot;);
+
+    if (p2 === &quot;&quot;) {
+      msg.innerText = &quot;&quot;;
+    } else if (p1 === p2) {
+      msg.style.color = &quot;green&quot;;
+      msg.innerText = &quot;✓ Passwords match&quot;;
+    } else {
+      msg.style.color = &quot;red&quot;;
+      msg.innerText = &quot;✗ Passwords do not match&quot;;
+    }
+  }
+
+  document.getElementById(&quot;pass2&quot;).addEventListener(&quot;input&quot;, checkPasswords);
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6. Form Validation with the DOM</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">7. DOM Animations</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">How DOM Animations Work (The Concept)</h3>
+<p class="v2-p">CSS transitions and animations are great for simple effects. But JavaScript DOM animations give you <strong>precise control</strong> using:</p>
+<ul class="v2-ul"><li><strong><code>setInterval(fn, ms)</code></strong> · runs a function repeatedly every <code>ms</code> milliseconds</li><li><strong><code>clearInterval(id)</code></strong> · stops a running interval</li><li><strong><code>requestAnimationFrame(fn)</code></strong> · the modern, performance-friendly alternative</li></ul>
+<p class="v2-p">The core idea: <strong>change a CSS property by a small amount, many times per second, to create the illusion of smooth movement</strong>.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Timer Functions Explained</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Function</th><th>What it does</th></tr></thead><tbody><tr><td><code>setTimeout(fn, ms)</code></td><td>Calls <code>fn</code> once after <code>ms</code> milliseconds</td></tr><tr><td><code>setInterval(fn, ms)</code></td><td>Calls <code>fn</code> repeatedly every <code>ms</code> milliseconds</td></tr><tr><td><code>clearInterval(id)</code></td><td>Stops an interval using its returned id</td></tr><tr><td><code>requestAnimationFrame(fn)</code></td><td>Calls <code>fn</code> before the next screen repaint (~60fps)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Micro-Demo: Blinking Text</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;p id=&quot;blink&quot;&gt;Notice me!&lt;/p&gt;
+
+&lt;script&gt;
+  var visible = true;
+
+  setInterval(function() {
+    var el = document.getElementById(&quot;blink&quot;);
+    el.style.visibility = visible ? &quot;hidden&quot; : &quot;visible&quot;;
+    visible = !visible;
+  }, 500); // Every 500ms (half a second)
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> The text alternates between visible and hidden twice per second.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Building a Slide Animation Step by Step</h3>
+<p class="v2-p">This is the classic W3Schools sliding box animation · let's build it together and understand every line.</p>
+<p class="v2-p"><strong>HTML structure:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;container&quot; style=&quot;
+  width: 400px;
+  height: 400px;
+  position: relative;
+  background: #ddd;
+&quot;&gt;
+  &lt;div id=&quot;box&quot; style=&quot;
+    width: 50px;
+    height: 50px;
+    background: red;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+  &quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;button onclick=&quot;startMove()&quot;&gt;Start&lt;/button&gt;
+&lt;button onclick=&quot;stopMove()&quot;&gt;Stop&lt;/button&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Why <code>position: relative</code> on the container?</strong> The box uses <code>position: absolute</code> which positions it relative to its nearest positioned ancestor. By setting <code>relative</code> on the container, the box moves within the container, not the entire page.</p>
+<p class="v2-p"><strong>JavaScript:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var timer = null;   // Stores the interval ID so we can stop it later
+
+function startMove() {
+  // Prevent starting multiple intervals at once
+  clearInterval(timer);
+
+  timer = setInterval(function() {
+    var box = document.getElementById(&quot;box&quot;);
+
+    // Read current left position (removing &quot;px&quot; to get a number)
+    var currentLeft = parseInt(box.style.left);
+
+    // If box has reached the right edge of the container, stop
+    if (currentLeft &gt;= 350) {  // 400px container - 50px box = 350px max
+      clearInterval(timer);
+    } else {
+      // Move box 1px to the right
+      box.style.left = (currentLeft + 1) + &quot;px&quot;;
+    }
+  }, 5); // Every 5ms ≈ 200 frames per second
+}
+
+function stopMove() {
+  clearInterval(timer);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line breakdown:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td><code>var timer = null</code></td><td>Declares a variable outside the function so it persists between calls</td></tr><tr><td><code>clearInterval(timer)</code></td><td>Ensures no duplicate intervals run at the same time</td></tr><tr><td><code>parseInt(box.style.left)</code></td><td>Converts <code>"0px"</code> (a string) into <code>0</code> (a number) for arithmetic</td></tr><tr><td><code>(currentLeft + 1) + "px"</code></td><td>Increases by 1, then converts back to <code>"1px"</code> string</td></tr><tr><td><code>clearInterval(timer)</code> at the boundary</td><td>Stops the animation when the box reaches the edge</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Using <code>requestAnimationFrame</code> · The Modern Way</h3>
+<p class="v2-p"><code>setInterval</code> has a problem: it fires on its own schedule, not in sync with the browser's painting cycle. This can cause <strong>jank</strong> (stuttering). <code>requestAnimationFrame</code> is smarter:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var pos = 0;
+var animating = false;
+var animId;
+
+function animate() {
+  if (!animating) return;
+
+  var box = document.getElementById(&quot;box&quot;);
+  pos++;
+
+  if (pos &gt;= 350) {
+    pos = 350;
+    animating = false;
+  }
+
+  box.style.left = pos + &quot;px&quot;;
+
+  // Request the NEXT frame
+  animId = requestAnimationFrame(animate);
+}
+
+function startMove() {
+  if (!animating) {
+    animating = true;
+    animate();
+  }
+}
+
+function stopMove() {
+  animating = false;
+  cancelAnimationFrame(animId);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why is this better?</strong></p>
+<ul class="v2-ul"><li>Syncs with the display refresh rate (usually 60fps)</li><li>Pauses automatically when the tab is not visible (saves CPU/battery)</li><li>Smoother than <code>setInterval</code></li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Animating Multiple Properties</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;bubble&quot; style=&quot;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: blue;
+  position: absolute;
+  top: 200px;
+  left: 0px;
+  opacity: 1;
+&quot;&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  var x = 0;
+  var opacity = 1;
+
+  function animate() {
+    var el = document.getElementById(&quot;bubble&quot;);
+
+    x += 2;
+    opacity -= 0.005;
+
+    el.style.left = x + &quot;px&quot;;
+    el.style.opacity = opacity;
+
+    if (x &lt; 400 &amp;&amp; opacity &gt; 0) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong> A blue circle slides to the right while gradually fading out.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>7. DOM Animations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">8. The Document Object in Depth</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">What Is the <code>document</code> Object?</h3>
+<p class="v2-p">The <code>document</code> object is the <strong>root of the HTML DOM</strong> · it represents the loaded HTML page and provides access to every element, attribute, and text node in it.</p>
+<p class="v2-p">You never create <code>document</code> · it's automatically available in any JavaScript running in a browser.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Key <code>document</code> Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>What it returns</th></tr></thead><tbody><tr><td><code>document.title</code></td><td>The page title (from <code>&lt;title&gt;</code> tag)</td></tr><tr><td><code>document.URL</code></td><td>Full URL of the current page</td></tr><tr><td><code>document.domain</code></td><td>Domain name (e.g., <code>"example.com"</code>)</td></tr><tr><td><code>document.referrer</code></td><td>URL of the page that linked here</td></tr><tr><td><code>document.lastModified</code></td><td>Date/time the page was last modified</td></tr><tr><td><code>document.readyState</code></td><td>Loading state: <code>"loading"</code>, <code>"interactive"</code>, <code>"complete"</code></td></tr><tr><td><code>document.characterSet</code></td><td>Character encoding (usually <code>"UTF-8"</code>)</td></tr><tr><td><code>document.doctype</code></td><td>The DOCTYPE declaration</td></tr><tr><td><code>document.head</code></td><td>The <code>&lt;head&gt;</code> element</td></tr><tr><td><code>document.body</code></td><td>The <code>&lt;body&gt;</code> element</td></tr><tr><td><code>document.documentElement</code></td><td>The <code>&lt;html&gt;</code> element</td></tr><tr><td><code>document.forms</code></td><td>HTMLCollection of all <code>&lt;form&gt;</code> elements</td></tr><tr><td><code>document.images</code></td><td>HTMLCollection of all <code>&lt;img&gt;</code> elements</td></tr><tr><td><code>document.links</code></td><td>HTMLCollection of all <code>&lt;a&gt;</code> elements with href</td></tr><tr><td><code>document.scripts</code></td><td>HTMLCollection of all <code>&lt;script&gt;</code> elements</td></tr><tr><td><code>document.styleSheets</code></td><td>List of all linked/embedded stylesheets</td></tr><tr><td><code>document.cookie</code></td><td>Get or set cookies</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Practical Examples</h3>
+<p class="v2-p"><strong>Reading page information:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(document.title);        // &quot;My Page Title&quot;
+console.log(document.URL);          // &quot;https://example.com/page.html&quot;
+console.log(document.domain);       // &quot;example.com&quot;
+console.log(document.lastModified); // &quot;03/17/2026 10:30:00&quot;
+console.log(document.readyState);   // &quot;complete&quot;</code></pre></div></div>
+<p class="v2-p"><strong>Accessing the <code>&lt;body&gt;</code> directly:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.body.style.backgroundColor = &quot;lightblue&quot;;
+document.body.style.fontFamily = &quot;Arial, sans-serif&quot;;</code></pre></div></div>
+<p class="v2-p"><strong>Working with forms:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(document.forms.length);         // Number of forms on the page
+console.log(document.forms[0].id);          // id of first form
+console.log(document.forms[&quot;loginForm&quot;]);   // Access by name attribute</code></pre></div></div>
+<p class="v2-p"><strong>Working with images:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var images = document.images;
+for (var i = 0; i &lt; images.length; i++) {
+  console.log(images[i].src); // Prints URL of each image
+}</code></pre></div></div>
+<p class="v2-p"><strong>Working with links:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var links = document.links;
+for (var i = 0; i &lt; links.length; i++) {
+  links[i].style.color = &quot;purple&quot;; // Changes all link colours
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating Elements · Full Node API</h3>
+<p class="v2-p">The document object is responsible for creating all new nodes:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Creates</th></tr></thead><tbody><tr><td><code>document.createElement(tag)</code></td><td>A new HTML element</td></tr><tr><td><code>document.createTextNode(text)</code></td><td>A raw text node</td></tr><tr><td><code>document.createAttribute(name)</code></td><td>A new attribute node</td></tr><tr><td><code>document.createComment(text)</code></td><td>An HTML comment node</td></tr><tr><td><code>document.createDocumentFragment()</code></td><td>A lightweight container for building DOM structures off-screen</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Text node example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var para = document.createElement(&quot;p&quot;);
+var text = document.createTextNode(&quot;Hello from a text node!&quot;);
+para.appendChild(text);
+document.body.appendChild(para);
+// Result: &lt;p&gt;Hello from a text node!&lt;/p&gt; added to the page</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">DocumentFragment · Performance Trick</h3>
+<p class="v2-p">When adding many elements, inserting them one by one causes the browser to <strong>repaint the screen repeatedly</strong>. A <code>DocumentFragment</code> lets you build the structure in memory first, then insert everything at once:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var fragment = document.createDocumentFragment();
+
+for (var i = 1; i &lt;= 100; i++) {
+  var li = document.createElement(&quot;li&quot;);
+  li.innerText = &quot;Item &quot; + i;
+  fragment.appendChild(li); // No repaint yet
+}
+
+// ONE repaint only
+document.getElementById(&quot;myList&quot;).appendChild(fragment);</code></pre></div></div>
+<p class="v2-p">This is significantly faster than 100 individual <code>appendChild</code> calls on the live DOM.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Cookies with <code>document.cookie</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Set a cookie
+document.cookie = &quot;username=Alice; expires=Thu, 31 Dec 2026 12:00:00 UTC; path=/&quot;;
+
+// Read all cookies (returns one big string)
+console.log(document.cookie);
+// Output: &quot;username=Alice; theme=dark&quot;
+
+// To read a specific cookie, you need to parse the string manually
+function getCookie(name) {
+  var cookies = document.cookie.split(&quot;; &quot;);
+  for (var i = 0; i &lt; cookies.length; i++) {
+    var parts = cookies[i].split(&quot;=&quot;);
+    if (parts[0] === name) return parts[1];
+  }
+  return null;
+}
+
+console.log(getCookie(&quot;username&quot;)); // Output: Alice</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 For modern projects, use <code>localStorage</code> or <code>sessionStorage</code> for client-side data storage. Cookies are mainly for data that needs to be sent to the server.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>document.open()</code>, <code>document.write()</code>, <code>document.close()</code></h3>
+<p class="v2-p">These three work together to write an entirely new document:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.open();
+document.write(&quot;&lt;html&gt;&lt;body&gt;&lt;h1&gt;New document written by JS!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;&quot;);
+document.close();</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ This <strong>completely replaces</strong> the existing page. Used mainly in old-style popup windows. Avoid in modern projects.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>8. The Document Object in Depth</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">9. HTML Element Reference</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">The Element as an Object</h3>
+<p class="v2-p">Every HTML element in the DOM is represented as a JavaScript object. That object has:</p>
+<ul class="v2-ul"><li><strong>Properties</strong> · data about the element (its id, class, style, content, etc.)</li><li><strong>Methods</strong> · actions you can perform (click it, focus it, blur it, etc.)</li></ul>
+<p class="v2-p">This section catalogues the most important ones.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Universal Element Properties (Available on Every Element)</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>id</code></td><td>String</td><td>The element's <code>id</code> attribute</td></tr><tr><td><code>tagName</code></td><td>String</td><td>Tag name in UPPERCASE (<code>"DIV"</code>, <code>"P"</code>, <code>"INPUT"</code>)</td></tr><tr><td><code>nodeName</code></td><td>String</td><td>Same as tagName for elements</td></tr><tr><td><code>nodeType</code></td><td>Number</td><td>1=Element, 3=Text, 8=Comment, 9=Document</td></tr><tr><td><code>innerHTML</code></td><td>String</td><td>HTML content inside the element</td></tr><tr><td><code>innerText</code></td><td>String</td><td>Visible text content (no tags)</td></tr><tr><td><code>textContent</code></td><td>String</td><td>All text content (includes hidden text)</td></tr><tr><td><code>outerHTML</code></td><td>String</td><td>The element including its own opening/closing tags</td></tr><tr><td><code>className</code></td><td>String</td><td>All CSS classes as a space-separated string</td></tr><tr><td><code>classList</code></td><td>DOMTokenList</td><td>Live list of classes (use <code>.add()</code>, <code>.remove()</code>, <code>.toggle()</code>)</td></tr><tr><td><code>style</code></td><td>CSSStyleDeclaration</td><td>Inline styles</td></tr><tr><td><code>attributes</code></td><td>NamedNodeMap</td><td>All attributes of the element</td></tr><tr><td><code>dataset</code></td><td>DOMStringMap</td><td>Custom <code>data-*</code> attributes</td></tr><tr><td><code>hidden</code></td><td>Boolean</td><td>Whether the element is hidden</td></tr><tr><td><code>tabIndex</code></td><td>Number</td><td>Keyboard tab order</td></tr><tr><td><code>title</code></td><td>String</td><td>Tooltip text</td></tr><tr><td><code>lang</code></td><td>String</td><td>Language code</td></tr><tr><td><code>dir</code></td><td>String</td><td>Text direction: <code>"ltr"</code> or <code>"rtl"</code></td></tr><tr><td><code>accessKey</code></td><td>String</td><td>Keyboard shortcut key</td></tr><tr><td><code>contentEditable</code></td><td>String</td><td><code>"true"</code> if user can edit the element's content</td></tr><tr><td><code>isContentEditable</code></td><td>Boolean</td><td>Read-only. Is the element editable?</td></tr><tr><td><code>draggable</code></td><td>Boolean</td><td>Can the element be dragged?</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Position and Size Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Description</th></tr></thead><tbody><tr><td><code>offsetWidth</code></td><td>Total width including padding and border</td></tr><tr><td><code>offsetHeight</code></td><td>Total height including padding and border</td></tr><tr><td><code>offsetLeft</code></td><td>Distance from left edge of offset parent</td></tr><tr><td><code>offsetTop</code></td><td>Distance from top edge of offset parent</td></tr><tr><td><code>offsetParent</code></td><td>Nearest positioned ancestor element</td></tr><tr><td><code>clientWidth</code></td><td>Width including padding, excluding border and scrollbar</td></tr><tr><td><code>clientHeight</code></td><td>Height including padding, excluding border</td></tr><tr><td><code>scrollWidth</code></td><td>Full scrollable width</td></tr><tr><td><code>scrollHeight</code></td><td>Full scrollable height</td></tr><tr><td><code>scrollLeft</code></td><td>Pixels scrolled horizontally</td></tr><tr><td><code>scrollTop</code></td><td>Pixels scrolled vertically</td></tr><tr><td><code>getBoundingClientRect()</code></td><td>Returns size and position relative to viewport</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var box = document.getElementById(&quot;box&quot;);
+
+console.log(box.offsetWidth);   // e.g. 300 (px)
+console.log(box.offsetTop);     // e.g. 120 (px from top of offset parent)
+
+var rect = box.getBoundingClientRect();
+console.log(rect.top);    // Distance from top of viewport
+console.log(rect.left);   // Distance from left of viewport
+console.log(rect.width);  // Element width
+console.log(rect.height); // Element height</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Tree Navigation Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Returns</th></tr></thead><tbody><tr><td><code>parentNode</code></td><td>Parent node (may be a text node or document)</td></tr><tr><td><code>parentElement</code></td><td>Parent element (always an element or null)</td></tr><tr><td><code>childNodes</code></td><td>NodeList of all child nodes</td></tr><tr><td><code>children</code></td><td>HTMLCollection of child elements only</td></tr><tr><td><code>firstChild</code></td><td>First child node</td></tr><tr><td><code>lastChild</code></td><td>Last child node</td></tr><tr><td><code>firstElementChild</code></td><td>First child element</td></tr><tr><td><code>lastElementChild</code></td><td>Last child element</td></tr><tr><td><code>nextSibling</code></td><td>Next sibling node</td></tr><tr><td><code>previousSibling</code></td><td>Previous sibling node</td></tr><tr><td><code>nextElementSibling</code></td><td>Next sibling element</td></tr><tr><td><code>previousElementSibling</code></td><td>Previous sibling element</td></tr><tr><td><code>childElementCount</code></td><td>Number of child elements</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Universal Element Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>getAttribute(name)</code></td><td>Get the value of an attribute</td></tr><tr><td><code>setAttribute(name, value)</code></td><td>Set an attribute value</td></tr><tr><td><code>removeAttribute(name)</code></td><td>Remove an attribute</td></tr><tr><td><code>hasAttribute(name)</code></td><td>Returns boolean: does the attribute exist?</td></tr><tr><td><code>appendChild(node)</code></td><td>Add a child node at the end</td></tr><tr><td><code>insertBefore(new, ref)</code></td><td>Insert before a reference child</td></tr><tr><td><code>removeChild(child)</code></td><td>Remove a child node</td></tr><tr><td><code>replaceChild(new, old)</code></td><td>Replace a child node</td></tr><tr><td><code>cloneNode(deep)</code></td><td>Clone the element; <code>deep=true</code> clones children too</td></tr><tr><td><code>contains(node)</code></td><td>Returns boolean: is the node a descendant?</td></tr><tr><td><code>matches(selector)</code></td><td>Returns boolean: does the element match a CSS selector?</td></tr><tr><td><code>closest(selector)</code></td><td>Walks up the tree, returns first ancestor matching selector</td></tr><tr><td><code>querySelector(sel)</code></td><td>Finds first matching descendant</td></tr><tr><td><code>querySelectorAll(sel)</code></td><td>Finds all matching descendants</td></tr><tr><td><code>insertAdjacentHTML(pos, html)</code></td><td>Inserts HTML at a specific position</td></tr><tr><td><code>insertAdjacentElement(pos, el)</code></td><td>Inserts an element at a specific position</td></tr><tr><td><code>scrollIntoView()</code></td><td>Scrolls the element into the visible viewport</td></tr><tr><td><code>focus()</code></td><td>Gives focus to the element</td></tr><tr><td><code>blur()</code></td><td>Removes focus</td></tr><tr><td><code>click()</code></td><td>Programmatically clicks the element</td></tr><tr><td><code>remove()</code></td><td>Removes the element from the DOM</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>insertAdjacentHTML</code> Positions</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;target&quot;&gt;TARGET&lt;/div&gt;
+
+&lt;script&gt;
+  var el = document.getElementById(&quot;target&quot;);
+
+  el.insertAdjacentHTML(&quot;beforebegin&quot;, &quot;&lt;p&gt;Before the div&lt;/p&gt;&quot;);
+  // &lt;p&gt;Before the div&lt;/p&gt;
+  // &lt;div id=&quot;target&quot;&gt;TARGET&lt;/div&gt;
+
+  el.insertAdjacentHTML(&quot;afterbegin&quot;, &quot;&lt;p&gt;First inside div&lt;/p&gt;&quot;);
+  // &lt;div id=&quot;target&quot;&gt;&lt;p&gt;First inside div&lt;/p&gt;TARGET&lt;/div&gt;
+
+  el.insertAdjacentHTML(&quot;beforeend&quot;, &quot;&lt;p&gt;Last inside div&lt;/p&gt;&quot;);
+  // &lt;div id=&quot;target&quot;&gt;TARGET&lt;p&gt;Last inside div&lt;/p&gt;&lt;/div&gt;
+
+  el.insertAdjacentHTML(&quot;afterend&quot;, &quot;&lt;p&gt;After the div&lt;/p&gt;&quot;);
+  // &lt;div id=&quot;target&quot;&gt;TARGET&lt;/div&gt;
+  // &lt;p&gt;After the div&lt;/p&gt;
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>cloneNode</code> · Copying Elements</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;original&quot;&gt;
+  &lt;p&gt;Hello&lt;/p&gt;
+  &lt;span&gt;World&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  var original = document.getElementById(&quot;original&quot;);
+
+  // Shallow clone — copies only the div, NOT its children
+  var shallow = original.cloneNode(false);
+
+  // Deep clone — copies the div AND all its children
+  var deep = original.cloneNode(true);
+
+  document.body.appendChild(deep);
+  // Adds an identical copy of the div (with &lt;p&gt; and &lt;span&gt;) to the body
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>matches</code> and <code>closest</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;nav&gt;
+  &lt;ul class=&quot;menu&quot;&gt;
+    &lt;li class=&quot;item active&quot;&gt;&lt;a href=&quot;#&quot;&gt;Home&lt;/a&gt;&lt;/li&gt;
+    &lt;li class=&quot;item&quot;&gt;&lt;a href=&quot;#&quot;&gt;About&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+
+&lt;script&gt;
+  var link = document.querySelector(&quot;a&quot;);
+
+  // Does this element match a CSS selector?
+  console.log(link.matches(&quot;a&quot;));          // true
+  console.log(link.matches(&quot;.item a&quot;));    // true
+  console.log(link.matches(&quot;.active a&quot;));  // true
+
+  // Walk UP the tree to find the nearest ancestor matching a selector
+  var closestMenu = link.closest(&quot;.menu&quot;);
+  console.log(closestMenu.tagName); // Output: UL
+
+  var closestNav = link.closest(&quot;nav&quot;);
+  console.log(closestNav.tagName); // Output: NAV
+&lt;/script&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>data-*</code> Attributes and the <code>dataset</code> API</h3>
+<p class="v2-p">Custom data attributes let you embed extra information in HTML without affecting layout:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div id=&quot;product&quot;
+  data-id=&quot;42&quot;
+  data-name=&quot;Blue Shirt&quot;
+  data-price=&quot;29.99&quot;
+  data-in-stock=&quot;true&quot;&gt;
+  Blue Shirt
+&lt;/div&gt;
+
+&lt;script&gt;
+  var el = document.getElementById(&quot;product&quot;);
+
+  console.log(el.dataset.id);       // &quot;42&quot;
+  console.log(el.dataset.name);     // &quot;Blue Shirt&quot;
+  console.log(el.dataset.price);    // &quot;29.99&quot;
+  console.log(el.dataset.inStock);  // &quot;true&quot; (note: camelCase conversion)
+
+  // Modify a data attribute
+  el.dataset.price = &quot;24.99&quot;;
+
+  // Add a new data attribute
+  el.dataset.discount = &quot;10&quot;;
+  // Now the HTML has data-discount=&quot;10&quot;
+&lt;/script&gt;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 The naming conversion: <code>data-in-stock</code> → <code>dataset.inStock</code> (hyphen removed, next letter capitalised · same rule as CSS properties).</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Input-Specific Properties</h3>
+<p class="v2-p"><code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code>, and <code>&lt;select&gt;</code> have special properties:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>value</code></td><td>String</td><td>Current value of the input</td></tr><tr><td><code>defaultValue</code></td><td>String</td><td>Original value (before user changes)</td></tr><tr><td><code>checked</code></td><td>Boolean</td><td>Whether a checkbox/radio is checked</td></tr><tr><td><code>defaultChecked</code></td><td>Boolean</td><td>Original checked state</td></tr><tr><td><code>disabled</code></td><td>Boolean</td><td>Whether the input is disabled</td></tr><tr><td><code>readOnly</code></td><td>Boolean</td><td>Whether the input is read-only</td></tr><tr><td><code>required</code></td><td>Boolean</td><td>Whether the input is required</td></tr><tr><td><code>placeholder</code></td><td>String</td><td>Placeholder text</td></tr><tr><td><code>type</code></td><td>String</td><td>Input type (<code>"text"</code>, <code>"number"</code>, etc.)</td></tr><tr><td><code>name</code></td><td>String</td><td>Name attribute (used in form submission)</td></tr><tr><td><code>form</code></td><td>HTMLFormElement</td><td>The form this input belongs to</td></tr><tr><td><code>validity</code></td><td>ValidityState</td><td>Validation state object</td></tr><tr><td><code>validationMessage</code></td><td>String</td><td>Browser's validation error message</td></tr></tbody></table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var input = document.getElementById(&quot;myInput&quot;);
+
+input.value = &quot;Hello&quot;;          // Set value
+console.log(input.value);       // Read value
+input.disabled = true;          // Disable it
+input.readOnly = false;         // Make it editable
+input.focus();                  // Move cursor to this field
+input.select();                 // Select all text in it</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 2 · APPLIED EXERCISES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>9. HTML Element Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">10. Applied Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2"><hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1: Live Word Counter</h3>
+<p class="v2-p"><strong>Objective:</strong> Use DOM manipulation to count characters and words in a textarea in real time.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> You are building a Twitter-like post composer. Users must stay under 280 characters. You need to show them their remaining character count as they type.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;input type=&quot;text&quot; oninput=&quot;showLength(this)&quot;&gt;
+&lt;p id=&quot;len&quot;&gt;0 characters&lt;/p&gt;
+
+&lt;script&gt;
+  function showLength(input) {
+    document.getElementById(&quot;len&quot;).innerText = input.value.length + &quot; characters&quot;;
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Your exercise:</strong></p>
+<p class="v2-p">Build a textarea with:</p>
+<ul class="v2-ul"><li>A <strong>character counter</strong> (e.g., "245/280 characters used")</li><li>A <strong>word counter</strong> (e.g., "32 words")</li><li>A <strong>colour indicator</strong>: green when under 240, orange from 240 · 279, red at 280+</li><li>A <strong>submit button</strong> that is disabled until at least 10 characters are entered</li></ul>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create a <code>&lt;textarea id="post"&gt;</code> with <code>maxlength="280"</code></li><li>Add <code>&lt;p id="charCount"&gt;</code> and <code>&lt;p id="wordCount"&gt;</code> display elements</li><li>Add a <code>&lt;button id="submitBtn" disabled&gt;Post&lt;/button&gt;</code></li><li>Write an <code>oninput</code> handler that:</li></ol>
+<p class="v2-p">- Reads <code>textarea.value.length</code>    - Updates the character counter text    - Splits by whitespace to count words: <code>text.trim().split(/\s+/).filter(Boolean).length</code>    - Changes the counter colour using <code>style.color</code> based on length    - Sets <code>button.disabled = (length &lt; 10)</code></p>
+<p class="v2-p"><strong>Hints:</strong></p>
+<ul class="v2-ul"><li><code>"".trim().split(/\s+/).filter(Boolean).length</code> returns <code>0</code>, not <code>1</code>. The <code>.filter(Boolean)</code> removes empty strings from split on an empty input.</li><li>Access the textarea's value: <code>document.getElementById("post").value</code></li></ul>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>What does <code>filter(Boolean)</code> do when the textarea is empty?</li><li>Why use <code>trim()</code> before splitting?</li><li>What happens to <code>disabled</code> when the user clears the textarea?</li></ol>
+<p class="v2-p"><strong>Optional what-if:</strong> Change the colour of the textarea border (not just the counter) based on length. Also display "X characters remaining" instead of "X used".</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2: Dynamic Student Grade Table</h3>
+<p class="v2-p"><strong>Objective:</strong> Let the user add rows to a table using the DOM.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> A school administrator app where teachers can add student grades without a page reload.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;table id=&quot;t&quot;&gt;&lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Grade&lt;/th&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;button onclick=&quot;addRow()&quot;&gt;Add Row&lt;/button&gt;
+
+&lt;script&gt;
+  function addRow() {
+    var row = document.createElement(&quot;tr&quot;);
+    row.innerHTML = &quot;&lt;td&gt;Student&lt;/td&gt;&lt;td&gt;A&lt;/td&gt;&quot;;
+    document.getElementById(&quot;t&quot;).appendChild(row);
+  }
+&lt;/script&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Your exercise:</strong></p>
+<p class="v2-p">Build a grade entry system with:</p>
+<ul class="v2-ul"><li>Input fields: student name, subject, grade (number 0 · 100)</li><li>An "Add Student" button</li><li>A <code>&lt;table&gt;</code> that shows each added student</li><li>A <strong>colour-coded grade</strong>: green (≥70), orange (50 · 69), red (&lt;50)</li><li>A <strong>running class average</strong> displayed below the table</li><li>A <strong>Delete</strong> button on each row</li></ul>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create three <code>&lt;input&gt;</code> fields with ids <code>"name"</code>, <code>"subject"</code>, <code>"grade"</code></li><li>Create an empty <code>&lt;table id="gradeTable"&gt;</code> with headers</li><li>Create <code>&lt;p id="average"&gt;Class Average: · &lt;/p&gt;</code></li><li>In <code>addStudent()</code>:</li></ol>
+<p class="v2-p">- Read input values    - Validate: name not empty, grade is 0 · 100    - Create a <code>&lt;tr&gt;</code> with <code>&lt;td&gt;</code> cells, setting the grade <code>td</code>'s background colour    - Add a Delete button: set its <code>onclick</code> to <code>this.parentElement.parentElement.remove()</code>    - After removing, recalculate the average</p>
+<p class="v2-p"><strong>Grade colour logic:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var gradeNum = parseInt(grade);
+var gradeCell = document.createElement(&quot;td&quot;);
+gradeCell.innerText = gradeNum;
+if (gradeNum &gt;= 70) gradeCell.style.backgroundColor = &quot;#c8f7c5&quot;;
+else if (gradeNum &gt;= 50) gradeCell.style.backgroundColor = &quot;#fde8a0&quot;;
+else gradeCell.style.backgroundColor = &quot;#fdc5c5&quot;;</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why do you need <code>parseInt()</code> when reading a number input's <code>.value</code>?</li><li>After clicking Delete, how does the average recalculate without knowing which row was removed?</li><li>Why use <code>this.parentElement.parentElement.remove()</code> instead of an <code>id</code> in the Delete button?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3: CSS Theme Switcher</h3>
+<p class="v2-p"><strong>Objective:</strong> Toggle between light and dark themes using <code>classList</code>.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> Most modern web apps (GitHub, VS Code, Twitter) offer a dark mode. This is typically done by toggling a class on the <code>&lt;body&gt;</code>.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>In <code>&lt;style&gt;</code>, define two themes:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">css</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>body.light {
+  background-color: white;
+  color: black;
+}
+body.dark {
+  background-color: #1a1a2e;
+  color: #eee;
+}
+.card {
+  padding: 20px;
+  border: 1px solid currentColor;
+  margin: 10px;
+}</code></pre></div></div>
+<ol class="v2-ol"><li>Set <code>&lt;body class="light"&gt;</code></li><li>Create a toggle button</li><li>In the toggle handler:</li></ol>
+<p class="v2-p">- Use <code>document.body.classList.toggle("dark")</code>    - Use <code>document.body.classList.toggle("light")</code>    - Update the button text: "Switch to Dark" / "Switch to Light"</p>
+<ol class="v2-ol"><li><strong>Remember theme with localStorage:</strong> <code>localStorage.setItem("theme", "dark")</code> and read it on page load</li></ol>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why toggle both classes instead of just adding/removing "dark"?</li><li>What happens if a user opens the page in a new tab · will their theme preference persist?</li><li>How would you detect the user's operating system dark mode preference using <code>window.matchMedia</code>?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4: Animated Progress Bar</h3>
+<p class="v2-p"><strong>Objective:</strong> Build an animated progress bar using DOM animations.</p>
+<p class="v2-p"><strong>Real-world scenario:</strong> File upload progress indicators, quiz result reveals, loading screens.</p>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>HTML:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div style=&quot;width:400px; background:#ddd; height:30px; border-radius:15px;&quot;&gt;
+  &lt;div id=&quot;bar&quot; style=&quot;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to right, #4CAF50, #8BC34A);
+    border-radius: 15px;
+    transition: width 0.1s;
+  &quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;p id=&quot;percent&quot;&gt;0%&lt;/p&gt;
+&lt;button onclick=&quot;startProgress()&quot;&gt;Start&lt;/button&gt;
+&lt;button onclick=&quot;resetProgress()&quot;&gt;Reset&lt;/button&gt;</code></pre></div></div>
+<ol class="v2-ol"><li>JavaScript:</li></ol>
+<p class="v2-p">- Create a variable <code>progress = 0</code>    - Use <code>setInterval</code> every 50ms to increase <code>progress</code> by 1    - Update <code>bar.style.width = progress + "%"</code>    - Update <code>percent.innerText = progress + "%"</code>    - When progress reaches 100, call <code>clearInterval</code></p>
+<ol class="v2-ol"><li><strong>Enhancement:</strong> Change the bar colour as it fills:</li></ol>
+<p class="v2-p">- 0 · 40%: red    - 41 · 70%: orange    - 71 · 100%: green</p>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Why is <code>clearInterval</code> essential · what happens without it?</li><li>How do you prevent the user from clicking "Start" multiple times and creating multiple intervals?</li><li>What does <code>transition: width 0.1s</code> in CSS do? How does this interact with the JS animation?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 5: Form Validation Suite</h3>
+<p class="v2-p"><strong>Objective:</strong> Build a complete registration form with comprehensive validation.</p>
+<p class="v2-p"><strong>Fields to validate:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Field</th><th>Rules</th></tr></thead><tbody><tr><td>Full Name</td><td>Required, letters and spaces only, 2 · 50 chars</td></tr><tr><td>Email</td><td>Required, valid email format</td></tr><tr><td>Phone</td><td>Required, exactly 10 digits</td></tr><tr><td>Password</td><td>Required, min 8 chars, at least 1 uppercase, 1 digit</td></tr><tr><td>Confirm Password</td><td>Must match password</td></tr><tr><td>Age</td><td>Required, number 16 · 120</td></tr><tr><td>Terms checkbox</td><td>Must be checked</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create the form HTML with one <code>&lt;span class="error"&gt;</code> next to each field</li><li>Write a validation function for each field</li><li>Call all validators on form submit</li><li>Show error messages next to each invalid field (not alert boxes)</li><li>Highlight invalid inputs with a red border using <code>classList.add("invalid")</code> and a CSS rule <code>.invalid { border: 2px solid red; }</code></li><li>Clear error messages and borders for valid fields</li></ol>
+<p class="v2-p"><strong>Hint for password strength check:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function validatePassword(pass) {
+  var hasUpper = /[A-Z]/.test(pass);
+  var hasDigit = /[0-9]/.test(pass);
+  var hasMinLength = pass.length &gt;= 8;
+  return hasUpper &amp;&amp; hasDigit &amp;&amp; hasMinLength;
+}</code></pre></div></div>
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 3 · PROJECT SIMULATION</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>10. Applied Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">11. Project Simulation: Interactive Student Dashboard</div><div class="pc" id="chk11"></div></div><div class="pb2"><h3 class="v2-h3">Project Overview</h3>
+<p class="v2-p">You are a junior front-end developer at <strong>EduTrack</strong>, a school management software company. Your task is to build a client-side <strong>Student Performance Dashboard</strong> · a single HTML page that teachers can use to:</p>
+<ul class="v2-ul"><li>Add students and their test scores</li><li>View a dynamically-built grade table</li><li>Filter students by performance category</li><li>Animate a summary panel when scores are entered</li><li>Validate all inputs before accepting them</li></ul>
+<p class="v2-p"><strong>No frameworks. No libraries. Pure HTML + CSS + JavaScript DOM.</strong></p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1: Setup &amp; Core Logic</h3>
+<p class="v2-p"><strong>Goal:</strong> Build the data entry form and display students in a table.</p>
+<p class="v2-p"><strong>Preview micro-example:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>var students = []; // Our in-memory data store
+
+function addStudent(name, score) {
+  students.push({ name: name, score: Number(score) });
+  renderTable();
+}
+
+function renderTable() {
+  var tbody = document.getElementById(&quot;studentBody&quot;);
+  tbody.innerHTML = &quot;&quot;; // Clear existing rows
+
+  students.forEach(function(student, index) {
+    var row = document.createElement(&quot;tr&quot;);
+    row.innerHTML = `
+      &lt;td&gt;${student.name}&lt;/td&gt;
+      &lt;td&gt;${student.score}&lt;/td&gt;
+      &lt;td&gt;${getGrade(student.score)}&lt;/td&gt;
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function getGrade(score) {
+  if (score &gt;= 90) return &quot;A&quot;;
+  if (score &gt;= 80) return &quot;B&quot;;
+  if (score &gt;= 70) return &quot;C&quot;;
+  if (score &gt;= 60) return &quot;D&quot;;
+  return &quot;F&quot;;
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output after Stage 1:</strong> A functional table that grows as students are added.</p>
+<p class="v2-p"><strong>Milestones:</strong></p>
+<ul class="v2-ul"><li>[ ] HTML form: name input, score input (0 · 100), subject dropdown, Add button</li><li>[ ] Input validation: name required, score is 0 · 100, duplicate names warned</li><li>[ ] Data array stores all entries</li><li>[ ] Table renders from array (re-rendered on every change)</li><li>[ ] Each row has a colour-coded grade cell</li><li>[ ] Delete button on each row removes from array and re-renders</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 2: Adding Features</h3>
+<p class="v2-p"><strong>Goal:</strong> Add filtering, sorting, and a statistics panel.</p>
+<p class="v2-p"><strong>Preview micro-example · filtering:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function filterStudents(category) {
+  var filtered;
+
+  if (category === &quot;all&quot;) {
+    filtered = students;
+  } else if (category === &quot;passing&quot;) {
+    filtered = students.filter(function(s) { return s.score &gt;= 60; });
+  } else if (category === &quot;failing&quot;) {
+    filtered = students.filter(function(s) { return s.score &lt; 60; });
+  } else if (category === &quot;excellent&quot;) {
+    filtered = students.filter(function(s) { return s.score &gt;= 90; });
+  }
+
+  renderTable(filtered); // Pass the filtered list to the renderer
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output after Stage 2:</strong> Buttons that instantly filter the table. A stats panel showing count, average, highest, and lowest scores.</p>
+<p class="v2-p"><strong>Milestones:</strong></p>
+<ul class="v2-ul"><li>[ ] Filter buttons: All / Passing (≥60) / Failing (&lt;60) / Excellent (≥90)</li><li>[ ] Sort by name (A · Z) or score (high · low, low · high)</li><li>[ ] Statistics panel showing:</li></ul>
+<p class="v2-p">- Total students   - Class average (to 1 decimal place)   - Highest scorer + name   - Lowest scorer + name   - Count per grade letter (A, B, C, D, F)</p>
+<ul class="v2-ul"><li>[ ] Statistics panel <strong>animates in</strong> (fade from opacity 0 to 1) when first student is added</li><li>[ ] Export button that generates a summary <code>&lt;pre&gt;</code> block with all data formatted as text</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 3: Displaying Results</h3>
+<p class="v2-p"><strong>Goal:</strong> Add a visual grade distribution bar chart using DOM animation.</p>
+<p class="v2-p"><strong>Preview micro-example · drawing bars:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>function drawChart() {
+  var grades = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+
+  students.forEach(function(s) {
+    grades[getGrade(s.score)]++;
+  });
+
+  var total = students.length;
+
+  Object.keys(grades).forEach(function(letter) {
+    var barEl = document.getElementById(&quot;bar-&quot; + letter);
+    var percent = total &gt; 0 ? (grades[letter] / total) * 100 : 0;
+    barEl.style.width = &quot;0%&quot;; // Reset
+
+    // Animate to actual width
+    setTimeout(function() {
+      barEl.style.transition = &quot;width 0.8s ease&quot;;
+      barEl.style.width = percent + &quot;%&quot;;
+    }, 50);
+
+    document.getElementById(&quot;label-&quot; + letter).innerText =
+      letter + &quot;: &quot; + grades[letter] + &quot; students&quot;;
+  });
+}</code></pre></div></div>
+<p class="v2-p"><strong>Each bar structure:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;div style=&quot;margin-bottom: 8px;&quot;&gt;
+  &lt;span id=&quot;label-A&quot; style=&quot;display:inline-block; width:100px;&quot;&gt;A: 0 students&lt;/span&gt;
+  &lt;div style=&quot;display:inline-block; background:#ddd; width:300px; height:20px;&quot;&gt;
+    &lt;div id=&quot;bar-A&quot; style=&quot;background:#4CAF50; height:100%; width:0%;&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre></div></div>
+<p class="v2-p"><strong>Expected output after Stage 3:</strong> When students are added or removed, the bar chart animates to reflect the new grade distribution.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Full Project Template</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;UTF-8&quot;&gt;
+  &lt;title&gt;EduTrack — Student Dashboard&lt;/title&gt;
+  &lt;style&gt;
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 20px; }
+    h1 { color: #2c3e50; }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { display: inline-block; width: 100px; }
+    input, select { padding: 6px; margin: 4px; border: 1px solid #ccc; border-radius: 4px; }
+    input.invalid { border-color: red; }
+    .error { color: red; font-size: 0.85em; }
+    button { padding: 8px 16px; cursor: pointer; border: none; border-radius: 4px; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-danger { background: #e74c3c; color: white; font-size: 0.8em; padding: 4px 8px; }
+    .btn-filter { background: #ecf0f1; color: #2c3e50; margin: 2px; }
+    .btn-filter.active { background: #3498db; color: white; }
+
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+    th { background: #2c3e50; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
+
+    .grade-A { background: #c8f7c5 !important; }
+    .grade-B { background: #d5f5e3 !important; }
+    .grade-C { background: #fef9e7 !important; }
+    .grade-D { background: #fde8a0 !important; }
+    .grade-F { background: #fdc5c5 !important; }
+
+    #statsPanel { opacity: 0; transition: opacity 1s; margin-top: 20px; padding: 15px; background: #ecf0f1; border-radius: 8px; }
+    #statsPanel.visible { opacity: 1; }
+
+    .chart-bar-bg { display: inline-block; background: #ddd; width: 250px; height: 18px; vertical-align: middle; }
+    .chart-bar { height: 100%; width: 0%; transition: width 0.8s ease; }
+    .chart-label { display: inline-block; width: 120px; font-size: 0.9em; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;h1&gt;📊 EduTrack — Student Performance Dashboard&lt;/h1&gt;
+
+  &lt;!-- SECTION 1: Entry Form --&gt;
+  &lt;section&gt;
+    &lt;h2&gt;Add Student&lt;/h2&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+      &lt;label&gt;Name:&lt;/label&gt;
+      &lt;input type=&quot;text&quot; id=&quot;studentName&quot; placeholder=&quot;Full name&quot;&gt;
+      &lt;span class=&quot;error&quot; id=&quot;nameError&quot;&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+      &lt;label&gt;Subject:&lt;/label&gt;
+      &lt;select id=&quot;subject&quot;&gt;
+        &lt;option value=&quot;Math&quot;&gt;Math&lt;/option&gt;
+        &lt;option value=&quot;English&quot;&gt;English&lt;/option&gt;
+        &lt;option value=&quot;Science&quot;&gt;Science&lt;/option&gt;
+        &lt;option value=&quot;History&quot;&gt;History&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group&quot;&gt;
+      &lt;label&gt;Score (0–100):&lt;/label&gt;
+      &lt;input type=&quot;number&quot; id=&quot;score&quot; min=&quot;0&quot; max=&quot;100&quot; placeholder=&quot;0–100&quot;&gt;
+      &lt;span class=&quot;error&quot; id=&quot;scoreError&quot;&gt;&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;button class=&quot;btn-primary&quot; onclick=&quot;handleAdd()&quot;&gt;+ Add Student&lt;/button&gt;
+  &lt;/section&gt;
+
+  &lt;!-- SECTION 2: Filter Controls --&gt;
+  &lt;section style=&quot;margin-top: 20px;&quot;&gt;
+    &lt;strong&gt;Filter:&lt;/strong&gt;
+    &lt;button class=&quot;btn-filter active&quot; onclick=&quot;setFilter(&#x27;all&#x27;, this)&quot;&gt;All&lt;/button&gt;
+    &lt;button class=&quot;btn-filter&quot; onclick=&quot;setFilter(&#x27;passing&#x27;, this)&quot;&gt;Passing (≥60)&lt;/button&gt;
+    &lt;button class=&quot;btn-filter&quot; onclick=&quot;setFilter(&#x27;excellent&#x27;, this)&quot;&gt;Excellent (≥90)&lt;/button&gt;
+    &lt;button class=&quot;btn-filter&quot; onclick=&quot;setFilter(&#x27;failing&#x27;, this)&quot;&gt;Failing (&amp;lt;60)&lt;/button&gt;
+
+    &lt;strong style=&quot;margin-left: 20px;&quot;&gt;Sort:&lt;/strong&gt;
+    &lt;button class=&quot;btn-filter&quot; onclick=&quot;setSort(&#x27;name&#x27;)&quot;&gt;Name A–Z&lt;/button&gt;
+    &lt;button class=&quot;btn-filter&quot; onclick=&quot;setSort(&#x27;score-high&#x27;)&quot;&gt;Score ↓&lt;/button&gt;
+    &lt;button class=&quot;btn-filter&quot; onclick=&quot;setSort(&#x27;score-low&#x27;)&quot;&gt;Score ↑&lt;/button&gt;
+  &lt;/section&gt;
+
+  &lt;!-- SECTION 3: Grade Table --&gt;
+  &lt;table id=&quot;gradeTable&quot;&gt;
+    &lt;thead&gt;
+      &lt;tr&gt;
+        &lt;th&gt;#&lt;/th&gt;
+        &lt;th&gt;Name&lt;/th&gt;
+        &lt;th&gt;Subject&lt;/th&gt;
+        &lt;th&gt;Score&lt;/th&gt;
+        &lt;th&gt;Grade&lt;/th&gt;
+        &lt;th&gt;Action&lt;/th&gt;
+      &lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody id=&quot;studentBody&quot;&gt;
+      &lt;tr&gt;&lt;td colspan=&quot;6&quot; style=&quot;text-align:center; color:#aaa;&quot;&gt;No students yet.&lt;/td&gt;&lt;/tr&gt;
+    &lt;/tbody&gt;
+  &lt;/table&gt;
+
+  &lt;!-- SECTION 4: Statistics Panel (animates in) --&gt;
+  &lt;div id=&quot;statsPanel&quot;&gt;
+    &lt;h3&gt;📈 Class Statistics&lt;/h3&gt;
+    &lt;div id=&quot;statsContent&quot;&gt;&lt;/div&gt;
+    &lt;h4&gt;Grade Distribution&lt;/h4&gt;
+    &lt;div id=&quot;gradeChart&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    var students = [];
+    var currentFilter = &quot;all&quot;;
+    var currentSort = &quot;none&quot;;
+    var statsShown = false;
+
+    // ─── Validation ───────────────────────────────────────
+    function validateInputs(name, score) {
+      var valid = true;
+
+      document.getElementById(&quot;nameError&quot;).innerText = &quot;&quot;;
+      document.getElementById(&quot;scoreError&quot;).innerText = &quot;&quot;;
+      document.getElementById(&quot;studentName&quot;).classList.remove(&quot;invalid&quot;);
+      document.getElementById(&quot;score&quot;).classList.remove(&quot;invalid&quot;);
+
+      if (name.trim() === &quot;&quot;) {
+        document.getElementById(&quot;nameError&quot;).innerText = &quot;Name is required.&quot;;
+        document.getElementById(&quot;studentName&quot;).classList.add(&quot;invalid&quot;);
+        valid = false;
+      }
+
+      var scoreNum = Number(score);
+      if (score === &quot;&quot; || isNaN(scoreNum) || scoreNum &lt; 0 || scoreNum &gt; 100) {
+        document.getElementById(&quot;scoreError&quot;).innerText = &quot;Enter a score between 0 and 100.&quot;;
+        document.getElementById(&quot;score&quot;).classList.add(&quot;invalid&quot;);
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    // ─── Add Student ──────────────────────────────────────
+    function handleAdd() {
+      var name = document.getElementById(&quot;studentName&quot;).value;
+      var subject = document.getElementById(&quot;subject&quot;).value;
+      var score = document.getElementById(&quot;score&quot;).value;
+
+      if (!validateInputs(name, score)) return;
+
+      students.push({
+        id: Date.now(),
+        name: name.trim(),
+        subject: subject,
+        score: Number(score)
+      });
+
+      // Clear inputs
+      document.getElementById(&quot;studentName&quot;).value = &quot;&quot;;
+      document.getElementById(&quot;score&quot;).value = &quot;&quot;;
+
+      render();
+
+      // Animate stats panel in on first student
+      if (!statsShown) {
+        statsShown = true;
+        setTimeout(function() {
+          document.getElementById(&quot;statsPanel&quot;).classList.add(&quot;visible&quot;);
+        }, 100);
+      }
+    }
+
+    // ─── Delete Student ───────────────────────────────────
+    function deleteStudent(id) {
+      students = students.filter(function(s) { return s.id !== id; });
+      render();
+    }
+
+    // ─── Grading ──────────────────────────────────────────
+    function getGrade(score) {
+      if (score &gt;= 90) return &quot;A&quot;;
+      if (score &gt;= 80) return &quot;B&quot;;
+      if (score &gt;= 70) return &quot;C&quot;;
+      if (score &gt;= 60) return &quot;D&quot;;
+      return &quot;F&quot;;
+    }
+
+    // ─── Filter &amp; Sort ────────────────────────────────────
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll(&quot;.btn-filter&quot;).forEach(function(b) {
+        b.classList.remove(&quot;active&quot;);
+      });
+      btn.classList.add(&quot;active&quot;);
+      render();
+    }
+
+    function setSort(sort) {
+      currentSort = sort;
+      render();
+    }
+
+    function applyFilterSort(list) {
+      // Filter
+      var filtered = list.filter(function(s) {
+        if (currentFilter === &quot;passing&quot;) return s.score &gt;= 60;
+        if (currentFilter === &quot;failing&quot;) return s.score &lt; 60;
+        if (currentFilter === &quot;excellent&quot;) return s.score &gt;= 90;
+        return true;
+      });
+
+      // Sort
+      if (currentSort === &quot;name&quot;) {
+        filtered.sort(function(a, b) { return a.name.localeCompare(b.name); });
+      } else if (currentSort === &quot;score-high&quot;) {
+        filtered.sort(function(a, b) { return b.score - a.score; });
+      } else if (currentSort === &quot;score-low&quot;) {
+        filtered.sort(function(a, b) { return a.score - b.score; });
+      }
+
+      return filtered;
+    }
+
+    // ─── Render Table ─────────────────────────────────────
+    function renderTable(list) {
+      var tbody = document.getElementById(&quot;studentBody&quot;);
+      tbody.innerHTML = &quot;&quot;;
+
+      if (list.length === 0) {
+        tbody.innerHTML = &quot;&lt;tr&gt;&lt;td colspan=&#x27;6&#x27; style=&#x27;text-align:center; color:#aaa;&#x27;&gt;No students match the filter.&lt;/td&gt;&lt;/tr&gt;&quot;;
+        return;
+      }
+
+      list.forEach(function(student, index) {
+        var grade = getGrade(student.score);
+        var row = document.createElement(&quot;tr&quot;);
+        row.className = &quot;grade-&quot; + grade;
+
+        row.innerHTML =
+          &quot;&lt;td&gt;&quot; + (index + 1) + &quot;&lt;/td&gt;&quot; +
+          &quot;&lt;td&gt;&quot; + student.name + &quot;&lt;/td&gt;&quot; +
+          &quot;&lt;td&gt;&quot; + student.subject + &quot;&lt;/td&gt;&quot; +
+          &quot;&lt;td&gt;&quot; + student.score + &quot;&lt;/td&gt;&quot; +
+          &quot;&lt;td&gt;&lt;strong&gt;&quot; + grade + &quot;&lt;/strong&gt;&lt;/td&gt;&quot; +
+          &quot;&lt;td&gt;&lt;button class=&#x27;btn-danger&#x27; data-id=&#x27;&quot; + student.id + &quot;&#x27;&gt;Delete&lt;/button&gt;&lt;/td&gt;&quot;;
+
+        row.querySelector(&quot;.btn-danger&quot;).addEventListener(&quot;click&quot;, function() {
+          deleteStudent(Number(this.getAttribute(&quot;data-id&quot;)));
+        });
+
+        tbody.appendChild(row);
+      });
+    }
+
+    // ─── Render Stats ─────────────────────────────────────
+    function renderStats() {
+      if (students.length === 0) {
+        document.getElementById(&quot;statsContent&quot;).innerHTML = &quot;&lt;p&gt;Add students to see statistics.&lt;/p&gt;&quot;;
+        document.getElementById(&quot;gradeChart&quot;).innerHTML = &quot;&quot;;
+        return;
+      }
+
+      var scores = students.map(function(s) { return s.score; });
+      var avg = (scores.reduce(function(a, b) { return a + b; }, 0) / scores.length).toFixed(1);
+      var highest = Math.max.apply(null, scores);
+      var lowest = Math.min.apply(null, scores);
+      var topStudent = students.find(function(s) { return s.score === highest; });
+      var bottomStudent = students.find(function(s) { return s.score === lowest; });
+
+      var gradeCounts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
+      students.forEach(function(s) { gradeCounts[getGrade(s.score)]++; });
+
+      document.getElementById(&quot;statsContent&quot;).innerHTML =
+        &quot;&lt;p&gt;👥 &lt;strong&gt;Total Students:&lt;/strong&gt; &quot; + students.length + &quot;&lt;/p&gt;&quot; +
+        &quot;&lt;p&gt;📊 &lt;strong&gt;Class Average:&lt;/strong&gt; &quot; + avg + &quot;&lt;/p&gt;&quot; +
+        &quot;&lt;p&gt;🏆 &lt;strong&gt;Top Scorer:&lt;/strong&gt; &quot; + topStudent.name + &quot; (&quot; + highest + &quot;)&lt;/p&gt;&quot; +
+        &quot;&lt;p&gt;📉 &lt;strong&gt;Lowest Scorer:&lt;/strong&gt; &quot; + bottomStudent.name + &quot; (&quot; + lowest + &quot;)&lt;/p&gt;&quot;;
+
+      // Build animated grade chart
+      var chartHTML = &quot;&quot;;
+      var colors = { A: &quot;#4CAF50&quot;, B: &quot;#8BC34A&quot;, C: &quot;#FFC107&quot;, D: &quot;#FF9800&quot;, F: &quot;#F44336&quot; };
+
+      Object.keys(gradeCounts).forEach(function(letter) {
+        var pct = students.length &gt; 0 ? (gradeCounts[letter] / students.length * 100) : 0;
+        chartHTML +=
+          &quot;&lt;div style=&#x27;margin-bottom:8px;&#x27;&gt;&quot; +
+          &quot;&lt;span class=&#x27;chart-label&#x27;&gt;&quot; + letter + &quot;: &quot; + gradeCounts[letter] + &quot; student(s)&lt;/span&gt;&quot; +
+          &quot;&lt;div class=&#x27;chart-bar-bg&#x27;&gt;&lt;div id=&#x27;bar-&quot; + letter + &quot;&#x27; class=&#x27;chart-bar&#x27; style=&#x27;background:&quot; + colors[letter] + &quot;;&#x27;&gt;&lt;/div&gt;&lt;/div&gt;&quot; +
+          &quot;&lt;/div&gt;&quot;;
+      });
+
+      document.getElementById(&quot;gradeChart&quot;).innerHTML = chartHTML;
+
+      // Animate bars
+      Object.keys(gradeCounts).forEach(function(letter) {
+        var pct = students.length &gt; 0 ? (gradeCounts[letter] / students.length * 100) : 0;
+        setTimeout(function() {
+          var bar = document.getElementById(&quot;bar-&quot; + letter);
+          if (bar) bar.style.width = pct + &quot;%&quot;;
+        }, 50);
+      });
+    }
+
+    // ─── Master Render ────────────────────────────────────
+    function render() {
+      var displayList = applyFilterSort(students);
+      renderTable(displayList);
+      renderStats();
+    }
+  &lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reflection Questions</h3>
+<ol class="v2-ol"><li><strong>Why do we re-render the entire table on every change</strong> instead of just modifying one row? What are the pros and cons of this "full re-render" approach vs a "targeted update" approach?</li></ol>
+<ol class="v2-ol"><li><strong>The statistics panel fades in on the first student added.</strong> How would you make it fade back out if all students are deleted?</li></ol>
+<ol class="v2-ol"><li><strong>The filter buttons only filter the displayed table, not the underlying data array.</strong> Why is this the right approach? What would go wrong if you filtered the array itself?</li></ol>
+<ol class="v2-ol"><li><strong>How would this project work in a real company?</strong> What would need to change if student data had to be saved to a database and persist across page reloads?</li></ol>
+<ol class="v2-ol"><li><strong>The Delete button uses <code>data-id</code></strong> instead of the student's array index. Why is this safer than using the index directly?</li></ol>
+<hr class="v2-hr">
+<h3 class="v2-h3">Optional Advanced Features</h3>
+<ul class="v2-ul"><li>[ ] <strong>Edit in place:</strong> Clicking a student's name makes it editable inline using <code>contenteditable</code></li><li>[ ] <strong>Export to CSV:</strong> A button that builds a CSV string and triggers a download using <code>URL.createObjectURL</code></li><li>[ ] <strong>LocalStorage persistence:</strong> Save the <code>students</code> array to <code>localStorage</code> on every change, restore it on page load</li><li>[ ] <strong>Search filter:</strong> A text input that filters students by name in real time using <code>querySelectorAll</code> and <code>classList</code></li><li>[ ] <strong>Drag-to-reorder:</strong> Implement drag-and-drop row reordering using <code>draggable</code> and the drag events</li></ul>
+<hr class="v2-hr">
+<p class="v2-p"># 12. Completion Checklist &amp; Summary</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">- Add students and their test scores
+- View a dynamically-built grade table
+- Filter students by performance category
+- Animate a summary panel when scores are entered
+- Validate all inputs before accepting them
+
+No frameworks. No libraries. Pure HTML + CSS + JavaScript DOM. · </div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Errors · Quick Reference</div><div class="pc" id="chk12"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Why it happens</th><th>Fix</th></tr></thead><tbody><tr><td><code>getElementById</code> returns <code>null</code></td><td>Script runs before the element exists in the DOM</td><td>Place <code>&lt;script&gt;</code> at the end of <code>&lt;body&gt;</code>, or use <code>DOMContentLoaded</code></td></tr><tr><td><code>style.left</code> returns <code>""</code> not <code>"0px"</code></td><td>Initial style is not set inline</td><td>Set <code>style.left = "0px"</code> in HTML, or check for <code>""</code> and default to 0</td></tr><tr><td><code>parseInt</code> returns <code>NaN</code></td><td>Style value is empty string</td><td>Always provide a fallback: `parseInt(el.style.left) \</td><td>\</td><td>0`</td></tr><tr><td>Multiple intervals stacking</td><td><code>startMove()</code> called multiple times</td><td>Always call <code>clearInterval(timer)</code> before <code>setInterval</code></td></tr><tr><td><code>innerHTML</code> XSS risk</td><td>User input inserted as HTML</td><td>Use <code>innerText</code> or sanitise HTML</td></tr><tr><td><code>getElementsByTagName</code> not updating</td><td>Expected live, got stale index</td><td>HTMLCollections are live, but indices can shift; loop in reverse when removing</td></tr><tr><td><code>querySelectorAll</code> result has no <code>.forEach</code> in IE</td><td>NodeList in old browsers</td><td>Use <code>Array.from(list).forEach(...)</code> for compatibility</td></tr><tr><td><code>document.write</code> destroying the page</td><td>Called after load</td><td>Use <code>innerHTML</code> instead for post-load content insertion</td></tr><tr><td>Forgetting <code>return false</code> in onsubmit</td><td>Form submits even on validation failure</td><td>Always <code>return false</code> (or <code>event.preventDefault()</code>) when validation fails</td></tr><tr><td>Using <code>id</code> that contains spaces</td><td>Browsers allow it but JS selectors break</td><td>Never put spaces in id values</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Errors · Quick Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">One-Sentence Summary</div><div class="pc" id="chk13"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>The HTML DOM is JavaScript's live map of your webpage · master its methods for finding, changing, creating, and animating elements, and you gain complete programmatic control over everything users see and interact with.</strong></p></blockquote>
+<hr class="v2-hr">
+<p class="v2-p"><em>Tutorial generated by AI_TUTORIAL_GENERATOR · Source: W3Schools JavaScript HTML DOM series (9 pages) · Format: Markdown</em></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>One-Sentence Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lesson 28 Project</div><div class="build-req"><p class="v2-p">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code h</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>My Project</title>
+</head>
+<body>
+<!-- Your code here -->
+</body>
+</html>`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-28-lesson-28-project</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 28 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-28-lesson-28-project/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 28 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. What is the HTML DOM?</li><li>✅ 2. DOM Methods · Your First Tools</li><li>✅ 3. Finding HTML Elements</li><li>✅ 4. Changing HTML Content</li><li>✅ 5. Changing CSS Styles</li><li>✅ 6. Form Validation with the DOM</li><li>✅ 7. DOM Animations</li><li>✅ 8. The Document Object in Depth</li></ul><div class="ln"><a href="lesson_27.html" class="ln-btn">&#8592; Lesson 27</a><a href="lesson_29.html" class="ln-btn primary">Lesson 29 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 28 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

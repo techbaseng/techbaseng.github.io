@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 41: Python MySQL · Querying, Filtering, Sorting, Modifying, and Joining Data — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="11" data-key="techbase_python_l41">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 41 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 41</div>
+      <h1>Python MySQL · Querying, Filtering, Sorting, Modifying, and Joining Data</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Setup · Assumed Tables</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 41</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome! In this lesson you will learn how to <strong>talk to a MySQL database using Python</strong>. By the end of this lesson you will know how to:</p>
+<ul class="v2-ul"><li><strong>Read</strong> data from a table (SELECT)</li><li><strong>Filter</strong> results with conditions (WHERE)</li><li><strong>Sort</strong> results (ORDER BY)</li><li><strong>Limit</strong> the number of results (LIMIT / OFFSET)</li><li><strong>Update</strong> existing rows (UPDATE)</li><li><strong>Delete</strong> rows (DELETE)</li><li><strong>Combine two tables</strong> into one result (JOIN)</li></ul>
+<p class="v2-p">Think of a database like a giant, organised filing cabinet. Each drawer is a <strong>table</strong>. Inside each drawer are many <strong>rows</strong> (records). This lesson teaches you how to open that cabinet, find exactly the papers you need, change them, throw some away, and even merge two drawers together.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world relevance:</strong> Every app you use daily · banking, e-commerce, social media · stores its data in a database and uses exactly these operations to show you information, update your profile, delete old orders, or link your account to your purchases.</p></blockquote>
+<hr class="v2-hr"></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Setup · Assumed Tables</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome! In this lesson you will learn how to <strong>talk to a MySQL database using Python</strong>. By the end of this lesson you will know how to:</p>
+<ul class="v2-ul"><li><strong>Read</strong> data from a table (SELECT)</li><li><strong>Filter</strong> results with conditions (WHERE)</li><li><strong>Sort</strong> results (ORDER BY)</li><li><strong>Limit</strong> the number of results (LIMIT / OFFSET)</li><li><strong>Update</strong> existing rows (UPDATE)</li><li><strong>Delete</strong> rows (DELETE)</li><li><strong>Combine two tables</strong> into one result (JOIN)</li></ul>
+<p class="v2-p">Think of a database like a giant, organised filing cabinet. Each drawer is a <strong>table</strong>. Inside each drawer are many <strong>rows</strong> (records). This lesson teaches you how to open that cabinet, find exactly the papers you need, change them, throw some away, and even merge two drawers together.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world relevance:</strong> Every app you use daily · banking, e-commerce, social media · stores its data in a database and uses exactly these operations to show you information, update your profile, delete old orders, or link your account to your purchases.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Before we dive in, let us make sure you understand the building blocks. If any of these words are unfamiliar, read this section carefully.</p>
+<h3 class="v2-h3">What is MySQL?</h3>
+<p class="v2-p"><strong>MySQL</strong> is a <strong>database management system (DBMS)</strong>. It stores data in organised tables, just like Excel spreadsheets but far more powerful. You can store millions of rows and retrieve exactly the ones you need in milliseconds.</p>
+<h3 class="v2-h3">What is mysql-connector-python?</h3>
+<p class="v2-p">This is a <strong>Python library</strong> (a pre-built toolbox) that lets your Python code speak to a MySQL server. You install it once with:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>pip install mysql-connector-python</code></pre></div></div>
+<h3 class="v2-h3">The standard connection block</h3>
+<p class="v2-p">Every example in this lesson starts with the same connection code. Here is what each line does:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector    # Load the MySQL toolbox
+
+mydb = mysql.connector.connect(   # Open a connection to the MySQL server
+    host=&quot;localhost&quot;,             # Where the server lives (your own machine)
+    user=&quot;yourusername&quot;,          # Your MySQL login name
+    password=&quot;yourpassword&quot;,      # Your MySQL password
+    database=&quot;mydatabase&quot;         # Which database to use
+)
+
+mycursor = mydb.cursor()          # Create a cursor — your &quot;pen&quot; to write queries</code></pre></div></div>
+<p class="v2-p"><strong>Analogy:</strong> Think of <code>mydb</code> as opening a phone call to the database. Think of <code>mycursor</code> as picking up a pen so you can write your question on paper and send it.</p>
+<h3 class="v2-h3">What is a cursor?</h3>
+<p class="v2-p">A <strong>cursor</strong> is a special object that:</p>
+<ol class="v2-ol"><li>Sends your SQL query to the database</li><li>Holds the results that come back</li><li>Lets you loop through those results</li></ol>
+<h3 class="v2-h3">What is SQL?</h3>
+<p class="v2-p"><strong>SQL</strong> (Structured Query Language) is the language you use to talk to a database. You write SQL commands inside Python strings and send them through the cursor. SQL is not Python · it is its own simple language.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Part 1 · SELECT: Reading Data from a Table</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is SELECT and why does it exist?</h3>
+<p class="v2-p"><code>SELECT</code> is the SQL command for <strong>reading data</strong>. Without it, you cannot see anything in a database. It is the most-used SQL command in the world.</p>
+<p class="v2-p"><strong>Why do we need it?</strong> A table might have thousands of rows. SELECT lets you say: "Give me all rows," or "Give me just the name and address columns," or "Give me just the first row."</p>
+<h3 class="v2-h3">1.1 · Selecting ALL rows and columns</h3>
+<p class="v2-p">The <code><em></code> symbol means "everything." <code>SELECT </em></code> means "give me every column."</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute(&quot;SELECT * FROM customers&quot;)   # Send the SQL query
+
+myresult = mycursor.fetchall()   # fetchall() grabs every single row returned
+
+for x in myresult:       # Loop through each row
+    print(x)             # Print the row (it is a tuple)</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line breakdown:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Line</th><th>What it does</th></tr></thead><tbody><tr><td><code>mycursor.execute(...)</code></td><td>Sends the SQL query to the database</td></tr><tr><td><code>"SELECT * FROM customers"</code></td><td>SQL: "Give me every column from the customers table"</td></tr><tr><td><code>mycursor.fetchall()</code></td><td>Collects ALL the results into a Python list</td></tr><tr><td><code>for x in myresult</code></td><td>Loops through each row one at a time</td></tr><tr><td><code>print(x)</code></td><td>Prints one row (shown as a tuple like <code>(1, 'John', 'Oslo St')</code>)</td></tr></tbody></table></div>
+<p class="v2-p"><strong>Expected output</strong> (example with 3 rows):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(1, &#x27;John&#x27;, &#x27;Highway 21&#x27;)
+(2, &#x27;Peter&#x27;, &#x27;Lowstreet 4&#x27;)
+(3, &#x27;Amy&#x27;, &#x27;Apple st 652&#x27;)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>What is a tuple?</strong> A tuple is a group of values in brackets. Each row from the database comes back as a tuple. Position 0 is the first column, position 1 is the second column, and so on.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What happens if your <code>customers</code> table is empty? What would <code>myresult</code> contain? Answer: It would be an empty list <code>[]</code>, and the <code>for</code> loop would simply not print anything.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.2 · Selecting SPECIFIC columns</h3>
+<p class="v2-p">Sometimes you do not want all columns · only certain ones. Instead of <code>*</code>, you list the column names separated by commas.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycursor.execute(&quot;SELECT name, address FROM customers&quot;)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>SELECT name, address</code> · "I only want the name and address columns"</li><li><code>FROM customers</code> · "from the customers table"</li></ul>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(&#x27;John&#x27;, &#x27;Highway 21&#x27;)
+(&#x27;Peter&#x27;, &#x27;Lowstreet 4&#x27;)
+(&#x27;Amy&#x27;, &#x27;Apple st 652&#x27;)</code></pre></div></div>
+<p class="v2-p">Notice each tuple now only has 2 values instead of the full row.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> Why would you want to select only specific columns instead of <code>*</code>? Imagine a table with 50 columns · fetching all 50 when you only need 2 wastes memory and makes your program slower.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">1.3 · Using fetchone() to get a single row</h3>
+<p class="v2-p"><code>fetchall()</code> gets every row. <code>fetchone()</code> gets just the <strong>first row</strong>. This is useful when you know there is only one result, or you only need to check one record.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycursor.execute(&quot;SELECT * FROM customers&quot;)
+
+myresult = mycursor.fetchone()   # Only grab the first row
+
+print(myresult)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(1, &#x27;John&#x27;, &#x27;Highway 21&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>Analogy:</strong> <code>fetchall()</code> is like grabbing the entire stack of papers. <code>fetchone()</code> is like picking only the top sheet.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Common mistake:</strong> Calling <code>fetchone()</code> multiple times on the same executed query returns the next row each time. The cursor "moves forward" like a reading finger.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>SELECT: Reading Data from a Table</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Part 2 · WHERE: Filtering Your Results</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is WHERE and why does it exist?</h3>
+<p class="v2-p">Without filtering, you get <strong>every row</strong>. But in real life you almost always want specific rows · "show me the customer named John," or "show me all orders above $100."</p>
+<p class="v2-p"><code>WHERE</code> is the SQL filter. It says: "Only give me rows that match this condition."</p>
+<p class="v2-p"><strong>Analogy:</strong> Imagine searching your email inbox. You don't read all 10,000 emails · you type a name in the search box. <code>WHERE</code> is that search box.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.1 · Simple WHERE filter</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+sql = &quot;SELECT * FROM customers WHERE address = &#x27;Park Lane 38&#x27;&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>SELECT *</code> · give me all columns</li><li><code>FROM customers</code> · from the customers table</li><li><code>WHERE address = 'Park Lane 38'</code> · BUT only rows where the address is exactly 'Park Lane 38'</li></ul>
+<p class="v2-p"><strong>Expected output</strong> (assuming one match):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(7, &#x27;Ben&#x27;, &#x27;Park Lane 38&#x27;)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important:</strong> String values in SQL must be wrapped in <strong>single quotes</strong> <code>'like this'</code>. Numbers do not need quotes.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.2 · Wildcard search with LIKE and %</h3>
+<p class="v2-p">Sometimes you want rows that <strong>contain</strong> a word or letter pattern, not an exact match. Use <code>LIKE</code> with the <code>%</code> symbol.</p>
+<p class="v2-p"><code>%</code> means "any number of any characters" · like a wildcard in a card game.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;SELECT * FROM customers WHERE address LIKE &#x27;%way%&#x27;&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Breaking down <code>'%way%'</code>:</strong></p>
+<ul class="v2-ul"><li>First <code>%</code> · any characters can come before "way"</li><li><code>way</code> · this exact text must appear somewhere</li><li>Last <code>%</code> · any characters can come after "way"</li></ul>
+<p class="v2-p">This matches "Highway 21", "Broadway 5", "My way 3", etc.</p>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(1, &#x27;John&#x27;, &#x27;Highway 21&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>More wildcard examples:</strong></p>
+<ul class="v2-ul"><li><code>'J%'</code> · starts with J</li><li><code>'%n'</code> · ends with n</li><li><code>'%ohn%'</code> · contains "ohn" anywhere</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">2.3 · Preventing SQL Injection with %s placeholder</h3>
+<p class="v2-p"><strong>What is SQL Injection?</strong> This is a famous hacking technique. If you build SQL queries by gluing user input directly into a string, a hacker could type something like <code>'; DROP TABLE customers; · </code> as their address. This would destroy your table!</p>
+<p class="v2-p"><strong>The safe solution:</strong> Use <code>%s</code> as a placeholder and pass the actual value separately. The connector will safely handle the escaping for you.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;SELECT * FROM customers WHERE address = %s&quot;
+adr = (&quot;Yellow Garden 2&quot;, )    # Note the comma — this makes it a tuple
+
+mycursor.execute(sql, adr)     # Pass the query AND the values separately
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Why <code>("Yellow Garden 2", )</code> with a comma?</strong> The <code>execute()</code> method expects a <strong>tuple</strong> as the second argument. A single-item tuple in Python requires a trailing comma.</p>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(8, &#x27;Vicky&#x27;, &#x27;Yellow Garden 2&#x27;)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Rule of thumb:</strong> Whenever the WHERE value comes from user input (a form, an API, user typing), ALWAYS use <code>%s</code>. Never build SQL by string concatenation.</p></blockquote>
+<p class="v2-p"><strong>Wrong (dangerous):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># NEVER DO THIS if address comes from user input
+sql = &quot;SELECT * FROM customers WHERE address = &#x27;&quot; + user_input + &quot;&#x27;&quot;</code></pre></div></div>
+<p class="v2-p"><strong>Right (safe):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;SELECT * FROM customers WHERE address = %s&quot;
+mycursor.execute(sql, (user_input,))</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>WHERE: Filtering Your Results</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Part 3 · ORDER BY: Sorting Your Results</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">What is ORDER BY and why does it exist?</h3>
+<p class="v2-p">When MySQL returns rows, the order is not guaranteed. <code>ORDER BY</code> sorts the results · alphabetically, numerically, by date, etc.</p>
+<p class="v2-p"><strong>Real-world example:</strong> An online shop shows products sorted by price (cheapest first). A leaderboard shows scores sorted highest first.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.1 · ORDER BY ascending (default)</h3>
+<p class="v2-p"><code>ORDER BY</code> without anything extra sorts from <strong>smallest to largest</strong> (A to Z for text, 1 to 100 for numbers). This is called <strong>ascending</strong> order.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+sql = &quot;SELECT * FROM customers ORDER BY name&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>SELECT *</code> · all columns</li><li><code>FROM customers</code> · from customers table</li><li><code>ORDER BY name</code> · sort the results by the name column, A to Z</li></ul>
+<p class="v2-p"><strong>Expected output</strong> (alphabetically sorted by name):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(3, &#x27;Amy&#x27;, &#x27;Apple st 652&#x27;)
+(1, &#x27;John&#x27;, &#x27;Highway 21&#x27;)
+(2, &#x27;Peter&#x27;, &#x27;Lowstreet 4&#x27;)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">3.2 · ORDER BY DESC (descending)</h3>
+<p class="v2-p">Add <code>DESC</code> after the column name to sort in <strong>reverse order</strong> · Z to A for text, or largest to smallest for numbers.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;SELECT * FROM customers ORDER BY name DESC&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output</strong> (reverse alphabetically):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(2, &#x27;Peter&#x27;, &#x27;Lowstreet 4&#x27;)
+(1, &#x27;John&#x27;, &#x27;Highway 21&#x27;)
+(3, &#x27;Amy&#x27;, &#x27;Apple st 652&#x27;)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>ASC vs DESC summary:</strong></p>
+<ul class="v2-ul"><li><code>ASC</code> (Ascending) · A → Z, 1 → 100 (this is the default)</li><li><code>DESC</code> (Descending) · Z → A, 100 → 1</li></ul></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>ORDER BY: Sorting Your Results</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Part 4 · LIMIT: Controlling How Many Rows You Get Back</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What is LIMIT and why does it exist?</h3>
+<p class="v2-p">Imagine a table with 1,000,000 customer rows. If you do <code>SELECT *</code>, Python tries to load all one million rows into memory · your program would slow down or crash!</p>
+<p class="v2-p"><code>LIMIT</code> says: "Only give me the first N rows." This is essential for performance and for building features like <strong>pagination</strong> (showing page 1, page 2, page 3 of results).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.1 · Basic LIMIT</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute(&quot;SELECT * FROM customers LIMIT 5&quot;)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>SELECT * FROM customers</code> · all columns from customers</li><li><code>LIMIT 5</code> · but only return the first 5 rows</li></ul>
+<p class="v2-p"><strong>Expected output:</strong> The first 5 rows of the table (whatever they are).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">4.2 · LIMIT with OFFSET (pagination)</h3>
+<p class="v2-p"><code>OFFSET</code> tells MySQL <strong>where to start counting from</strong>. Think of it like "skip the first N rows, then give me the next batch."</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycursor.execute(&quot;SELECT * FROM customers LIMIT 5 OFFSET 2&quot;)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>LIMIT 5</code> · give me 5 rows</li><li><code>OFFSET 2</code> · but skip the first 2 rows before starting to count</li></ul>
+<p class="v2-p">So if your table has rows 1 through 10, <code>LIMIT 5 OFFSET 2</code> returns rows 3, 4, 5, 6, 7.</p>
+<p class="v2-p"><strong>Visual illustration:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Row 1  ← skipped (OFFSET 2)
+Row 2  ← skipped
+Row 3  ← returned ✓
+Row 4  ← returned ✓
+Row 5  ← returned ✓
+Row 6  ← returned ✓
+Row 7  ← returned ✓
+Row 8  ← not included (past LIMIT 5)
+...</code></pre></div></div>
+<p class="v2-p"><strong>Real-world use:</strong> A website showing 10 products per page:</p>
+<ul class="v2-ul"><li>Page 1: <code>LIMIT 10 OFFSET 0</code></li><li>Page 2: <code>LIMIT 10 OFFSET 10</code></li><li>Page 3: <code>LIMIT 10 OFFSET 20</code></li></ul>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>LIMIT: Controlling How Many Rows You Get Back</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Part 5 · UPDATE: Changing Existing Data</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">What is UPDATE and why does it exist?</h3>
+<p class="v2-p"><code>UPDATE</code> modifies the value of one or more columns in existing rows. You use it when information changes · a customer moves to a new address, a price changes, a user updates their profile.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Critical warning:</strong> Always use a <code>WHERE</code> clause with <code>UPDATE</code>. Without it, <strong>every single row</strong> in the table gets changed!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.1 · Basic UPDATE</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+sql = &quot;UPDATE customers SET address = &#x27;Canyon 123&#x27; WHERE address = &#x27;Valley 345&#x27;&quot;
+
+mycursor.execute(sql)
+
+mydb.commit()   # IMPORTANT: saves the changes permanently
+
+print(mycursor.rowcount, &quot;record(s) affected&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>UPDATE customers</code> · I want to update the customers table</li><li><code>SET address = 'Canyon 123'</code> · change the address column to this new value</li><li><code>WHERE address = 'Valley 345'</code> · but ONLY for rows where address is currently 'Valley 345'</li></ul>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1 record(s) affected</code></pre></div></div>
+<p class="v2-p"><strong>What is <code>mydb.commit()</code>?</strong> <code>commit()</code> is like pressing <strong>Save</strong> on a document. Without it, your changes exist temporarily but are NOT written to the database permanently. This is a very common beginner mistake · forgetting <code>commit()</code> and wondering why nothing changed!</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Imagine you're editing a Word document. <code>execute()</code> makes your edits on screen. <code>commit()</code> is pressing Ctrl+S to actually save to disk.</p></blockquote>
+<p class="v2-p"><strong>What is <code>mycursor.rowcount</code>?</strong> This tells you how many rows were actually changed. It is very useful to confirm your update worked.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">5.2 · UPDATE with SQL Injection protection</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;UPDATE customers SET address = %s WHERE address = %s&quot;
+val = (&quot;Valley 345&quot;, &quot;Canyon 123&quot;)    # (new value, condition to match)
+
+mycursor.execute(sql, val)
+
+mydb.commit()
+
+print(mycursor.rowcount, &quot;record(s) affected&quot;)</code></pre></div></div>
+<p class="v2-p">Here two <code>%s</code> placeholders are used. The first is for the new address (<code>SET address = %s</code>), and the second is for the WHERE condition. They are filled in order from the tuple <code>val</code>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>UPDATE: Changing Existing Data</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Part 6 · DELETE: Removing Rows</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">What is DELETE and why does it exist?</h3>
+<p class="v2-p"><code>DELETE FROM</code> permanently removes rows from a table. You use it to clean up old data · expired sessions, cancelled orders, deleted accounts.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Critical warning:</strong> Always use a <code>WHERE</code> clause with <code>DELETE</code>. Without it, <strong>every row in the entire table is deleted</strong> · and this action cannot be undone (unless you have a backup)!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.1 · Basic DELETE</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+sql = &quot;DELETE FROM customers WHERE address = &#x27;Mountain 21&#x27;&quot;
+
+mycursor.execute(sql)
+
+mydb.commit()   # Required to make the deletion permanent
+
+print(mycursor.rowcount, &quot;record(s) deleted&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown:</strong></p>
+<ul class="v2-ul"><li><code>DELETE FROM customers</code> · remove rows from the customers table</li><li><code>WHERE address = 'Mountain 21'</code> · but only rows where address matches</li></ul>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1 record(s) deleted</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.2 · DELETE with SQL Injection protection</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;DELETE FROM customers WHERE address = %s&quot;
+adr = (&quot;Yellow Garden 2&quot;, )    # Tuple with one value
+
+mycursor.execute(sql, adr)
+
+mydb.commit()
+
+print(mycursor.rowcount, &quot;record(s) deleted&quot;)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Rule:</strong> Use <code>%s</code> placeholders whenever the value comes from outside your code · user input, API data, config files, etc.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">6.3 · The danger of DELETE without WHERE</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># ⚠️ THIS DELETES EVERY SINGLE ROW IN THE TABLE
+sql = &quot;DELETE FROM customers&quot;
+mycursor.execute(sql)
+mydb.commit()
+# The customers table is now completely empty!</code></pre></div></div>
+<p class="v2-p">This is one of the most dangerous mistakes in database programming. <strong>Always double-check your DELETE statements have a WHERE clause.</strong></p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>DELETE: Removing Rows</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Part 7 · JOIN: Combining Two Tables</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">What is JOIN and why does it exist?</h3>
+<p class="v2-p">In real-world databases, information is split across <strong>multiple tables</strong> to avoid repetition. For example:</p>
+<ul class="v2-ul"><li>A <code>users</code> table stores user names and IDs</li><li>A <code>products</code> table stores product names and IDs</li><li>Users can "favourite" a product · but you don't copy the product name into the users table</li></ul>
+<p class="v2-p">Instead, you store the product's ID in the users table, and use <code>JOIN</code> to link them when needed.</p>
+<p class="v2-p"><strong>Analogy:</strong> Imagine two lists. List A is your class roster (student name + favourite subject code). List B is the subject list (subject code + subject name). JOIN combines them so you can see "John → Mathematics" instead of just "John → 101".</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The sample tables for this section</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>users table:
+{ id: 1, name: &#x27;John&#x27;,    fav: 154 }
+{ id: 2, name: &#x27;Peter&#x27;,   fav: 154 }
+{ id: 3, name: &#x27;Amy&#x27;,     fav: 155 }
+{ id: 4, name: &#x27;Hannah&#x27;,  fav: NULL }
+{ id: 5, name: &#x27;Michael&#x27;, fav: NULL }
+
+products table:
+{ id: 154, name: &#x27;Chocolate Heaven&#x27; }
+{ id: 155, name: &#x27;Tasty Lemons&#x27;     }
+{ id: 156, name: &#x27;Vanilla Dreams&#x27;   }</code></pre></div></div>
+<p class="v2-p">The <code>fav</code> column in users matches the <code>id</code> column in products. Hannah and Michael have no favourite (NULL/empty).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">7.1 · INNER JOIN (only matching rows)</h3>
+<p class="v2-p"><code>INNER JOIN</code> returns rows where there is a <strong>match in both tables</strong>. Rows without a match are excluded.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;yourusername&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;mydatabase&quot;
+)
+
+mycursor = mydb.cursor()
+
+sql = &quot;&quot;&quot;SELECT
+  users.name AS user,
+  products.name AS favorite
+FROM users
+INNER JOIN products ON users.fav = products.id&quot;&quot;&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>SQL breakdown line by line:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>SELECT
+  users.name AS user,       -- Get name from users table, label it &quot;user&quot;
+  products.name AS favorite -- Get name from products table, label it &quot;favorite&quot;
+FROM users                  -- Start with the users table
+INNER JOIN products         -- Connect it to the products table
+ON users.fav = products.id  -- Match where users.fav equals products.id</code></pre></div></div>
+<ul class="v2-ul"><li><code>table.column</code> syntax · when two tables have a column with the same name (like <code>name</code>), you must specify which table's column you want using <code>tablename.columnname</code></li><li><code>AS user</code> · renames the column in the output (called an alias)</li><li><code>ON</code> · specifies how the two tables are linked</li></ul>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(&#x27;John&#x27;, &#x27;Chocolate Heaven&#x27;)
+(&#x27;Peter&#x27;, &#x27;Chocolate Heaven&#x27;)
+(&#x27;Amy&#x27;, &#x27;Tasty Lemons&#x27;)</code></pre></div></div>
+<p class="v2-p">Notice Hannah and Michael are <strong>not included</strong> because their <code>fav</code> is NULL · no matching product.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Note:</strong> <code>JOIN</code> and <code>INNER JOIN</code> are identical. You can use either.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">7.2 · LEFT JOIN (all from left table, matched from right)</h3>
+<p class="v2-p"><code>LEFT JOIN</code> returns <strong>all rows from the first (left) table</strong>, plus matching data from the second table where available. If there is no match, the right side shows <code>None</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;&quot;&quot;SELECT
+  users.name AS user,
+  products.name AS favorite
+FROM users
+LEFT JOIN products ON users.fav = products.id&quot;&quot;&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(&#x27;John&#x27;, &#x27;Chocolate Heaven&#x27;)
+(&#x27;Peter&#x27;, &#x27;Chocolate Heaven&#x27;)
+(&#x27;Amy&#x27;, &#x27;Tasty Lemons&#x27;)
+(&#x27;Hannah&#x27;, None)
+(&#x27;Michael&#x27;, None)</code></pre></div></div>
+<p class="v2-p">Now Hannah and Michael appear · but their favourite shows as <code>None</code> because they have no matching product.</p>
+<p class="v2-p"><strong>Use case:</strong> Show ALL customers and their orders, including customers who haven't ordered anything yet.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">7.3 · RIGHT JOIN (all from right table, matched from left)</h3>
+<p class="v2-p"><code>RIGHT JOIN</code> is the opposite · it returns <strong>all rows from the second (right) table</strong>, plus matching data from the left table.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sql = &quot;&quot;&quot;SELECT
+  users.name AS user,
+  products.name AS favorite
+FROM users
+RIGHT JOIN products ON users.fav = products.id&quot;&quot;&quot;
+
+mycursor.execute(sql)
+
+myresult = mycursor.fetchall()
+
+for x in myresult:
+    print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>(&#x27;John&#x27;, &#x27;Chocolate Heaven&#x27;)
+(&#x27;Peter&#x27;, &#x27;Chocolate Heaven&#x27;)
+(&#x27;Amy&#x27;, &#x27;Tasty Lemons&#x27;)
+(None, &#x27;Vanilla Dreams&#x27;)</code></pre></div></div>
+<p class="v2-p">Now all products appear, including Vanilla Dreams which nobody has as a favourite · but Hannah and Michael are excluded.</p>
+<p class="v2-p"><strong>Use case:</strong> Show ALL products and who likes them, including products nobody likes yet.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">JOIN summary table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Join Type</th><th>Left table rows</th><th>Right table rows</th></tr></thead><tbody><tr><td><code>INNER JOIN</code></td><td>Only matched</td><td>Only matched</td></tr><tr><td><code>LEFT JOIN</code></td><td>All rows</td><td>Only matched (None for unmatched)</td></tr><tr><td><code>RIGHT JOIN</code></td><td>Only matched (None for unmatched)</td><td>All rows</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>JOIN: Combining Two Tables</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Reading and Filtering Data</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice SELECT and WHERE together.</p>
+<p class="v2-p"><strong>Scenario:</strong> You manage a school database. The <code>students</code> table has columns: <code>id</code>, <code>name</code>, <code>grade</code>, <code>city</code>.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Connect to your database.</li><li>Select all students.</li><li>Select only <code>name</code> and <code>grade</code> columns.</li><li>Select students whose city is 'Lagos'.</li><li>Select students whose name contains the letter 'a'.</li></ol>
+<p class="v2-p"><strong>Starter code:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import mysql.connector
+
+mydb = mysql.connector.connect(
+    host=&quot;localhost&quot;,
+    user=&quot;root&quot;,
+    password=&quot;yourpassword&quot;,
+    database=&quot;school&quot;
+)
+mycursor = mydb.cursor()
+
+# Step 2 - All students
+mycursor.execute(&quot;SELECT * FROM students&quot;)
+print(&quot;All students:&quot;)
+for row in mycursor.fetchall():
+    print(row)
+
+# Step 3 - Only name and grade
+mycursor.execute(&quot;SELECT name, grade FROM students&quot;)
+print(&quot;\nNames and grades:&quot;)
+for row in mycursor.fetchall():
+    print(row)
+
+# Step 4 - Students from Lagos (use %s for safety)
+mycursor.execute(&quot;SELECT * FROM students WHERE city = %s&quot;, (&quot;Lagos&quot;,))
+print(&quot;\nStudents from Lagos:&quot;)
+for row in mycursor.fetchall():
+    print(row)
+
+# Step 5 - Names containing &#x27;a&#x27;
+mycursor.execute(&quot;SELECT * FROM students WHERE name LIKE %s&quot;, (&quot;%a%&quot;,))
+print(&quot;\nNames containing &#x27;a&#x27;:&quot;)
+for row in mycursor.fetchall():
+    print(row)</code></pre></div></div>
+<p class="v2-p"><strong>Expected output</strong> (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>All students:
+(1, &#x27;Amara&#x27;, &#x27;A&#x27;, &#x27;Lagos&#x27;)
+(2, &#x27;John&#x27;, &#x27;B&#x27;, &#x27;Abuja&#x27;)
+(3, &#x27;Fatima&#x27;, &#x27;A&#x27;, &#x27;Lagos&#x27;)
+
+Names and grades:
+(&#x27;Amara&#x27;, &#x27;A&#x27;)
+(&#x27;John&#x27;, &#x27;B&#x27;)
+(&#x27;Fatima&#x27;, &#x27;A&#x27;)
+
+Students from Lagos:
+(1, &#x27;Amara&#x27;, &#x27;A&#x27;, &#x27;Lagos&#x27;)
+(3, &#x27;Fatima&#x27;, &#x27;A&#x27;, &#x27;Lagos&#x27;)
+
+Names containing &#x27;a&#x27;:
+(1, &#x27;Amara&#x27;, &#x27;A&#x27;, &#x27;Lagos&#x27;)
+(3, &#x27;Fatima&#x27;, &#x27;A&#x27;, &#x27;Lagos&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What changes if you use <code>LIKE '%A%'</code> instead of <code>LIKE '%a%'</code>?</li><li>What does <code>fetchone()</code> return instead of <code>fetchall()</code>?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Sorting and Limiting</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice ORDER BY and LIMIT.</p>
+<p class="v2-p"><strong>Scenario:</strong> You run an online store. The <code>products</code> table has: <code>id</code>, <code>name</code>, <code>price</code>, <code>stock</code>.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol"><li>Get all products sorted by price (cheapest first).</li><li>Get all products sorted by name Z to A.</li><li>Get only the 3 most expensive products. (Hint: sort DESC then LIMIT 3)</li><li>Get products 4 through 6 by price. (Hint: LIMIT 3 OFFSET 3)</li></ol>
+<p class="v2-p"><strong>Code:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Step 1 - Cheapest first
+mycursor.execute(&quot;SELECT * FROM products ORDER BY price&quot;)
+print(&quot;Products by price (cheap first):&quot;)
+for row in mycursor.fetchall():
+    print(row)
+
+# Step 2 - Name Z to A
+mycursor.execute(&quot;SELECT * FROM products ORDER BY name DESC&quot;)
+print(&quot;\nProducts by name (Z to A):&quot;)
+for row in mycursor.fetchall():
+    print(row)
+
+# Step 3 - Top 3 most expensive
+mycursor.execute(&quot;SELECT * FROM products ORDER BY price DESC LIMIT 3&quot;)
+print(&quot;\nTop 3 most expensive:&quot;)
+for row in mycursor.fetchall():
+    print(row)
+
+# Step 4 - Products 4 to 6 by price
+mycursor.execute(&quot;SELECT * FROM products ORDER BY price LIMIT 3 OFFSET 3&quot;)
+print(&quot;\nProducts 4 to 6 by price:&quot;)
+for row in mycursor.fetchall():
+    print(row)</code></pre></div></div>
+<p class="v2-p"><strong>What-if challenge:</strong> Change OFFSET to 0. What changes? Change LIMIT to 1. What do you get?</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Updating and Deleting Safely</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice UPDATE and DELETE with WHERE and %s.</p>
+<p class="v2-p"><strong>Scenario:</strong> You manage an employee database. Table <code>employees</code> has: <code>id</code>, <code>name</code>, <code>department</code>, <code>salary</code>.</p>
+<p class="v2-p"><strong>Code:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Update salary for employees in &#x27;Sales&#x27; department
+sql = &quot;UPDATE employees SET salary = %s WHERE department = %s&quot;
+val = (75000, &quot;Sales&quot;)
+mycursor.execute(sql, val)
+mydb.commit()
+print(mycursor.rowcount, &quot;employee(s) salary updated&quot;)
+
+# Delete employees in department &#x27;Temp&#x27;
+sql = &quot;DELETE FROM employees WHERE department = %s&quot;
+mycursor.execute(sql, (&quot;Temp&quot;,))
+mydb.commit()
+print(mycursor.rowcount, &quot;temp employee(s) removed&quot;)
+
+# Verify the changes
+mycursor.execute(&quot;SELECT * FROM employees&quot;)
+for row in mycursor.fetchall():
+    print(row)</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>What would happen if you forgot <code>mydb.commit()</code> after UPDATE?</li><li>What would happen if you forgot the WHERE clause in DELETE?</li></ul>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(10)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake 1: Forgetting <code>mydb.commit()</code> after UPDATE or DELETE</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong — the change never gets saved!
+mycursor.execute(&quot;UPDATE customers SET city = &#x27;Lagos&#x27; WHERE id = 1&quot;)
+# Forgot commit — nothing changes in the database
+
+# Correct
+mycursor.execute(&quot;UPDATE customers SET city = &#x27;Lagos&#x27; WHERE id = 1&quot;)
+mydb.commit()  # This saves the change</code></pre></div></div>
+<p class="v2-p"><strong>Mistake 2: Using DELETE or UPDATE without WHERE</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Deletes EVERY row — catastrophic!
+mycursor.execute(&quot;DELETE FROM customers&quot;)
+
+# Updates EVERY row — also catastrophic!
+mycursor.execute(&quot;UPDATE customers SET city = &#x27;Lagos&#x27;&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Mistake 3: Building SQL by string concatenation with user input</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># DANGEROUS — SQL injection vulnerability
+user_city = input(&quot;Enter city: &quot;)
+sql = &quot;SELECT * FROM customers WHERE city = &#x27;&quot; + user_city + &quot;&#x27;&quot;
+
+# SAFE
+sql = &quot;SELECT * FROM customers WHERE city = %s&quot;
+mycursor.execute(sql, (user_city,))</code></pre></div></div>
+<p class="v2-p"><strong>Mistake 4: Forgetting the trailing comma in a single-value tuple</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># Wrong — this is just a string in brackets, not a tuple
+val = (&quot;Lagos&quot;)         # This is just &quot;Lagos&quot;
+
+# Correct — the comma makes it a tuple
+val = (&quot;Lagos&quot;,)        # This is a tuple with one item</code></pre></div></div>
+<p class="v2-p"><strong>Mistake 5: Confusing <code>fetchall()</code> and <code>fetchone()</code></strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>mycursor.execute(&quot;SELECT * FROM customers&quot;)
+row = mycursor.fetchone()   # Gets first row only
+print(row)                  # (1, &#x27;John&#x27;, &#x27;Oslo&#x27;)
+
+# If you call fetchone() again...
+row2 = mycursor.fetchone()  # Gets the SECOND row (cursor moved forward)
+print(row2)                 # (2, &#x27;Peter&#x27;, &#x27;Berlin&#x27;)</code></pre></div></div>
+<p class="v2-p"><strong>Mistake 6: Using <code>*</code> in JOINs when both tables have a column called <code>name</code></strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># This could confuse which &quot;name&quot; column is which
+sql = &quot;SELECT * FROM users INNER JOIN products ON users.fav = products.id&quot;
+
+# Better — explicitly select what you need with aliases
+sql = &quot;SELECT users.name AS user, products.name AS product FROM users INNER JOIN products ON users.fav = products.id&quot;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Setup · Assumed Tables</div><div class="build-req"><p class="v2-p">Build a simple system that queries and manages a shop's data.</p>
+<h3 class="v2-h3">Setup · Assumed Tables</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>customers table: id, name, city
+orders table:    id, customer_id, product, amount</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`customers table: id, name, city
+orders table:    id, customer_id, product, amount`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-41-setup-assumed-tables</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 41 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 41 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1 · SELECT: Reading Data from a Table</li><li>✅ Part 2 · WHERE: Filtering Your Results</li><li>✅ Part 3 · ORDER BY: Sorting Your Results</li><li>✅ Part 4 · LIMIT: Controlling How Many Rows You Get Back</li><li>✅ Part 5 · UPDATE: Changing Existing Data</li><li>✅ Part 6 · DELETE: Removing Rows</li></ul><div class="ln"><a href="lesson_40.html" class="ln-btn">&#8592; Lesson 40</a><a href="lesson_42.html" class="ln-btn primary">Lesson 42 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 41 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 13: JavaScript Temporal API: The Modern, Precise, and Safe Way to Handle Dates and Times in JavaScript — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="12" data-key="techbase_js_l13">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 13 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 13</div>
+      <h1>JavaScript Temporal API: The Modern, Precise, and Safe Way to Handle Dates and Times in JavaScript</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: 🔵 Stage 1 · Setup: Store Meetings and Display Basics</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 13</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 12 phases</span><span>🏗️ 🔵 Stage 1 · Setup: Store Meetings and Display Basics</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">1. Background: Why a New Date System?</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You already know that JavaScript has a <code>Date</code> object. So why build an entirely new system called <strong>Temporal</strong>?</p>
+<p class="v2-p">Because the old <code>Date</code> object has deep, unfixable problems that have caused bugs in production software for over 30 years. The Temporal API was designed from scratch to fix every one of them.</p>
+<h3 class="v2-h3">The 7 Problems with the Old <code>Date</code> Object</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Problem</th><th>What Happens</th></tr></thead><tbody><tr><td>1. <strong>Mutable</strong></td><td><code>setDate()</code>, <code>setMonth()</code> change the object permanently · easy to accidentally modify a shared date</td></tr><tr><td>2. <strong>0-indexed months</strong></td><td>January = 0, December = 11 · confusing and error-prone</td></tr><tr><td>3. <strong>No timezone support</strong></td><td><code>Date</code> stores UTC but displays in local time · constantly confusing</td></tr><tr><td>4. <strong>Millisecond precision only</strong></td><td>Cannot represent microseconds or nanoseconds</td></tr><tr><td>5. <strong>Inconsistent string parsing</strong></td><td><code>new Date("01/15/2024")</code> behaves differently in Chrome vs Firefox</td></tr><tr><td>6. <strong>No calendar system support</strong></td><td>Cannot work with Hebrew, Japanese, Islamic, or other calendars</td></tr><tr><td>7. <strong>One type for everything</strong></td><td>You cannot distinguish "just a date" from "a date with a time" from "a timestamp"</td></tr></tbody></table></div>
+<h3 class="v2-h3">What Temporal Fixes</h3>
+<p class="v2-p">Temporal introduces a <strong>family of separate types</strong>, each designed for a specific use case:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Temporal.Instant         → A precise moment in time (like a UTC timestamp)
+Temporal.PlainDate       → A date with no time, no timezone (&quot;2024-03-20&quot;)
+Temporal.PlainTime       → A time with no date, no timezone (&quot;09:30:00&quot;)
+Temporal.PlainDateTime   → A date + time, no timezone (&quot;2024-03-20T09:30:00&quot;)
+Temporal.ZonedDateTime   → A date + time + timezone (&quot;2024-03-20T09:30:00[Europe/London]&quot;)
+Temporal.Duration        → A length of time (&quot;2 years, 3 months, 5 days&quot;)
+Temporal.Now             → Static methods to get the current moment in any form
+Temporal.PlainYearMonth  → Just a year and month (&quot;2024-03&quot;)
+Temporal.PlainMonthDay   → Just a month and day (&quot;--03-20&quot;) — for recurring dates</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Think of it like specialised tools in a toolkit. A carpenter does not use a screwdriver to hammer a nail. Similarly, you should not use <code>Temporal.Instant</code> (a precise UTC point) when you only need <code>Temporal.PlainDate</code> (a date on a calendar).</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Major companies building calendars, booking systems, financial platforms, and global apps lobbied for the Temporal API for years · because the old <code>Date</code> object was causing real data loss and billing errors in production systems.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1. Background: Why a New Date System?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">2. Topic 1 · Temporal Introduction &amp; Overview</div><div class="pc" id="chk2"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<h3 class="v2-h3">Key Design Principles of Temporal</h3>
+<p class="v2-p">Before looking at any code, understand these five principles that govern how Temporal works:</p>
+<h4 class="v2-h4">Principle 1 · Immutable (No Setters!)</h4>
+<p class="v2-p">Every Temporal object is <strong>immutable</strong> · it cannot be changed after creation. When you "modify" a Temporal value, you always get a <strong>new object</strong> back. The original is untouched.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const date = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+// ❌ There is no date.setDate(21) — no setters exist!
+
+// ✅ Instead — create a new object:
+const newDate = date.with({ day: 21 });
+
+console.log(date.toString());    // 2024-03-20  ← unchanged
+console.log(newDate.toString()); // 2024-03-21  ← new object</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-20
+2024-03-21</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Immutability prevents a whole class of bugs where a shared date object is accidentally modified by one part of the code, breaking another. This is especially common in React and other UI frameworks.</p></blockquote>
+<hr class="v2-hr">
+<h4 class="v2-h4">Principle 2 · Months Are 1-Indexed ✅</h4>
+<p class="v2-p">Unlike the old <code>Date</code> object, Temporal uses <strong>human-friendly month numbers</strong>. January = 1, December = 12.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Old Date — CONFUSING ❌
+const old = new Date(2024, 0, 15); // month 0 = January?!
+
+// Temporal — CLEAR ✅
+const modern = Temporal.PlainDate.from({ year: 2024, month: 1, day: 15 }); // month 1 = January
+console.log(modern.month); // 1
+console.log(modern.monthCode); // &quot;M01&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h4 class="v2-h4">Principle 3 · Explicit Timezone Handling</h4>
+<p class="v2-p">Temporal separates "plain" dates/times (no timezone) from "zoned" dates/times (with timezone). You always know exactly what you're working with.</p>
+<hr class="v2-hr">
+<h4 class="v2-h4">Principle 4 · Nanosecond Precision</h4>
+<p class="v2-p">Temporal stores time with <strong>nanosecond</strong> precision · 1,000,000× more precise than the old <code>Date</code> object's milliseconds. Critical for scientific, financial, and performance-sensitive applications.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const instant = Temporal.Instant.fromEpochNanoseconds(1705276800000000500n);
+// Note the &quot;n&quot; suffix — JavaScript BigInt for very large numbers
+console.log(instant.epochNanoseconds); // 1705276800000000500n</code></pre></div></div>
+<hr class="v2-hr">
+<h4 class="v2-h4">Principle 5 · ISO 8601 Strings for Everything</h4>
+<p class="v2-p">Every Temporal type produces and accepts clean, unambiguous ISO 8601 strings.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const date = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+console.log(date.toString()); // &quot;2024-03-20&quot;
+
+const time = Temporal.PlainTime.from(&quot;14:30:00&quot;);
+console.log(time.toString()); // &quot;14:30:00&quot;
+
+const zdt = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:30:00[Europe/London]&quot;);
+console.log(zdt.toString()); // &quot;2024-03-20T14:30:00+00:00[Europe/London]&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Temporal Type Family · When to Use What</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Use Case</th><th>Temporal Type</th></tr></thead><tbody><tr><td>"Right now" in universal time</td><td><code>Temporal.Now.instant()</code></td></tr><tr><td>"Today's date" (no time)</td><td><code>Temporal.Now.plainDateISO()</code></td></tr><tr><td>A calendar date with no time (e.g. a birthday)</td><td><code>Temporal.PlainDate</code></td></tr><tr><td>A time of day with no date (e.g. "office opens at 9 AM")</td><td><code>Temporal.PlainTime</code></td></tr><tr><td>A date and time with no timezone (e.g. a log entry)</td><td><code>Temporal.PlainDateTime</code></td></tr><tr><td>A meeting with a specific timezone</td><td><code>Temporal.ZonedDateTime</code></td></tr><tr><td>An exact point in history (database timestamp)</td><td><code>Temporal.Instant</code></td></tr><tr><td>"How long" between two events</td><td><code>Temporal.Duration</code></td></tr><tr><td>A month in a year (no day · e.g. credit card expiry)</td><td><code>Temporal.PlainYearMonth</code></td></tr><tr><td>An annual event (month + day, no year · e.g. birthday)</td><td><code>Temporal.PlainMonthDay</code></td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2. Topic 1 · Temporal Introduction &amp; Overview</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">3. Topic 2 · Temporal vs Date: Side-by-Side</div><div class="pc" id="chk3"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">Let's compare the same tasks done the old way (<code>Date</code>) vs the new way (<code>Temporal</code>).</p>
+<h3 class="v2-h3">Comparison 1 · Create "March 20, 2024"</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Old Date — month is 0-indexed (bug waiting to happen)
+const old = new Date(2024, 2, 20); // month 2 = March ← confusing!
+
+// Temporal — month 3 = March (human-friendly!)
+const modern = Temporal.PlainDate.from({ year: 2024, month: 3, day: 20 });
+// or from a string:
+const modern2 = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+console.log(old.toDateString());    // Wed Mar 20 2024
+console.log(modern.toString());     // 2024-03-20</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparison 2 · Add 10 Days</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Old Date — mutates the original!
+const old = new Date(2024, 2, 20);
+old.setDate(old.getDate() + 10); // ← mutates old directly!
+console.log(old.toDateString()); // Sat Mar 30 2024
+
+// Temporal — always returns a new object, original unchanged
+const original = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+const added    = original.add({ days: 10 });
+
+console.log(original.toString()); // 2024-03-20 ← untouched!
+console.log(added.toString());    // 2024-03-30 ← new object</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-20
+2024-03-30</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparison 3 · Difference Between Two Dates</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Old Date — manual math, error-prone
+const d1 = new Date(2024, 0, 1);
+const d2 = new Date(2024, 11, 31);
+const diffDays = Math.round((d2 - d1) / 86400000); // 365
+
+// Temporal — clean and explicit
+const t1 = Temporal.PlainDate.from(&quot;2024-01-01&quot;);
+const t2 = Temporal.PlainDate.from(&quot;2024-12-31&quot;);
+const diff = t1.until(t2);
+
+console.log(diff.days);   // 365
+console.log(diff.toString()); // &quot;P365D&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparison 4 · Timezone Conversion</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Old Date — no built-in timezone support at all!
+// You need external libraries like Moment.js or date-fns/tz
+
+// Temporal — built-in, explicit, clear
+const meeting = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:00:00[Europe/London]&quot;);
+const inNY    = meeting.withTimeZone(&quot;America/New_York&quot;);
+const inTokyo = meeting.withTimeZone(&quot;Asia/Tokyo&quot;);
+
+console.log(inNY.toString());    // 2024-03-20T10:00:00-04:00[America/New_York]
+console.log(inTokyo.toString()); // 2024-03-20T23:00:00+09:00[Asia/Tokyo]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Full Comparison Table</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th>Old <code>Date</code></th><th><code>Temporal</code></th></tr></thead><tbody><tr><td>Months</td><td>0-indexed (Jan=0) ❌</td><td>1-indexed (Jan=1) ✅</td></tr><tr><td>Mutable</td><td>Yes (setters) ❌</td><td>No (immutable) ✅</td></tr><tr><td>Precision</td><td>Milliseconds</td><td>Nanoseconds ✅</td></tr><tr><td>Timezone support</td><td>None (workarounds needed) ❌</td><td>Built-in, explicit ✅</td></tr><tr><td>String parsing</td><td>Inconsistent ❌</td><td>ISO 8601, consistent ✅</td></tr><tr><td>Date-only type</td><td>No (Date always has time) ❌</td><td>Yes (<code>PlainDate</code>) ✅</td></tr><tr><td>Time-only type</td><td>No ❌</td><td>Yes (<code>PlainTime</code>) ✅</td></tr><tr><td>Duration type</td><td>No (manual math) ❌</td><td>Yes (<code>Duration</code>) ✅</td></tr><tr><td>Calendar systems</td><td>No ❌</td><td>Yes (ISO, Hebrew, etc.) ✅</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3. Topic 2 · Temporal vs Date: Side-by-Side</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">4. Topic 3 · Temporal.Now</div><div class="pc" id="chk4"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><code>Temporal.Now</code> is a namespace (a collection of static methods) that gives you the current date and time in various forms. You do NOT create a <code>Temporal.Now</code> object · you call its methods directly.</p>
+<p class="v2-p">Think of <code>Temporal.Now</code> like a dashboard with different dials · each method gives you the "current moment" in a different format.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>Temporal.Now.instant()</code> · Current Moment as a UTC Instant</h3>
+<p class="v2-p">Returns the current moment as a <code>Temporal.Instant</code> · a precise point in universal time, stored in nanoseconds.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const now = Temporal.Now.instant();
+console.log(now.toString());
+// &quot;2024-03-20T14:30:00.123456789Z&quot;
+//  ↑ Full UTC timestamp with nanoseconds!
+
+console.log(now.epochMilliseconds);
+// 1710944200123  (milliseconds since epoch — for compatibility)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output (sample):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-20T14:30:00.123456789Z
+1710944200123</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Use this to timestamp database records, log entries, and event streams. It gives the most precise, unambiguous timestamp possible.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>Temporal.Now.zonedDateTimeISO()</code> · Current Date+Time With Timezone</h3>
+<p class="v2-p">Returns the current date and time in your local timezone as a <code>Temporal.ZonedDateTime</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const zdt = Temporal.Now.zonedDateTimeISO();
+console.log(zdt.toString());
+// &quot;2024-03-20T14:30:00.123456789+00:00[Europe/London]&quot;
+// ↑ Full date, time, UTC offset, AND timezone name!
+
+// You can also specify a timezone:
+const inNY = Temporal.Now.zonedDateTimeISO(&quot;America/New_York&quot;);
+console.log(inNY.toString());
+// &quot;2024-03-20T10:30:00.123456789-04:00[America/New_York]&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>Temporal.Now.plainDateISO()</code> · Today's Date Only</h3>
+<p class="v2-p">Returns today's date as a <code>Temporal.PlainDate</code> · no time, no timezone.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const today = Temporal.Now.plainDateISO();
+console.log(today.toString()); // &quot;2024-03-20&quot;
+console.log(today.year);       // 2024
+console.log(today.month);      // 3  (March — 1-indexed!)
+console.log(today.day);        // 20</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output (sample):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-20
+2024
+3
+20</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> You can also specify a timezone to get "today" in a specific part of the world:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const todayInTokyo = Temporal.Now.plainDateISO(&quot;Asia/Tokyo&quot;);
+// Tokyo is ahead of UTC — their &quot;today&quot; might be ahead of yours</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>Temporal.Now.plainTimeISO()</code> · Current Time Only</h3>
+<p class="v2-p">Returns the current time of day as a <code>Temporal.PlainTime</code> · no date, no timezone.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const time = Temporal.Now.plainTimeISO();
+console.log(time.toString()); // &quot;14:30:00.123456789&quot;
+console.log(time.hour);       // 14
+console.log(time.minute);     // 30
+console.log(time.second);     // 0</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>Temporal.Now.plainDateTimeISO()</code> · Current Date and Time (No Timezone)</h3>
+<p class="v2-p">Returns current date + time as a <code>Temporal.PlainDateTime</code> · useful for local timestamps where you don't need timezone info.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dt = Temporal.Now.plainDateTimeISO();
+console.log(dt.toString()); // &quot;2024-03-20T14:30:00.123456789&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>Temporal.Now.timeZoneId()</code> · Your Current Timezone Name</h3>
+<p class="v2-p">Returns the IANA timezone identifier (the official name) of your system's current timezone.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const tz = Temporal.Now.timeZoneId();
+console.log(tz); // &quot;Europe/London&quot; or &quot;America/New_York&quot; or &quot;Asia/Tokyo&quot; etc.</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Use this when you need to store a user's timezone preference automatically on first visit to your app.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Summary: All Temporal.Now Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Best For</th></tr></thead><tbody><tr><td><code>Temporal.Now.instant()</code></td><td><code>Temporal.Instant</code></td><td>Precise UTC timestamps</td></tr><tr><td><code>Temporal.Now.zonedDateTimeISO(tz?)</code></td><td><code>Temporal.ZonedDateTime</code></td><td>Full local date+time+timezone</td></tr><tr><td><code>Temporal.Now.plainDateISO(tz?)</code></td><td><code>Temporal.PlainDate</code></td><td>Today's date only</td></tr><tr><td><code>Temporal.Now.plainTimeISO(tz?)</code></td><td><code>Temporal.PlainTime</code></td><td>Current time of day only</td></tr><tr><td><code>Temporal.Now.plainDateTimeISO(tz?)</code></td><td><code>Temporal.PlainDateTime</code></td><td>Local date+time, no TZ needed</td></tr><tr><td><code>Temporal.Now.timeZoneId()</code></td><td>String</td><td>Get the user's timezone name</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4. Topic 3 · Temporal.Now</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">5. Topic 4 · Temporal.Instant</div><div class="pc" id="chk5"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">A <code>Temporal.Instant</code> represents <strong>a specific, precise point in universal time</strong> · like a pin stuck in the global timeline. It is always in UTC. It has no timezone, no calendar, no year/month/day on its own · just a single precise moment measured in <strong>nanoseconds</strong> from the Unix Epoch (January 1, 1970 UTC).</p>
+<p class="v2-p">Think of it like a universal timestamp on a package · it says exactly <em>when</em> something happened, without any cultural interpretation of "day" or "month".</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a Temporal.Instant</h3>
+<h4 class="v2-h4">From an ISO 8601 string (must end with <code>Z</code> for UTC):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i1 = Temporal.Instant.from(&quot;2024-03-20T14:30:00Z&quot;);
+console.log(i1.toString()); // &quot;2024-03-20T14:30:00Z&quot;
+
+const i2 = Temporal.Instant.from(&quot;2024-03-20T14:30:00.123456789Z&quot;);
+console.log(i2.toString()); // &quot;2024-03-20T14:30:00.123456789Z&quot;</code></pre></div></div>
+<h4 class="v2-h4">From epoch milliseconds (for compatibility with old <code>Date</code>):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i = Temporal.Instant.fromEpochMilliseconds(1710944200000);
+console.log(i.toString()); // &quot;2024-03-20T14:36:40Z&quot;</code></pre></div></div>
+<h4 class="v2-h4">From epoch nanoseconds (BigInt · note the <code>n</code>):</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i = Temporal.Instant.fromEpochNanoseconds(1710944200000000000n);
+console.log(i.toString()); // &quot;2024-03-20T14:36:40Z&quot;</code></pre></div></div>
+<h4 class="v2-h4"><code>Temporal.Instant.fromEpochSeconds()</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i = Temporal.Instant.fromEpochSeconds(1710944200);
+console.log(i.toString()); // &quot;2024-03-20T14:36:40Z&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reading Instant Properties</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i = Temporal.Instant.from(&quot;2024-03-20T14:30:00.123Z&quot;);
+
+console.log(i.epochSeconds);       // 1710944200   (Number)
+console.log(i.epochMilliseconds);  // 1710944200123  (Number)
+console.log(i.epochMicroseconds);  // 1710944200123000n  (BigInt)
+console.log(i.epochNanoseconds);   // 1710944200123000000n  (BigInt)</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output (sample):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>1710944200
+1710944200123
+1710944200123000n
+1710944200123000000n</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> <code>epochMilliseconds</code> is the most compatible property · it is the same value you'd get from the old <code>Date</code> object's <code>getTime()</code> method. Use it when passing timestamps to APIs or databases that expect milliseconds.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>THINK ABOUT IT:</strong> Why are <code>epochMicroseconds</code> and <code>epochNanoseconds</code> BigInt values (with <code>n</code>) while <code>epochSeconds</code> and <code>epochMilliseconds</code> are regular Numbers? Because nanosecond timestamps are too large to fit accurately in JavaScript's regular 64-bit floating-point number format!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparing Two Instants</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const event1 = Temporal.Instant.from(&quot;2024-03-20T10:00:00Z&quot;);
+const event2 = Temporal.Instant.from(&quot;2024-03-20T14:30:00Z&quot;);
+
+// Compare: returns -1, 0, or 1
+const result = Temporal.Instant.compare(event1, event2);
+console.log(result); // -1 (event1 is before event2)
+
+// Check order
+if (Temporal.Instant.compare(event1, event2) &lt; 0) {
+  console.log(&quot;event1 happened first&quot;);
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>-1
+event1 happened first</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Arithmetic with Instant</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const start = Temporal.Instant.from(&quot;2024-03-20T10:00:00Z&quot;);
+
+// Add a duration (only hours, minutes, seconds, ms, µs, ns — NOT days/months!)
+const later = start.add({ hours: 4, minutes: 30 });
+console.log(later.toString()); // &quot;2024-03-20T14:30:00Z&quot;
+
+// Subtract
+const earlier = start.subtract({ minutes: 90 });
+console.log(earlier.toString()); // &quot;2024-03-20T08:30:00Z&quot;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>WATCH OUT:</strong> <code>Temporal.Instant</code> does NOT support adding <code>days</code>, <code>months</code>, or <code>years</code> · because "1 day" is ambiguous without a timezone (daylight saving time can make days 23 or 25 hours long). Use <code>Temporal.ZonedDateTime</code> for calendar-aware arithmetic.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Converting Instant to ZonedDateTime</h3>
+<p class="v2-p">To read the year, month, day, hour etc. from an Instant, you must first attach a timezone:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const i = Temporal.Instant.from(&quot;2024-03-20T14:30:00Z&quot;);
+
+const inLondon  = i.toZonedDateTimeISO(&quot;Europe/London&quot;);
+const inNewYork = i.toZonedDateTimeISO(&quot;America/New_York&quot;);
+const inTokyo   = i.toZonedDateTimeISO(&quot;Asia/Tokyo&quot;);
+
+console.log(inLondon.toString());  // &quot;2024-03-20T14:30:00+00:00[Europe/London]&quot;
+console.log(inNewYork.toString()); // &quot;2024-03-20T10:30:00-04:00[America/New_York]&quot;
+console.log(inTokyo.toString());   // &quot;2024-03-20T23:30:00+09:00[Asia/Tokyo]&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-20T14:30:00+00:00[Europe/London]
+2024-03-20T10:30:00-04:00[America/New_York]
+2024-03-20T23:30:00+09:00[Asia/Tokyo]</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Store all timestamps in your database as <code>Temporal.Instant</code> (or its <code>epochMilliseconds</code>). When displaying to a user, convert to their timezone using <code>toZonedDateTimeISO(userTimezone)</code>. This is the professional pattern used by all global apps.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">until() and since() · Duration Between Instants</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const start = Temporal.Instant.from(&quot;2024-03-20T10:00:00Z&quot;);
+const end   = Temporal.Instant.from(&quot;2024-03-20T14:30:00Z&quot;);
+
+const duration = start.until(end);
+console.log(duration.hours);   // 4
+console.log(duration.minutes); // 30
+console.log(duration.toString()); // &quot;PT4H30M&quot;
+
+// since() is the reverse
+const ago = end.since(start);
+console.log(ago.toString()); // &quot;PT4H30M&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5. Topic 4 · Temporal.Instant</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">6. Topic 5 · Plain Types</div><div class="pc" id="chk6"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">"Plain" types in Temporal are date/time objects with <strong>no timezone attached</strong>. They represent calendar values as they appear on a wall calendar or clock · without any UTC conversion or timezone ambiguity.</p>
+<p class="v2-p">There are four Plain types. Each covers a different slice of date/time information:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Type</th><th>Stores</th><th>Example</th></tr></thead><tbody><tr><td><code>Temporal.PlainDate</code></td><td>Year, Month, Day</td><td>"2024-03-20"</td></tr><tr><td><code>Temporal.PlainTime</code></td><td>Hour, Minute, Second, subseconds</td><td>"14:30:00"</td></tr><tr><td><code>Temporal.PlainYearMonth</code></td><td>Year + Month (no day)</td><td>"2024-03"</td></tr><tr><td><code>Temporal.PlainMonthDay</code></td><td>Month + Day (no year)</td><td>" · 03-20"</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">6A · Temporal.PlainDate</h3>
+<p class="v2-p">A date on a calendar with no time and no timezone. Perfect for birthdays, holidays, deadlines, or any date where the specific hour doesn't matter.</p>
+<h4 class="v2-h4">Creating a PlainDate:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// From an ISO string
+const d1 = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+console.log(d1.toString()); // &quot;2024-03-20&quot;
+
+// From an object (month is 1-indexed!)
+const d2 = Temporal.PlainDate.from({ year: 2024, month: 3, day: 20 });
+console.log(d2.toString()); // &quot;2024-03-20&quot;
+
+// Constructor
+const d3 = new Temporal.PlainDate(2024, 3, 20);
+console.log(d3.toString()); // &quot;2024-03-20&quot;</code></pre></div></div>
+<h4 class="v2-h4">Reading PlainDate Properties:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+console.log(d.year);         // 2024
+console.log(d.month);        // 3        ← March (1-indexed!)
+console.log(d.monthCode);    // &quot;M03&quot;
+console.log(d.day);          // 20
+console.log(d.dayOfWeek);    // 3        ← Wednesday (1=Mon, 7=Sun — ISO standard)
+console.log(d.dayOfYear);    // 80       ← 80th day of 2024
+console.log(d.weekOfYear);   // 12       ← 12th week of 2024
+console.log(d.daysInMonth);  // 31       ← March has 31 days
+console.log(d.daysInYear);   // 366      ← 2024 is a leap year
+console.log(d.inLeapYear);   // true
+console.log(d.calendarId);   // &quot;iso8601&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024
+3
+M03
+20
+3
+80
+12
+31
+366
+true
+iso8601</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> <code>dayOfWeek</code> in Temporal follows the <strong>ISO 8601 standard</strong> · Monday=1, Tuesday=2, ..., Sunday=7. This is different from the old <code>Date</code> object where Sunday=0.</p></blockquote>
+<blockquote class="v2-bq"><p class="v2-p">🐛 <strong>COMMON MISTAKE:</strong> Do not confuse <code>day</code> (day of the month: 1 · 31) with <code>dayOfWeek</code> (day of the week: 1 · 7 in ISO). And note <code>dayOfWeek: 3</code> means Wednesday, NOT Thursday!</p></blockquote>
+<h4 class="v2-h4">Modifying a PlainDate with <code>.with()</code>:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+const nextMonth = d.with({ month: 4 }); // Change only the month
+console.log(nextMonth.toString()); // &quot;2024-04-20&quot;
+
+const endOfYear = d.with({ month: 12, day: 31 });
+console.log(endOfYear.toString()); // &quot;2024-12-31&quot;</code></pre></div></div>
+<h4 class="v2-h4">Adding and Subtracting:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+const plus10  = d.add({ days: 10 });
+console.log(plus10.toString());  // &quot;2024-03-30&quot;
+
+const plus3m  = d.add({ months: 3 });
+console.log(plus3m.toString());  // &quot;2024-06-20&quot;
+
+const minus1y = d.subtract({ years: 1 });
+console.log(minus1y.toString()); // &quot;2023-03-20&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-30
+2024-06-20
+2023-03-20</code></pre></div></div>
+<h4 class="v2-h4">Comparing Two Dates:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d1 = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+const d2 = Temporal.PlainDate.from(&quot;2024-06-15&quot;);
+
+console.log(Temporal.PlainDate.compare(d1, d2)); // -1 (d1 is before d2)
+console.log(d1.equals(d2));                       // false
+console.log(d1.equals(&quot;2024-03-20&quot;));             // true (string auto-converted)</code></pre></div></div>
+<h4 class="v2-h4">until() and since():</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const start = Temporal.PlainDate.from(&quot;2024-01-01&quot;);
+const end   = Temporal.PlainDate.from(&quot;2024-12-31&quot;);
+
+const diff = start.until(end);
+console.log(diff.days);    // 365
+
+// With explicit units
+const diff2 = start.until(end, { largestUnit: &quot;month&quot; });
+console.log(diff2.months); // 11
+console.log(diff2.days);   // 30</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">6B · Temporal.PlainTime</h3>
+<p class="v2-p">A time of day with no date and no timezone. Perfect for "office opens at 9:00 AM", "alarm at 06:30", or any recurring daily time.</p>
+<h4 class="v2-h4">Creating a PlainTime:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const t1 = Temporal.PlainTime.from(&quot;14:30:00&quot;);
+console.log(t1.toString()); // &quot;14:30:00&quot;
+
+const t2 = Temporal.PlainTime.from({ hour: 14, minute: 30, second: 0 });
+console.log(t2.toString()); // &quot;14:30:00&quot;
+
+const t3 = new Temporal.PlainTime(14, 30, 0, 0, 0, 0); // h, m, s, ms, µs, ns
+console.log(t3.toString()); // &quot;14:30:00&quot;</code></pre></div></div>
+<h4 class="v2-h4">Reading PlainTime Properties:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const t = Temporal.PlainTime.from(&quot;14:30:45.123456789&quot;);
+
+console.log(t.hour);        // 14
+console.log(t.minute);      // 30
+console.log(t.second);      // 45
+console.log(t.millisecond); // 123
+console.log(t.microsecond); // 456
+console.log(t.nanosecond);  // 789</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>14
+30
+45
+123
+456
+789</code></pre></div></div>
+<h4 class="v2-h4">Arithmetic on PlainTime:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const t = Temporal.PlainTime.from(&quot;22:00:00&quot;);
+
+// Adding time wraps around midnight automatically!
+const plus3h = t.add({ hours: 3 });
+console.log(plus3h.toString()); // &quot;01:00:00&quot; ← wrapped past midnight!
+
+const minus30m = t.subtract({ minutes: 30 });
+console.log(minus30m.toString()); // &quot;21:30:00&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>01:00:00
+21:30:00</code></pre></div></div>
+<h4 class="v2-h4">Until/Since with PlainTime:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const open  = Temporal.PlainTime.from(&quot;09:00:00&quot;);
+const close = Temporal.PlainTime.from(&quot;17:30:00&quot;);
+
+const workDay = open.until(close);
+console.log(workDay.hours);   // 8
+console.log(workDay.minutes); // 30</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>8
+30</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">6C · Temporal.PlainYearMonth</h3>
+<p class="v2-p">Represents a specific year and month with no day. Perfect for credit card expiry dates, monthly reporting periods, or subscription months.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const ym1 = Temporal.PlainYearMonth.from(&quot;2024-03&quot;);
+console.log(ym1.year);        // 2024
+console.log(ym1.month);       // 3
+console.log(ym1.daysInMonth); // 31
+
+// Add months
+const next = ym1.add({ months: 3 });
+console.log(next.toString()); // &quot;2024-06&quot;
+
+// Compare
+console.log(Temporal.PlainYearMonth.compare(ym1, next)); // -1</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024
+3
+31
+2024-06
+-1</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> A credit card expiry of "03/2027" is a <code>PlainYearMonth</code> · it represents the entire month of March 2027, not a specific day.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">6D · Temporal.PlainMonthDay</h3>
+<p class="v2-p">Represents a month and day with no year. Perfect for recurring annual events · birthdays, anniversaries, national holidays · where the year changes but the month/day stays the same.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Note the &quot;--&quot; prefix in ISO format for PlainMonthDay (no year!)
+const birthday = Temporal.PlainMonthDay.from(&quot;--03-20&quot;);
+console.log(birthday.month); // 3
+console.log(birthday.day);   // 20
+
+// Or from an object
+const holiday = Temporal.PlainMonthDay.from({ month: 12, day: 25 });
+console.log(holiday.toString()); // &quot;--12-25&quot;
+
+// Convert to a PlainDate for a specific year
+const thisYear = birthday.toPlainDate({ year: 2024 });
+console.log(thisYear.toString()); // &quot;2024-03-20&quot;
+
+const nextYear = birthday.toPlainDate({ year: 2025 });
+console.log(nextYear.toString()); // &quot;2025-03-20&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>3
+20
+--12-25
+2024-03-20
+2025-03-20</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> In a birthday reminder app, store each person's birthday as a <code>PlainMonthDay</code>. Each year, call <code>.toPlainDate({ year: currentYear })</code> to get this year's birthday.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>6. Topic 5 · Plain Types</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">7. Topic 6 · Temporal.PlainDateTime</div><div class="pc" id="chk7"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><code>Temporal.PlainDateTime</code> represents a date <strong>and</strong> a time of day · but with <strong>no timezone</strong>. It is like a calendar entry written on paper: "March 20, 2024 at 2:30 PM" · it describes a moment in time on a local clock, but says nothing about which timezone that clock is in.</p>
+<p class="v2-p">Use <code>PlainDateTime</code> when:</p>
+<ul class="v2-ul"><li>You're recording events that happened on a specific machine (logs)</li><li>The timezone is already understood by both parties (e.g. "always UTC")</li><li>You want to combine date + time before attaching a timezone</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a PlainDateTime</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// From ISO string
+const dt1 = Temporal.PlainDateTime.from(&quot;2024-03-20T14:30:00&quot;);
+console.log(dt1.toString()); // &quot;2024-03-20T14:30:00&quot;
+
+// From an object
+const dt2 = Temporal.PlainDateTime.from({
+  year: 2024, month: 3, day: 20,
+  hour: 14, minute: 30, second: 0
+});
+console.log(dt2.toString()); // &quot;2024-03-20T14:30:00&quot;
+
+// Constructor
+const dt3 = new Temporal.PlainDateTime(2024, 3, 20, 14, 30, 0);
+console.log(dt3.toString()); // &quot;2024-03-20T14:30:00&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reading All Properties</h3>
+<p class="v2-p"><code>PlainDateTime</code> has ALL the properties of both <code>PlainDate</code> and <code>PlainTime</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dt = Temporal.PlainDateTime.from(&quot;2024-03-20T14:30:45.123456789&quot;);
+
+// Date parts
+console.log(dt.year);         // 2024
+console.log(dt.month);        // 3
+console.log(dt.day);          // 20
+console.log(dt.dayOfWeek);    // 3  (Wednesday in ISO: Mon=1, Sun=7)
+console.log(dt.dayOfYear);    // 80
+console.log(dt.weekOfYear);   // 12
+console.log(dt.daysInMonth);  // 31
+console.log(dt.inLeapYear);   // true
+
+// Time parts
+console.log(dt.hour);         // 14
+console.log(dt.minute);       // 30
+console.log(dt.second);       // 45
+console.log(dt.millisecond);  // 123
+console.log(dt.microsecond);  // 456
+console.log(dt.nanosecond);   // 789</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Modifying with <code>.with()</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dt = Temporal.PlainDateTime.from(&quot;2024-03-20T14:30:00&quot;);
+
+// Change just the time
+const morning = dt.with({ hour: 9, minute: 0, second: 0 });
+console.log(morning.toString()); // &quot;2024-03-20T09:00:00&quot;
+
+// Change just the date
+const nextWeek = dt.with({ day: 27 });
+console.log(nextWeek.toString()); // &quot;2024-03-27T14:30:00&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-20T09:00:00
+2024-03-27T14:30:00</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Arithmetic with PlainDateTime</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dt = Temporal.PlainDateTime.from(&quot;2024-03-20T14:30:00&quot;);
+
+const plus2weeks = dt.add({ weeks: 2 });
+console.log(plus2weeks.toString()); // &quot;2024-04-03T14:30:00&quot;
+
+const minus1y6m  = dt.subtract({ years: 1, months: 6 });
+console.log(minus1y6m.toString());  // &quot;2022-09-20T14:30:00&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-04-03T14:30:00
+2022-09-20T14:30:00</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Converting PlainDateTime to Other Types</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dt = Temporal.PlainDateTime.from(&quot;2024-03-20T14:30:00&quot;);
+
+// Extract just the date
+const date = dt.toPlainDate();
+console.log(date.toString()); // &quot;2024-03-20&quot;
+
+// Extract just the time
+const time = dt.toPlainTime();
+console.log(time.toString()); // &quot;14:30:00&quot;
+
+// Attach a timezone to make a ZonedDateTime
+const zdt = dt.toZonedDateTime(&quot;Europe/London&quot;);
+console.log(zdt.toString()); // &quot;2024-03-20T14:30:00+00:00[Europe/London]&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>7. Topic 6 · Temporal.PlainDateTime</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">8. Topic 7 · Temporal.ZonedDateTime</div><div class="pc" id="chk8"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p"><code>Temporal.ZonedDateTime</code> is the most complete Temporal type. It stores a <strong>date, a time, AND a timezone</strong>. It knows exactly what moment in universal time something is, AND what it looks like on a calendar in a specific place.</p>
+<p class="v2-p">Think of it like a meeting invitation: "March 20, 2024 at 2:30 PM London time" · this is fully unambiguous. Anyone anywhere can calculate what time this is in their own timezone.</p>
+<p class="v2-p">Use <code>ZonedDateTime</code> when:</p>
+<ul class="v2-ul"><li>Scheduling meetings across timezones</li><li>Recording events that users in different countries need to see in their own local time</li><li>Handling daylight saving time correctly</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a ZonedDateTime</h3>
+<p class="v2-p">The key feature of a ZonedDateTime string is the <strong>timezone identifier in square brackets <code>[...]</code></strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// From ISO string with timezone in brackets
+const zdt1 = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:30:00[Europe/London]&quot;);
+console.log(zdt1.toString());
+// &quot;2024-03-20T14:30:00+00:00[Europe/London]&quot;
+
+// With UTC offset and timezone
+const zdt2 = Temporal.ZonedDateTime.from(&quot;2024-03-20T10:30:00-04:00[America/New_York]&quot;);
+console.log(zdt2.toString());
+// &quot;2024-03-20T10:30:00-04:00[America/New_York]&quot;
+
+// From an object
+const zdt3 = Temporal.ZonedDateTime.from({
+  year: 2024, month: 3, day: 20,
+  hour: 14, minute: 30, second: 0,
+  timeZone: &quot;Asia/Tokyo&quot;
+});
+console.log(zdt3.toString());
+// &quot;2024-03-20T14:30:00+09:00[Asia/Tokyo]&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reading ZonedDateTime Properties</h3>
+<p class="v2-p">ZonedDateTime has all the properties of PlainDateTime, PLUS timezone-specific ones:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const zdt = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:30:00+00:00[Europe/London]&quot;);
+
+// Standard date/time properties
+console.log(zdt.year);       // 2024
+console.log(zdt.month);      // 3
+console.log(zdt.day);        // 20
+console.log(zdt.hour);       // 14
+console.log(zdt.minute);     // 30
+
+// Timezone-specific properties
+console.log(zdt.timeZoneId);          // &quot;Europe/London&quot;
+console.log(zdt.offset);              // &quot;+00:00&quot;
+console.log(zdt.offsetNanoseconds);   // 0
+console.log(zdt.hoursInDay);          // 24 (or 23/25 on DST change days!)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Converting Timezones with <code>.withTimeZone()</code></h3>
+<p class="v2-p">This is one of the most powerful features · converting the same moment into any timezone:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const london = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:00:00[Europe/London]&quot;);
+
+// Convert to different timezones — same moment, different local time display
+const newYork = london.withTimeZone(&quot;America/New_York&quot;);
+const tokyo   = london.withTimeZone(&quot;Asia/Tokyo&quot;);
+const dubai   = london.withTimeZone(&quot;Asia/Dubai&quot;);
+const sydney  = london.withTimeZone(&quot;Australia/Sydney&quot;);
+
+console.log(&quot;London  :&quot;, london.hour + &quot;:&quot; + String(london.minute).padStart(2,&quot;0&quot;));
+console.log(&quot;New York:&quot;, newYork.hour + &quot;:&quot; + String(newYork.minute).padStart(2,&quot;0&quot;));
+console.log(&quot;Tokyo   :&quot;, tokyo.hour + &quot;:&quot; + String(tokyo.minute).padStart(2,&quot;0&quot;));
+console.log(&quot;Dubai   :&quot;, dubai.hour + &quot;:&quot; + String(dubai.minute).padStart(2,&quot;0&quot;));
+console.log(&quot;Sydney  :&quot;, sydney.hour + &quot;:&quot; + String(sydney.minute).padStart(2,&quot;0&quot;));</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output (for 14:00 London time in summer):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>London  : 14:00
+New York: 10:00
+Tokyo   : 23:00
+Dubai   : 18:00
+Sydney  : 00:00</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🏢 <strong>REAL WORLD:</strong> Google Calendar shows "2:00 PM London time · click to see your local time". That conversion is exactly <code>withTimeZone(userTimezone)</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Daylight Saving Time (DST) · ZonedDateTime Handles It Automatically</h3>
+<p class="v2-p">One of the most complex problems in date handling is Daylight Saving Time. Clocks spring forward in spring and fall back in autumn. <code>ZonedDateTime</code> handles this correctly and transparently.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// The day clocks spring forward in London (March 31, 2024)
+const beforeDST = Temporal.ZonedDateTime.from(&quot;2024-03-31T00:00:00[Europe/London]&quot;);
+const afterDST  = beforeDST.add({ hours: 3 });
+
+// Even though we added 3 hours, the clock shows 4 hours later
+// because the clock jumped forward 1 hour at 1 AM!
+console.log(beforeDST.hour); // 0
+console.log(afterDST.hour);  // 4  ← 3 elapsed hours = 4 clock hours because of DST!
+console.log(beforeDST.hoursInDay); // 23  ← this day only has 23 hours!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>THINK ABOUT IT:</strong> If you tried to do this with the old <code>Date</code> object, you'd have to manually check whether DST was in effect. ZonedDateTime does this for you automatically using IANA timezone data.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">ZonedDateTime Arithmetic</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const zdt = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:00:00[America/New_York]&quot;);
+
+// Calendar-aware addition (respects DST!)
+const plus3months = zdt.add({ months: 3 });
+console.log(plus3months.toString());
+// &quot;2024-06-20T14:00:00-04:00[America/New_York]&quot;
+// Note: offset changed from -05:00 to -04:00 because DST kicked in!</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Converting ZonedDateTime to Other Types</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const zdt = Temporal.ZonedDateTime.from(&quot;2024-03-20T14:30:00[Europe/London]&quot;);
+
+const instant = zdt.toInstant();
+console.log(instant.toString()); // &quot;2024-03-20T14:30:00Z&quot;
+
+const plainDate = zdt.toPlainDate();
+console.log(plainDate.toString()); // &quot;2024-03-20&quot;
+
+const plainTime = zdt.toPlainTime();
+console.log(plainTime.toString()); // &quot;14:30:00&quot;
+
+const plainDT = zdt.toPlainDateTime();
+console.log(plainDT.toString()); // &quot;2024-03-20T14:30:00&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>8. Topic 7 · Temporal.ZonedDateTime</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">9. Topic 8 · Temporal.Duration</div><div class="pc" id="chk9"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">A <code>Temporal.Duration</code> represents a <strong>length of time</strong> · not a point in time, but the <em>span</em> between two points. Think of it like the difference between "2:30 PM" (a point in time) and "2 hours and 30 minutes" (a duration).</p>
+<p class="v2-p">Durations can include: years, months, weeks, days, hours, minutes, seconds, milliseconds, microseconds, and nanoseconds · all in one object.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Creating a Duration</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// From an object
+const d1 = Temporal.Duration.from({ years: 1, months: 6, days: 15 });
+console.log(d1.toString()); // &quot;P1Y6M15D&quot;  (ISO 8601 duration format)
+
+// From an ISO duration string
+// P = &quot;Period&quot; marker, T = time separator
+const d2 = Temporal.Duration.from(&quot;P1Y6M15DT2H30M&quot;);
+console.log(d2.years);   // 1
+console.log(d2.months);  // 6
+console.log(d2.days);    // 15
+console.log(d2.hours);   // 2
+console.log(d2.minutes); // 30
+
+// Using the constructor
+const d3 = new Temporal.Duration(1, 6, 0, 15, 2, 30);
+// (years, months, weeks, days, hours, minutes, seconds, ms, µs, ns)
+console.log(d3.toString()); // &quot;P1Y6M15DT2H30M&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>P1Y6M15D
+1
+6
+15
+2
+30
+P1Y6M15DT2H30M</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Understanding ISO Duration Format</h3>
+<p class="v2-p">The ISO 8601 duration string format uses letters as unit markers:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>P1Y6M15DT2H30M45S
+↑ ↑ ↑  ↑ ↑ ↑  ↑  ↑
+│ │ │  │ │ │  │  └── Seconds
+│ │ │  │ │ │  └───── Minutes
+│ │ │  │ │ └──────── Hours
+│ │ │  │ └────────── &quot;T&quot; separates date part from time part
+│ │ │  └──────────── Days
+│ │ └─────────────── Months
+│ └───────────────── Years
+└─────────────────── &quot;P&quot; = Period (required start marker)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>console.log(Temporal.Duration.from(&quot;P1Y&quot;).toString());        // &quot;P1Y&quot;
+console.log(Temporal.Duration.from(&quot;P6M&quot;).toString());        // &quot;P6M&quot;
+console.log(Temporal.Duration.from(&quot;P15D&quot;).toString());       // &quot;P15D&quot;
+console.log(Temporal.Duration.from(&quot;PT2H30M&quot;).toString());    // &quot;PT2H30M&quot;
+console.log(Temporal.Duration.from(&quot;PT45S&quot;).toString());      // &quot;PT45S&quot;
+console.log(Temporal.Duration.from(&quot;P1Y6M15DT2H30M45S&quot;).toString()); // full</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Reading Duration Properties</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d = Temporal.Duration.from({ years: 2, months: 3, weeks: 1, days: 5, hours: 6, minutes: 30, seconds: 15 });
+
+console.log(d.years);   // 2
+console.log(d.months);  // 3
+console.log(d.weeks);   // 1
+console.log(d.days);    // 5
+console.log(d.hours);   // 6
+console.log(d.minutes); // 30
+console.log(d.seconds); // 15
+console.log(d.sign);    // 1   (positive duration)</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Negative Durations</h3>
+<p class="v2-p">A Duration can be negative (representing going back in time). The <code>sign</code> property tells you the direction.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const negative = Temporal.Duration.from({ days: -10 });
+console.log(negative.sign);     // -1
+console.log(negative.toString()); // &quot;-P10D&quot;
+
+// Negate a duration
+const positive = Temporal.Duration.from({ days: 10 });
+const flipped  = positive.negated();
+console.log(flipped.sign);     // -1
+console.log(flipped.toString()); // &quot;-P10D&quot;
+
+// Absolute value (always positive)
+const abs = negative.abs();
+console.log(abs.toString()); // &quot;P10D&quot;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Adding and Subtracting Durations</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d1 = Temporal.Duration.from({ months: 3, days: 10 });
+const d2 = Temporal.Duration.from({ months: 1, days: 5 });
+
+// Duration + Duration
+// Note: requires a relativeTo date for month calculations
+const sum = d1.add(d2, { relativeTo: Temporal.PlainDate.from(&quot;2024-01-01&quot;) });
+console.log(sum.months); // 4
+console.log(sum.days);   // 15</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3"><code>total()</code> · Convert Duration to a Single Unit</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// How many total days is 2 months and 15 days?
+const d = Temporal.Duration.from({ months: 2, days: 15 });
+const totalDays = d.total({
+  unit: &quot;day&quot;,
+  relativeTo: Temporal.PlainDate.from(&quot;2024-01-01&quot;)
+});
+console.log(totalDays); // 76  (Jan=31, Feb=29 in 2024 leap year, +15 = 75... check exact)</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>TIP:</strong> Many Duration operations require a <code>relativeTo</code> date. This is because months have different numbers of days (28 · 31), and years have 365 or 366 days. Without knowing <em>which</em> months you're measuring, JavaScript can't convert accurately.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>9. Topic 8 · Temporal.Duration</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">10. Topic 9 · Temporal Arithmetic</div><div class="pc" id="chk10"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 1 · Conceptual Understanding</strong></p></blockquote>
+<p class="v2-p">Date arithmetic · adding days, subtracting months, calculating differences · is one of the most common (and error-prone) tasks in date handling. Temporal makes it clean, safe, and explicit.</p>
+<p class="v2-p"><strong>The core rule:</strong> All Temporal types are immutable. Every arithmetic operation returns a <strong>new object</strong>. The original is never changed.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Adding a Duration to a Date</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const startDate = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+// Add individual components
+const plus30days  = startDate.add({ days: 30 });
+const plus2months = startDate.add({ months: 2 });
+const plus1year   = startDate.add({ years: 1 });
+const combined    = startDate.add({ years: 1, months: 2, days: 15 });
+
+console.log(plus30days.toString());  // &quot;2024-04-19&quot;
+console.log(plus2months.toString()); // &quot;2024-05-20&quot;
+console.log(plus1year.toString());   // &quot;2025-03-20&quot;
+console.log(combined.toString());    // &quot;2025-06-04&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-04-19
+2024-05-20
+2025-03-20
+2025-06-04</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Subtracting a Duration from a Date</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+const minus10days  = d.subtract({ days: 10 });
+const minus1month  = d.subtract({ months: 1 });
+const minus2years  = d.subtract({ years: 2 });
+
+console.log(minus10days.toString()); // &quot;2024-03-10&quot;
+console.log(minus1month.toString()); // &quot;2024-02-20&quot;
+console.log(minus2years.toString()); // &quot;2022-03-20&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-03-10
+2024-02-20
+2022-03-20</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Calculating Difference: <code>until()</code> and <code>since()</code></h3>
+<p class="v2-p"><code>until()</code> and <code>since()</code> tell you the Duration between two dates.</p>
+<ul class="v2-ul"><li><code>a.until(b)</code> → "how long from a to b?" (forward)</li><li><code>a.since(b)</code> → "how long since b until a?" (also forward, just written differently)</li></ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const start = Temporal.PlainDate.from(&quot;2024-01-15&quot;);
+const end   = Temporal.PlainDate.from(&quot;2024-12-31&quot;);
+
+// Default largest unit = &quot;day&quot;
+const diff1 = start.until(end);
+console.log(diff1.days);    // 351
+
+// Specify largest unit to get months and days
+const diff2 = start.until(end, { largestUnit: &quot;month&quot; });
+console.log(diff2.months);  // 11
+console.log(diff2.days);    // 16
+
+// Specify smallest unit to round
+const diff3 = start.until(end, { largestUnit: &quot;year&quot;, smallestUnit: &quot;month&quot; });
+console.log(diff3.years);   // 0
+console.log(diff3.months);  // 11</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>351
+11
+16
+0
+11</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Overflow Control: <code>overflow</code> Option</h3>
+<p class="v2-p">When adding months, you can land on a day that doesn't exist in the target month. For example, adding 1 month to January 31 would give February 31 · which doesn't exist. Temporal handles this with the <code>overflow</code> option:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const jan31 = Temporal.PlainDate.from(&quot;2024-01-31&quot;);
+
+// Default overflow = &quot;constrain&quot; — clamps to last valid day
+const feb = jan31.add({ months: 1 }); // Feb 31 → constrain to Feb 29 (2024 leap year)
+console.log(feb.toString()); // &quot;2024-02-29&quot;
+
+// overflow: &quot;reject&quot; — throws an error instead
+try {
+  const invalid = jan31.add({ months: 1 }, { overflow: &quot;reject&quot; });
+} catch (e) {
+  console.log(e.message); // RangeError — Feb 31 does not exist
+}</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-02-29
+RangeError ...</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Rounding Durations: <code>round()</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const start = Temporal.PlainDateTime.from(&quot;2024-03-20T10:23:45&quot;);
+const end   = Temporal.PlainDateTime.from(&quot;2024-03-20T14:37:12&quot;);
+
+const diff = start.until(end);
+console.log(diff.toString()); // &quot;PT4H13M27S&quot;
+
+// Round to the nearest hour
+const rounded = diff.round({ smallestUnit: &quot;hour&quot;, relativeTo: start });
+console.log(rounded.hours); // 4</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Using a Stored Duration Object</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Store a duration and reuse it
+const subscription = Temporal.Duration.from({ months: 1 });
+const signupDate   = Temporal.PlainDate.from(&quot;2024-03-15&quot;);
+
+const renewalDate  = signupDate.add(subscription);
+const renewal2     = renewalDate.add(subscription);
+const renewal3     = renewal2.add(subscription);
+
+console.log(renewalDate.toString()); // &quot;2024-04-15&quot;
+console.log(renewal2.toString());    // &quot;2024-05-15&quot;
+console.log(renewal3.toString());    // &quot;2024-06-15&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>2024-04-15
+2024-05-15
+2024-06-15</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparing Dates and Times</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const d1 = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+const d2 = Temporal.PlainDate.from(&quot;2024-06-15&quot;);
+const d3 = Temporal.PlainDate.from(&quot;2024-03-20&quot;);
+
+// Static compare() method: -1 (before), 0 (equal), 1 (after)
+console.log(Temporal.PlainDate.compare(d1, d2)); // -1 (d1 before d2)
+console.log(Temporal.PlainDate.compare(d2, d1)); // 1  (d2 after d1)
+console.log(Temporal.PlainDate.compare(d1, d3)); // 0  (equal)
+
+// .equals() for equality check
+console.log(d1.equals(d3)); // true
+console.log(d1.equals(d2)); // false
+
+// Sorting an array by date
+const dates = [
+  Temporal.PlainDate.from(&quot;2024-06-15&quot;),
+  Temporal.PlainDate.from(&quot;2024-01-01&quot;),
+  Temporal.PlainDate.from(&quot;2024-03-20&quot;),
+];
+dates.sort(Temporal.PlainDate.compare);
+console.log(dates.map(d =&gt; d.toString()));
+// [&quot;2024-01-01&quot;, &quot;2024-03-20&quot;, &quot;2024-06-15&quot;]</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>-1
+1
+0
+true
+false
+[&quot;2024-01-01&quot;, &quot;2024-03-20&quot;, &quot;2024-06-15&quot;]</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Arithmetic with ZonedDateTime (DST-Aware)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const meeting = Temporal.ZonedDateTime.from(&quot;2024-03-20T09:00:00[America/New_York]&quot;);
+
+// Add 6 months — result respects DST!
+const followUp = meeting.add({ months: 6 });
+console.log(followUp.toString());
+// &quot;2024-09-20T09:00:00-04:00[America/New_York]&quot;
+// Notice: offset changed from -05:00 to -04:00 because summer DST is active!
+// But the *clock time* (9:00 AM) stays the same — exactly what a human would expect!</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">The core rule: All Temporal types are immutable. Every arithmetic operation returns a new object. The original is never changed. · </div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">11. Topic 10 · Complete Temporal Reference</div><div class="pc" id="chk11"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p">Your one-stop reference for every Temporal type and its methods.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.Now · All Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>Temporal.Now.instant()</code></td><td><code>Temporal.Instant</code></td><td>Current UTC instant</td></tr><tr><td><code>Temporal.Now.zonedDateTimeISO(tz?)</code></td><td><code>Temporal.ZonedDateTime</code></td><td>Current date+time+timezone</td></tr><tr><td><code>Temporal.Now.plainDateISO(tz?)</code></td><td><code>Temporal.PlainDate</code></td><td>Today's date</td></tr><tr><td><code>Temporal.Now.plainTimeISO(tz?)</code></td><td><code>Temporal.PlainTime</code></td><td>Current time of day</td></tr><tr><td><code>Temporal.Now.plainDateTimeISO(tz?)</code></td><td><code>Temporal.PlainDateTime</code></td><td>Current date+time (no TZ)</td></tr><tr><td><code>Temporal.Now.timeZoneId()</code></td><td>String</td><td>IANA timezone name of system</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.Instant · Key Methods and Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>Temporal.Instant.from(string)</code></td><td>Create from ISO string ending in Z</td></tr><tr><td><code>Temporal.Instant.fromEpochSeconds(n)</code></td><td>Create from epoch seconds</td></tr><tr><td><code>Temporal.Instant.fromEpochMilliseconds(n)</code></td><td>Create from epoch ms</td></tr><tr><td><code>Temporal.Instant.fromEpochMicroseconds(n)</code></td><td>Create from epoch µs (BigInt)</td></tr><tr><td><code>Temporal.Instant.fromEpochNanoseconds(n)</code></td><td>Create from epoch ns (BigInt)</td></tr><tr><td><code>Temporal.Instant.compare(a, b)</code></td><td>Compare two instants (-1/0/1)</td></tr><tr><td><code>.epochSeconds</code></td><td>Number of seconds since epoch</td></tr><tr><td><code>.epochMilliseconds</code></td><td>Number of ms since epoch</td></tr><tr><td><code>.epochMicroseconds</code></td><td>Number of µs since epoch (BigInt)</td></tr><tr><td><code>.epochNanoseconds</code></td><td>Number of ns since epoch (BigInt)</td></tr><tr><td><code>.add(duration)</code></td><td>Add time-only duration → new Instant</td></tr><tr><td><code>.subtract(duration)</code></td><td>Subtract time-only duration → new Instant</td></tr><tr><td><code>.until(other, options?)</code></td><td>Duration from this to other</td></tr><tr><td><code>.since(other, options?)</code></td><td>Duration since other to this</td></tr><tr><td><code>.round(options)</code></td><td>Round to given unit</td></tr><tr><td><code>.equals(other)</code></td><td>Equality check</td></tr><tr><td><code>.toZonedDateTimeISO(timeZone)</code></td><td>Convert to ZonedDateTime</td></tr><tr><td><code>.toString()</code></td><td>ISO string with Z suffix</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.PlainDate · Key Methods and Properties</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>Temporal.PlainDate.from(item)</code></td><td>Create from string or object</td></tr><tr><td><code>Temporal.PlainDate.compare(a, b)</code></td><td>Compare two dates</td></tr><tr><td><code>.year</code></td><td>4-digit year</td></tr><tr><td><code>.month</code></td><td>Month number (1 · 12)</td></tr><tr><td><code>.monthCode</code></td><td>Month code e.g. "M03"</td></tr><tr><td><code>.day</code></td><td>Day of month (1 · 31)</td></tr><tr><td><code>.dayOfWeek</code></td><td>ISO day of week (1=Mon, 7=Sun)</td></tr><tr><td><code>.dayOfYear</code></td><td>Day number in year (1 · 366)</td></tr><tr><td><code>.weekOfYear</code></td><td>ISO week number</td></tr><tr><td><code>.daysInMonth</code></td><td>Days in current month</td></tr><tr><td><code>.daysInYear</code></td><td>Days in current year</td></tr><tr><td><code>.inLeapYear</code></td><td><code>true</code> if leap year</td></tr><tr><td><code>.calendarId</code></td><td>Calendar system name</td></tr><tr><td><code>.add(duration, options?)</code></td><td>Add duration → new PlainDate</td></tr><tr><td><code>.subtract(duration, options?)</code></td><td>Subtract → new PlainDate</td></tr><tr><td><code>.until(other, options?)</code></td><td>Duration to another date</td></tr><tr><td><code>.since(other, options?)</code></td><td>Duration since another date</td></tr><tr><td><code>.with(fields)</code></td><td>Change specific fields → new date</td></tr><tr><td><code>.equals(other)</code></td><td>Equality check</td></tr><tr><td><code>.toPlainDateTime(time?)</code></td><td>Combine with a time</td></tr><tr><td><code>.toZonedDateTime(tz)</code></td><td>Attach timezone</td></tr><tr><td><code>.toPlainYearMonth()</code></td><td>Drop the day</td></tr><tr><td><code>.toPlainMonthDay()</code></td><td>Drop the year</td></tr><tr><td><code>.toString()</code></td><td>"YYYY-MM-DD"</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.PlainTime · Key Properties and Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>.hour</code></td><td>0 · 23</td></tr><tr><td><code>.minute</code></td><td>0 · 59</td></tr><tr><td><code>.second</code></td><td>0 · 59</td></tr><tr><td><code>.millisecond</code></td><td>0 · 999</td></tr><tr><td><code>.microsecond</code></td><td>0 · 999</td></tr><tr><td><code>.nanosecond</code></td><td>0 · 999</td></tr><tr><td><code>.add(duration)</code></td><td>Add duration → new PlainTime (wraps midnight)</td></tr><tr><td><code>.subtract(duration)</code></td><td>Subtract → new PlainTime</td></tr><tr><td><code>.until(other)</code></td><td>Duration to other time</td></tr><tr><td><code>.since(other)</code></td><td>Duration since other time</td></tr><tr><td><code>.with(fields)</code></td><td>Change specific fields</td></tr><tr><td><code>.equals(other)</code></td><td>Equality check</td></tr><tr><td><code>.toPlainDateTime(date)</code></td><td>Combine with a date</td></tr><tr><td><code>.toString()</code></td><td>"HH:MM:SS.sss..."</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.PlainDateTime · Key Properties</h3>
+<p class="v2-p">Has ALL properties of PlainDate + PlainTime, plus:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>.with(fields)</code></td><td>Change date or time fields</td></tr><tr><td><code>.withPlainDate(date)</code></td><td>Replace the date part</td></tr><tr><td><code>.withPlainTime(time)</code></td><td>Replace the time part</td></tr><tr><td><code>.toPlainDate()</code></td><td>Extract date part</td></tr><tr><td><code>.toPlainTime()</code></td><td>Extract time part</td></tr><tr><td><code>.toZonedDateTime(tz)</code></td><td>Attach timezone</td></tr><tr><td><code>.toInstant(tz)</code></td><td>Convert to Instant (needs TZ)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.ZonedDateTime · Key Properties</h3>
+<p class="v2-p">Has ALL properties of PlainDateTime, plus:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property / Method</th><th>Description</th></tr></thead><tbody><tr><td><code>.timeZoneId</code></td><td>IANA timezone name</td></tr><tr><td><code>.offset</code></td><td>UTC offset string e.g. "+05:30"</td></tr><tr><td><code>.offsetNanoseconds</code></td><td>UTC offset in nanoseconds</td></tr><tr><td><code>.hoursInDay</code></td><td>Hours in this day (23/24/25 for DST)</td></tr><tr><td><code>.withTimeZone(tz)</code></td><td>Convert to different timezone</td></tr><tr><td><code>.withCalendar(cal)</code></td><td>Convert to different calendar</td></tr><tr><td><code>.toInstant()</code></td><td>Convert to Temporal.Instant</td></tr><tr><td><code>.toPlainDate()</code></td><td>Drop time and timezone</td></tr><tr><td><code>.toPlainTime()</code></td><td>Drop date and timezone</td></tr><tr><td><code>.toPlainDateTime()</code></td><td>Drop timezone</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Temporal.Duration · Key Properties and Methods</h3>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Member</th><th>Description</th></tr></thead><tbody><tr><td><code>.years</code></td><td>Years component</td></tr><tr><td><code>.months</code></td><td>Months component</td></tr><tr><td><code>.weeks</code></td><td>Weeks component</td></tr><tr><td><code>.days</code></td><td>Days component</td></tr><tr><td><code>.hours</code></td><td>Hours component</td></tr><tr><td><code>.minutes</code></td><td>Minutes component</td></tr><tr><td><code>.seconds</code></td><td>Seconds component</td></tr><tr><td><code>.milliseconds</code></td><td>Milliseconds component</td></tr><tr><td><code>.microseconds</code></td><td>Microseconds component</td></tr><tr><td><code>.nanoseconds</code></td><td>Nanoseconds component</td></tr><tr><td><code>.sign</code></td><td>1 (positive), -1 (negative), 0 (zero)</td></tr><tr><td><code>.blank</code></td><td><code>true</code> if all components are 0</td></tr><tr><td><code>.add(other, {relativeTo})</code></td><td>Add two durations</td></tr><tr><td><code>.subtract(other, {relativeTo})</code></td><td>Subtract durations</td></tr><tr><td><code>.with(fields)</code></td><td>Replace specific components</td></tr><tr><td><code>.negated()</code></td><td>Flip sign</td></tr><tr><td><code>.abs()</code></td><td>Always positive</td></tr><tr><td><code>.round(options)</code></td><td>Round to a unit</td></tr><tr><td><code>.total(options)</code></td><td>Total in a single unit</td></tr><tr><td><code>.toString()</code></td><td>ISO 8601 duration string (P...)</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Complete Arithmetic Options Reference</h3>
+<p class="v2-p">When calling <code>.add()</code>, <code>.subtract()</code>, <code>.until()</code>, <code>.since()</code>, <code>.round()</code>:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Option</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td><code>largestUnit</code></td><td><code>"year"</code>, <code>"month"</code>, <code>"week"</code>, <code>"day"</code>, <code>"hour"</code>, <code>"minute"</code>, <code>"second"</code>, etc.</td><td>Largest unit in result</td></tr><tr><td><code>smallestUnit</code></td><td>Same list</td><td>Smallest unit (rounds below this)</td></tr><tr><td><code>roundingMode</code></td><td><code>"trunc"</code>, <code>"ceil"</code>, <code>"floor"</code>, <code>"halfExpand"</code>, <code>"halfEven"</code></td><td>How to round</td></tr><tr><td><code>overflow</code></td><td><code>"constrain"</code>, <code>"reject"</code></td><td>Behaviour when day doesn't exist</td></tr><tr><td><code>relativeTo</code></td><td>PlainDate or ZonedDateTime</td><td>Reference date for month/year conversions</td></tr></tbody></table></div>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>11. Topic 10 · Complete Temporal Reference</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">12. Applied Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 2 · Applied Exercises</strong></p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 1 · Temporal Detective 🔍</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice creating and reading every Temporal plain type.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a <strong>school records system</strong> using Temporal to store student data. All dates must be timezone-free (plain types).</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const dob = Temporal.PlainDate.from(&quot;2005-08-12&quot;);
+console.log(&quot;Year      :&quot;, dob.year);       // 2005
+console.log(&quot;Month     :&quot;, dob.month);      // 8 (August — 1-indexed!)
+console.log(&quot;Day       :&quot;, dob.day);        // 12
+console.log(&quot;Day of wk :&quot;, dob.dayOfWeek);  // 5 (Friday in ISO: Mon=1, Sun=7)
+console.log(&quot;Leap year :&quot;, dob.inLeapYear); // false</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Year      : 2005
+Month     : 8
+Day       : 12
+Day of wk : 5
+Leap year : false</code></pre></div></div>
+<h4 class="v2-h4">Task A · Build a Student Record</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const student = {
+  name: &quot;Amara Diallo&quot;,
+  dob: Temporal.PlainDate.from(&quot;2005-08-12&quot;),
+  enrollmentDate: Temporal.PlainDate.from(&quot;2020-09-01&quot;),
+  graduationDate: Temporal.PlainDate.from(&quot;2025-06-30&quot;),
+  classStartTime: Temporal.PlainTime.from(&quot;08:30:00&quot;),
+  lunchTime: Temporal.PlainTime.from(&quot;12:00:00&quot;),
+};
+
+// Calculate:
+// 1. Student age today
+const today = Temporal.Now.plainDateISO();
+let age = today.year - student.dob.year;
+const birthdayThisYear = student.dob.with({ year: today.year });
+if (Temporal.PlainDate.compare(today, birthdayThisYear) &lt; 0) age--;
+console.log(&quot;Age:&quot;, age);
+
+// 2. Days until graduation
+const daysLeft = today.until(student.graduationDate, { largestUnit: &quot;day&quot; });
+console.log(&quot;Days until graduation:&quot;, daysLeft.days);
+
+// 3. Total enrollment duration in years and months
+const enrollmentDuration = student.enrollmentDate.until(student.graduationDate, {
+  largestUnit: &quot;year&quot;
+});
+console.log(&quot;Enrollment:&quot;, enrollmentDuration.years, &quot;years,&quot;, enrollmentDuration.months, &quot;months&quot;);
+
+// 4. Hours between class start and lunch
+const morningLength = student.classStartTime.until(student.lunchTime);
+console.log(&quot;Morning session:&quot;, morningLength.hours, &quot;hours&quot;, morningLength.minutes, &quot;min&quot;);</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (sample based on current date ~March 2026):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Age: 20
+Days until graduation: 121 (approximate — depends on run date)
+Enrollment: 4 years, 9 months
+Morning session: 3 hours 30 min</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why does the age calculation need a birthday-this-year check?</li><li>Why use <code>PlainDate</code> instead of <code>ZonedDateTime</code> for school dates?</li><li>What does <code>dayOfWeek: 5</code> mean in Temporal's ISO convention?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Global Meeting Coordinator 🌍</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice <code>ZonedDateTime</code>, <code>withTimeZone()</code>, and <code>Temporal.Now</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> You work at a company with teams in <strong>London, New York, Lagos, and Tokyo</strong>. Schedule a 2 PM London meeting and show each team what time that is locally.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const londonMeeting = Temporal.ZonedDateTime.from(&quot;2024-06-15T14:00:00[Europe/London]&quot;);
+const nyTime = londonMeeting.withTimeZone(&quot;America/New_York&quot;);
+console.log(`London: ${londonMeeting.hour}:00 → New York: ${nyTime.hour}:00`);</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>London: 14:00 → New York: 10:00</code></p>
+<h4 class="v2-h4">Task A · Convert Meeting to All Timezones</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const meetingLondon = Temporal.ZonedDateTime.from(&quot;2024-06-20T14:00:00[Europe/London]&quot;);
+
+const timezones = [
+  { city: &quot;London&quot;,   tz: &quot;Europe/London&quot;     },
+  { city: &quot;New York&quot;, tz: &quot;America/New_York&quot;   },
+  { city: &quot;Lagos&quot;,    tz: &quot;Africa/Lagos&quot;        },
+  { city: &quot;Tokyo&quot;,    tz: &quot;Asia/Tokyo&quot;          },
+  { city: &quot;Sydney&quot;,   tz: &quot;Australia/Sydney&quot;    },
+];
+
+console.log(&quot;Meeting Scheduler — June 20, 2024\n&quot;);
+timezones.forEach(({ city, tz }) =&gt; {
+  const local = meetingLondon.withTimeZone(tz);
+  const h  = String(local.hour).padStart(2, &quot;0&quot;);
+  const m  = String(local.minute).padStart(2, &quot;0&quot;);
+  console.log(`${city.padEnd(10)} : ${h}:${m} (UTC${local.offset})`);
+});</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Meeting Scheduler — June 20, 2024
+
+London     : 14:00 (UTC+01:00)
+New York   : 09:00 (UTC-04:00)
+Lagos      : 15:00 (UTC+01:00)
+Tokyo      : 22:00 (UTC+09:00)
+Sydney     : 23:00 (UTC+10:00)</code></pre></div></div>
+<h4 class="v2-h4">Task B · Find Best Meeting Time</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Write a function that checks if a proposed London time is within
+// working hours (8 AM - 6 PM) for all given cities.
+function isWorkingHour(zdt) {
+  return zdt.hour &gt;= 8 &amp;&amp; zdt.hour &lt; 18;
+}
+
+function findBestMeetingTime(cities) {
+  // Try each hour from 8 AM to 5 PM London time
+  for (let h = 8; h &lt;= 17; h++) {
+    const londonTime = Temporal.ZonedDateTime.from({
+      year: 2024, month: 6, day: 20,
+      hour: h, minute: 0, second: 0,
+      timeZone: &quot;Europe/London&quot;
+    });
+
+    const allWorking = cities.every(({ tz }) =&gt;
+      isWorkingHour(londonTime.withTimeZone(tz))
+    );
+
+    if (allWorking) {
+      console.log(`Best time: ${h}:00 London (all cities in working hours)`);
+      return h;
+    }
+  }
+  console.log(&quot;No single hour works for all cities!&quot;);
+  return null;
+}
+
+const cities = [
+  { city: &quot;London&quot;,   tz: &quot;Europe/London&quot;   },
+  { city: &quot;New York&quot;, tz: &quot;America/New_York&quot; },
+  { city: &quot;Lagos&quot;,    tz: &quot;Africa/Lagos&quot;     },
+];
+
+findBestMeetingTime(cities);</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why might <code>hoursInDay</code> return 23 on some days in London?</li><li>What is the difference between an offset (<code>+01:00</code>) and a timezone ID (<code>Europe/London</code>)?</li><li>If you store a meeting time in a database, should you store it as a <code>ZonedDateTime</code> string or an <code>Instant</code> epoch? Why?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Duration Calculator ⏱️</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice creating, reading, and using <code>Temporal.Duration</code> objects.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are building a <strong>subscription management system</strong> that tracks trial periods, billing cycles, and contract lengths.</p>
+<h4 class="v2-h4">Warm-up Micro-Demo:</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const trial = Temporal.Duration.from({ days: 14 });
+const start = Temporal.PlainDate.from(&quot;2024-03-15&quot;);
+const end   = start.add(trial);
+console.log(&quot;Trial ends:&quot;, end.toString()); // &quot;2024-03-29&quot;</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong> <code>Trial ends: 2024-03-29</code></p>
+<h4 class="v2-h4">Task A · Build a Subscription Timeline</h4>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">javascript</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const durations = {
+  trial:          Temporal.Duration.from({ days: 14 }),
+  monthly:        Temporal.Duration.from({ months: 1 }),
+  quarterly:      Temporal.Duration.from({ months: 3 }),
+  annual:         Temporal.Duration.from({ years: 1 }),
+  noticePeriod:   Temporal.Duration.from({ days: 30 }),
+};
+
+const signupDate = Temporal.PlainDate.from(&quot;2024-03-15&quot;);
+
+const trialEnd   = signupDate.add(durations.trial);
+const firstBill  = trialEnd.add({ days: 1 }); // billing starts day after trial
+const secondBill = firstBill.add(durations.monthly);
+const contractEnd = signupDate.add(durations.annual);
+const cancelBy   = contractEnd.subtract(durations.noticePeriod);
+
+// How long from signup to contract end?
+const totalLength = signupDate.until(contractEnd, { largestUnit: &quot;month&quot; });
+
+console.log(&quot;Signup      :&quot;, signupDate.toString());
+console.log(&quot;Trial ends  :&quot;, trialEnd.toString());
+console.log(&quot;First bill  :&quot;, firstBill.toString());
+console.log(&quot;Second bill :&quot;, secondBill.toString());
+console.log(&quot;Cancel by   :&quot;, cancelBy.toString());
+console.log(&quot;Contract end:&quot;, contractEnd.toString());
+console.log(`Contract length: ${totalLength.months} months`);</code></pre></div></div>
+<p class="v2-p"><strong>▶ Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Signup      : 2024-03-15
+Trial ends  : 2024-03-29
+First bill  : 2024-03-30
+Second bill : 2024-04-30
+Cancel by   : 2025-02-13
+Contract end: 2025-03-15
+Contract length: 12 months</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Why is Duration immutable? What benefit does that give to the <code>durations</code> object?</li><li>What does <code>duration.sign</code> return for <code>Temporal.Duration.from({ days: -5 })</code>?</li><li>Why does <code>total()</code> require a <code>relativeTo</code> option for months?</li></ul>
+<hr class="v2-hr">
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"> · ### Exercise 1 · Temporal Detective 🔍
+
+Objective: Practice creating and reading every Temporal plain type.
+
+Scenario: You are building a school records system using Temporal to store student data. All dates must be timezone-free (plain types).</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">🔵 Stage 1 · Setup: Store Meetings and Display Basics</div><div class="build-req"><blockquote class="v2-bq"><p class="v2-p"><strong>Phase 3 · Project Simulation</strong></p></blockquote>
+<p class="v2-p"><strong>Real-world scenario:</strong> You are a developer at a multinational consulting firm. Build a <strong>global meeting scheduler</strong> that:</p>
+<ul class="v2-ul"><li>Stores meetings as <code>ZonedDateTime</code> (with full timezone support)</li><li>Shows each meeting in multiple timezones</li><li>Calculates countdown until each meeting</li><li>Uses <code>Duration</code> to compute meeting lengths</li><li>Finds and highlights the next upcoming meeting</li><li>Generates a formatted agenda report</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">🔵 Stage 1 · Setup: Store Meetings and Display Basics</h3>
+<p class="v2-p"><strong>Goal:</strong> Create <code>ZonedDateTime</code> objects for each meeting and display their basic info.</p>
+<h4 class="v2-h4">Simple stage preview:</h4></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const meeting = Temporal.ZonedDateTime.from(&quot;2026-04-10T14:00:00[Europe/London]&quot;);
+console.log(`Meeting: ${meeting.year}-${String(meeting.month).padStart(2,&quot;0&quot;)}-${String(meeting.day).padStart(2,&quot;0&quot;)} at ${meeting.hour}:00 (${meeting.timeZoneId})`);</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`const meeting = Temporal.ZonedDateTime.from(&quot;2026-04-10T14:00:00[Europe/London]&quot;);
+console.log(\`Meeting: \${meeting.year}-\${String(meeting.month).padStart(2,&quot;0&quot;)}-\${String(meeting.day).padStart(2,&quot;0&quot;)} at \${meeting.hour}:00 (\${meeting.timeZoneId})\`);`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-13-stage-1-setup-store-meetings-and-display</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 13 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-13-stage-1-setup-store-meetings-and-display/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 13 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ 1. Background: Why a New Date System?</li><li>✅ 2. Topic 1 · Temporal Introduction & Overview</li><li>✅ 3. Topic 2 · Temporal vs Date: Side-by-Side</li><li>✅ 4. Topic 3 · Temporal.Now</li><li>✅ 5. Topic 4 · Temporal.Instant</li><li>✅ 6. Topic 5 · Plain Types</li><li>✅ 7. Topic 6 · Temporal.PlainDateTime</li><li>✅ 8. Topic 7 · Temporal.ZonedDateTime</li></ul><div class="ln"><a href="lesson_12.html" class="ln-btn">&#8592; Lesson 12</a><a href="lesson_14.html" class="ln-btn primary">Lesson 14 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 13 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

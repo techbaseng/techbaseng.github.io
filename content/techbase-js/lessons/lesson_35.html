@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 35: JavaScript Modules: What Modules Are · Exports · Imports · Namespaces · Dynamic Imports — Techbase JavaScript</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="48" data-key="techbase_js_l35">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">JavaScript Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 35 of 46</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">JavaScript · Lesson 35</div>
+      <h1>JavaScript Modules: What Modules Are · Exports · Imports · Namespaces · Dynamic Imports</h1>
+      <div class="l-hero-sub">48 phases &nbsp;·&nbsp; Build: Lesson 35 Project</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#fffbeb 0%,#f8fafc 55%,#fef3c7 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 35</h2><p>Work through each phase in order. Complete the task before unlocking the next. Your Build It project unlocks when all phases are done.</p><div class="wm"><span>📚 48 phases</span><span>🏗️ Lesson 35 Project</span><span>🌐 GitHub Pages</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 48</div><div class="pt">The Problem Modules Solve</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Imagine you are building a shopping website. Over several months, your <code>app.js</code> grows to 4,000 lines. It contains helper functions, class definitions, API calls, UI logic, cart calculations, and user authentication · all tangled together. Every developer must read the entire file to find anything. One wrong edit can break something completely unrelated.</p>
+<p class="v2-p">This is <strong>the global scope problem</strong> · one of the biggest sources of bugs in large JavaScript applications.</p>
+<p class="v2-p"><strong>Real-world analogy · a kitchen:</strong> Imagine a professional kitchen where every utensil, ingredient, and piece of equipment is thrown in one giant pile in the middle of the room. Every cook must dig through everything to find anything. Now imagine the same kitchen with labelled drawers, shelves, and stations. Each station has exactly what it needs and nothing more. That organised kitchen is a <strong>modular codebase</strong>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Problem Modules Solve</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 48</div><div class="pt">1.1 · What Is a Module?</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">A <strong>module</strong> is a JavaScript file that:</p>
+<ol class="v2-ol"><li><strong>Explicitly declares</strong> what it provides to other files (using <code>export</code>)</li><li><strong>Explicitly declares</strong> what it needs from other files (using <code>import</code>)</li><li>Has its own <strong>private scope</strong> · variables and functions inside are invisible to the outside world unless exported</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Before modules — everything global, everything tangled:
+
+app.js
+  function calculateTax()     ← visible everywhere, can be overwritten
+  function formatCurrency()   ← visible everywhere
+  class ShoppingCart          ← visible everywhere
+  const API_KEY = &quot;secret&quot;    ← visible everywhere — dangerous!
+  ... 3,990 more lines ...
+
+After modules — each file does one job:
+
+utils/math.js       exports: add, subtract, calculateTax
+utils/format.js     exports: formatCurrency, formatDate
+cart/Cart.js        exports: ShoppingCart class
+api/client.js       exports: get, post, delete
+main.js             imports only what it needs from each</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.1 · What Is a Module?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 48</div><div class="pt">1.2 · Key Properties of Modules</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Property</th><th>Description</th></tr></thead><tbody><tr><td><strong>Own scope</strong></td><td>Variables inside are private unless exported</td></tr><tr><td><strong>Strict mode by default</strong></td><td>Module code always runs in strict mode</td></tr><tr><td><strong>Single evaluation</strong></td><td>A module's code runs only once, regardless of how many files import it</td></tr><tr><td><strong>Static analysis</strong></td><td>Import/export relationships are declared at top · tools can analyse them without running the code</td></tr><tr><td><strong>Deferred by default</strong></td><td><code>&lt;script type="module"&gt;</code> executes after HTML is fully parsed</td></tr><tr><td><strong>HTTPS or localhost required</strong></td><td>Modules use CORS · they won't load from <code>file://</code></td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.2 · Key Properties of Modules</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 48</div><div class="pt">1.3 · Enabling Modules in the Browser</div><div class="pc" id="chk4"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+
+  &lt;!-- Regular script — shares global scope, no import/export --&gt;
+  &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
+
+  &lt;!-- Module script — isolated scope, import/export available --&gt;
+  &lt;script type=&quot;module&quot; src=&quot;main.js&quot;&gt;&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div>
+<p class="v2-p"><strong><code>&lt;script&gt;</code> vs <code>&lt;script type="module"&gt;</code>:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th><code>&lt;script&gt;</code></th><th><code>&lt;script type="module"&gt;</code></th></tr></thead><tbody><tr><td>Scope</td><td>Global</td><td>Module-local (private)</td></tr><tr><td>Strict mode</td><td>Off by default</td><td>Always on</td></tr><tr><td><code>import</code>/<code>export</code></td><td>Not available</td><td>Available</td></tr><tr><td>Execution timing</td><td>Blocking (unless <code>defer</code>)</td><td>Always deferred</td></tr><tr><td>Loads again on re-encounter</td><td>Yes</td><td>No · cached after first load</td></tr><tr><td>Requires CORS</td><td>No</td><td>Yes</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.3 · Enabling Modules in the Browser</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 48</div><div class="pt">1.4 · Modules in Node.js</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><strong>CommonJS (older · still the default in Node.js):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Exporting:
+module.exports = { add, subtract };
+
+// Importing:
+const { add, subtract } = require(&quot;./math&quot;);
+const fs = require(&quot;fs&quot;);   // Built-in module</code></pre></div></div>
+<p class="v2-p"><strong>ES Modules (modern · same syntax as browser):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// In package.json: { &quot;type&quot;: &quot;module&quot; }  OR use .mjs file extension
+
+// Exporting:
+export function add(a, b) { return a + b; }
+
+// Importing:
+import { add } from &quot;./math.js&quot;;
+import fs from &quot;node:fs&quot;;</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 This tutorial focuses on <strong>ES Modules (ESM)</strong> · the modern standard that works in both browsers and modern Node.js, and is used by all major frameworks (React, Vue, Svelte) and build tools (Vite, Webpack, Rollup).</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.4 · Modules in Node.js</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 48</div><div class="pt">1.5 · The Module Map: Why Modules Execute Only Once</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When the browser (or Node.js) encounters an <code>import</code>, it checks an internal <strong>module map</strong> · a registry of every path already loaded:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>First time &quot;import { add } from &#x27;./math.js&#x27;&quot; is seen:
+  → Load math.js, parse it, run it, cache result in module map
+
+Second time (a different file also imports math.js):
+  → Check module map → already there → return cached exports immediately
+  → math.js code does NOT run again</code></pre></div></div>
+<p class="v2-p"><strong>Why this matters · shared live state:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// counter.js
+let count = 0;
+export function increment() { count++; }
+export function getCount()  { return count; }
+
+// fileA.js
+import { increment } from &quot;./counter.js&quot;;
+increment();   // count becomes 1
+
+// fileB.js
+import { getCount } from &quot;./counter.js&quot;;
+console.log(getCount());   // Output: 1 — same module instance!</code></pre></div></div>
+<p class="v2-p"><code>fileA</code> and <code>fileB</code> share the <strong>same live</strong> <code>counter.js</code> module instance. There is only one <code>count</code> variable across the whole application.</p>
+<blockquote class="v2-bq"><p class="v2-p">🤔 <strong>Thinking question:</strong> If modules loaded fresh every time they were imported, what would <code>getCount()</code> in <code>fileB.js</code> return, and why would that cause problems in a real app?</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 2 · EXPORTS</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>1.5 · The Module Map: Why Modules Execute Only Once</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 48</div><div class="pt">What Is an Export?</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">An <strong>export</strong> is how a module declares what it is willing to share with the rest of the application. Everything not exported is <strong>private</strong> · completely invisible to importing files, as if it does not exist.</p>
+<p class="v2-p">Think of a module as a company. Inside the company there are internal processes, private data, and trade secrets. What the company offers to the public · its products and services · is its <strong>public API</strong>. That public API is the export.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is an Export?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 48</div><div class="pt">2.1 · Named Exports</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><strong>Named exports</strong> let you export multiple things from one module, each with its own name. Importing files must use those exact names (or rename them · see Chapter 3).</p>
+<p class="v2-p"><strong>Syntax 1 · <code>export</code> keyword inline:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// math.js
+
+export const PI = 3.14159265;
+
+export function add(a, b) {
+  return a + b;
+}
+
+export function multiply(a, b) {
+  return a * b;
+}
+
+export class Vector {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  magnitude() {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Syntax 2 · export list at the bottom (preferred for readability):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// math.js — all internal definitions first, public API declared at the bottom
+
+const PI = 3.14159265;
+
+function add(a, b)      { return a + b; }
+function subtract(a, b) { return a - b; }
+function multiply(a, b) { return a * b; }
+function divide(a, b) {
+  if (b === 0) throw new Error(&quot;Division by zero.&quot;);
+  return a / b;
+}
+
+class Vector {
+  constructor(x, y) { this.x = x; this.y = y; }
+  magnitude() { return Math.sqrt(this.x ** 2 + this.y ** 2); }
+}
+
+// One clear &quot;table of contents&quot; — everything the module provides:
+export { PI, add, subtract, multiply, divide, Vector };</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Why list exports at the bottom?</strong> Having all exports in one <code>export { }</code> block gives you a clean, scannable public API declaration without reading through every line of implementation. Many professional style guides prefer this pattern.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.1 · Named Exports</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 48</div><div class="pt">2.2 · Renaming at Export</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">You can rename values as they are exported, separating internal names from the public API:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// database.js
+
+function connectToDatabase(connectionString) {
+  return { connected: true, url: connectionString };
+}
+
+function disconnectFromDatabase() {
+  return { connected: false };
+}
+
+// Expose shorter, cleaner public names:
+export {
+  connectToDatabase    as connect,
+  disconnectFromDatabase as disconnect
+};</code></pre></div></div>
+<p class="v2-p">Consumers will import <code>connect</code> and <code>disconnect</code>, not the longer internal names.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.2 · Renaming at Export</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 48</div><div class="pt">2.3 · Default Export</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Every module can have <strong>one default export</strong> · the "main thing" the module provides. Typically used when the entire purpose of a file is one function or one class.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// greeting.js
+export default function greet(name) {
+  return &quot;Hello, &quot; + name + &quot;!&quot;;
+}</code></pre></div></div>
+<p class="v2-p"><strong>Default export with a class:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ShoppingCart.js
+export default class ShoppingCart {
+  #items = [];
+
+  add(item)      { this.#items.push(item); return this; }
+  remove(itemId) { this.#items = this.#items.filter(i =&gt; i.id !== itemId); return this; }
+
+  get total()     { return this.#items.reduce((sum, i) =&gt; sum + i.price, 0); }
+  get itemCount() { return this.#items.length; }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Default export with an expression:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// config.js
+export default {
+  apiUrl:  &quot;https://api.myapp.com&quot;,
+  timeout: 5000,
+  retries: 3
+};</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.3 · Default Export</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 48</div><div class="pt">2.4 · Default vs Named Exports · When to Use Each</div><div class="pc" id="chk11"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Situation</th><th>Use</th></tr></thead><tbody><tr><td>Module has ONE primary purpose</td><td>Default export</td></tr><tr><td>Module provides a collection of utilities</td><td>Named exports</td></tr><tr><td>One class/component per file</td><td>Default export</td></tr><tr><td>Utility libraries (<code>math.js</code>, <code>format.js</code>)</td><td>Named exports</td></tr><tr><td>Configuration objects</td><td>Default export</td></tr><tr><td>Constants and enums used across files</td><td>Named exports</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>You can mix both in the same file:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// api.js
+export const BASE_URL = &quot;https://api.myapp.com&quot;;   // Named
+export const TIMEOUT  = 5000;                       // Named
+
+export default async function request(path, options) {   // Default
+const res = await fetch(BASE_URL + path, options);
+if (!res.ok) throw new Error(res.status);
+return res.json();
+}</code></pre></div></div></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.4 · Default vs Named Exports · When to Use Each</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 48</div><div class="pt">2.5 · Re-Exporting: Building Barrel Files</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">A module can import from one file and immediately re-export · creating a centralised entry point called a <strong>barrel file</strong> or <strong>index file</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// utils/index.js — barrel file
+
+export { add, subtract, multiply }    from &quot;./math.js&quot;;
+export { formatCurrency, formatDate } from &quot;./format.js&quot;;
+export { capitalise, truncate }       from &quot;./string.js&quot;;
+
+// Re-export a default as a named export:
+export { default as request } from &quot;./api.js&quot;;
+
+// Re-export everything from a module:
+export * from &quot;./validators.js&quot;;</code></pre></div></div>
+<p class="v2-p">Now consumers import from one path:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ✅ Clean — one import from the barrel:
+import { add, formatCurrency, capitalise, request } from &quot;./utils/index.js&quot;;
+
+// ❌ Messy without a barrel — separate import for each file:
+import { add }            from &quot;./utils/math.js&quot;;
+import { formatCurrency } from &quot;./utils/format.js&quot;;
+import { capitalise }     from &quot;./utils/string.js&quot;;
+import request            from &quot;./utils/api.js&quot;;</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.5 · Re-Exporting: Building Barrel Files</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 48</div><div class="pt">2.6 · What Cannot Be Exported</div><div class="pc" id="chk13"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Cannot export bare literals:
+export 42;         // SyntaxError
+export &quot;hello&quot;;    // SyntaxError
+
+// ✅ Bind to a variable first:
+export const ANSWER = 42;
+
+// ❌ Cannot have more than one default:
+export default function a() {}
+export default function b() {}   // SyntaxError — only one default per module</code></pre></div></div>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 3 · IMPORTS</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>2.6 · What Cannot Be Exported</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 48</div><div class="pt">What Is an Import?</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p">An <strong>import</strong> is how a module declares its <strong>dependencies</strong> · what it needs from other modules to do its work. Static imports are resolved before the code runs, always declared at the top of a file.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is an Import?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 48</div><div class="pt">3.1 · Importing Named Exports</div><div class="pc" id="chk15"></div></div><div class="pb2"><p class="v2-p">Use curly braces <code>{ }</code> to import named exports. The names must match exactly what was exported (or use <code>as</code> to rename):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// math.js exports: add, subtract, multiply, PI
+import { add, multiply, PI } from &quot;./math.js&quot;;
+
+console.log(add(3, 4));      // Output: 7
+console.log(multiply(3, 4)); // Output: 12
+console.log(PI);             // Output: 3.14159265</code></pre></div></div>
+<p class="v2-p"><strong>File path rules:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Path</th><th>Meaning</th></tr></thead><tbody><tr><td><code>"./math.js"</code></td><td>Same directory as current file</td></tr><tr><td><code>"../utils/math.js"</code></td><td>Parent directory, into <code>utils/</code></td></tr><tr><td><code>"/src/utils/math.js"</code></td><td>Absolute path from site root</td></tr><tr><td><code>"lodash"</code></td><td>npm package · resolved by bundler or Node.js</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Always include the <code>.js</code> extension in browser ES modules.</strong> Node.js and bundlers often resolve it automatically, but browsers require the full path.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.1 · Importing Named Exports</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase16"><div class="ph"><div class="pn">Phase 16 of 48</div><div class="pt">3.2 · Importing the Default Export</div><div class="pc" id="chk16"></div></div><div class="pb2"><p class="v2-p">No curly braces. You choose any name you want:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// greeting.js: export default function greet(name) {...}
+
+import greet    from &quot;./greeting.js&quot;;
+import sayHello from &quot;./greeting.js&quot;;   // You can name it anything
+
+console.log(greet(&quot;Alice&quot;));    // Output: Hello, Alice!
+console.log(sayHello(&quot;Bob&quot;));   // Output: Hello, Bob!</code></pre></div></div>
+<p class="v2-p">Both <code>greet</code> and <code>sayHello</code> are the same exported function · the name is entirely the importer's choice.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.2 · Importing the Default Export</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(16)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase17"><div class="ph"><div class="pn">Phase 17 of 48</div><div class="pt">3.3 · Importing Default and Named Together</div><div class="pc" id="chk17"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// api.js: default export is request(), named exports are BASE_URL and TIMEOUT
+import request, { BASE_URL, TIMEOUT } from &quot;./api.js&quot;;
+// Default comes first, named exports follow in braces after the comma</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.3 · Importing Default and Named Together</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(17)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase18"><div class="ph"><div class="pn">Phase 18 of 48</div><div class="pt">3.4 · Renaming at Import (`as`)</div><div class="pc" id="chk18"></div></div><div class="pb2"><p class="v2-p">Use <code>as</code> to give an import a different local name:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import { add as mathAdd, multiply as mathMultiply } from &quot;./math.js&quot;;
+import { add as arrayMerge }                          from &quot;./array-utils.js&quot;;
+
+console.log(mathAdd(2, 3));          // Output: 5
+console.log(arrayMerge([1], [2]));   // Output: [1, 2]</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.4 · Renaming at Import (<code>as</code>)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(18)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase19"><div class="ph"><div class="pn">Phase 19 of 48</div><div class="pt">3.5 · Side-Effect-Only Import</div><div class="pc" id="chk19"></div></div><div class="pb2"><p class="v2-p">Import a module purely to run its setup code · no exports needed:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import &quot;./polyfills.js&quot;;   // Adds browser compatibility features
+import &quot;./analytics.js&quot;;   // Starts analytics tracking
+import &quot;./styles.css&quot;;     // Load stylesheet (with a bundler)</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.5 · Side-Effect-Only Import</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(19)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase20"><div class="ph"><div class="pn">Phase 20 of 48</div><div class="pt">3.6 · Import All as a Namespace (`* as`)</div><div class="pc" id="chk20"></div></div><div class="pb2"><p class="v2-p">Import every export from a module into one object:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import * as MathUtils from &quot;./math.js&quot;;
+
+console.log(MathUtils.add(3, 4));   // Output: 7
+console.log(MathUtils.PI);          // Output: 3.14159265</code></pre></div></div>
+<p class="v2-p">This is covered in depth in Chapter 4.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.6 · Import All as a Namespace (<code>* as</code>)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(20)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase21"><div class="ph"><div class="pn">Phase 21 of 48</div><div class="pt">3.7 · Imports Are Live Bindings · Not Copies</div><div class="pc" id="chk21"></div></div><div class="pb2"><p class="v2-p">This is one of the most important and surprising properties of ES modules:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// counter.js
+export let count = 0;
+export function increment() { count++; }
+
+// main.js
+import { count, increment } from &quot;./counter.js&quot;;
+
+console.log(count);   // Output: 0
+increment();
+console.log(count);   // Output: 1  ← count updated! It is NOT a copy.
+increment();
+console.log(count);   // Output: 2</code></pre></div></div>
+<p class="v2-p">The imported <code>count</code> is a <strong>live reference</strong> to the variable in <code>counter.js</code> · not a snapshot taken at import time. When the module updates <code>count</code>, the importing file sees the new value immediately.</p>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>You cannot reassign an imported binding from outside the module:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import { count } from &quot;./counter.js&quot;;
+count = 5;   // ❌ TypeError: Assignment to constant variable</code></pre></div></div>
+<p class="v2-p">Only the module that owns the variable can change it. You must call a function the module provides (like <code>increment()</code>) to trigger changes.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.7 · Imports Are Live Bindings · Not Copies</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(21)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase22"><div class="ph"><div class="pn">Phase 22 of 48</div><div class="pt">3.8 · Top-Level Await in Modules</div><div class="pc" id="chk22"></div></div><div class="pb2"><p class="v2-p">Inside a module (and only a module), you can use <code>await</code> at the top level · outside any <code>async</code> function:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// config.js
+const response = await fetch(&quot;https://api.myapp.com/config&quot;);
+const config   = await response.json();
+
+export const { apiUrl, theme, locale } = config;
+// Any module importing from config.js automatically waits
+// for this await to complete before proceeding</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// main.js
+import { apiUrl } from &quot;./config.js&quot;;
+// By the time this line runs, config.js has already finished fetching
+console.log(apiUrl);   // Output: https://api.myapp.com</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Top-level await blocks the importing module.</strong> Don't put slow awaits in widely-shared modules.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 4 · NAMESPACES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>3.8 · Top-Level Await in Modules</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(22)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase23"><div class="ph"><div class="pn">Phase 23 of 48</div><div class="pt">What Is a Namespace?</div><div class="pc" id="chk23"></div></div><div class="pb2"><p class="v2-p">A <strong>namespace</strong> is a named container that groups related items under a single identifier. In JavaScript modules, namespace imports (<code>import * as Name</code>) collect all of a module's exports into one object, accessed with dot notation.</p>
+<p class="v2-p"><strong>Real-world analogy · a toolbox:</strong> Instead of carrying 20 individual tools in your pockets, you carry one toolbox. You access each tool by opening the box: <code>toolbox.hammer</code>, <code>toolbox.wrench</code>. The toolbox is the namespace · it organises everything under one handle.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is a Namespace?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(23)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase24"><div class="ph"><div class="pn">Phase 24 of 48</div><div class="pt">4.1 · Creating a Namespace Import</div><div class="pc" id="chk24"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// validators.js
+export function isEmail(value)        { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value); }
+export function isPhone(value)        { return /^[+\d][\d\s\-]{6,14}$/.test(value); }
+export function isPostcode(value)     { return /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i.test(value); }
+export function isNonEmpty(value)     { return typeof value === &quot;string&quot; &amp;&amp; value.trim().length &gt; 0; }
+export function isInRange(value, min, max) {
+  return typeof value === &quot;number&quot; &amp;&amp; value &gt;= min &amp;&amp; value &lt;= max;
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// main.js
+import * as Validators from &quot;./validators.js&quot;;
+
+console.log(Validators.isEmail(&quot;alice@example.com&quot;));   // Output: true
+console.log(Validators.isPhone(&quot;+44 7700 900000&quot;));     // Output: true
+console.log(Validators.isNonEmpty(&quot;  &quot;));               // Output: false
+console.log(Validators.isInRange(7, 1, 10));            // Output: true</code></pre></div></div>
+<p class="v2-p">All five exports are now properties of the <code>Validators</code> object.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.1 · Creating a Namespace Import</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(24)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase25"><div class="ph"><div class="pn">Phase 25 of 48</div><div class="pt">4.2 · Why Use Namespaces?</div><div class="pc" id="chk25"></div></div><div class="pb2"><p class="v2-p"><strong>1 · Avoiding name collisions:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Without namespace — names clash:
+import { format } from &quot;./date-utils.js&quot;;
+import { format } from &quot;./number-utils.js&quot;;  // ❌ SyntaxError: duplicate local name
+
+// With namespaces — no collision:
+import * as DateUtils   from &quot;./date-utils.js&quot;;
+import * as NumberUtils from &quot;./number-utils.js&quot;;
+
+DateUtils.format(new Date());   // ✅ Date formatting
+NumberUtils.format(1234567);    // ✅ Number formatting</code></pre></div></div>
+<p class="v2-p"><strong>2 · Documenting the source · always clear where a function comes from:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Without namespace — where does validate() come from?
+import { validate, sanitise, normalise } from &quot;./string-utils.js&quot;;
+
+// With namespace — source is always visible:
+import * as StringUtils from &quot;./string-utils.js&quot;;
+StringUtils.validate(&quot;hello&quot;);
+StringUtils.sanitise(&quot;&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;&quot;);</code></pre></div></div>
+<p class="v2-p"><strong>3 · Passing a whole module's API as an argument:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import * as MathUtils from &quot;./math.js&quot;;
+
+function applyAll(operations, a, b) {
+  return Object.entries(operations)
+    .filter(([name, val]) =&gt; typeof val === &quot;function&quot;)
+    .map(([name, fn]) =&gt; `${name}(${a}, ${b}) = ${fn(a, b)}`);
+}
+
+console.log(applyAll(MathUtils, 10, 3));
+// Output:
+// add(10, 3) = 13
+// subtract(10, 3) = 7
+// multiply(10, 3) = 30
+// divide(10, 3) = 3.333...</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.2 · Why Use Namespaces?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(25)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase26"><div class="ph"><div class="pn">Phase 26 of 48</div><div class="pt">4.3 · Namespace Objects Are Sealed (Read-Only)</div><div class="pc" id="chk26"></div></div><div class="pb2"><p class="v2-p">The namespace object created by <code>import * as X</code> is sealed · you cannot add, remove, or replace properties:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import * as Utils from &quot;./math.js&quot;;
+
+Utils.add = function() {};   // ❌ TypeError: Cannot assign to read only property
+Utils.newFn = () =&gt; {};      // ❌ TypeError: Cannot add property
+delete Utils.PI;             // ❌ TypeError: Cannot delete property</code></pre></div></div>
+<p class="v2-p">This is intentional · it prevents accidental corruption of a module's public API.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.3 · Namespace Objects Are Sealed (Read-Only)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(26)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase27"><div class="ph"><div class="pn">Phase 27 of 48</div><div class="pt">4.4 · Namespace Patterns in Professional Code</div><div class="pc" id="chk27"></div></div><div class="pb2"><p class="v2-p"><strong>Feature layer with one namespace per domain:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import * as CartAPI    from &quot;../api/cart.js&quot;;
+import * as ProductAPI from &quot;../api/product.js&quot;;
+import * as UserAPI    from &quot;../api/user.js&quot;;
+
+async function checkout(userId, cartId) {
+  const user  = await UserAPI.getById(userId);
+  const cart  = await CartAPI.getById(cartId);
+  const items = await Promise.all(
+    cart.itemIds.map(id =&gt; ProductAPI.getById(id))
+  );
+  return CartAPI.processCheckout(user, cart, items);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Namespace facade over a barrel:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// auth/index.js
+export { login, logout, refreshToken }         from &quot;./tokens.js&quot;;
+export { getCurrentUser, updateProfile }        from &quot;./user.js&quot;;
+export { hasPermission, requireRole }           from &quot;./permissions.js&quot;;
+
+// consumer.js
+import * as Auth from &quot;./auth/index.js&quot;;
+
+if (!Auth.hasPermission(&quot;admin&quot;)) Auth.requireRole(&quot;editor&quot;);
+const user = Auth.getCurrentUser();</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.4 · Namespace Patterns in Professional Code</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(27)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase28"><div class="ph"><div class="pn">Phase 28 of 48</div><div class="pt">4.5 · Namespace vs Named Imports · Decision Guide</div><div class="pc" id="chk28"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Situation</th><th>Prefer</th></tr></thead><tbody><tr><td>Using 1 · 3 specific items</td><td>Named imports <code>{ a, b, c }</code></td></tr><tr><td>Using most/all of a module's exports</td><td>Namespace <code>* as X</code></td></tr><tr><td>Two modules export the same name</td><td>Namespace (avoids collision)</td></tr><tr><td>Repeatedly calling from the same module</td><td>Namespace (source always visible)</td></tr><tr><td>Bundle size / tree shaking is critical</td><td>Named imports (unused exports removable)</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">💡 <strong>Tree shaking and namespaces:</strong> Bundlers like Webpack and Rollup remove unused code ("tree shaking"). With <code>import { add }</code>, they know only <code>add</code> is used and can remove everything else. With <code>import * as Math</code>, they must include all exports. For production apps, prefer named imports where bundle size matters.</p></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># CHAPTER 5 · DYNAMIC IMPORTS</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>4.5 · Namespace vs Named Imports · Decision Guide</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(28)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase29"><div class="ph"><div class="pn">Phase 29 of 48</div><div class="pt">What Is a Dynamic Import?</div><div class="pc" id="chk29"></div></div><div class="pb2"><p class="v2-p">Everything so far · <code>import { x } from "./file.js"</code> · is <strong>static import</strong>: always at the top of the file, resolved before any code runs, always loaded unconditionally.</p>
+<p class="v2-p"><strong>Dynamic import</strong> · <code>import("./file.js")</code> · loads a module <strong>on demand at runtime</strong>, exactly when needed. It returns a <strong>Promise</strong> that resolves to the module's namespace object.</p>
+<p class="v2-p"><strong>Real-world analogy · a library:</strong> Static imports are like arriving at work with every book you might ever need. Dynamic imports are like having a library next door · you only go get a book when you actually need it.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>What Is a Dynamic Import?</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(29)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase30"><div class="ph"><div class="pn">Phase 30 of 48</div><div class="pt">5.1 · The Dynamic Import Syntax</div><div class="pc" id="chk30"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Static (always loads at startup):
+import { greet } from &quot;./greeting.js&quot;;
+
+// Dynamic (loads on demand, returns a Promise):
+const module = await import(&quot;./greeting.js&quot;);
+module.greet(&quot;Alice&quot;);</code></pre></div></div>
+<p class="v2-p"><strong><code>import()</code> is a function call, not a statement.</strong> This means:</p>
+<ul class="v2-ul"><li>It can appear anywhere in your code (inside functions, conditions, loops)</li><li>It returns a Promise that must be <code>await</code>-ed or <code>.then()</code>-chained</li><li>The path can be a computed string · not just a literal</li></ul>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.1 · The Dynamic Import Syntax</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(30)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase31"><div class="ph"><div class="pn">Phase 31 of 48</div><div class="pt">5.2 · Accessing Exports from a Dynamic Import</div><div class="pc" id="chk31"></div></div><div class="pb2"><p class="v2-p">The resolved value is the module's <strong>namespace object</strong> · same as <code>import * as X</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// math.js exports: add, multiply, PI, and a default Calculator class
+
+const mathModule = await import(&quot;./math.js&quot;);
+
+console.log(mathModule.add(3, 4));   // Output: 7  (named export)
+console.log(mathModule.PI);          // Output: 3.14159265  (named export)
+console.log(mathModule.default);     // Output: [class Calculator]  (default export)</code></pre></div></div>
+<p class="v2-p"><strong>Accessing the default export cleanly:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Destructure with rename:
+const { default: Calculator } = await import(&quot;./math.js&quot;);
+const calc = new Calculator();</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.2 · Accessing Exports from a Dynamic Import</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(31)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase32"><div class="ph"><div class="pn">Phase 32 of 48</div><div class="pt">5.3 · Conditional Loading</div><div class="pc" id="chk32"></div></div><div class="pb2"><p class="v2-p">Load a module only when a specific condition is met:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function initialise(userRole) {
+  if (userRole === &quot;admin&quot;) {
+    // Only admins load the admin panel — saves bandwidth for everyone else:
+    const { AdminPanel } = await import(&quot;./admin/AdminPanel.js&quot;);
+    AdminPanel.initialise();
+  } else {
+    const { UserDashboard } = await import(&quot;./dashboard/UserDashboard.js&quot;);
+    UserDashboard.initialise();
+  }
+}</code></pre></div></div>
+<p class="v2-p">Without dynamic imports, both modules would be downloaded for every user.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.3 · Conditional Loading</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(32)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase33"><div class="ph"><div class="pn">Phase 33 of 48</div><div class="pt">5.4 · Event-Triggered Loading (Code Splitting)</div><div class="pc" id="chk33"></div></div><div class="pb2"><p class="v2-p">Load expensive modules only when the user triggers an action:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const reportBtn = document.getElementById(&quot;generate-report&quot;);
+
+reportBtn.addEventListener(&quot;click&quot;, async function() {
+  reportBtn.disabled    = true;
+  reportBtn.textContent = &quot;Loading...&quot;;
+
+  try {
+    // pdf-generator.js is large — only download it on demand:
+    const { generatePDF } = await import(&quot;./pdf-generator.js&quot;);
+    await generatePDF(getReportData());
+    reportBtn.textContent = &quot;Download Ready&quot;;
+  } catch (err) {
+    console.error(&quot;PDF generation failed:&quot;, err);
+    reportBtn.textContent = &quot;Failed — Try Again&quot;;
+    reportBtn.disabled    = false;
+  }
+});</code></pre></div></div>
+<p class="v2-p">Users who never click the button never download the PDF library.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.4 · Event-Triggered Loading (Code Splitting)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(33)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase34"><div class="ph"><div class="pn">Phase 34 of 48</div><div class="pt">5.5 · Dynamic Paths</div><div class="pc" id="chk34"></div></div><div class="pb2"><p class="v2-p">The path in <code>import()</code> can be a computed string:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Load a language file based on user&#x27;s locale:
+async function loadTranslations(locale) {
+  const supported = [&quot;en&quot;, &quot;fr&quot;, &quot;de&quot;, &quot;es&quot;, &quot;yo&quot;];
+  const safe      = supported.includes(locale) ? locale : &quot;en&quot;;
+
+  const { default: translations } = await import(`./locales/${safe}.js`);
+  return translations;
+}
+
+const t = await loadTranslations(&quot;fr&quot;);
+console.log(t.greeting);   // Output: Bonjour!</code></pre></div></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Dynamic paths and bundlers:</strong> When you use a variable in a path, bundlers (Webpack, Vite) must include all files that could possibly match the pattern. Use a clear, predictable pattern (<code>./locales/${locale}.js</code>) so the bundler knows which files to include. Never use fully user-controlled paths · see the security note at the end of this chapter.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.5 · Dynamic Paths</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(34)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase35"><div class="ph"><div class="pn">Phase 35 of 48</div><div class="pt">5.6 · Loading Multiple Modules in Parallel</div><div class="pc" id="chk35"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>async function loadDashboard() {
+  const [
+    { default: Chart },
+    { DataTable },
+    { KPIWidget }
+  ] = await Promise.all([
+    import(&quot;./charts/Chart.js&quot;),
+    import(&quot;./tables/DataTable.js&quot;),
+    import(&quot;./widgets/KPIWidget.js&quot;)
+  ]);
+
+  // All three downloaded in parallel:
+  new Chart(&quot;#revenue-chart&quot;, { type: &quot;bar&quot; });
+  new DataTable(&quot;#sales-table&quot;);
+  new KPIWidget(&quot;#kpi-panel&quot;);
+}</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.6 · Loading Multiple Modules in Parallel</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(35)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase36"><div class="ph"><div class="pn">Phase 36 of 48</div><div class="pt">5.7 · Lazy Loading in Frameworks</div><div class="pc" id="chk36"></div></div><div class="pb2"><p class="v2-p">Every major framework uses dynamic imports for performance:</p>
+<p class="v2-p"><strong>React · lazy loading a component:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import { lazy, Suspense } from &quot;react&quot;;
+
+// AdminPage.js is NOT in the initial bundle:
+const AdminPage = lazy(() =&gt; import(&quot;./AdminPage.js&quot;));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;div&gt;Loading...&lt;/div&gt;}&gt;
+      &lt;AdminPage /&gt;   {/* Downloads only when this component renders */}
+    &lt;/Suspense&gt;
+  );
+}</code></pre></div></div>
+<p class="v2-p"><strong>Vue · async component:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const AdminPanel = defineAsyncComponent(() =&gt; import(&quot;./AdminPanel.vue&quot;));</code></pre></div></div>
+<p class="v2-p"><strong>React Router · route-level code splitting:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const routes = [
+  { path: &quot;/&quot;,      component: lazy(() =&gt; import(&quot;./pages/Home.js&quot;)) },
+  { path: &quot;/shop&quot;,  component: lazy(() =&gt; import(&quot;./pages/Shop.js&quot;)) },
+  { path: &quot;/admin&quot;, component: lazy(() =&gt; import(&quot;./pages/Admin.js&quot;)) },
+];
+// Each page&#x27;s code only downloads when the user navigates to it</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.7 · Lazy Loading in Frameworks</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(36)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase37"><div class="ph"><div class="pn">Phase 37 of 48</div><div class="pt">5.8 · Preloading for Anticipated Interactions</div><div class="pc" id="chk37"></div></div><div class="pb2"><p class="v2-p">For modules you'll need soon but not immediately:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// User is browsing products — they&#x27;ll probably click &quot;Add to Cart&quot;
+// Start downloading the cart module in the background:
+setTimeout(() =&gt; {
+  import(&quot;./cart/CartModal.js&quot;);   // Preload silently — no await needed
+}, 3000);
+
+// When the user clicks, the module is likely already cached:
+addToCartBtn.addEventListener(&quot;click&quot;, async () =&gt; {
+  const { CartModal } = await import(&quot;./cart/CartModal.js&quot;);
+  CartModal.open();   // Near-instant — already loaded
+});</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.8 · Preloading for Anticipated Interactions</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(37)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase38"><div class="ph"><div class="pn">Phase 38 of 48</div><div class="pt">5.9 · Static vs Dynamic Imports · Decision Guide</div><div class="pc" id="chk38"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Use Case</th><th>Static <code>import</code></th><th>Dynamic <code>import()</code></th></tr></thead><tbody><tr><td>Core dependencies always needed</td><td>✅</td><td>❌</td></tr><tr><td>Optional or rarely-used features</td><td>❌</td><td>✅</td></tr><tr><td>Conditional loading (if/switch)</td><td>❌</td><td>✅</td></tr><tr><td>Dynamic paths (variable in path)</td><td>❌</td><td>✅</td></tr><tr><td>Must appear at top of file</td><td>✅ (required)</td><td>✅ (works anywhere)</td></tr><tr><td>Route-based code splitting</td><td>❌</td><td>✅</td></tr><tr><td>Works with tree shaking</td><td>✅ Best</td><td>✅ Also works</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p">⚠️ <strong>Never use user-controlled input directly in a dynamic import path:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// ❌ Dangerous — user could supply &quot;../../../sensitive-file&quot;
+const module = await import(userInput);
+
+// ✅ Safe — validate against a whitelist:
+const allowed = [&quot;chart&quot;, &quot;table&quot;, &quot;map&quot;];
+if (!allowed.includes(componentName)) throw new Error(&quot;Invalid component&quot;);
+const module = await import(`./components/${componentName}.js`);</code></pre></div></div></blockquote>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 2 · APPLIED EXERCISES</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>5.9 · Static vs Dynamic Imports · Decision Guide</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(38)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase39"><div class="ph"><div class="pn">Phase 39 of 48</div><div class="pt">Exercise 1 · Named and Default Exports</div><div class="pc" id="chk39"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Build a <code>string-utils.js</code> module and consume it in two different ways.</p>
+<p class="v2-p"><strong>Scenario:</strong> A content management system needs string manipulation tools across multiple files.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">3. In consumer-namespace.js, how do you access the default export through the namespace object? · </div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// tiny-utils.js
+export const shout   = str =&gt; str.toUpperCase() + &quot;!&quot;;
+export const whisper = str =&gt; str.toLowerCase() + &quot;...&quot;;
+export default        str =&gt; str.trim();
+
+// consumer.js
+import trim, { shout, whisper } from &quot;./tiny-utils.js&quot;;
+console.log(shout(&quot;hello&quot;));    // Output: HELLO!
+console.log(whisper(&quot;HELLO&quot;));  // Output: hello...
+console.log(trim(&quot;  hi  &quot;));    // Output: hi</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create <code>string-utils.js</code> with these <strong>named</strong> exports:</li></ol>
+<p class="v2-p">- <code>capitalise(str)</code> · first letter uppercase, rest lowercase    - <code>titleCase(str)</code> · capitalise every word    - <code>truncate(str, maxLength, suffix = "...")</code> · cut at <code>maxLength</code>, append suffix    - <code>countWords(str)</code> · number of words (split on whitespace)    - <code>reverseWords(str)</code> · reverse word order: "hello world" → "world hello"    - <code>slugify(str)</code> · lowercase, spaces to hyphens, remove non-alphanumeric: "Hello World!" → "hello-world"</p>
+<ol class="v2-ol"><li>Add a <strong>default export</strong>: <code>sanitise(str)</code> · trims whitespace and strips HTML tags (replace <code>&lt;[^&gt;]*&gt;</code> with <code>""</code>)</li><li>Create <code>consumer-named.js</code> · import only <code>truncate</code>, <code>titleCase</code>, and <code>slugify</code>. Test with sample strings and log the results.</li><li>Create <code>consumer-namespace.js</code> · import the whole module as <code>* as StringUtils</code>. Access the default export via <code>StringUtils.default</code>.</li></ol>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>What is the advantage of the export list at the bottom vs inline <code>export</code> keywords on each declaration?</li><li>Can <code>consumer-named.js</code> use <code>capitalise</code> if it wasn't imported? Try it and note the error message.</li><li>In <code>consumer-namespace.js</code>, how do you access the default export through the namespace object?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(39)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase40"><div class="ph"><div class="pn">Phase 40 of 48</div><div class="pt">Exercise 2 · Barrel File and Re-Exports</div><div class="pc" id="chk40"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Organise a utility library so consumers only ever import from one path.</p>
+<p class="v2-p"><strong>Scenario:</strong> A data processing library split across four modules:</p>
+<ul class="v2-ul"><li><code>math.js</code> · <code>sum</code>, <code>average</code>, <code>median</code>, <code>clamp</code></li><li><code>array.js</code> · <code>unique</code>, <code>flatten</code>, <code>groupBy</code>, <code>chunk</code></li><li><code>date.js</code> · <code>formatDate</code>, <code>daysBetween</code>, <code>isWeekend</code></li><li><code>validate.js</code> · <code>isEmail</code>, <code>isUrl</code>, <code>isNonEmpty</code></li></ul>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create each of the four files with working stub implementations.</li><li>Create <code>utils/index.js</code> as a barrel that re-exports everything from all four.</li><li>Create <code>app.js</code> that imports everything it needs from <code>"./utils/index.js"</code> only · never from the individual files.</li><li>Test that <code>app.js</code> can use <code>sum</code>, <code>unique</code>, <code>formatDate</code>, and <code>isEmail</code> through the single import.</li></ol>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>If you add a new function to <code>math.js</code>, which is the only file you need to update for it to be accessible via the barrel?</li><li>What happens if <code>array.js</code> and <code>math.js</code> both export a function named <code>sum</code>? How would you resolve the conflict inside the barrel?</li></ol>
+<hr class="v2-hr"></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 2 · Barrel File and Re-Exports</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(40)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase41"><div class="ph"><div class="pn">Phase 41 of 48</div><div class="pt">Exercise 3 · Namespace Imports</div><div class="pc" id="chk41"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Refactor messy individual imports into clean, collision-free namespaces.</p>
+<p class="v2-p"><strong>Before (names clash, hard to track origins):</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 3 · Namespace Imports</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import { get, post, put, del }                    from &quot;./http.js&quot;;
+import { get as storageGet, set, remove }          from &quot;./storage.js&quot;;
+import { log, warn, error }                        from &quot;./logger.js&quot;;
+import { format as formatDate, parse, isValid }    from &quot;./date.js&quot;;
+import { format as formatNum, round, floor }       from &quot;./number.js&quot;;</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create stub implementations of all five modules.</li><li>Refactor all five imports using <code>* as</code>:</li></ol>
+<p class="v2-p">``<code>js    import <em> as Http    from "./http.js";    import </em> as Storage from "./storage.js";    import <em> as Logger  from "./logger.js";    import </em> as DateFmt from "./date.js";    import * as NumFmt  from "./number.js";    </code>``</p>
+<ol class="v2-ol"><li>Update all call sites (e.g., <code>get(url)</code> → <code>Http.get(url)</code>).</li><li>Write a <code>processDataPipeline(url)</code> function that uses all five namespaces in sequence: fetch data, validate dates, format numbers, log results, cache to storage.</li></ol>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>Before refactoring, why did <code>get</code> and <code>format</code> need <code>as</code> aliases?</li><li>After refactoring with namespaces, are aliases still necessary?</li><li>Try adding a new property to one of the namespace objects. What error do you get?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(41)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase42"><div class="ph"><div class="pn">Phase 42 of 48</div><div class="pt">Exercise 4 · Dynamic Import for Code Splitting</div><div class="pc" id="chk42"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Build a dashboard that loads feature panels only when the user requests them.</p>
+<p class="v2-p"><strong>Scenario:</strong> A three-panel dashboard · Analytics, Settings, Help. Each panel is a separate module that should only download when its tab is clicked.</p>
+<p class="v2-p"><strong>Warm-up mini-example:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 4 · Dynamic Import for Code Splitting</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.getElementById(&quot;btn&quot;).addEventListener(&quot;click&quot;, async () =&gt; {
+  const { render } = await import(&quot;./heavy-module.js&quot;);
+  render(document.getElementById(&quot;container&quot;));
+});</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Create <code>analytics.js</code>, <code>settings.js</code>, <code>help.js</code>. Each exports a <code>default</code> function <code>render(container)</code> that writes panel content into the element.</li><li>In <code>main.js</code>, add click listeners to three tab buttons.</li><li>On click:</li></ol>
+<p class="v2-p">- Show a loading indicator    - Dynamically import the correct module    - Call its <code>render()</code> function    - Handle import errors gracefully</p>
+<ol class="v2-ol"><li>Add a module cache so a panel loaded once is not re-imported on subsequent clicks:</li></ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>const moduleCache = new Map();
+
+async function loadPanel(name, container) {
+  container.innerHTML = &quot;&lt;p&gt;Loading...&lt;/p&gt;&quot;;
+
+  if (!moduleCache.has(name)) {
+    const mod = await import(`./${name}.js`);
+    moduleCache.set(name, mod);
+  }
+
+  moduleCache.get(name).default(container);
+}</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ol class="v2-ol"><li>What type does <code>import()</code> return? How do you access a default export from the result?</li><li>The browser's module map already caches modules · why does the application-level <code>Map</code> still add value?</li><li>What happens if the user clicks the same tab button multiple times in rapid succession before the first load finishes? How would you prevent a double-load?</li></ol>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(42)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase43"><div class="ph"><div class="pn">Phase 43 of 48</div><div class="pt">Exercise 5 · Full Module Architecture</div><div class="pc" id="chk43"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Objective:</strong> Design and implement a complete modular application for a student grade tracker.</p>
+<p class="v2-p"><strong>Required structure:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Exercise 5 · Full Module Architecture</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>grades-app/
+  models/
+    Student.js       → default: Student class
+    Grade.js         → default: Grade class
+  services/
+    gradeService.js  → named: calculateAverage, getLetterGrade, getTopStudents
+    reportService.js → named: generateReport, exportCSV
+  utils/
+    math.js          → named: average, round, clamp
+    format.js        → named: formatPercent, formatName
+  index.js           → barrel: re-exports all classes and service functions
+  main.js            → entry point: imports everything from barrel, runs the app</code></pre></div></div>
+<p class="v2-p"><strong>Step-by-step instructions:</strong></p>
+<ol class="v2-ol"><li>Build all files with working implementations.</li><li><code>Student</code> class: <code>id</code>, <code>name</code>, <code>grades</code> array, <code>addGrade(subject, score)</code>, <code>getAverage()</code>.</li><li><code>gradeService</code> uses <code>math.js</code> utilities. <code>getLetterGrade</code> returns A/B/C/D/F.</li><li><code>reportService</code>: <code>generateReport(students)</code> returns a formatted string; <code>exportCSV(students)</code> returns CSV text.</li><li><code>index.js</code> barrel re-exports all classes and service functions.</li><li><code>main.js</code> creates 5 students, adds grades, prints a report · importing everything from <code>"./index.js"</code> only.</li></ol>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># PHASE 3 · PROJECT SIMULATION</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(43)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase44"><div class="ph"><div class="pn">Phase 44 of 48</div><div class="pt">Project: Modular Blog Platform</div><div class="pc" id="chk44"></div></div><div class="pb2"><p class="v2-p"><strong>Scenario:</strong> You are architecting the JavaScript codebase for a lightweight blogging platform. The system must be modular and optimised · with code splitting so the editor and admin tools only load for users who need them.</p>
+<p class="v2-p">This project uses all five chapters: module structure (Ch.1), named/default/barrel exports (Ch.2), named/default/namespace/live-binding imports (Ch.3), namespace patterns for service layers (Ch.4), dynamic imports for features and locale loading (Ch.5).</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 1 · Core Data Models</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// models/Post.js
+export default class Post {
+  static #nextId = 1;
+
+  constructor(title, content, authorId, tags = []) {
+    this.id        = Post.#nextId++;
+    this.title     = title;
+    this.content   = content;
+    this.authorId  = authorId;
+    this.tags      = tags;
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+    this.published = false;
+    this.slug      = Post.#slugify(title);
+  }
+
+  static #slugify(title) {
+    return title.toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, &quot;&quot;)
+      .trim()
+      .replace(/\s+/g, &quot;-&quot;);
+  }
+
+  publish() {
+    this.published = true;
+    this.updatedAt = new Date();
+    return this;
+  }
+
+  update(fields) {
+    Object.assign(this, fields);
+    this.updatedAt = new Date();
+    if (fields.title) this.slug = Post.#slugify(fields.title);
+    return this;
+  }
+
+  get summary() {
+    const words = this.content.split(/\s+/);
+    return words.slice(0, 20).join(&quot; &quot;) + (words.length &gt; 20 ? &quot;...&quot; : &quot;&quot;);
+  }
+
+  toJSON() {
+    return {
+      id: this.id, title: this.title, slug: this.slug,
+      summary: this.summary, authorId: this.authorId, tags: this.tags,
+      published: this.published,
+      createdAt: this.createdAt.toISOString(),
+      updatedAt: this.updatedAt.toISOString()
+    };
+  }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// models/Author.js
+export default class Author {
+  static #nextId = 100;
+
+  constructor(name, email, bio = &quot;&quot;) {
+    this.id    = Author.#nextId++;
+    this.name  = name;
+    this.email = email;
+    this.bio   = bio;
+    this.posts = [];
+  }
+
+  get displayName() { return this.name; }
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 2 · Utility Layer (Named Exports + Barrel)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// utils/string.js
+export const slugify = str =&gt;
+  str.toLowerCase().replace(/[^a-z0-9\s-]/g, &quot;&quot;).trim().replace(/\s+/g, &quot;-&quot;);
+
+export const truncate = (str, max, suffix = &quot;...&quot;) =&gt;
+  str.length &lt;= max ? str : str.slice(0, max - suffix.length) + suffix;
+
+export const capitalise = str =&gt;
+  str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+export const wordCount = str =&gt;
+  str.trim().split(/\s+/).filter(Boolean).length;
+
+export const readingTime = str =&gt; {
+  const mins = Math.ceil(wordCount(str) / 200);   // Average reading: ~200 wpm
+  return mins + &quot; min read&quot;;
+};</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// utils/date.js
+export const formatDate = (date, locale = &quot;en-GB&quot;) =&gt;
+  new Date(date).toLocaleDateString(locale, {
+    year: &quot;numeric&quot;, month: &quot;long&quot;, day: &quot;numeric&quot;
+  });
+
+export const timeAgo = date =&gt; {
+  const secs = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (secs &lt; 60)    return &quot;just now&quot;;
+  if (secs &lt; 3600)  return Math.floor(secs / 60)   + &quot; minutes ago&quot;;
+  if (secs &lt; 86400) return Math.floor(secs / 3600)  + &quot; hours ago&quot;;
+  return Math.floor(secs / 86400) + &quot; days ago&quot;;
+};</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// utils/validate.js
+export const isEmail    = v =&gt; /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+export const isNonEmpty = v =&gt; typeof v === &quot;string&quot; &amp;&amp; v.trim().length &gt; 0;
+export const minLength  = (v, n) =&gt; typeof v === &quot;string&quot; &amp;&amp; v.trim().length &gt;= n;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// utils/index.js — barrel
+export * from &quot;./string.js&quot;;
+export * from &quot;./date.js&quot;;
+export * from &quot;./validate.js&quot;;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 3 · Service Layer (Namespace Imports)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// services/PostService.js
+import Post           from &quot;../models/Post.js&quot;;
+import * as StringUtils  from &quot;../utils/string.js&quot;;
+import * as Validate     from &quot;../utils/validate.js&quot;;
+
+const _posts = new Map();   // In-memory store
+
+export function createPost(title, content, authorId, tags = []) {
+  if (!Validate.isNonEmpty(title))      throw new Error(&quot;Title is required.&quot;);
+  if (!Validate.minLength(content, 50)) throw new Error(&quot;Content must be at least 50 characters.&quot;);
+
+  const post = new Post(title, content, authorId, tags);
+  _posts.set(post.id, post);
+  return post;
+}
+
+export function publishPost(postId) {
+  const post = _posts.get(postId);
+  if (!post) throw new Error(&quot;Post not found: &quot; + postId);
+  return post.publish();
+}
+
+export function getPublished() {
+  return Array.from(_posts.values())
+    .filter(p =&gt; p.published)
+    .sort((a, b) =&gt; b.createdAt - a.createdAt);
+}
+
+export function getByTag(tag) {
+  return getPublished().filter(p =&gt; p.tags.includes(tag));
+}
+
+export function search(query) {
+  const q = query.toLowerCase();
+  return getPublished().filter(p =&gt;
+    p.title.toLowerCase().includes(q) ||
+    p.content.toLowerCase().includes(q)
+  );
+}
+
+export function getStats() {
+  const all       = Array.from(_posts.values());
+  const published = all.filter(p =&gt; p.published);
+  const totalWords = published.reduce((sum, p) =&gt; sum + StringUtils.wordCount(p.content), 0);
+
+  return {
+    total:     all.length,
+    published: published.length,
+    drafts:    all.length - published.length,
+    totalWords,
+    avgWords:  published.length ? Math.round(totalWords / published.length) : 0
+  };
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// services/index.js — service barrel (exports namespaces, not individual functions)
+export * as PostService   from &quot;./PostService.js&quot;;
+export * as AuthorService from &quot;./AuthorService.js&quot;;</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 4 · Dynamic Features (Dynamic Imports + Caching)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// features/editor.js — only loaded for logged-in authors
+import * as PostService  from &quot;../services/PostService.js&quot;;
+import * as StringUtils  from &quot;../utils/string.js&quot;;
+import * as Validate     from &quot;../utils/validate.js&quot;;
+
+export function initEditor(container) {
+  container.innerHTML = `
+    &lt;div class=&quot;editor&quot;&gt;
+      &lt;h2&gt;Write New Post&lt;/h2&gt;
+      &lt;input    id=&quot;post-title&quot;   placeholder=&quot;Title...&quot; /&gt;
+      &lt;textarea id=&quot;post-content&quot; placeholder=&quot;Write your post (min 50 chars)...&quot; rows=&quot;10&quot;&gt;&lt;/textarea&gt;
+      &lt;input    id=&quot;post-tags&quot;    placeholder=&quot;Tags, comma-separated...&quot; /&gt;
+      &lt;button   id=&quot;save-draft&quot;&gt;Save Draft&lt;/button&gt;
+      &lt;button   id=&quot;publish-btn&quot;&gt;Save &amp; Publish&lt;/button&gt;
+      &lt;p        id=&quot;editor-status&quot;&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  `;
+
+  const status = container.querySelector(&quot;#editor-status&quot;);
+
+  function readFormData() {
+    return {
+      title:   container.querySelector(&quot;#post-title&quot;).value,
+      content: container.querySelector(&quot;#post-content&quot;).value,
+      tags:    container.querySelector(&quot;#post-tags&quot;).value
+        .split(&quot;,&quot;).map(t =&gt; t.trim()).filter(Boolean)
+    };
+  }
+
+  container.querySelector(&quot;#save-draft&quot;).addEventListener(&quot;click&quot;, () =&gt; {
+    const { title, content, tags } = readFormData();
+    try {
+      const post = PostService.createPost(title, content, 1, tags);
+      status.textContent =
+        `Draft saved: &quot;${post.title}&quot; · ${StringUtils.readingTime(post.content)}`;
+      status.style.color = &quot;green&quot;;
+    } catch (err) {
+      status.textContent = &quot;Error: &quot; + err.message;
+      status.style.color = &quot;red&quot;;
+    }
+  });
+
+  container.querySelector(&quot;#publish-btn&quot;).addEventListener(&quot;click&quot;, () =&gt; {
+    const { title, content, tags } = readFormData();
+    try {
+      const post = PostService.createPost(title, content, 1, tags);
+      PostService.publishPost(post.id);
+      status.textContent = `Published: &quot;${post.title}&quot;`;
+      status.style.color = &quot;green&quot;;
+    } catch (err) {
+      status.textContent = &quot;Error: &quot; + err.message;
+      status.style.color = &quot;red&quot;;
+    }
+  });
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// features/admin.js — only loaded for admin users
+import * as PostService from &quot;../services/PostService.js&quot;;
+import * as DateUtils   from &quot;../utils/date.js&quot;;
+
+export function initAdmin(container) {
+  const stats = PostService.getStats();
+  const posts = PostService.getPublished();
+
+  container.innerHTML = `
+    &lt;div class=&quot;admin-panel&quot;&gt;
+      &lt;h2&gt;Admin Dashboard&lt;/h2&gt;
+      &lt;section class=&quot;stats&quot;&gt;
+        &lt;p&gt;Total posts:  &lt;strong&gt;${stats.total}&lt;/strong&gt;&lt;/p&gt;
+        &lt;p&gt;Published:    &lt;strong&gt;${stats.published}&lt;/strong&gt;&lt;/p&gt;
+        &lt;p&gt;Drafts:       &lt;strong&gt;${stats.drafts}&lt;/strong&gt;&lt;/p&gt;
+        &lt;p&gt;Avg length:   &lt;strong&gt;${stats.avgWords} words&lt;/strong&gt;&lt;/p&gt;
+      &lt;/section&gt;
+      &lt;h3&gt;Published Posts&lt;/h3&gt;
+      &lt;ul&gt;
+        ${posts.map(p =&gt;
+          `&lt;li&gt;${p.title} — &lt;em&gt;${DateUtils.timeAgo(p.createdAt)}&lt;/em&gt;&lt;/li&gt;`
+        ).join(&quot;&quot;)}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  `;
+}</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 5 · Main Entry Point</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// main.js — static imports for always-needed code
+import Post           from &quot;./models/Post.js&quot;;
+import Author         from &quot;./models/Author.js&quot;;
+import * as PostService from &quot;./services/PostService.js&quot;;
+import * as Utils       from &quot;./utils/index.js&quot;;
+
+// --- Seed data ---
+const alice = new Author(&quot;Alice Chen&quot;,  &quot;alice@blog.com&quot;);
+const bob   = new Author(&quot;Bob Okafor&quot;,  &quot;bob@blog.com&quot;);
+
+const post1 = PostService.createPost(
+  &quot;Getting Started with JavaScript Modules&quot;,
+  &quot;JavaScript modules are one of the most important features added to the language in recent &quot; +
+  &quot;years. They allow developers to split their code into isolated, reusable pieces that are easy &quot; +
+  &quot;to test and maintain. In this post we will explore exports, imports, namespaces, and dynamic &quot; +
+  &quot;loading with practical examples from a real codebase.&quot;,
+  alice.id,
+  [&quot;javascript&quot;, &quot;modules&quot;, &quot;tutorial&quot;]
+);
+
+const post2 = PostService.createPost(
+  &quot;Why Async Await Changed Everything&quot;,
+  &quot;Before async and await arrived in ES2017 writing asynchronous JavaScript meant navigating &quot; +
+  &quot;callback hell or wrestling with Promise chains. Async await made it possible to write async &quot; +
+  &quot;code that reads just like synchronous code dramatically improving readability and reducing &quot; +
+  &quot;the likelihood of subtle timing bugs in complex asynchronous workflows.&quot;,
+  bob.id,
+  [&quot;javascript&quot;, &quot;async&quot;, &quot;tutorial&quot;]
+);
+
+PostService.publishPost(post1.id);
+PostService.publishPost(post2.id);
+
+// --- Render public blog ---
+function renderBlog() {
+  const posts = PostService.getPublished();
+  const app   = document.getElementById(&quot;app&quot;);
+
+  app.innerHTML = `
+    &lt;header&gt;&lt;h1&gt;The Dev Blog&lt;/h1&gt;&lt;/header&gt;
+    &lt;main&gt;
+      ${posts.map(p =&gt; `
+        &lt;article class=&quot;post-card&quot;&gt;
+          &lt;h2&gt;${p.title}&lt;/h2&gt;
+          &lt;p class=&quot;meta&quot;&gt;
+            ${Utils.formatDate(p.createdAt)} · ${Utils.readingTime(p.content)}
+          &lt;/p&gt;
+          &lt;p class=&quot;summary&quot;&gt;${p.summary}&lt;/p&gt;
+          &lt;p class=&quot;tags&quot;&gt;${p.tags.map(t =&gt; `&lt;span&gt;#${t}&lt;/span&gt;`).join(&quot; &quot;)}&lt;/p&gt;
+        &lt;/article&gt;
+      `).join(&quot;&quot;)}
+    &lt;/main&gt;
+    &lt;footer&gt;
+      &lt;button id=&quot;editor-btn&quot;&gt;✏️ Write Post&lt;/button&gt;
+      &lt;button id=&quot;admin-btn&quot;&gt;⚙️ Admin&lt;/button&gt;
+      &lt;div id=&quot;feature-panel&quot;&gt;&lt;/div&gt;
+    &lt;/footer&gt;
+  `;
+
+  // --- Dynamic feature loading with application-level cache ---
+  const moduleCache = new Map();
+
+  async function loadFeature(name) {
+    const panel = document.getElementById(&quot;feature-panel&quot;);
+    panel.innerHTML = &quot;&lt;p&gt;Loading...&lt;/p&gt;&quot;;
+
+    try {
+      if (!moduleCache.has(name)) {
+        const mod = await import(`./features/${name}.js`);
+        moduleCache.set(name, mod);
+      }
+
+      const mod = moduleCache.get(name);
+      if (name === &quot;editor&quot;) mod.initEditor(panel);
+      if (name === &quot;admin&quot;)  mod.initAdmin(panel);
+
+    } catch (err) {
+      panel.innerHTML = `&lt;p style=&quot;color:red&quot;&gt;⚠️ Failed to load ${name}: ${err.message}&lt;/p&gt;`;
+    }
+  }
+
+  document.getElementById(&quot;editor-btn&quot;)
+    .addEventListener(&quot;click&quot;, () =&gt; loadFeature(&quot;editor&quot;));
+  document.getElementById(&quot;admin-btn&quot;)
+    .addEventListener(&quot;click&quot;, () =&gt; loadFeature(&quot;admin&quot;));
+}
+
+renderBlog();</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Stage 6 · Advanced Challenge: Dynamic Locale Loading</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// locales/en.js
+export default { readMore: &quot;Read more&quot;, byAuthor: &quot;By&quot;, loading: &quot;Loading...&quot; };
+
+// locales/fr.js
+export default { readMore: &quot;Lire la suite&quot;, byAuthor: &quot;Par&quot;, loading: &quot;Chargement...&quot; };
+
+// locales/yo.js  (Yoruba)
+export default { readMore: &quot;Ka siwaju&quot;, byAuthor: &quot;Nipa&quot;, loading: &quot;Nduro...&quot; };</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// i18n.js — locale module with dynamic import + caching
+const SUPPORTED = [&quot;en&quot;, &quot;fr&quot;, &quot;de&quot;, &quot;es&quot;, &quot;yo&quot;];
+const _cache    = new Map();
+let   _active   = null;
+
+export async function loadLocale(locale) {
+  const safe = SUPPORTED.includes(locale) ? locale : &quot;en&quot;;
+  if (_cache.has(safe)) { _active = _cache.get(safe); return _active; }
+
+  const { default: messages } = await import(`./locales/${safe}.js`);
+  _cache.set(safe, messages);
+  _active = messages;
+  return messages;
+}
+
+export const t = key =&gt; _active?.[key] ?? key;
+export const getSupportedLocales = () =&gt; [...SUPPORTED];</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// In main.js — detect browser language, load the right locale before rendering:
+const browserLocale = navigator.language.split(&quot;-&quot;)[0];
+await loadLocale(browserLocale);   // Top-level await — waits before renderBlog()
+renderBlog();</code></pre></div></div>
+<p class="v2-p"><strong>Reflection Questions:</strong></p>
+<ol class="v2-ol"><li><code>PostService.js</code> uses <code>import <em> as StringUtils</code> and <code>import </em> as Validate</code> as namespaces. What are the trade-offs vs named imports for a production application with strict bundle-size requirements?</li><li>The <code>moduleCache</code> Map in <code>main.js</code> stores loaded feature modules. The browser's module map also caches them. Why does the application-level cache still add value on top of what the browser already does?</li><li><code>utils/index.js</code> uses <code>export <em> from "./string.js"</code>. What risk does <code>export </em></code> introduce when two sub-modules export the same name? How would you resolve it in the barrel?</li><li>In the locale loader, <code>await import(</code>./locales/${safe}.js<code>)</code> uses a template literal path. What must a bundler (Vite, Webpack) do at build time when it encounters a pattern like this? What happens to bundle size?</li><li><code>services/index.js</code> re-exports using <code>export <em> as PostService from "./PostService.js"</code>. A consumer then writes <code>import </em> as Services from "./services/index.js"</code> and calls <code>Services.PostService.createPost(...)</code>. Trace the full chain · what is <code>Services</code>, what is <code>Services.PostService</code>, and what is <code>Services.PostService.createPost</code>?</li></ol>
+<hr class="v2-hr">
+<hr class="v2-hr">
+<p class="v2-p"># QUIZ &amp; COMPLETION CHECKLIST</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Project: Modular Blog Platform</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(44)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase45"><div class="ph"><div class="pn">Phase 45 of 48</div><div class="pt">Self-Assessment Quiz</div><div class="pc" id="chk45"></div></div><div class="pb2"><p class="v2-p"><strong>Q1:</strong> What three things do ES modules provide that plain <code>&lt;script&gt;</code> tags do not?</p>
+<p class="v2-p"><strong>Q2:</strong> What is the difference between a named export and a default export? Can a module have both?</p>
+<p class="v2-p"><strong>Q3:</strong> What is wrong with each of these lines?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>export 42;
+export default function() {}
+export default class {}</code></pre></div></div>
+<p class="v2-p"><strong>Q4:</strong> When importing a named export, what are the two requirements about the name you use?</p>
+<p class="v2-p"><strong>Q5:</strong> Explain "live bindings" in one sentence, then demonstrate with a two-file code example.</p>
+<p class="v2-p"><strong>Q6:</strong> You need <code>format</code> from both <code>./date.js</code> and <code>./number.js</code>. Write two ways to import both without conflict.</p>
+<p class="v2-p"><strong>Q7:</strong> What does <code>import * as Utils from "./utils.js"</code> produce? Can you add a new property to it?</p>
+<p class="v2-p"><strong>Q8:</strong> What is a barrel file and why is it useful?</p>
+<p class="v2-p"><strong>Q9:</strong> Write the code to dynamically load <code>./chart.js</code> only when a button is clicked, access its default export as <code>Chart</code>, and handle load failures.</p>
+<p class="v2-p"><strong>Q10:</strong> What is the difference between <code>import Chart from "./chart.js"</code> and <code>const { default: Chart } = await import("./chart.js")</code>?</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Self-Assessment Quiz</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(45)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase46"><div class="ph"><div class="pn">Phase 46 of 48</div><div class="pt">Answer Key</div><div class="pc" id="chk46"></div></div><div class="pb2"><p class="v2-p"><strong>A1:</strong> Any three of: own private scope (no global pollution), strict mode always on, <code>import</code>/<code>export</code> syntax, deferred execution, single evaluation (module map cache), live bindings, top-level <code>await</code>.</p>
+<p class="v2-p"><strong>A2:</strong> Named exports are identified by their name · a module can have many. A default export is the "main" export · exactly one per module. Yes, a module can have both simultaneously.</p>
+<p class="v2-p"><strong>A3:</strong> (1) <code>export 42</code> · you cannot export a bare value; bind it first: <code>export const ANSWER = 42</code>. (2 &amp; 3) · two <code>export default</code> statements · only one default is allowed per module.</p>
+<p class="v2-p"><strong>A4:</strong> (1) The name must exactly match what was exported · or you must use <code>as</code> to rename it. (2) It must be wrapped in curly braces <code>{ }</code>.</p>
+<p class="v2-p"><strong>A5:</strong> A live binding means the import is a real-time reference to the exported variable · if the exporting module changes it, the importing file sees the updated value immediately. Example: export <code>let count = 0</code> and <code>increment()</code>. Calling <code>increment()</code> makes <code>count</code> read as <code>1</code> in the importing file.</p>
+<p class="v2-p"><strong>A6:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>// Option 1 — rename with &#x27;as&#x27;:
+import { format as formatDate } from &quot;./date.js&quot;;
+import { format as formatNum  } from &quot;./number.js&quot;;
+
+// Option 2 — namespaces:
+import * as DateFmt from &quot;./date.js&quot;;
+import * as NumFmt  from &quot;./number.js&quot;;
+// Use: DateFmt.format(), NumFmt.format()</code></pre></div></div>
+<p class="v2-p"><strong>A7:</strong> A <strong>namespace object</strong> · a sealed object where each property is one of the module's exports. No · namespace objects are frozen; attempting to add, remove, or replace properties throws a <code>TypeError</code>.</p>
+<p class="v2-p"><strong>A8:</strong> A barrel file (index file) is a module that re-exports items from multiple sub-modules through a single path. It simplifies imports for consumers · one import path instead of many · and lets you reorganise internal files without updating every consumer.</p>
+<p class="v2-p"><strong>A9:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">js</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>document.getElementById(&quot;chart-btn&quot;).addEventListener(&quot;click&quot;, async () =&gt; {
+  try {
+    const { default: Chart } = await import(&quot;./chart.js&quot;);
+    new Chart(document.getElementById(&quot;canvas&quot;)).render();
+  } catch (err) {
+    console.error(&quot;Failed to load chart:&quot;, err.message);
+  }
+});</code></pre></div></div>
+<p class="v2-p"><strong>A10:</strong> The first is a <strong>static import</strong> · runs at startup, <code>Chart</code> is available throughout the file, must be at the top level. The second is a <strong>dynamic import</strong> · returns a Promise, runs only when that line executes, works anywhere in code. Both give you the same <code>Chart</code> value.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Answer Key</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(46)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase47"><div class="ph"><div class="pn">Phase 47 of 48</div><div class="pt">Key Gotchas Summary</div><div class="pc" id="chk47"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Mistake</th><th>Why It Happens</th><th>Fix</th></tr></thead><tbody><tr><td><code>export 42</code> · bare value</td><td>Forgetting to bind it to a name</td><td><code>export const ANSWER = 42</code></td></tr><tr><td>Two <code>export default</code> in one file</td><td>Only one default allowed per module</td><td>Remove one; convert the other to a named export</td></tr><tr><td>Named import without curly braces</td><td>Confusing named and default syntax</td><td>Named → <code>{ name }</code>, Default → <code>name</code> (no braces)</td></tr><tr><td>Missing <code>.js</code> extension in browser</td><td>Browsers need the full path</td><td>Always include <code>.js</code> for browser ES modules</td></tr><tr><td><code>import</code> inside a function or <code>if</code></td><td>Static imports must be at top level</td><td>Use dynamic <code>import()</code> for conditional loading</td></tr><tr><td>Reassigning an imported binding</td><td>Imports are live read-only references</td><td>Call a function the module exports to change the value</td></tr><tr><td>Forgetting <code>await</code> before <code>import()</code></td><td><code>import()</code> returns a Promise</td><td><code>const mod = await import("./file.js")</code></td></tr><tr><td>Accessing <code>.default</code> on a static default import</td><td>Static default import is already the value</td><td>Only namespace objects have a <code>.default</code> property</td></tr><tr><td>Dynamic path from user input</td><td>Path traversal security risk</td><td>Always validate against a whitelist before using in <code>import()</code></td></tr><tr><td>Circular imports (A imports B, B imports A)</td><td>Modules can't fully initialise each other</td><td>Refactor shared code into a third module C</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Key Gotchas Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(47)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase48"><div class="ph"><div class="pn">Phase 48 of 48</div><div class="pt">One-Sentence Summary</div><div class="pc" id="chk48"></div></div><div class="pb2"><blockquote class="v2-bq"><p class="v2-p">JavaScript modules transform a tangled global codebase into a network of self-contained, explicitly connected files · each declaring what it provides through exports and what it needs through imports · while dynamic imports allow expensive code to load on demand, keeping initial page loads fast.</p></blockquote>
+<hr class="v2-hr">
+<p class="v2-p"><em>Tutorial generated by AI_TUTORIAL_GENERATOR · Source curriculum: W3Schools JavaScript Modules (5 pages)</em></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>One-Sentence Summary</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(48)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lesson 35 Project</div><div class="build-req"><p class="v2-p">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code h</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.html</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;My Project&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;!-- Your code here --&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`<!DOCTYPE html>
+<html lang=&quot;en&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<title>My Project</title>
+</head>
+<body>
+<!-- Your code here -->
+</body>
+</html>`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.html &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub Pages &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub Pages &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>js-lesson-35-lesson-35-project</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, then click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong>. Rename your file to <code>index.html</code> and upload it.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add JavaScript lesson 35 project"</em> and click <strong>Commit changes</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Go to <strong>Settings &gt; Pages</strong>, set Source to <strong>main branch</strong>, click <strong>Save</strong>. Your site goes live at <code>https://YOUR-NAME.github.io/js-lesson-35-lesson-35-project/</code> in about one minute. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 35 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ The Problem Modules Solve</li><li>✅ 1.1 · What Is a Module?</li><li>✅ 1.2 · Key Properties of Modules</li><li>✅ 1.3 · Enabling Modules in the Browser</li><li>✅ 1.4 · Modules in Node.js</li><li>✅ 1.5 · The Module Map: Why Modules Execute Only Once</li><li>✅ What Is an Export?</li><li>✅ 2.1 · Named Exports</li></ul><div class="ln"><a href="lesson_34.html" class="ln-btn">&#8592; Lesson 34</a><a href="lesson_36.html" class="ln-btn primary">Lesson 36 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; JavaScript Course &nbsp;·&nbsp; Lesson 35 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>

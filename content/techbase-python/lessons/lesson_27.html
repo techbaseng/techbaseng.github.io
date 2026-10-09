@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 27: NumPy Random Distributions, Permutations, Seaborn Visualisation, and Universal Functions (ufuncs) — Techbase Python</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/css/lesson.css">
+</head>
+<body data-total="8" data-key="techbase_python_l27">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap">
+    
+    <div class="nav-logo-text">
+      Techbase<span class="course-lbl">Python Course</span>
+    </div>
+  </a>
+  <span class="l-nav-lbl">Lesson 27 of 45</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo">
+      
+    </div>
+    <div class="l-hero-text">
+      <div class="badge">Python · Lesson 27</div>
+      <h1>NumPy Random Distributions, Permutations, Seaborn Visualisation, and Universal Functions (ufuncs)</h1>
+      <div class="l-hero-sub">8 phases &nbsp;·&nbsp; Build: Project Description</div>
+    </div>
+  </div>
+</div>
+
+<section style="background:linear-gradient(160deg,#ecfdf5 0%,#f8fafc 55%,#d1fae5 100%);padding-bottom:1.5rem;border-bottom:1px solid var(--br)">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 27</h2><div style="font-size:1rem;line-height:1.85;color:var(--t2)"><p class="v2-p">Welcome to Lesson 27! In this lesson you will learn four powerful ideas that sit at the heart of modern data science and scientific computing in Python:</p>
+<ol class="v2-ol"><li><strong>Random Data Distributions</strong> · how to generate random numbers that follow real-world patterns (like weighted choices and probability rules).</li><li><strong>Random Permutations</strong> · how to shuffle arrays or create new rearrangements without changing the original data.</li><li><strong>Seaborn for Visualisation</strong> · how to draw beautiful distribution charts using a Python library called Seaborn, so you can <em>see</em> what your data looks like.</li><li><strong>Universal Functions (ufuncs)</strong> · NumPy's super-fast way of doing math operations on entire arrays at once without writing slow loops.</li></ol>
+<p class="v2-p">These four topics flow naturally into each other. First you will learn to <em>create</em> specially shaped random data, then to <em>rearrange</em> it, then to <em>visualise</em> it, and finally to <em>process</em> it efficiently with ufuncs. By the end of this lesson you will have everything you need for a real mini-project.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Prerequisites check:</strong> This lesson assumes you have already used NumPy and know how to create arrays with <code>np.array()</code>. If you have not, quickly review: <code>import numpy as np</code> and <code>arr = np.array([1, 2, 3])</code> before continuing.</p></blockquote>
+<hr class="v2-hr"></div><div class="wm"><span>📚 8 phases</span><span>🏗️ Project Description</span><span>🐍 GitHub Repo</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 8</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to Lesson 27! In this lesson you will learn four powerful ideas that sit at the heart of modern data science and scientific computing in Python:</p>
+<ol class="v2-ol"><li><strong>Random Data Distributions</strong> · how to generate random numbers that follow real-world patterns (like weighted choices and probability rules).</li><li><strong>Random Permutations</strong> · how to shuffle arrays or create new rearrangements without changing the original data.</li><li><strong>Seaborn for Visualisation</strong> · how to draw beautiful distribution charts using a Python library called Seaborn, so you can <em>see</em> what your data looks like.</li><li><strong>Universal Functions (ufuncs)</strong> · NumPy's super-fast way of doing math operations on entire arrays at once without writing slow loops.</li></ol>
+<p class="v2-p">These four topics flow naturally into each other. First you will learn to <em>create</em> specially shaped random data, then to <em>rearrange</em> it, then to <em>visualise</em> it, and finally to <em>process</em> it efficiently with ufuncs. By the end of this lesson you will have everything you need for a real mini-project.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Prerequisites check:</strong> This lesson assumes you have already used NumPy and know how to create arrays with <code>np.array()</code>. If you have not, quickly review: <code>import numpy as np</code> and <code>arr = np.array([1, 2, 3])</code> before continuing.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 8</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">What is a Python Array (NumPy ndarray)?</h3>
+<p class="v2-p">Before we start, a very quick reminder. In NumPy, data is stored in an <strong>ndarray</strong> (n-dimensional array). Think of it as a super-powered list that can hold numbers very efficiently.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([10, 20, 30, 40])
+print(arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[10 20 30 40]</code></pre></div></div>
+<h3 class="v2-h3">What is a Python List?</h3>
+<p class="v2-p">A Python list is the built-in container: <code>[1, 2, 3]</code>. NumPy arrays and Python lists look similar but NumPy arrays are far faster for maths operations. You will see both used in this lesson.</p>
+<h3 class="v2-h3">What is a Library Import?</h3>
+<p class="v2-p">When you write <code>from numpy import random</code>, you are saying: "Go into the NumPy toolkit and bring out the <em>random</em> tool so I can use it directly." Instead of typing <code>numpy.random.choice()</code> every time, you just type <code>random.choice()</code>.</p>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 8</div><div class="pt">Part 1 · Random Data Distribution</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is a Data Distribution?</h3>
+<p class="v2-p">Imagine a bag of coloured marbles. You reach in and pull one out. A <strong>data distribution</strong> tells you the complete story of the bag: how many of each colour exist, and therefore how likely you are to pull each one.</p>
+<p class="v2-p">In statistics and data science, a <strong>data distribution</strong> is a description of all the possible values a variable can take, and how often each value appears.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world analogy:</strong> Think about a school canteen that sells only four snacks: biscuits, chips, juice, and water. If you ask 100 students what they bought, maybe 10 bought biscuits, 30 bought chips, 60 bought juice, and 0 bought water. <em>That pattern · 10%, 30%, 60%, 0%</em> · is the distribution of purchases.</p></blockquote>
+<h3 class="v2-h3">What is Probability?</h3>
+<p class="v2-p"><strong>Probability</strong> is just a fancy word for "how likely is something to happen?" It is always a number between <strong>0</strong> and <strong>1</strong>:</p>
+<ul class="v2-ul"><li><strong>0</strong> means it will <em>never</em> happen.</li><li><strong>1</strong> means it will <em>always</em> happen.</li><li><strong>0.5</strong> means it happens roughly <em>half</em> the time.</li></ul>
+<p class="v2-p">The probabilities for all possible outcomes must always add up to exactly <strong>1.0</strong> (because something must happen).</p>
+<h3 class="v2-h3">What is a Probability Density Function (PDF)?</h3>
+<p class="v2-p">A <strong>Probability Density Function</strong> is a mathematical description of a <em>continuous</em> distribution · that is, a distribution where the values can be any decimal number, not just whole numbers. It describes the probability of all values in an array or dataset.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Simple explanation:</strong> Think of a PDF like a recipe that tells you the "shape" of your data. A bell-curve PDF means most values cluster in the middle. A flat PDF means all values are equally likely.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">The <code>random.choice()</code> Method</h3>
+<p class="v2-p">NumPy's <code>random</code> module gives us a method called <code>choice()</code>. This method lets you:</p>
+<ol class="v2-ol"><li>Give it a list of possible values.</li><li>Tell it exactly how likely each value should be (using probabilities).</li><li>Ask it to generate as many random picks as you want.</li></ol>
+<p class="v2-p"><strong>Syntax breakdown:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>random.choice(values_list, p=probabilities_list, size=how_many_you_want)</code></pre></div></div>
+<ul class="v2-ul"><li><code>values_list</code> · the list of values to pick from, e.g. <code>[3, 5, 7, 9]</code></li><li><code>p=</code> · the probability for each value; must be the same length as the values list and must sum to exactly 1.0</li><li><code>size=</code> · how many random values to generate; can be a single number like <code>(100,)</code> or a shape like <code>(3, 5)</code> for a 2D array</li></ul>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Important rule:</strong> The probabilities in the <code>p</code> list <strong>must sum to exactly 1.0</strong>. If they don't, Python will raise an error.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Example 1 · Weighted Coin Flip</h3>
+<p class="v2-p">Let's start with the simplest possible example: a coin that is more likely to land on heads.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+
+# Our coin: 1 = heads, 0 = tails
+# Probability of heads = 0.7, tails = 0.3
+result = random.choice([0, 1], p=[0.3, 0.7], size=(10))
+
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (your output will vary because it is random):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[1 1 0 1 1 1 0 1 1 1]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Line</th><th>What it does</th></tr></thead><tbody><tr><td><code>from numpy import random</code></td><td>Imports the random module from NumPy</td></tr><tr><td><code>random.choice([0, 1], ...)</code></td><td>Tells Python to pick from the values 0 or 1</td></tr><tr><td><code>p=[0.3, 0.7]</code></td><td>0 has a 30% chance; 1 has a 70% chance</td></tr><tr><td><code>size=(10)</code></td><td>Generate 10 random picks</td></tr><tr><td><code>print(result)</code></td><td>Show the result</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would happen if you changed <code>p=[0.3, 0.7]</code> to <code>p=[0.0, 1.0]</code>? Would you ever see a 0? Try it!</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Example 2 · Weighted Choice with Four Values</h3>
+<p class="v2-p">Now let's pick from four possible values with different probabilities, just like the canteen example.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+
+# Values: 3, 5, 7, 9
+# 3 has 10% chance, 5 has 30% chance, 7 has 60% chance, 9 has 0% chance
+x = random.choice([3, 5, 7, 9], p=[0.1, 0.3, 0.6, 0.0], size=(100))
+
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (yours will be different but follow the same pattern):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[7 7 5 7 7 3 7 5 7 7 7 5 7 7 7 7 7 5 7 7 7 5 7 7 7 7 7 5 7 7
+ 7 5 7 7 7 7 7 7 7 7 7 7 3 7 5 7 7 5 7 5 5 7 7 7 7 5 7 7 7 7
+ 5 7 7 7 5 5 7 7 7 5 7 7 5 7 7 7 7 7 7 5 7 7 3 5 7 7 5 7 7 7
+ 7 7 5 7 5 7 7 7 7 7]</code></pre></div></div>
+<p class="v2-p"><strong>Notice:</strong> The value 9 <em>never</em> appears because its probability is 0.0. The value 7 appears most often because it has the highest probability (0.6 = 60%).</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> Add up the probabilities: 0.1 + 0.3 + 0.6 + 0.0 = 1.0. They add up to exactly 1. This is always required.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Generating 2D Distribution Arrays</h3>
+<p class="v2-p">You can also generate the random values as a two-dimensional array (like a grid/table) by passing a <strong>tuple</strong> as the <code>size</code> parameter.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+
+# Same four values, same probabilities, but now get a 3×5 table
+x = random.choice([3, 5, 7, 9], p=[0.1, 0.3, 0.6, 0.0], size=(3, 5))
+
+print(x)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[[7 5 7 7 7]
+ [5 7 7 3 7]
+ [7 7 5 7 7]]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Code Part</th><th>Meaning</th></tr></thead><tbody><tr><td><code>size=(3, 5)</code></td><td>Create a 2D array with 3 rows and 5 columns</td></tr><tr><td>The result</td><td>A 3×5 table of randomly chosen values (total = 15 values)</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use:</strong> In data science, you might model a weather system where rain (probability 0.4), cloud (0.35), sun (0.2), and storm (0.05) occur across a 10-day, 5-city forecast grid.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Random Data Distribution</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 8</div><div class="pt">Part 2 · Random Permutations</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">What is a Permutation?</h3>
+<p class="v2-p">A <strong>permutation</strong> is simply a rearrangement of the same elements in a different order.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Everyday analogy:</strong> Imagine you have three books on your shelf: A, B, C. One arrangement is A-B-C. A permutation could be B-C-A or C-A-B. All three books are still there · they're just in a different order.</p></blockquote>
+<p class="v2-p">Examples of permutations:</p>
+<ul class="v2-ul"><li><code>[1, 2, 3]</code> is a permutation of <code>[3, 2, 1]</code></li><li><code>["apple", "banana", "cherry"]</code> is a permutation of <code>["banana", "cherry", "apple"]</code></li></ul>
+<p class="v2-p">NumPy's <code>random</code> module gives us <strong>two methods</strong> for working with permutations:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Method</th><th>What it does</th><th>Changes the original array?</th></tr></thead><tbody><tr><td><code>shuffle()</code></td><td>Rearranges the array <strong>in-place</strong></td><td><strong>YES</strong> · the original is changed</td></tr><tr><td><code>permutation()</code></td><td>Returns a new rearranged array</td><td><strong>NO</strong> · the original stays the same</td></tr></tbody></table></div>
+<p class="v2-p">This is an important difference! Let's see both in action.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 1: <code>shuffle()</code> · Rearrange In-Place</h3>
+<p class="v2-p"><strong>"In-place"</strong> means the method <em>directly modifies</em> the original array. The array you started with gets a new order. Nothing new is created.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+
+print(&quot;Before shuffle:&quot;, arr)
+
+random.shuffle(arr)
+
+print(&quot;After shuffle:&quot;, arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (your shuffle order will vary):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Before shuffle: [1 2 3 4 5]
+After shuffle:  [3 1 5 2 4]</code></pre></div></div>
+<p class="v2-p"><strong>Key point:</strong> After calling <code>shuffle(arr)</code>, the original <code>arr</code> is permanently changed. The values <code>[1, 2, 3, 4, 5]</code> are now in a random order.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Common beginner mistake:</strong> Assigning the result to a new variable like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>new_arr = random.shuffle(arr)  # WRONG! new_arr will be None</code></pre></div></div>
+<p class="v2-p"><code>shuffle()</code> does NOT return anything. It modifies <code>arr</code> directly and returns <code>None</code>. Simply call <code>random.shuffle(arr)</code> and then use <code>arr</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Method 2: <code>permutation()</code> · Return a New Arrangement</h3>
+<p class="v2-p"><code>permutation()</code> is the safe option when you want a shuffled copy but need to keep your original data intact.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+
+print(&quot;Original arr:&quot;, arr)
+
+new_arr = random.permutation(arr)
+
+print(&quot;New permutation:&quot;, new_arr)
+print(&quot;Original arr still:&quot;, arr)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Original arr: [1 2 3 4 5]
+New permutation: [4 1 3 5 2]
+Original arr still: [1 2 3 4 5]</code></pre></div></div>
+<p class="v2-p"><strong>Notice:</strong> <code>arr</code> is completely unchanged! The shuffled version is stored in <code>new_arr</code>.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Real-world use case:</strong> Imagine you have a list of 1000 student names for a quiz draw. You want to shuffle the order for fair selection, but you also want to keep the original alphabetical list intact for your records. Use <code>permutation()</code> · not <code>shuffle()</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Comparing shuffle() and permutation() Side by Side</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import numpy as np
+
+original = np.array([10, 20, 30, 40, 50])
+
+# --- Using shuffle ---
+arr_for_shuffle = original.copy()  # Make a copy first to preserve original
+random.shuffle(arr_for_shuffle)
+print(&quot;After shuffle():     &quot;, arr_for_shuffle)
+
+# --- Using permutation ---
+new_version = random.permutation(original)
+print(&quot;After permutation(): &quot;, new_version)
+print(&quot;Original unchanged:  &quot;, original)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>After shuffle():      [30 10 50 20 40]
+After permutation():  [20 50 10 40 30]
+Original unchanged:   [10 20 30 40 50]</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Feature</th><th><code>shuffle()</code></th><th><code>permutation()</code></th></tr></thead><tbody><tr><td>Modifies original</td><td>YES</td><td>NO</td></tr><tr><td>Returns new array</td><td>NO (returns None)</td><td>YES</td></tr><tr><td>Safe for original data</td><td>Only if you copy first</td><td>Always safe</td></tr></tbody></table></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Random Permutations</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 8</div><div class="pt">Part 3 · Seaborn: Visualising Distributions</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Why Do We Need to Visualise?</h3>
+<p class="v2-p">Numbers alone can be hard to understand. When you generate 1000 random numbers, looking at them as a list tells you very little. A <strong>chart</strong> instantly shows you the shape: Are most values clustered together? Are they spread evenly? Are there extreme values?</p>
+<p class="v2-p">This is exactly why data scientists use <strong>visualisation libraries</strong> · tools that turn numbers into charts.</p>
+<h3 class="v2-h3">What is Seaborn?</h3>
+<p class="v2-p"><strong>Seaborn</strong> is a Python library specifically built for making statistical charts and visualising data distributions beautifully. It sits <em>on top of</em> another library called <strong>Matplotlib</strong> · think of Seaborn as the fancy user-friendly wrapper around Matplotlib's more technical engine.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Matplotlib is like a professional artist's full studio · powerful but takes time to set up. Seaborn is like a smart automated art assistant that handles all the setup for you.</p></blockquote>
+<h3 class="v2-h3">Installing Seaborn</h3>
+<p class="v2-p">Before using Seaborn, you need to install it. Open your terminal/command prompt and run:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>pip install seaborn</code></pre></div></div>
+<p class="v2-p">If you are using <strong>Jupyter Notebook</strong>, run this inside a cell:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>!pip install seaborn</code></pre></div></div>
+<h3 class="v2-h3">What is Matplotlib?</h3>
+<p class="v2-p"><strong>Matplotlib</strong> is the core plotting library for Python. Seaborn uses it behind the scenes. You need to import both.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt   # For displaying charts
+import seaborn as sns              # For creating distribution charts</code></pre></div></div>
+<ul class="v2-ul"><li><code>matplotlib.pyplot</code> is imported as <code>plt</code> · a short name by convention</li><li><code>seaborn</code> is imported as <code>sns</code> · another short name by convention</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">What is a Displot?</h3>
+<p class="v2-p"><strong>Displot</strong> stands for <strong>distribution plot</strong>. It is Seaborn's function for visualising how data is distributed. It takes an array (a list of numbers) and draws a curve showing how the values are spread out.</p>
+<p class="v2-p">Think of it like this: if you measured the heights of 1000 people and plotted them, the displot would show a curve peaking around the average height, with fewer and fewer people as you go towards very short or very tall heights.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Example 1 · Basic Displot</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+
+# A small list of 6 numbers
+sns.displot([0, 1, 2, 3, 4, 5])
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>What this produces:</strong> A distribution chart with:</p>
+<ul class="v2-ul"><li>A histogram (vertical bars showing how often each value appears)</li><li>A smooth curve over the bars showing the overall distribution shape</li></ul>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Line</th><th>Meaning</th></tr></thead><tbody><tr><td><code>import matplotlib.pyplot as plt</code></td><td>Load the Matplotlib display engine, call it <code>plt</code></td></tr><tr><td><code>import seaborn as sns</code></td><td>Load Seaborn charting library, call it <code>sns</code></td></tr><tr><td><code>sns.displot([0, 1, 2, 3, 4, 5])</code></td><td>Create a distribution chart from the list of 6 numbers</td></tr><tr><td><code>plt.show()</code></td><td>Actually display the chart on screen</td></tr></tbody></table></div>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Why <code>plt.show()</code>?</strong> Seaborn creates the chart in memory, but <code>plt.show()</code> is the command that pushes it to your screen. Without it, nothing appears.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple Example 2 · Displot Without the Histogram (KDE Only)</h3>
+<p class="v2-p">Sometimes you want to see only the smooth curve (called a <strong>KDE · Kernel Density Estimate</strong>) without the histogram bars underneath. This is useful when you have a lot of data and just want to see the shape.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Pass kind=&quot;kde&quot; to show only the smooth curve
+sns.displot([0, 1, 2, 3, 4, 5], kind=&quot;kde&quot;)
+
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>What this produces:</strong> Only the smooth density curve · no bars.</p>
+<p class="v2-p"><strong>What is KDE (Kernel Density Estimate)?</strong> A KDE is a smooth curve that estimates the probability distribution of your data. Instead of counting exact values in bins (like a histogram), it draws a flowing curve that approximates the shape of the data.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Key note:</strong> For the rest of the NumPy tutorial (particularly when visualising random distributions like Normal, Binomial, Poisson, etc.), the standard approach is to use <code>sns.displot(arr, kind="kde")</code>.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">Practical Example · Visualising a Random Distribution</h3>
+<p class="v2-p">Now let's combine what we learned in Part 1 with Seaborn to actually <em>see</em> a distribution:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Generate 1000 random values from our weighted choice
+x = random.choice([3, 5, 7, 9], p=[0.1, 0.3, 0.6, 0.0], size=(1000))
+
+# Visualise the distribution
+sns.displot(x, kind=&quot;kde&quot;)
+plt.title(&quot;Distribution of Weighted Random Choices&quot;)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>What you will see:</strong> A curve with a large peak around 7 (since it has 60% probability), a smaller bump around 5 (30%), and a tiny presence near 3 (10%). The value 9 will not appear at all.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would the chart look like if all four values had equal probability of 0.25? Try changing the <code>p</code> values and observe the shape.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Seaborn: Visualising Distributions</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 8</div><div class="pt">Part 4 · NumPy Universal Functions (ufuncs)</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">What Are ufuncs?</h3>
+<p class="v2-p"><strong>ufuncs</strong> stands for <strong>Universal Functions</strong>. These are special NumPy functions that are designed to work on entire arrays at once · on every element simultaneously · instead of going through them one by one.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Analogy:</strong> Imagine you need to paint 100 fence posts. The slow way: you paint them one at a time with a small brush. The fast way: you use a spray painter that covers all 100 at once. ufuncs are NumPy's spray painter.</p></blockquote>
+<h3 class="v2-h3">Why Use ufuncs?</h3>
+<p class="v2-p">The main reasons to use ufuncs are:</p>
+<ol class="v2-ol"><li><strong>Speed (Vectorization):</strong> They are dramatically faster than Python loops for large datasets.</li><li><strong>Simplicity:</strong> One line of code replaces a multi-line loop.</li><li><strong>Extra power:</strong> They support special options like <code>where</code>, <code>dtype</code>, and <code>out</code> for advanced control.</li></ol>
+<h3 class="v2-h3">What is Vectorization?</h3>
+<p class="v2-p"><strong>Vectorization</strong> means converting an operation that would normally loop over elements one-by-one into a single operation that processes the entire array at once.</p>
+<p class="v2-p">Modern CPUs (the chips inside your computer) are specifically designed to perform these "do-it-to-everything-at-once" operations extremely fast. This is called <strong>SIMD (Single Instruction, Multiple Data)</strong> at the hardware level · but you don't need to worry about that. Just know that vectorization uses the computer's hardware more efficiently.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Problem: Slow Python Loops</h3>
+<p class="v2-p">Let's first see the <em>old slow way</em> of adding two lists together:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># The slow Python way — using a loop
+x = [1, 2, 3, 4]
+y = [4, 5, 6, 7]
+z = []   # Empty list to store results
+
+for i, j in zip(x, y):      # zip() pairs up elements: (1,4), (2,5), (3,6), (4,7)
+    z.append(i + j)          # Add each pair and store the result
+
+print(z)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[5, 7, 9, 11]</code></pre></div></div>
+<p class="v2-p"><strong>Line-by-line explanation:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Line</th><th>Meaning</th></tr></thead><tbody><tr><td><code>x = [1, 2, 3, 4]</code></td><td>First list of numbers</td></tr><tr><td><code>y = [4, 5, 6, 7]</code></td><td>Second list of numbers</td></tr><tr><td><code>z = []</code></td><td>Start with an empty list to collect results</td></tr><tr><td><code>for i, j in zip(x, y):</code></td><td>Loop through both lists together, pairing elements</td></tr><tr><td><code>z.append(i + j)</code></td><td>Add the paired numbers and add them to the results list</td></tr></tbody></table></div>
+<p class="v2-p">This works! But imagine doing this with 1 million numbers · it would be slow.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Fast Way: NumPy's <code>np.add()</code> ufunc</h3>
+<p class="v2-p">NumPy has a built-in ufunc called <code>add()</code> that does exactly the same thing in one line, but much faster:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+x = [1, 2, 3, 4]
+y = [4, 5, 6, 7]
+
+z = np.add(x, y)   # Add all elements at once — no loop needed!
+
+print(z)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>[ 5  7  9 11]</code></pre></div></div>
+<p class="v2-p"><strong>Notice:</strong> The result is exactly the same as the loop version! But <code>np.add()</code> did it in a single operation instead of iterating step by step.</p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> The output looks like <code>[ 5  7  9 11]</code> (with spaces, no commas) instead of <code>[5, 7, 9, 11]</code>. Why? Because NumPy arrays print differently from Python lists · no commas, and numbers are aligned.</p></blockquote>
+<hr class="v2-hr">
+<h3 class="v2-h3">What Happens Inside np.add()?</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Input x:  [1,  2,  3,  4]
+Input y:  [4,  5,  6,  7]
+            ↓   ↓   ↓   ↓
+Result z: [5,  7,  9, 11]</code></pre></div></div>
+<p class="v2-p">NumPy processes each matching pair (position 0 with position 0, position 1 with position 1, and so on) all at the same time · this is <strong>element-wise</strong> operation.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Additional ufunc Arguments</h3>
+<p class="v2-p">ufuncs support special optional arguments that give you more control:</p>
+<div class="v2-table-wrap"><table class="v2-table"><thead><tr><th>Argument</th><th>What it does</th><th>Example</th></tr></thead><tbody><tr><td><code>where</code></td><td>A boolean condition · only apply the operation where True</td><td><code>np.add(x, y, where=[True, False, True, True])</code></td></tr><tr><td><code>dtype</code></td><td>Specify the data type of the output</td><td><code>np.add(x, y, dtype=float)</code></td></tr><tr><td><code>out</code></td><td>Specify an output array to write results into</td><td><code>np.add(x, y, out=result_array)</code></td></tr></tbody></table></div>
+<p class="v2-p">You do not need to memorise all of these right now. The key idea is: ufuncs are flexible tools that go beyond basic loops.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">The Performance Difference: Why It Matters</h3>
+<p class="v2-p">To understand why vectorisation matters, consider this: if you have a dataset with <strong>1 million data points</strong> (common in real data science work), a Python loop might take several seconds. The equivalent NumPy ufunc operation runs in milliseconds.</p>
+<p class="v2-p">For example, adding two arrays of 1,000,000 numbers:</p>
+<ul class="v2-ul"><li>Python loop: ~0.5 seconds</li><li>NumPy ufunc: ~0.005 seconds (100x faster)</li></ul>
+<p class="v2-p">This is why data scientists, machine learning engineers, and scientists use NumPy · it makes working with large datasets practical.</p>
+<hr class="v2-hr">
+<h3 class="v2-h3">Simple ufunc Examples to Consolidate</h3>
+<p class="v2-p"><strong>Example A · Adding arrays:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+a = np.array([10, 20, 30])
+b = np.array([1, 2, 3])
+
+result = np.add(a, b)
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong> <code>[11 22 33]</code></p>
+<p class="v2-p"><strong>Example B · Multiplying arrays:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+a = np.array([2, 4, 6])
+b = np.array([3, 3, 3])
+
+result = np.multiply(a, b)
+print(result)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong> <code>[ 6 12 18]</code></p>
+<p class="v2-p"><strong>Example C · Squaring all elements (using np.power):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+
+squared = np.power(arr, 2)   # Raise each element to the power of 2
+print(squared)</code></pre></div></div>
+<p class="v2-p"><strong>Output:</strong> <code>[ 1  4  9 16 25]</code></p>
+<blockquote class="v2-bq"><p class="v2-p"><strong>Thinking prompt:</strong> What would <code>np.power(arr, 3)</code> produce? Try to calculate the answer before running it.</p></blockquote>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>NumPy Universal Functions (ufuncs)</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 8</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><h3 class="v2-h3">Exercise 1 · Weighted Lottery Simulation</h3>
+<p class="v2-p"><strong>Objective:</strong> Simulate a simple lottery where different prizes have different probabilities.</p>
+<p class="v2-p"><strong>Scenario:</strong> A raffle has 4 possible prizes:</p>
+<ul class="v2-ul"><li>Prize A (₦5,000): 5% chance</li><li>Prize B (₦1,000): 15% chance</li><li>Prize C (₦200): 30% chance</li><li>No prize (₦0): 50% chance</li></ul>
+<p class="v2-p"><strong>Your Task:</strong></p>
+<ol class="v2-ol"><li>Use <code>random.choice()</code> to simulate 500 raffle draws.</li><li>Print the result.</li><li>Count how many times each prize was won using <code>np.unique()</code> (optional bonus).</li></ol>
+<p class="v2-p"><strong>Steps:</strong></p></div></div><div class="task-box"><div class="task-lbl">✏️ Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import numpy as np
+
+# Step 1: Define prizes and their probabilities
+prizes = [5000, 1000, 200, 0]
+probabilities = [0.05, 0.15, 0.30, 0.50]
+
+# Step 2: Simulate 500 draws
+draws = random.choice(prizes, p=probabilities, size=(500))
+
+# Step 3: Print results
+print(&quot;First 20 draws:&quot;, draws[:20])
+
+# Bonus Step: Count how many times each prize appeared
+values, counts = np.unique(draws, return_counts=True)
+for val, cnt in zip(values, counts):
+    print(f&quot;Prize ₦{val}: appeared {cnt} times ({cnt/500*100:.1f}%)&quot;)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (approximate · exact numbers vary):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>First 20 draws: [   0    0  200    0    0    0  200    0 1000    0    0  200    0    0    0    0    0    0    0    0]
+Prize ₦0:    appeared 251 times (50.2%)
+Prize ₦200:  appeared 149 times (29.8%)
+Prize ₦1000: appeared 76 times (15.2%)
+Prize ₦5000: appeared 24 times (4.8%)</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Do the counts roughly match the probabilities you set?</li><li>What happens if you increase the draws to 10,000? Do the percentages get closer to the exact probabilities?</li><li>What happens if all probabilities are equal (0.25 each)?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 2 · Shuffling a Student List</h3>
+<p class="v2-p"><strong>Objective:</strong> Practice the difference between <code>shuffle()</code> and <code>permutation()</code>.</p>
+<p class="v2-p"><strong>Scenario:</strong> You are a teacher with 8 students. You want to randomly assign them to two groups of 4.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import numpy as np
+
+students = np.array([&quot;Alice&quot;, &quot;Bob&quot;, &quot;Carol&quot;, &quot;David&quot;,
+                     &quot;Emma&quot;, &quot;Frank&quot;, &quot;Grace&quot;, &quot;Henry&quot;])
+
+# --- Method 1: Using permutation (safe — keeps original intact) ---
+shuffled = random.permutation(students)
+
+print(&quot;Original list:&quot;, students)
+print(&quot;Shuffled list:&quot;, shuffled)
+
+# Split into two groups
+group1 = shuffled[:4]
+group2 = shuffled[4:]
+
+print(&quot;\nGroup 1:&quot;, group1)
+print(&quot;Group 2:&quot;, group2)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output (your shuffle will differ):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Original list: [&#x27;Alice&#x27; &#x27;Bob&#x27; &#x27;Carol&#x27; &#x27;David&#x27; &#x27;Emma&#x27; &#x27;Frank&#x27; &#x27;Grace&#x27; &#x27;Henry&#x27;]
+Shuffled list: [&#x27;Grace&#x27; &#x27;Bob&#x27; &#x27;Emma&#x27; &#x27;Alice&#x27; &#x27;Henry&#x27; &#x27;Frank&#x27; &#x27;Carol&#x27; &#x27;David&#x27;]
+
+Group 1: [&#x27;Grace&#x27; &#x27;Bob&#x27; &#x27;Emma&#x27; &#x27;Alice&#x27;]
+Group 2: [&#x27;Henry&#x27; &#x27;Frank&#x27; &#x27;Carol&#x27; &#x27;David&#x27;]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Did the original <code>students</code> array change?</li><li>Could you use <code>shuffle()</code> here instead? What would you need to do differently?</li><li>What if you ran the code again · would you get the same groups?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 3 · Fast Array Arithmetic with ufuncs</h3>
+<p class="v2-p"><strong>Objective:</strong> Compare the loop approach vs ufunc approach.</p>
+<p class="v2-p"><strong>Scenario:</strong> You have sales data for 5 shops. You need to apply a 10% bonus to each shop's monthly revenue.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+
+# Monthly revenue (in thousands of Naira)
+revenue = np.array([120, 85, 200, 145, 310])
+
+# --- The slow way (loop) ---
+bonuses_loop = []
+for r in revenue:
+    bonuses_loop.append(r * 0.10)
+print(&quot;Bonuses (loop method):&quot;, bonuses_loop)
+
+# --- The fast way (ufunc / vectorized) ---
+bonuses_ufunc = np.multiply(revenue, 0.10)
+print(&quot;Bonuses (ufunc method):&quot;, bonuses_ufunc)
+
+# --- New totals ---
+new_revenue = np.add(revenue, bonuses_ufunc)
+print(&quot;Revenue after bonus:&quot;, new_revenue)</code></pre></div></div>
+<p class="v2-p"><strong>Expected Output:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>Bonuses (loop method): [12.0, 8.5, 20.0, 14.5, 31.0]
+Bonuses (ufunc method): [12.  8.5 20.  14.5 31. ]
+Revenue after bonus: [132.   93.5 220.  159.5 341. ]</code></pre></div></div>
+<p class="v2-p"><strong>Self-check questions:</strong></p>
+<ul class="v2-ul"><li>Are both methods producing the same result?</li><li>Which method would you prefer for a dataset with 1 million entries?</li><li>Can you modify the code to apply a 15% bonus only to shops earning more than 150?</li></ul>
+<hr class="v2-hr">
+<h3 class="v2-h3">Exercise 4 · Visualising a Weighted Distribution</h3>
+<p class="v2-p"><strong>Objective:</strong> Use Seaborn to visualise a weighted distribution and observe its shape.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Simulate exam grade categories (A, B, C, D, F)
+# Most students get B or C, few get A or F
+grades_numeric = random.choice([90, 75, 60, 45, 30],
+                                p=[0.10, 0.35, 0.40, 0.10, 0.05],
+                                size=(500))
+
+# Visualise
+sns.displot(grades_numeric, kind=&quot;kde&quot;)
+plt.title(&quot;Simulated Exam Grade Distribution&quot;)
+plt.xlabel(&quot;Score&quot;)
+plt.ylabel(&quot;Density&quot;)
+plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>What to observe:</strong> The curve should peak around 60-75 (since C and B have the highest probabilities), with smaller peaks toward 90 and declining toward 30.</p>
+<hr class="v2-hr"></div><button class="ub" onclick="unlockNext(7)">Mark Complete and Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 8</div><div class="pt">Common Beginner Mistakes</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Mistake 1 · Probabilities That Don't Sum to 1.0</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — probabilities sum to 0.9, not 1.0
+x = random.choice([1, 2, 3], p=[0.2, 0.3, 0.4])  # Missing 0.1!</code></pre></div></div>
+<p class="v2-p"><strong>Error you will see:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ValueError: probabilities do not sum to 1</code></pre></div></div>
+<p class="v2-p"><strong>Correct version:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = random.choice([1, 2, 3], p=[0.2, 0.3, 0.5])  # 0.2+0.3+0.5 = 1.0 ✓</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 2 · Assigning the Return Value of shuffle()</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — shuffle() returns None, not the shuffled array
+arr = np.array([1, 2, 3, 4])
+shuffled = random.shuffle(arr)   # shuffled = None!
+print(shuffled)  # Prints: None</code></pre></div></div>
+<p class="v2-p"><strong>Correct version:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([1, 2, 3, 4])
+random.shuffle(arr)   # Modifies arr directly
+print(arr)            # Prints the shuffled array</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 3 · Wrong Number of Probabilities</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># WRONG — 4 values but only 3 probabilities
+x = random.choice([3, 5, 7, 9], p=[0.1, 0.3, 0.6])</code></pre></div></div>
+<p class="v2-p"><strong>Error:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">code</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>ValueError: &#x27;a&#x27; and &#x27;p&#x27; must have same size</code></pre></div></div>
+<p class="v2-p"><strong>Correct version:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>x = random.choice([3, 5, 7, 9], p=[0.1, 0.3, 0.6, 0.0])  # One probability per value</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 4 · Forgetting plt.show() with Seaborn</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.displot([1, 2, 3, 4, 5])
+# Nothing appears! You forgot plt.show()</code></pre></div></div>
+<p class="v2-p"><strong>Correct version:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>sns.displot([1, 2, 3, 4, 5])
+plt.show()  # This actually displays the chart</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 5 · Using a Python Loop Instead of a ufunc</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code># INEFFICIENT for large datasets
+result = []
+for val in big_array:
+    result.append(val * 2)</code></pre></div></div>
+<p class="v2-p"><strong>Better version:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>import numpy as np
+result = np.multiply(big_array, 2)  # Faster and cleaner</code></pre></div></div>
+<hr class="v2-hr">
+<h3 class="v2-h3">Mistake 6 · Expecting shuffle() Not to Change the Original</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([1, 2, 3, 4, 5])
+random.shuffle(arr)
+# arr is NOW changed — you cannot get the original back!</code></pre></div></div>
+<p class="v2-p"><strong>Safe version if you need the original:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">python</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>arr = np.array([1, 2, 3, 4, 5])
+arr_copy = arr.copy()    # Save a copy FIRST
+random.shuffle(arr)       # Now it&#x27;s safe — original is in arr_copy</code></pre></div></div>
+<hr class="v2-hr"><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes</strong>. Open your editor, type the examples above by hand, modify them, and observe what changes.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Project Description</div><div class="build-req"><h3 class="v2-h3">Project Description</h3>
+<p class="v2-p">You work as a data analyst for a school. You need to:</p>
+<ol class="v2-ol"><li>Simulate exam scores for 200 students with a realistic distribution.</li><li>Randomly shuffle students to create fair seating groups.</li><li>Apply performance bonuses (ufunc operations).</li><li>Visualise the final distribution.</li></ol>
+<h3 class="v2-h3">Stage 1 · Setup</h3></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Starter Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">starter.py</span><button class="copy-btn" onclick="copyCode(this)">&#10064; Copy</button></div><div class="v2-code-body"><pre><code>from numpy import random
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+print(&quot;=== Student Performance Analysis System ===\n&quot;)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="downloadStarter(`from numpy import random
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+print(&quot;=== Student Performance Analysis System ===\\n&quot;)`)" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,.3)">Download starter.py &#8595;</button><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Save to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Save Python Project to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-nop"><strong>Why Python cannot use GitHub Pages:</strong> GitHub Pages only serves static HTML, CSS, and JavaScript files. Python scripts need a runtime environment (a server or computer) to execute — the browser alone cannot run them. You will learn cloud deployment (Replit, PythonAnywhere, Heroku) later in this course. For now, save your code to GitHub as a growing portfolio of Python work.</div>
+<div class="gh-st"><div class="gh-n">1</div><p>Go to <strong>github.com</strong>, click <strong>New repository</strong>, name it <code>python-lesson-27-project-description</code>. Set to <strong>Public</strong>, tick <strong>Add a README</strong>, click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Click <strong>Add file &gt; Upload files</strong> and upload your <code>.py</code> script.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>Write commit message: <em>"Add Python lesson 27 project"</em> and click <strong>Commit changes</strong>. Your code is now publicly visible on your GitHub profile. 🐍</p></div>
+<button class="ub" onclick="showEnd()" style="background:#059669;margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 27 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Part 1 · Random Data Distribution</li><li>✅ Part 2 · Random Permutations</li><li>✅ Part 3 · Seaborn: Visualising Distributions</li><li>✅ Part 4 · NumPy Universal Functions (ufuncs)</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes</li></ul><div class="ln"><a href="lesson_26.html" class="ln-btn">&#8592; Lesson 26</a><a href="lesson_28.html" class="ln-btn primary">Lesson 28 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Python Course &nbsp;·&nbsp; Lesson 27 &nbsp;·&nbsp; © 2025 Techbase Consultant Services, Ibadan</span>
+</footer>
+
+<div id="toast"></div>
+<button id="go-top" title="Back to top">&#8593;</button>
+<canvas id="cc"></canvas>
+<script src="../assets/js/lesson.js" defer></script>
+</body></html>
