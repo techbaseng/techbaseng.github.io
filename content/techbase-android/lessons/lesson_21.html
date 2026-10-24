@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 21: Scrollable Lists and Grids: The Affirmations App — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l21">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 21 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 21</div>
+      <h1>Scrollable Lists and Grids: The Affirmations App</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Yoruba Proverbs App</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 21</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Show data with LazyColumn and LazyVerticalGrid, model it with data classes, and customise your app icon. Includes the Grid practice app.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Yoruba Proverbs App</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Open almost any app on your phone: WhatsApp chats, a bank's transaction history, a shop's product catalogue, your music library. Every one of them is built around a <strong>scrolling list</strong> (or a grid) of items. If you can build lists well, you can build the core of most apps.</p>
+<p class="v2-p">In this lesson you will build <strong>Affirmations</strong>, an app that shows a scrollable list of cards, each with a picture and an encouraging sentence. Then you will turn the list into a grid, and finish by giving your app its own launcher icon.</p>
+<p class="v2-p">This lesson covers four items from Unit 3 of Google's official <strong>Android Basics with Compose</strong> course: <em>Intro to Affirmations app</em>, <em>Add a scrollable list</em>, <em>Change the app icon</em> and <em>Practice: Build a grid</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Model list data with a Kotlin <strong>data class</strong>.</li>
+<li>Store text in <code>strings.xml</code> and images in <code>res/drawable</code>, and reference them with <code>@StringRes</code> and <code>@DrawableRes</code>.</li>
+<li>Build a card with <code>Card</code>, <code>Image</code> and <code>Text</code>.</li>
+<li>Display a long list efficiently with <code>LazyColumn</code> and <code>items</code>.</li>
+<li>Display a grid with <code>LazyVerticalGrid</code> and <code>GridCells</code>.</li>
+<li>Create an <strong>adaptive launcher icon</strong> with Image Asset Studio.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a list on screen is just <em>a list in your code</em>, turned into UI one item at a time. Data first, then a function that draws one item, then a lazy container that repeats it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Data classes</strong> (lesson 11). <code>data class</code> gives you a tidy way to bundle values together and automatically adds <code>toString</code>, <code>equals</code> and <code>copy</code>.</li>
+<li><strong>Lists</strong> (lesson 14). <code>listOf(...)</code> creates a read-only list, and you loop over it.</li>
+<li><strong>Row, Column and Modifier</strong> (lesson 16). Lists are built from the same layout pieces.</li>
+<li><strong>Resources.</strong> Android keeps text, images, colours and sizes in the <code>res</code> folder, separate from code. This makes translation and theming easy. You will use <code>res/values/strings.xml</code> and <code>res/drawable</code> today.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Why &quot;Lazy&quot;?</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">You could draw a list of 1,000 items by putting 1,000 <code>Text</code>s inside a <code>Column</code>. It would work for ten items and then your app would freeze, because the <code>Column</code> creates <strong>every</strong> child immediately, even the 990 that are far off screen.</p>
+<p class="v2-p">A <strong>lazy</strong> container is smarter. It only composes the items you can actually see (plus a few just outside the screen), and it throws away or reuses the rest as you scroll. Think of a waiter at a huge buffet who only brings the dishes you are looking at, instead of piling every dish on your table at once.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Container</th>
+<th>Composes</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td>All children, always</td>
+<td>A handful of items</td>
+</tr>
+<tr>
+<td><code>LazyColumn</code></td>
+<td>Only visible items</td>
+<td>Long or unknown-length vertical lists</td>
+</tr>
+<tr>
+<td><code>LazyRow</code></td>
+<td>Only visible items</td>
+<td>Horizontal lists (carousels)</td>
+</tr>
+<tr>
+<td><code>LazyVerticalGrid</code></td>
+<td>Only visible cells</td>
+<td>Grids of cards or photos</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Inside a lazy container you do not write a loop. You describe the items with a small <em>DSL</em> (a mini-language built from lambdas), and the container decides when to run your code:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>LazyColumn {
+    items(myList) { item -&gt;
+        Text(item)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The lambda after <code>items(myList)</code> is run <strong>once per visible item</strong>, and <code>item</code> is the element for that row.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Why &quot;Lazy&quot;?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: The Data</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a new <strong>Empty Activity</strong> project called <code>Affirmations</code> (package <code>com.example.affirmations</code>).</p>
+<h3 class="v2-h3">The model</h3>
+<p class="v2-p">Right-click the package, choose <strong>New &gt; Kotlin Class/File</strong>, name it <code>Affirmation</code>, and write a data class:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Affirmation.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.affirmations.model
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+
+data class Affirmation(
+    @StringRes val stringResourceId: Int,
+    @DrawableRes val imageResourceId: Int
+)</code></pre></div></div>
+<p class="v2-p">Notice that it stores <strong>numbers, not text and pictures</strong>. Android generates a unique integer ID for every resource in the class <code>R</code>. <code>R.string.affirmation1</code> is an <code>Int</code>. The annotations <code>@StringRes</code> and <code>@DrawableRes</code> are safety labels: Android Studio now warns you if you accidentally pass a drawable ID where a string ID is expected, even though both are just <code>Int</code>s.</p>
+<p class="v2-p">(You will need a folder named <code>model</code> under the package. Create it with <strong>New &gt; Package</strong>, or just keep the file in the main package and adjust the <code>package</code> line.)</p>
+<h3 class="v2-h3">The text resources</h3>
+<p class="v2-p">Open <code>app/src/main/res/values/strings.xml</code> and add ten sentences. Here are the first few:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Affirmations&lt;/string&gt;
+    &lt;string name="affirmation1"&gt;I am strong.&lt;/string&gt;
+    &lt;string name="affirmation2"&gt;I believe in myself.&lt;/string&gt;
+    &lt;string name="affirmation3"&gt;Each day is a new opportunity to grow.&lt;/string&gt;
+    &lt;string name="affirmation4"&gt;I can learn anything I set my mind to.&lt;/string&gt;
+    &lt;string name="affirmation5"&gt;Small steps still move me forward.&lt;/string&gt;
+    &lt;string name="affirmation6"&gt;I am proud of how far I have come.&lt;/string&gt;
+    &lt;string name="affirmation7"&gt;I choose to see the good in today.&lt;/string&gt;
+    &lt;string name="affirmation8"&gt;Mistakes are proof that I am trying.&lt;/string&gt;
+    &lt;string name="affirmation9"&gt;I am becoming a better developer every day.&lt;/string&gt;
+    &lt;string name="affirmation10"&gt;Today I will build something worth sharing.&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p">Putting text in <code>strings.xml</code> instead of inside code means you can later translate the app (for example into Yoruba or Hausa) by adding a <code>values-yo</code> or <code>values-ha</code> folder, without touching a single line of Kotlin.</p>
+<h3 class="v2-h3">The image resources</h3>
+<p class="v2-p">You need ten pictures in <code>res/drawable</code>. Pick the route that suits you:</p>
+<ol class="v2-ol">
+<li><strong>Your own photos or images.</strong> Copy ten small JPG or PNG files into <code>res/drawable</code>. File names must use only lowercase letters, digits and underscores, for example <code>image1.jpg</code>. Keep them small (under 300 KB each) so the app stays light.</li>
+<li><strong>No images? Use free built-in icons.</strong> Choose <strong>File &gt; New &gt; Vector Asset</strong> (or right-click <code>res/drawable</code>, then <strong>New &gt; Vector Asset</strong>), click the clip-art button, pick an icon, name it <code>image1</code>, and finish. Repeat for ten icons. These are scalable and tiny.</li>
+</ol>
+<p class="v2-p">Whichever you choose, name the ten resources <code>image1</code> to <code>image10</code>.</p>
+<h3 class="v2-h3">The data source</h3>
+<p class="v2-p">Create <code>Datasource.kt</code> that builds the list:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Datasource.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.affirmations.data
+
+import com.example.affirmations.R
+import com.example.affirmations.model.Affirmation
+
+class Datasource {
+    fun loadAffirmations(): List&lt;Affirmation&gt; {
+        return listOf(
+            Affirmation(R.string.affirmation1, R.drawable.image1),
+            Affirmation(R.string.affirmation2, R.drawable.image2),
+            Affirmation(R.string.affirmation3, R.drawable.image3),
+            Affirmation(R.string.affirmation4, R.drawable.image4),
+            Affirmation(R.string.affirmation5, R.drawable.image5),
+            Affirmation(R.string.affirmation6, R.drawable.image6),
+            Affirmation(R.string.affirmation7, R.drawable.image7),
+            Affirmation(R.string.affirmation8, R.drawable.image8),
+            Affirmation(R.string.affirmation9, R.drawable.image9),
+            Affirmation(R.string.affirmation10, R.drawable.image10)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">Why a class with a function instead of a bare list? Later in this course (lessons 30 and 34) the data will come from a repository, a web service or a database, and a function is the natural seam where that change happens.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The Data</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: One Card</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Always build <strong>one item</strong> first and preview it before you worry about the list. Open <code>MainActivity.kt</code> and add this composable. Add the imports as Android Studio suggests (<code>Alt + Enter</code>), or copy this block:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.affirmations.R
+import com.example.affirmations.model.Affirmation
+
+@Composable
+fun AffirmationCard(affirmation: Affirmation, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Column {
+            Image(
+                painter = painterResource(affirmation.imageResourceId),
+                contentDescription = stringResource(affirmation.stringResourceId),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(194.dp),
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = stringResource(affirmation.stringResourceId),
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AffirmationCardPreview() {
+    AffirmationCard(Affirmation(R.string.affirmation1, R.drawable.image1))
+}</code></pre></div></div>
+<p class="v2-p">What to notice:</p>
+<ul class="v2-ul">
+<li><code>Card</code> is a Material 3 container with rounded corners and elevation.</li>
+<li><code>stringResource(id)</code> turns the <code>Int</code> ID into the actual text, and it respects the user's language.</li>
+<li><code>painterResource(id)</code> loads the drawable.</li>
+<li><code>contentDescription</code> is read aloud by screen readers, so we reuse the sentence. (A purely decorative picture can use <code>null</code>; lesson 47 explains when.)</li>
+<li><code>ContentScale.Crop</code> fills the box and crops the extra, so differently-shaped pictures look uniform.</li>
+<li><code>MaterialTheme.typography.headlineSmall</code> takes its size and weight from the theme, so you can restyle the whole app later in one place (lesson 22).</li>
+</ul>
+<p class="v2-p">Open the <strong>Preview</strong> pane. You should see one card: a picture on top, the sentence beneath.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: One Card</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: The Scrollable List</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Now repeat that card for every affirmation.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.example.affirmations.data.Datasource
+
+@Composable
+fun AffirmationList(
+    affirmationList: List&lt;Affirmation&gt;,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(affirmationList, key = { it.stringResourceId }) { affirmation -&gt;
+            AffirmationCard(affirmation = affirmation)
+        }
+    }
+}
+
+@Composable
+fun AffirmationsApp(modifier: Modifier = Modifier) {
+    AffirmationList(
+        affirmationList = Datasource().loadAffirmations(),
+        modifier = modifier
+    )
+}</code></pre></div></div>
+<p class="v2-p">Then call it from <code>setContent</code>. The Empty Activity template wraps content in a <code>Scaffold</code> so that your content does not hide behind the system bars. Use the padding it gives you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>setContent {
+    AffirmationsTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -&gt;
+            AffirmationsApp(modifier = Modifier.padding(innerPadding))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>Scaffold</code> needs <code>import androidx.compose.material3.Scaffold</code> and <code>fillMaxSize</code> needs <code>import androidx.compose.foundation.layout.fillMaxSize</code>.)</p>
+<h3 class="v2-h3">Understanding each piece</h3>
+<ul class="v2-ul">
+<li><code>contentPadding</code> adds space <em>inside</em> the scrolling area, so the first card is not glued to the top and the last card can scroll clear of the bottom edge.</li>
+<li><code>Arrangement.spacedBy(8.dp)</code> puts an 8 dp gap between neighbouring items, so you never need margins on each card.</li>
+<li><code>items(list) { ... }</code> runs the lambda for each visible element.</li>
+<li><code>key = { it.stringResourceId }</code> gives each item a <strong>stable identity</strong>. When a list changes (an item is added, removed or moved), keys let Compose track which item is which instead of rebuilding everything. Keys must be <strong>unique</strong> and stable, and the string resource ID is both. Lesson 39 covers keys in depth.</li>
+</ul>
+<p class="v2-p">Run the app and scroll. Ten cards, smooth scrolling.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Experiment:</strong> change <code>ten</code> to <code>ten thousand</code>. Make a loop that repeats <code>loadAffirmations()</code> a thousand times (without keys, because duplicates would clash). The app stays smooth, because only a handful of items exist at any moment. That is the entire point of a lazy list.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Scrollable List</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: A Grid with LazyVerticalGrid</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">A grid lays items out in <strong>columns</strong>. The container takes a <code>columns</code> rule that says how many:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+
+@Composable
+fun AffirmationGrid(
+    affirmationList: List&lt;Affirmation&gt;,
+    modifier: Modifier = Modifier
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 160.dp),
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(affirmationList) { affirmation -&gt;
+            AffirmationCard(affirmation = affirmation)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">There are two ways to say how many columns:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Rule</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GridCells.Fixed(2)</code></td>
+<td>Always exactly two columns.</td>
+<td>A catalogue that must look the same everywhere.</td>
+</tr>
+<tr>
+<td><code>GridCells.Adaptive(minSize = 160.dp)</code></td>
+<td>As many columns as fit, each at least 160 dp wide.</td>
+<td>A grid that shows two columns on a phone and five on a tablet.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>Adaptive</code> is usually the better choice, because it quietly adjusts when the user rotates the phone or opens your app on a large screen. Note that <code>items</code> for the grid comes from a <em>different import</em> (<code>androidx.compose.foundation.lazy.grid.items</code>) than the <code>items</code> for <code>LazyColumn</code>. Importing the wrong one is the most common error with grids.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: A Grid with LazyVerticalGrid</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Changing the App Icon</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The default icon is the green Android robot. Every real app needs its own.</p>
+<h3 class="v2-h3">Using Image Asset Studio</h3>
+<ol class="v2-ol">
+<li>In the <strong>Android</strong> view, right-click the <code>res</code> folder.</li>
+<li>Choose <strong>New &gt; Image Asset</strong>.</li>
+<li>For <strong>Icon Type</strong> choose <strong>Launcher Icons (Adaptive and Legacy)</strong>.</li>
+<li>On the <strong>Foreground Layer</strong> tab choose a source: <em>Image</em> (your own logo), <em>Clip Art</em> (a built-in icon) or <em>Text</em>. Use <strong>Resize</strong> to keep the artwork inside the <strong>safe zone</strong>, the central circle.</li>
+<li>On the <strong>Background Layer</strong> tab pick a colour or image.</li>
+<li>Check the preview in different shapes (circle, square, squircle), then click <strong>Next</strong> and <strong>Finish</strong>.</li>
+</ol>
+<h3 class="v2-h3">What "adaptive" means</h3>
+<p class="v2-p">Since Android 8, an icon is made of <strong>two layers</strong>, a foreground and a background. Each phone maker applies its own <strong>mask</strong> (circle, rounded square, and so on) and the system can move the layers slightly for parallax effects. If you put important artwork near the edges it gets cropped. Keeping it inside the safe zone makes the icon look right on every phone.</p>
+<p class="v2-p">Newer Android versions also support a <strong>themed icon</strong> that takes on the user's wallpaper colours. For that, provide a single-colour <strong>monochrome</strong> layer. Image Asset Studio can generate one from your foreground.</p>
+<p class="v2-p">Finally, check <code>AndroidManifest.xml</code>. The <code>&lt;application&gt;</code> tag points at your icon through <code>android:icon="@mipmap/ic_launcher"</code> and <code>android:roundIcon="@mipmap/ic_launcher_round"</code>. Run the app and look at the launcher: your icon replaces the robot.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Changing the App Icon</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Build a grid of topics</strong> (the <em>Practice: Build a grid</em> exercise)</p>
+<p class="v2-p"><strong>Scenario:</strong> A school wants an app that shows the subjects it teaches as a two-column grid of cards.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a data class <code>Topic(@StringRes val name: Int, val courseCount: Int, @DrawableRes val image: Int)</code>.</li>
+<li>Make a list of at least eight topics (for example Mathematics, English, Biology, Chemistry, Physics, Economics, Government, Computer Science).</li>
+<li>Each card is a <code>Card</code> with the picture on the left (68 dp square) and the name plus the course count on the right. Use a <code>Row</code>.</li>
+<li>Show exactly <strong>two columns</strong> using <code>GridCells.Fixed(2)</code>.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+data class Topic(
+    @StringRes val name: Int,
+    val courseCount: Int,
+    @DrawableRes val image: Int
+)
+
+@Composable
+fun TopicCard(topic: Topic, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(topic.image),
+                contentDescription = null,
+                modifier = Modifier.size(68.dp),
+                contentScale = ContentScale.Crop
+            )
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    text = stringResource(topic.name),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "${topic.courseCount} courses",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TopicGrid(topics: List&lt;Topic&gt;, modifier: Modifier = Modifier) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(topics) { topic -&gt; TopicCard(topic) }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>contentDescription = null</code> is correct here because the text beside the picture already says everything, so a screen reader would only repeat itself. <code>Alignment.CenterVertically</code> centres the text against the square picture.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Click to select</strong></p>
+<p class="v2-p">Make the Affirmation list react to taps. When the user taps a card, show a <code>Text</code> banner at the top reading <code>You chose: ...</code> with the sentence. Use <code>rememberSaveable</code> to remember the chosen ID (lesson 17) and the <code>clickable</code> modifier on the card.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.clickable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+
+@Composable
+fun AffirmationsApp(modifier: Modifier = Modifier) {
+    var chosenId by rememberSaveable { mutableStateOf&lt;Int?&gt;(null) }
+
+    Column(modifier = modifier) {
+        if (chosenId != null) {
+            Text(
+                text = "You chose: " + stringResource(chosenId!!),
+                modifier = Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+        LazyColumn(
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(Datasource().loadAffirmations(), key = { it.stringResourceId }) { affirmation -&gt;
+                AffirmationCard(
+                    affirmation = affirmation,
+                    modifier = Modifier.clickable { chosenId = affirmation.stringResourceId }
+                )
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why it works:</strong> the click lambda changes state, which triggers recomposition, and the banner reads the state. Same loop as the dice roller. Production code would avoid <code>!!</code> by using <code>chosenId?.let { ... }</code>, which you can try as an improvement.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Change <code>GridCells.Adaptive(minSize = 160.dp)</code> to <code>GridCells.Fixed(3)</code> and compare how the grid looks on a phone and in landscape. Which rule would you pick for an app that must look good on tablets too, and why?</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: A <code>Column</code> for a long list.</strong> <em>What happens:</em> every item is composed immediately, memory climbs, scrolling stutters or the list does not scroll at all unless you add <code>verticalScroll</code>. <em>The fix:</em> <code>LazyColumn</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Nested vertical scrolling.</strong> <em>The wrong code:</em> putting a <code>LazyColumn</code> inside a <code>Column</code> that has <code>verticalScroll</code>, or inside another vertical <code>LazyColumn</code>. <em>What happens:</em> a crash saying vertically scrollable components were measured with an infinite maximum height. <em>The fix:</em> one scrolling container per direction. Put extra items inside the same <code>LazyColumn</code> as separate <code>item { }</code> entries.</p>
+<p class="v2-p"><strong>Mistake #3: Wrong <code>items</code> import.</strong> <em>Symptom:</em> red underline on <code>items</code> inside a grid. <em>The fix:</em> for <code>LazyVerticalGrid</code>, import <code>androidx.compose.foundation.lazy.grid.items</code>; for <code>LazyColumn</code>, <code>androidx.compose.foundation.lazy.items</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Duplicate or changing keys.</strong> <em>What happens:</em> a crash complaining that the key was already used. <em>The fix:</em> keys must be unique and stable. Never use the item's position in the list as the key if the list can change order.</p>
+<p class="v2-p"><strong>Mistake #5: Wrong resource folder or file names.</strong> <em>Symptom:</em> <code>R.drawable.Image1</code> does not exist. <em>The fix:</em> resource names are lowercase letters, digits and underscores only. <code>Image1.jpg</code> is rejected, <code>image1.jpg</code> works.</p>
+<p class="v2-p"><strong>Mistake #6: Huge images.</strong> <em>What happens:</em> the app is slow and uses a lot of memory because full-size camera photos are decoded. <em>The fix:</em> resize images before adding them, or use vector assets. Lesson 31 shows how to load remote images efficiently.</p>
+<p class="v2-p"><strong>Mistake #7: Missing <code>contentDescription</code> thinking.</strong> <em>The fix:</em> give meaningful pictures a description and pass <code>null</code> only for decorative ones.</p>
+<p class="v2-p"><strong>Mistake #8: Hard-coded text.</strong> <em>What happens:</em> Android Studio warns <em>Hardcoded string</em>. <em>The fix:</em> put text in <code>strings.xml</code> and read it with <code>stringResource</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why is <code>LazyColumn</code> better than <code>Column</code> for a long list?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>LazyColumn</code> only composes (and keeps) the items that are visible, plus a few near the screen edge. <code>Column</code> composes all children at once, which wastes memory and time for long lists.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the purpose of <code>@StringRes</code> and <code>@DrawableRes</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">They are annotations that mark an <code>Int</code> as a resource ID of a specific type. Resource IDs are plain integers, so the annotations let Android Studio warn you when you pass the wrong kind of ID.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>GridCells.Fixed(2)</code> and <code>GridCells.Adaptive(160.dp)</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>Fixed(2)</code> always creates exactly two columns. <code>Adaptive(160.dp)</code> creates as many columns as fit when each column is at least 160 dp wide, so the count grows on wider screens.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why give <code>items</code> a <code>key</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A key gives every item a stable identity so Compose can match old and new items when the list changes, preserving item state and animating or reusing correctly. Keys must be unique and stable.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What are the two layers of an adaptive icon, and why keep artwork in the safe zone?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">A foreground and a background layer. Phone makers apply different masks (circle, square, squircle), which crop the edges, so important artwork must stay inside the central safe zone.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-3-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 3, Pathway 2: Build a scrollable list</a>: the official pathway for this lesson, including the Affirmations app and the grid practice.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a>: all eight units.</li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2" rel="noopener noreferrer">Jetpack Compose for Android developers, pathway 2: Layouts, theming and animation</a>: lazy layouts are covered in more depth, which you will meet in lesson 39.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Yoruba Proverbs App</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a scrollable app of ten Yoruba proverbs. Each card shows a decorative icon, the proverb in Yoruba and its English meaning. It teaches the same pattern you will reuse for products, contacts and messages.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create <code>data class Proverb(@StringRes val yoruba: Int, @StringRes val english: Int, @DrawableRes val icon: Int)</code>.</li>
+<li>Add ten proverbs and their English meanings to <code>strings.xml</code>, using resource names <code>proverb1</code> to <code>proverb10</code> and <code>meaning1</code> to <code>meaning10</code>. (Use only proverbs you are confident about, or write your own sayings in any language.)</li>
+<li>Show them in a <code>LazyColumn</code> with spacing and padding.</li>
+<li>Each card has the Yoruba text in <code>titleMedium</code> style and the meaning in <code>bodyMedium</code> style underneath.</li>
+<li>Add a toggle button in the top bar that switches the layout between the list and a two-column grid.</li>
+<li>Change the launcher icon with Image Asset Studio.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add <code>values-yo</code> translations for the app name.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Proverbs.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.proverbs
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+data class Proverb(
+    @StringRes val yoruba: Int,
+    @StringRes val english: Int,
+    @DrawableRes val icon: Int
+)
+
+val proverbs = listOf(
+    Proverb(R.string.proverb1, R.string.meaning1, R.drawable.icon1),
+    Proverb(R.string.proverb2, R.string.meaning2, R.drawable.icon2),
+    Proverb(R.string.proverb3, R.string.meaning3, R.drawable.icon3)
+    // ... continue to ten
+)
+
+@Composable
+fun ProverbCard(proverb: Proverb, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(proverb.yoruba),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(proverb.english),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun ProverbsApp(modifier: Modifier = Modifier) {
+    var asGrid by rememberSaveable { mutableStateOf(false) }
+
+    Column(modifier = modifier) {
+        Button(
+            onClick = { asGrid = !asGrid },
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(if (asGrid) "Show as list" else "Show as grid")
+        }
+
+        if (asGrid) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                gridItems(proverbs, key = { it.yoruba }) { ProverbCard(it) }
+            }
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(proverbs, key = { it.yoruba }) { ProverbCard(it) }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes on the solution:</strong> both <code>items</code> functions are imported, the grid one under the alias <code>gridItems</code>, which is how you can use both in one file without a clash. The toggle button flips a boolean in state, and Compose swaps the container. Extend the <code>proverbs</code> list to ten entries and add the matching <code>strings.xml</code> lines. The proverbs themselves are yours to choose, and checking meanings with an elder or a reliable source is part of the exercise.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 21 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-21-scrollable-lists-and-grids-the-affirmation</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 21 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Why &quot;Lazy&quot;?</li><li>✅ Step-by-Step Build 1: The Data</li><li>✅ Step-by-Step Build 2: One Card</li><li>✅ Step-by-Step Build 3: The Scrollable List</li><li>✅ Step-by-Step Build 4: A Grid with LazyVerticalGrid</li><li>✅ Changing the App Icon</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_20.html" class="ln-btn">&#8592; Lesson 20</a><a href="lesson_22.html" class="ln-btn primary">Lesson 22 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 21 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

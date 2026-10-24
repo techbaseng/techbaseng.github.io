@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 63: The Domain Layer and Use Cases — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l63">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 63 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 63</div>
+      <h1>The Domain Layer and Use Cases</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Domain Layer for FeeTracker</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 63</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Decide when you need a domain layer, write use cases, and keep business logic reusable and testable.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Domain Layer for FeeTracker</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Between the UI layer and the data layer there is an <strong>optional</strong> layer: the <strong>domain layer</strong>. It holds <strong>business logic that is complex, or reused by several screens</strong>. Its building block is the <strong>use case</strong> (some teams call it an <em>interactor</em>): a small class that does <strong>one thing</strong> such as "get the students who owe fees" or "format a receipt".</p>
+<p class="v2-p">This lesson covers <em>Domain Layer</em> and <em>The Domain layer - MAD Skills</em> from the <strong>Modern Android App Architecture</strong> programme (https://developer.android.com/courses/android-architecture), based on the official page https://developer.android.com/topic/architecture/domain-layer.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Decide <strong>whether</strong> you need a domain layer, and say why it is optional.</li>
+<li>Write <strong>use cases</strong> with <code>operator fun invoke</code> and the standard <strong>naming convention</strong>.</li>
+<li>Combine <strong>several repositories</strong> in a use case.</li>
+<li>Make use cases <strong>main-safe</strong> and <strong>testable</strong>.</li>
+<li>Reuse logic across <strong>ViewModels</strong> without copying it.</li>
+<li>Recognise <strong>over-engineering</strong>, such as pass-through use cases.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a use case is a named piece of business logic. It lives in the domain layer when putting it in a ViewModel would make that ViewModel too big, or would force you to copy it into another ViewModel.</p>
+<p class="v2-p"><strong>Honesty note:</strong> many successful apps have <strong>no domain layer</strong>. The official guidance calls it optional. Treat everything in this lesson as a tool for when you feel the pain it solves.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Layers and the dependency rule</strong> (lesson 60).</li>
+<li><strong>UI layer state production</strong> (lesson 61).</li>
+<li><strong>Repositories and fakes</strong> (lesson 62).</li>
+<li><strong>Kotlin <code>operator</code> functions and <code>invoke</code></strong> (lessons 11 and 12).</li>
+<li><strong>Coroutines and Flow</strong> (lesson 33).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: What the Domain Layer Is For</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>UI layer       ViewModel
+                  │
+                  ▼
+Domain layer   Use cases        ← optional
+                  │
+                  ▼
+Data layer     Repositories</code></pre></div></div>
+<p class="v2-p">The official page lists the reasons to add use cases:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Reason</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Avoid code duplication</strong></td>
+<td>Two ViewModels both need "students who owe fees"</td>
+</tr>
+<tr>
+<td><strong>Improve readability</strong> of ViewModels</td>
+<td>Move a 40-line calculation out of the ViewModel</td>
+</tr>
+<tr>
+<td><strong>Improve testability</strong></td>
+<td>Test business rules with plain JUnit</td>
+</tr>
+<tr>
+<td><strong>Avoid large classes</strong></td>
+<td>Split logic that grew too big</td>
+</tr>
+<tr>
+<td><strong>Combine data from several repositories</strong></td>
+<td>Students + payments → balances</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">If none of these apply, skip the layer. A useful rule: <strong>add a use case the first time you copy logic into a second ViewModel, or the first time a ViewModel becomes hard to read</strong>.</p>
+<h3 class="v2-h3">What a use case may and may not do</h3>
+<ul class="v2-ul">
+<li>A use case <strong>depends on repositories</strong> (data layer) and <strong>other use cases</strong>.</li>
+<li>It <strong>never</strong> depends on the UI layer, on <code>Context</code>, or on Android framework classes. That keeps it plain Kotlin, easy to test, and reusable (for example in a Kotlin Multiplatform module, lessons 66 to 70).</li>
+<li>It has <strong>no state of its own</strong>. State belongs in the UI layer (screen state) or in the data layer (data). A use case may <em>transform</em> a flow, but it does not <em>hold</em> data.</li>
+<li>It does <strong>one thing</strong>.</li>
+</ul>
+<h3 class="v2-h3">Naming convention</h3>
+<p class="v2-p">The recommended pattern is <strong>verb in present tense + noun/what (optional) + <code>UseCase</code></strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Good</th>
+<th>Poor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>FormatDateUseCase</code></td>
+<td><code>DateUseCase</code></td>
+</tr>
+<tr>
+<td><code>GetOwingStudentsUseCase</code></td>
+<td><code>OwingStudentsManager</code></td>
+</tr>
+<tr>
+<td><code>RecordPaymentUseCase</code></td>
+<td><code>PaymentHelper</code></td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What the Domain Layer Is For</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: A First Use Case</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Back to FeeTracker. Business rule: a student <strong>owes</strong> fees when their term fee minus total payments is greater than zero. Two screens need it: the Students screen (show a badge) and the Dashboard (count defaulters).</p>
+<p class="v2-p">Without a domain layer, both ViewModels would contain this arithmetic. With one:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// domain/model/StudentBalance.kt
+data class StudentBalance(
+    val student: Student,
+    val paid: Long,
+    val balance: Long
+) {
+    val isOwing: Boolean get() = balance &gt; 0
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// domain/GetStudentBalancesUseCase.kt
+class GetStudentBalancesUseCase(
+    private val studentsRepository: StudentsRepository,
+    private val paymentsRepository: PaymentsRepository,
+    private val termFeeNaira: Long = 450_000,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+) {
+    operator fun invoke(): Flow&lt;List&lt;StudentBalance&gt;&gt; =
+        combine(
+            studentsRepository.observeStudents(),
+            paymentsRepository.observePayments()
+        ) { students, payments -&gt;
+            val paidByStudent = payments.groupBy { it.studentName }
+                .mapValues { (_, list) -&gt; list.sumOf { it.amountNaira } }
+
+            students.map { student -&gt;
+                val paid = paidByStudent[student.name] ?: 0L
+                StudentBalance(student, paid, balance = termFeeNaira - paid)
+            }
+        }.flowOn(defaultDispatcher)
+}</code></pre></div></div>
+<p class="v2-p">What makes this a good use case:</p>
+<ul class="v2-ul">
+<li><strong>One responsibility</strong>: produce balances.</li>
+<li><strong>Two repositories combined</strong>, a job that would otherwise bloat a ViewModel.</li>
+<li><strong><code>operator fun invoke</code></strong> lets callers write <code>getStudentBalances()</code> as if the class were a function.</li>
+<li><strong>Injected dispatcher</strong>: the grouping work is CPU-bound, so it runs on <code>Default</code>, and tests can replace it.</li>
+<li><strong>No Android imports</strong>.</li>
+</ul>
+<h3 class="v2-h3">Using it in a ViewModel</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class StudentsViewModel(getBalances: GetStudentBalancesUseCase) : ViewModel() {
+
+    val uiState: StateFlow&lt;StudentsUiState&gt; = getBalances()
+        .map&lt;List&lt;StudentBalance&gt;, StudentsUiState&gt; { StudentsUiState.Success(it) }
+        .catch { emit(StudentsUiState.Error("Could not load balances")) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudentsUiState.Loading)
+}
+
+class DashboardViewModel(getBalances: GetStudentBalancesUseCase) : ViewModel() {
+
+    val owingCount: StateFlow&lt;Int&gt; = getBalances()
+        .map { balances -&gt; balances.count { it.isOwing } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+}</code></pre></div></div>
+<p class="v2-p">Both ViewModels are now only a few lines, and the rule exists <strong>once</strong>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: A First Use Case</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Suspend Use Cases and Main-Safety</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">For one-shot actions, a use case is a <code>suspend operator fun invoke</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class RecordPaymentUseCase(
+    private val paymentsRepository: PaymentsRepository,
+    private val studentsRepository: StudentsRepository
+) {
+    suspend operator fun invoke(studentName: String, amountNaira: Long): Result&lt;Payment&gt; {
+        if (amountNaira &lt;= 0) {
+            return Result.failure(IllegalArgumentException("Amount must be positive"))
+        }
+        if (!studentsRepository.exists(studentName)) {
+            return Result.failure(IllegalArgumentException("Unknown student"))
+        }
+        return paymentsRepository.record(studentName, amountNaira)
+    }
+}</code></pre></div></div>
+<p class="v2-p">This is <strong>validation plus coordination</strong>: classic domain logic. The use case:</p>
+<ol class="v2-ol">
+<li>Checks rules that do not depend on the UI.</li>
+<li>Calls repositories in the right order.</li>
+<li>Returns a <code>Result</code> so the ViewModel can decide how to show the outcome.</li>
+</ol>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Main-safety.</strong> A use case should be safe to call from the main thread. Because repositories are already main-safe, this one needs no <code>withContext</code>. Add <code>withContext(defaultDispatcher)</code> only inside use cases that do heavy CPU work themselves.</p>
+</blockquote>
+<h3 class="v2-h3">Calling it from the ViewModel</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class PayViewModel(private val recordPayment: RecordPaymentUseCase) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(PayUiState())
+    val uiState: StateFlow&lt;PayUiState&gt; = _uiState.asStateFlow()
+
+    fun pay(studentName: String, amountText: String) {
+        val amount = amountText.toLongOrNull()
+        if (amount == null) {
+            _uiState.update { it.copy(userMessage = "Enter a number") }
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(saving = true) }
+            recordPayment(studentName, amount)
+                .onSuccess { _uiState.update { s -&gt; s.copy(saving = false, userMessage = "Payment saved") } }
+                .onFailure { e -&gt; _uiState.update { s -&gt; s.copy(saving = false, userMessage = e.message) } }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The text-to-number conversion is <strong>UI input handling</strong>, so it stays in the ViewModel. The "amount must be positive" rule is <strong>business logic</strong>, so it lives in the use case. Drawing that line clearly is the skill of this lesson.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Suspend Use Cases and Main-Safety</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Use Cases that Call Use Cases</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Use cases can build on each other, which keeps each one small:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class GetOwingStudentsUseCase(
+    private val getBalances: GetStudentBalancesUseCase
+) {
+    operator fun invoke(): Flow&lt;List&lt;StudentBalance&gt;&gt; =
+        getBalances().map { list -&gt; list.filter { it.isOwing }.sortedByDescending { it.balance } }
+}
+
+class FormatMoneyUseCase(private val locale: Locale = Locale("en", "NG")) {
+    operator fun invoke(naira: Long): String =
+        NumberFormat.getCurrencyInstance(locale).format(naira)
+}</code></pre></div></div>
+<p class="v2-p">Note the second one: formatting is a small, pure, reusable rule. The official page also uses a date-formatting use case as an example. If it needs a <code>Context</code> (for resource strings or the device locale from Android), pass in what you need as a plain parameter or an interface instead of the framework class.</p>
+<h3 class="v2-h3">Dependency direction check</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>StudentsViewModel ─► GetStudentBalancesUseCase ─► StudentsRepository
+                                                └► PaymentsRepository</code></pre></div></div>
+<p class="v2-p">Arrows go <strong>down only</strong>. A use case must never call a ViewModel.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Use Cases that Call Use Cases</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: Domain Models</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">A use case may use <strong>domain models</strong> that differ from data models. <code>StudentBalance</code> above is a domain model created by combining two data models. You may also create domain models that <strong>hide data-layer details</strong>, for example when the data layer's model has database annotations:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// data layer
+@Entity data class StudentEntity(@PrimaryKey val id: Int, val name: String, val formCode: Int)
+
+// domain layer
+data class Student(val id: Int, val name: String, val form: Form)
+enum class Form { SS1, SS2, SS3 }</code></pre></div></div>
+<p class="v2-p">The mapper (<code>StudentEntity.toDomain()</code>) can live in the data layer or in the domain layer. The official guidance is flexible: choose the arrangement your team finds clearest, and be consistent. <strong>Do not</strong> create a separate domain copy of every data class if the two are identical. Duplicating classes adds work without benefit.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Domain Models</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: Testing Use Cases</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Use cases are the easiest code to test, because they are plain Kotlin with injected dependencies.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class GetStudentBalancesUseCaseTest {
+
+    private val ada = Student(1, "Ada", "SS2", "")
+    private val tunde = Student(2, "Tunde", "SS1", "")
+
+    @Test
+    fun balance_is_term_fee_minus_payments() = runTest {
+        val students = FakeStudentsRepository(listOf(ada, tunde))
+        val payments = FakePaymentsRepository(
+            listOf(Payment(1, "Ada", 100_000, Instant.EPOCH), Payment(2, "Ada", 50_000, Instant.EPOCH))
+        )
+        val useCase = GetStudentBalancesUseCase(
+            students, payments, termFeeNaira = 450_000,
+            defaultDispatcher = StandardTestDispatcher(testScheduler)
+        )
+
+        val result = useCase().first()
+
+        assertEquals(300_000, result.first { it.student.name == "Ada" }.balance)
+        assertEquals(450_000, result.first { it.student.name == "Tunde" }.balance)
+    }
+
+    @Test
+    fun student_with_zero_balance_is_not_owing() = runTest {
+        val students = FakeStudentsRepository(listOf(ada))
+        val payments = FakePaymentsRepository(listOf(Payment(1, "Ada", 450_000, Instant.EPOCH)))
+        val result = GetStudentBalancesUseCase(
+            students, payments, 450_000, StandardTestDispatcher(testScheduler)
+        )().first()
+
+        assertFalse(result.single().isOwing)
+    }
+}
+
+class RecordPaymentUseCaseTest {
+    @Test
+    fun rejects_non_positive_amounts() = runTest {
+        val useCase = RecordPaymentUseCase(FakePaymentsRepository(), FakeStudentsRepository())
+        val result = useCase("Ada", 0)
+        assertTrue(result.isFailure)
+    }
+}</code></pre></div></div>
+<p class="v2-p">No Android runtime, no emulator, just JUnit and fakes (lesson 62). Tests run in milliseconds.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Testing Use Cases</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: When Not to Use a Use Case</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">The pass-through anti-pattern</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Adds a file and a layer, but does nothing
+class GetStudentsUseCase(private val repository: StudentsRepository) {
+    operator fun invoke() = repository.observeStudents()
+}</code></pre></div></div>
+<p class="v2-p">If every use case just forwards one repository call, you have bought indirection with no benefit. The ViewModel could call the repository directly. Keep use cases for <strong>real logic</strong>: combining, transforming, validating or reusing.</p>
+<h3 class="v2-h3">Quick decision guide</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Situation</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logic used by one ViewModel and is short</td>
+<td>Keep it in the ViewModel (or a private function)</td>
+</tr>
+<tr>
+<td>Logic used by two or more ViewModels</td>
+<td><strong>Use case</strong></td>
+</tr>
+<tr>
+<td>Logic combines data from several repositories</td>
+<td><strong>Use case</strong></td>
+</tr>
+<tr>
+<td>Logic is a simple read from one repository</td>
+<td>Call the repository directly</td>
+</tr>
+<tr>
+<td>Logic is UI-only (formatting for display, scroll state)</td>
+<td>Composable or plain state holder</td>
+</tr>
+<tr>
+<td>Logic is data-source specific (caching, merging network and disk)</td>
+<td>Repository</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Following the official guidance, add the domain layer <strong>gradually</strong>. Start without it, and extract a use case when a ViewModel grows or when logic is needed in a second place.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: When Not to Use a Use Case</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 7: Extracting a Use Case from a Fat ViewModel</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">You will meet this situation in real projects, so practise the safe way to do it. Suppose <code>StudentsViewModel</code> has grown to include this block:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// inside StudentsViewModel (before)
+val overdue: StateFlow&lt;List&lt;String&gt;&gt; = combine(students, payments) { s, p -&gt;
+    val paid = p.groupBy { it.studentName }.mapValues { (_, l) -&gt; l.sumOf { it.amountNaira } }
+    s.filter { (paid[it.name] ?: 0L) &lt; 450_000 }.map { it.name }
+}.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())</code></pre></div></div>
+<p class="v2-p">Follow these steps, running your tests after each one:</p>
+<ol class="v2-ol">
+<li><strong>Write a test first</strong> that describes the current behaviour (a student who paid less than the fee appears in the list). This is your safety net.</li>
+<li><strong>Copy the logic into a new class</strong> with <code>operator fun invoke</code>, taking the two flows' sources as constructor parameters. Do not delete the original yet.</li>
+<li><strong>Name the magic number.</strong> The literal <code>450_000</code> is a business rule. Give it a name or a constructor parameter so it appears in one place only.</li>
+<li><strong>Switch the ViewModel</strong> to call the use case, then delete the old block. Tests still pass, so behaviour is preserved.</li>
+<li><strong>Move the test</strong> to the use case's test class and make the ViewModel test shorter, because the ViewModel now only needs to check that it exposes whatever the use case emits.</li>
+<li><strong>Look for the second caller.</strong> If the Dashboard can now reuse it in one line, the extraction has paid for itself. If nothing else needs it and the ViewModel is still readable, ask honestly whether the extraction was worthwhile.</li>
+</ol>
+<p class="v2-p">This "test, extract, switch, delete" routine is a <strong>refactoring</strong>: behaviour stays the same while structure improves. It is much safer than rewriting several layers at once.</p>
+<h3 class="v2-h3">The domain layer and the rest of your toolbox</h3>
+<p class="v2-p">A final comment about scale. In a small project with one module, a domain layer is just a package named <code>domain</code>. In a larger project it may become its own <strong>Gradle module</strong> (lesson 65), which makes the dependency rule enforceable by the build: if the domain module does not depend on the Android UI module, a developer cannot accidentally import a composable there. Because use cases are plain Kotlin, they are also the most natural code to <strong>share with other platforms</strong> when you adopt Kotlin Multiplatform (lessons 66 to 70). Keeping Android classes out of the domain layer is therefore not only tidy; it keeps your options open.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Extracting a Use Case from a Fat ViewModel</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Where does it belong?</strong></p>
+<p class="v2-p">Place each piece of logic in ViewModel, use case, repository or composable: (a) converting the text "5000" to a number; (b) rejecting a negative payment; (c) merging payments from Room with newly downloaded ones; (d) showing a red badge for owing students; (e) calculating "days overdue" used by two screens.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(a) ViewModel (UI input handling). (b) Use case (business rule). (c) Repository (resolving sources). (d) Composable (display logic). (e) Use case, because two screens share it.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix the use case</strong></p>
+<p class="v2-p">Why is this a poor use case, and how do you improve it?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class StudentUseCase(private val context: Context, private val repo: StudentsRepository) {
+    var cache: List&lt;Student&gt; = emptyList()
+    fun get(): List&lt;Student&gt; { cache = repo.blockingGetAll(); return cache }
+    fun title() = context.getString(R.string.students)
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It has several problems: a vague name, three responsibilities (fetching, caching, UI text), an Android <code>Context</code> dependency, <strong>mutable state</strong> (<code>cache</code>), and a blocking call that is not main-safe. Split it: a repository owns caching; the UI owns <code>stringResource</code>; a focused use case such as <code>GetStudentsUseCase</code> (only if it adds logic) exposes a <code>Flow&lt;List&lt;Student&gt;&gt;</code> and has no framework imports.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Write a use case</strong></p>
+<p class="v2-p">Write <code>GetTopPayersUseCase(count: Int)</code> returning the students with the largest total payments, highest first, from <code>PaymentsRepository.observePayments()</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class GetTopPayersUseCase(
+    private val paymentsRepository: PaymentsRepository,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
+) {
+    operator fun invoke(count: Int): Flow&lt;List&lt;Pair&lt;String, Long&gt;&gt;&gt; =
+        paymentsRepository.observePayments()
+            .map { payments -&gt;
+                payments.groupBy { it.studentName }
+                    .mapValues { (_, list) -&gt; list.sumOf { it.amountNaira } }
+                    .entries
+                    .sortedByDescending { it.value }
+                    .take(count)
+                    .map { it.key to it.value }
+            }
+            .flowOn(defaultDispatcher)
+}</code></pre></div></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: A use case for everything.</strong> <em>Fix:</em> add one only for real logic or reuse.</p>
+<p class="v2-p"><strong>Mistake #2: Pass-through use cases.</strong> <em>Fix:</em> call the repository directly.</p>
+<p class="v2-p"><strong>Mistake #3: Android classes in the domain layer.</strong> <em>Fix:</em> keep it plain Kotlin.</p>
+<p class="v2-p"><strong>Mistake #4: Use cases that hold state.</strong> <em>Fix:</em> state lives in the UI or data layer.</p>
+<p class="v2-p"><strong>Mistake #5: Domain code calling the UI.</strong> <em>Fix:</em> respect the dependency direction.</p>
+<p class="v2-p"><strong>Mistake #6: Doing heavy work without a dispatcher.</strong> <em>Fix:</em> inject <code>Default</code> and use <code>flowOn</code> or <code>withContext</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Vague names.</strong> <em>Fix:</em> verb + noun + <code>UseCase</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Copying every data class into a domain class.</strong> <em>Fix:</em> separate models only when they differ.</p>
+<p class="v2-p"><strong>Mistake #9: Business rules in composables.</strong> <em>Fix:</em> move them to a use case and test them.</p>
+<p class="v2-p"><strong>Mistake #10: Mocking repositories in use-case tests.</strong> <em>Fix:</em> use fakes.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Is the domain layer required?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">No. It is optional and should be added when logic is complex, reused, or combines several repositories.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does <code>operator fun invoke</code> give you?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The ability to call a use case instance like a function: <code>getBalances()</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Name the recommended naming pattern for use cases.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Verb in present tense, optionally a noun, then <code>UseCase</code>, for example <code>GetOwingStudentsUseCase</code>.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Which layers may a use case depend on?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The data layer (repositories) and other use cases; never the UI layer.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What is a pass-through use case and why avoid it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">A class that only forwards a single repository call. It adds indirection without logic, reuse or testability benefits.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/android-architecture" rel="noopener noreferrer">Modern Android App Architecture programme</a></li>
+<li><a href="https://developer.android.com/topic/architecture/domain-layer" rel="noopener noreferrer">Domain layer</a></li>
+<li><a href="https://developer.android.com/topic/architecture/recommendations" rel="noopener noreferrer">Recommendations for Android architecture</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Domain Layer for FeeTracker</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Add a small, well-tested domain layer to FeeTracker.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create <code>domain/model/StudentBalance</code>.</li>
+<li>Implement <code>GetStudentBalancesUseCase</code> combining two repositories (with fakes if you lack the real ones).</li>
+<li>Implement <code>GetOwingStudentsUseCase</code> that builds on it.</li>
+<li>Implement <code>RecordPaymentUseCase</code> with validation (positive amount, student exists).</li>
+<li>Implement <code>FormatMoneyUseCase</code> for Naira formatting.</li>
+<li>Use two use cases from two different ViewModels (Students and Dashboard) to prove reuse.</li>
+<li>Write tests for each use case, including edge cases: no payments, overpayment (negative balance), unknown student, zero amount.</li>
+<li>In a short note, list one use case you chose <strong>not</strong> to create and why.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> define "overpaid" students (negative balance) and surface them in a separate list without touching either ViewModel's logic.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">Overpayment handling in the model and a test that locks it in:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class StudentBalance(val student: Student, val paid: Long, val balance: Long) {
+    val isOwing: Boolean get() = balance &gt; 0
+    val isOverpaid: Boolean get() = balance &lt; 0
+}
+
+class GetOverpaidStudentsUseCase(private val getBalances: GetStudentBalancesUseCase) {
+    operator fun invoke(): Flow&lt;List&lt;StudentBalance&gt;&gt; =
+        getBalances().map { list -&gt; list.filter { it.isOverpaid } }
+}
+
+class OverpaidTest {
+    @Test
+    fun overpayment_is_reported() = runTest {
+        val students = FakeStudentsRepository(listOf(Student(1, "Ada", "SS2", "")))
+        val payments = FakePaymentsRepository(listOf(Payment(1, "Ada", 500_000, Instant.EPOCH)))
+        val balances = GetStudentBalancesUseCase(students, payments, 450_000, StandardTestDispatcher(testScheduler))
+
+        val result = GetOverpaidStudentsUseCase(balances)().first()
+
+        assertEquals(-50_000, result.single().balance)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The "not created" note (example): <code>GetStudentsUseCase</code> was not created because it would only forward <code>observeStudents()</code>; the ViewModel calls the repository directly.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 63 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-63-the-domain-layer-and-use-cases</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 63 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What the Domain Layer Is For</li><li>✅ Step-by-Step Build 1: A First Use Case</li><li>✅ Step-by-Step Build 2: Suspend Use Cases and Main-Safety</li><li>✅ Step-by-Step Build 3: Use Cases that Call Use Cases</li><li>✅ Step-by-Step Build 4: Domain Models</li><li>✅ Step-by-Step Build 5: Testing Use Cases</li><li>✅ Step-by-Step Build 6: When Not to Use a Use Case</li><li>✅ Step-by-Step Build 7: Extracting a Use Case from a Fat ViewModel</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_62.html" class="ln-btn">&#8592; Lesson 62</a><a href="lesson_64.html" class="ln-btn primary">Lesson 64 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 63 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

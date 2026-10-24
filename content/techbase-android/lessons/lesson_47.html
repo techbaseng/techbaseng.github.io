@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 47: Accessibility in Compose: Labels, Touch Targets and Contrast — Techbase Android</title>
+</head>
+<body data-total="15" data-key="techbase_android_l47">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 47 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 47</div>
+      <h1>Accessibility in Compose: Labels, Touch Targets and Contrast</h1>
+      <div class="l-hero-sub">15 phases &nbsp;·&nbsp; Build: Accessible Order Screen</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 47</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Fix the three most common accessibility problems in Compose with semantics, minimum touch targets and contrast ratios.</p></div><div class="wm"><span>📚 15 phases</span><span>🏗️ Accessible Order Screen</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 15</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 46 you learned who needs accessibility, tried the system tools and found six problems in a deliberately bad screen. Now you <strong>fix them</strong>. Compose gives you a strong starting point: Material 3 components are accessible by default (minimum touch targets, roles, states, ripple focus), and the <strong>semantics</strong> system lets you describe anything custom.</p>
+<p class="v2-p">This lesson covers <em>Add accessibility features to your app</em>, the <em>Accessibility in Jetpack Compose</em> codelab and <em>Troubleshoot common accessibility issues</em> from the <em>Make your Android app accessible</em> pathway (https://developer.android.com/courses/pathways/make-your-android-app-accessible) and Pathway 4 of <em>Jetpack Compose for Android developers</em> (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Add meaningful <strong>content descriptions</strong> and mark decorative images.</li>
+<li>Use the <strong>semantics</strong> API: <code>Modifier.semantics</code>, roles, <code>stateDescription</code>, <code>heading()</code>, <code>onClickLabel</code>, live regions.</li>
+<li><strong>Merge</strong> related elements into one with <code>mergeDescendants</code>, or hide children with <code>clearAndSetSemantics</code>.</li>
+<li>Provide <strong>custom accessibility actions</strong> as alternatives to gestures.</li>
+<li>Meet the <strong>48 dp touch target</strong> minimum and understand <code>minimumInteractiveComponentSize</code>.</li>
+<li>Calculate and fix <strong>colour contrast</strong> (4.5:1 and 3:1) and avoid colour-only meaning.</li>
+<li>Make layouts that survive <strong>large text</strong> and <strong>display size</strong>.</li>
+<li>Control <strong>focus and traversal order</strong>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> if you use the standard Material 3 component, you get most accessibility for free. Where you build your own, you must say <strong>what it is, what it is called, what state it is in and what it can do</strong>.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 15</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Accessibility fundamentals, TalkBack, common problems</strong> (lesson 46).</li>
+<li><strong>Compose testing and the semantics tree</strong> (lesson 45).</li>
+<li><strong>Material 3 theming and colour roles</strong> (lesson 40).</li>
+<li><strong>Modifiers and layout</strong> (lessons 16 and 38).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 15</div><div class="pt">Conceptual Understanding: Semantics Properties</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Compose builds the semantics tree from composables. Many components add semantics for you; <code>Modifier.semantics { ... }</code> adds or changes them.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Semantics property</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>contentDescription</code></td>
+<td>A label for non-text content</td>
+<td>An icon's purpose</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>Visible text (automatic for <code>Text</code>)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td>What kind of control it is</td>
+<td><code>Role.Button</code>, <code>Checkbox</code>, <code>Switch</code>, <code>RadioButton</code>, <code>Tab</code>, <code>Image</code></td>
+</tr>
+<tr>
+<td><code>stateDescription</code></td>
+<td>A custom description of state</td>
+<td>"3 of 5 steps done"</td>
+</tr>
+<tr>
+<td><code>heading()</code></td>
+<td>Marks a heading so users can jump between headings</td>
+<td>Section titles</td>
+</tr>
+<tr>
+<td><code>onClick(label, action)</code></td>
+<td>A click action with a <strong>label</strong></td>
+<td>"Open details"</td>
+</tr>
+<tr>
+<td><code>customActions</code></td>
+<td>Extra actions in a menu</td>
+<td>"Archive", "Delete"</td>
+</tr>
+<tr>
+<td><code>liveRegion</code></td>
+<td>Announce changes automatically</td>
+<td>An error message</td>
+</tr>
+<tr>
+<td><code>disabled()</code> / <code>selected</code> / <code>toggleableState</code></td>
+<td>State</td>
+<td></td>
+</tr>
+<tr>
+<td><code>traversalIndex</code>, <code>isTraversalGroup</code></td>
+<td>Reading order</td>
+<td></td>
+</tr>
+<tr>
+<td><code>invisibleToUser()</code></td>
+<td>Hide from accessibility</td>
+<td>Decorative shapes</td>
+</tr>
+<tr>
+<td><code>collectionInfo</code>, <code>collectionItemInfo</code></td>
+<td>Row/column positions in lists</td>
+<td>Lists, grids</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">You can read the full list in the <code>SemanticsProperties</code> and <code>SemanticsPropertyReceiver</code> reference (do not memorise it; know where to look).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Semantics Properties</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 15</div><div class="pt">Step-by-Step Build 1: Fix the Labels</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Start from <code>BadScreen</code> of lesson 46. Fix problem B (an unlabelled icon) and problem C (a small target) together by using the <strong>right component</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+
+@Composable
+fun OrderLine(itemName: String, quantity: Int, onDelete: () -&gt; Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text("$itemName x $quantity")
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = "Delete $itemName"
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>IconButton</code> is a standard component: it gives the icon a <strong>48 dp touch target</strong>, a ripple, a focus indication and the <strong>Button role</strong>. The description says <em>what the button does</em> and includes the item name, because five rows each saying only "Delete" are indistinguishable when read out of context. TalkBack announces "Delete Zobo, button, double tap to activate".</p>
+<p class="v2-p"><strong>Use string resources</strong> for descriptions so they can be translated:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.res.stringResource
+
+contentDescription = stringResource(R.string.delete_item, itemName)</code></pre></div></div>
+<p class="v2-p">with <code>&lt;string name="delete_item"&gt;Delete %1$s&lt;/string&gt;</code> in <code>strings.xml</code>.</p>
+<h3 class="v2-h3">Description rules of thumb</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Do</th>
+<th>Do not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Describe the <strong>purpose</strong> ("Search")</td>
+<td>Describe the picture ("magnifying glass")</td>
+</tr>
+<tr>
+<td>Keep it short</td>
+<td>Write a sentence for every icon</td>
+</tr>
+<tr>
+<td>Leave out the control type ("button")</td>
+<td>"Search button" (TalkBack already says "button")</td>
+</tr>
+<tr>
+<td>Update it when state changes ("Pause" / "Play")</td>
+<td>Keep one description for both states</td>
+</tr>
+<tr>
+<td>Use <code>null</code> for decorative images</td>
+<td>Describe every divider and background</td>
+</tr>
+<tr>
+<td>Make descriptions unique in a list</td>
+<td>Repeat "Edit" ten times</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Decorative images</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Image(
+    painter = painterResource(R.drawable.divider_pattern),
+    contentDescription = null   // decorative: skipped by screen readers
+)</code></pre></div></div>
+<p class="v2-p">To hide any composable from accessibility services (for example a purely visual shape drawn on a <code>Canvas</code>), use <code>Modifier.semantics { invisibleToUser() }</code>. The API name and availability can change between versions, so check the reference. Also note that <strong>text that is only decoration</strong> should be avoided.</p>
+<h3 class="v2-h3">Headings</h3>
+<p class="v2-p">Screen readers let users jump from heading to heading, a huge time saver on long screens. Mark your section titles:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+
+@Composable
+fun SectionTitle(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.semantics { heading() }
+    )
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Fix the Labels</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 15</div><div class="pt">Step-by-Step Build 2: Roles, State and Click Labels</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Problem F in lesson 46 was a clickable <code>Box</code> that does not announce itself as a button. There are three fixes in order of preference.</p>
+<p class="v2-p"><strong>1. Use a standard component.</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+
+Button(onClick = { /* pay */ }) { Text("Pay now") }</code></pre></div></div>
+<p class="v2-p"><strong>2. Add a role to a custom clickable.</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+
+@Composable
+fun PayChip(onPay: () -&gt; Unit) {
+    Box(
+        Modifier.clickable(
+            onClickLabel = "Pay for order",
+            role = Role.Button,
+            onClick = onPay
+        )
+    ) {
+        Text("Pay now")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>onClickLabel</code> customises the hint TalkBack speaks: "double tap to pay for order" instead of the generic "double tap to activate". Use it when the visible text alone does not say what the action will do.</p>
+<p class="v2-p"><strong>3. Use the right interaction modifier for selection controls.</strong></p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Component type</th>
+<th>Modifier</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>On/off switch or checkbox</td>
+<td><code>Modifier.toggleable(value, role = Role.Switch or Role.Checkbox, onValueChange)</code></td>
+<td>Switch / Checkbox</td>
+</tr>
+<tr>
+<td>One choice in a group</td>
+<td><code>Modifier.selectable(selected, role = Role.RadioButton, onClick)</code></td>
+<td>RadioButton</td>
+</tr>
+<tr>
+<td>Tabs</td>
+<td><code>Modifier.selectable(selected, role = Role.Tab, ...)</code></td>
+<td>Tab</td>
+</tr>
+<tr>
+<td>Single action</td>
+<td><code>Modifier.clickable(role = Role.Button, ...)</code></td>
+<td>Button</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Custom state description</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+
+@Composable
+fun StepProgress(done: Int, total: Int) {
+    Column(
+        Modifier.semantics {
+            stateDescription = "$done of $total steps completed"
+        }
+    ) {
+        Text("Registration")
+        LinearProgressIndicator(progress = { done / total.toFloat() })
+    }
+}</code></pre></div></div>
+<p class="v2-p">Without this, TalkBack reads "Registration" and perhaps "25 percent" for the bar; with it, users hear a meaningful phrase.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Roles, State and Click Labels</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 15</div><div class="pt">Step-by-Step Build 3: Merging and Clearing Semantics</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Merge: one card, one announcement</h3>
+<p class="v2-p">A list row has a title, a subtitle, an icon and a price. Read separately that is four swipes per row. <strong>Merge</strong> them so that a user hears one item:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SnackRow(name: String, description: String, price: String, onClick: () -&gt; Unit) {
+    Card(
+        Modifier
+            .clickable(onClick = onClick)
+            .semantics(mergeDescendants = true) { }
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(name)
+            Text(description)
+            Text(price)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Note that <code>clickable</code> already merges its descendants. For a non-clickable container use <code>Modifier.semantics(mergeDescendants = true) { }</code>. TalkBack reads "Chin chin, Crunchy fried dough, 500 naira" as one unit. Keep each merged group <em>small</em>: a whole screen merged into one node is useless.</p>
+<h3 class="v2-h3">Clear: replace the children's story</h3>
+<p class="v2-p">Sometimes the children's automatic description is awkward. <code>clearAndSetSemantics</code> <strong>removes</strong> all semantics of the subtree and lets you write your own:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+
+@Composable
+fun StarRatingDisplay(stars: Int) {
+    Row(
+        Modifier.clearAndSetSemantics {
+            contentDescription = "Rated $stars out of 5 stars"
+        }
+    ) {
+        repeat(5) { index -&gt;
+            Icon(Icons.Filled.Star, contentDescription = null)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Without it, a screen reader would read five identical "star" icons. With it, one clear sentence. <strong>Caution:</strong> clearing semantics also removes actions and roles of children; do not use it on a container with buttons inside, or those buttons become unreachable.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Merging and Clearing Semantics</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 15</div><div class="pt">Step-by-Step Build 4: Custom Actions Instead of Gestures</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Swipe-to-delete is a <strong>gesture</strong>. People using TalkBack, Switch Access or Voice Access cannot easily swipe a row (TalkBack uses swipes for navigation). Give the row <strong>custom accessibility actions</strong>, which appear in the TalkBack actions menu and are available to switch and voice users.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun EmailRow(
+    subject: String,
+    onArchive: () -&gt; Unit,
+    onDelete: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier
+            .fillMaxWidth()
+            .semantics {
+                customActions = listOf(
+                    CustomAccessibilityAction("Archive") { onArchive(); true },
+                    CustomAccessibilityAction("Delete") { onDelete(); true }
+                )
+            }
+    ) {
+        Text(subject, Modifier.padding(16.dp))
+    }
+}</code></pre></div></div>
+<p class="v2-p">Each action returns <code>true</code> when handled. You still keep the visual swipe for sighted touch users; the custom actions are the <strong>alternative</strong>. The same pattern works for drag-to-reorder ("Move up", "Move down"), long-press menus and double-tap shortcuts.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Custom Actions Instead of Gestures</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 15</div><div class="pt">Step-by-Step Build 5: Live Regions and Announcements</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">When content changes without the user moving focus (an error appears, a counter updates, a snackbar), a screen reader will not mention it unless you ask. Mark the region as <strong>live</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+
+@Composable
+fun ErrorMessage(message: String?) {
+    if (message != null) {
+        Text(
+            text = "Error: $message",
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics {
+                liveRegion = LiveRegionMode.Polite
+            }
+        )
+    }
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Mode</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Polite</code></td>
+<td>Waits until the current speech finishes, then announces</td>
+</tr>
+<tr>
+<td><code>Assertive</code></td>
+<td>Interrupts immediately; use rarely (urgent errors)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Text inputs with <code>isError = true</code> and <code>supportingText</code> already expose their error message to services in Material 3; use a live region for custom messages. The standard <code>Snackbar</code> is announced by Material 3 itself.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Live Regions and Announcements</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 15</div><div class="pt">Step-by-Step Build 6: Touch Targets</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">The 48 dp rule. Material 3 interactive components (<code>Button</code>, <code>IconButton</code>, <code>Checkbox</code>, <code>Switch</code>, <code>Chip</code>, ...) apply <code>Modifier.minimumInteractiveComponentSize()</code> internally: if the visual is smaller than 48 dp, the <strong>touch area</strong> is expanded around it without changing the layout drawing. That is why a small <code>Checkbox</code> is easy to hit.</p>
+<p class="v2-p">For your own clickables you must do it yourself:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SmallCloseIcon(onClose: () -&gt; Unit) {
+    Icon(
+        imageVector = Icons.Filled.Close,
+        contentDescription = "Close",
+        modifier = Modifier
+            .minimumInteractiveComponentSize()   // at least 48 x 48 dp touch area
+            .clickable(role = Role.Button, onClick = onClose)
+            .size(24.dp)
+    )
+}</code></pre></div></div>
+<p class="v2-p">(Order matters: <code>minimumInteractiveComponentSize()</code> first so the clickable area includes the padding.) If you must show a larger gap between targets than 48 dp allows (dense toolbars), add spacing so neighbouring touch areas do not overlap. Also avoid targets at extreme screen edges where system gesture navigation takes over.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Touch Targets</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 15</div><div class="pt">Step-by-Step Build 7: Colour Contrast</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">How contrast is measured</h3>
+<p class="v2-p"><strong>Contrast ratio</strong> compares the <em>relative luminance</em> of two colours. It runs from 1:1 (identical) to 21:1 (black on white).</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Content</th>
+<th>Minimum (WCAG AA)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Normal text (under 18 sp regular or 14 sp bold)</td>
+<td><strong>4.5 : 1</strong></td>
+</tr>
+<tr>
+<td>Large text (18 sp+ regular, or 14 sp+ bold)</td>
+<td><strong>3 : 1</strong></td>
+</tr>
+<tr>
+<td>Icons, input borders, focus rings, chart lines that carry meaning</td>
+<td><strong>3 : 1</strong> against adjacent colours</td>
+</tr>
+<tr>
+<td>Decorative or disabled elements</td>
+<td>No requirement (but disabled should still be recognisable)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Compose can compute contrast for you in a test or debug tool. Here is a small helper you can drop into a unit test (no Android dependencies needed):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Contrast.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.accessdemo
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+
+fun contrastRatio(foreground: Color, background: Color): Float {
+    val l1 = foreground.luminance()
+    val l2 = background.luminance()
+    val lighter = maxOf(l1, l2)
+    val darker = minOf(l1, l2)
+    return (lighter + 0.05f) / (darker + 0.05f)
+}</code></pre></div></div>
+<p class="v2-p"><code>Color.luminance()</code> returns the relative luminance (0 black to 1 white) following the standard formula. Check your text pairs in a plain JUnit test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ContrastTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.accessdemo
+
+import androidx.compose.ui.graphics.Color
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class ContrastTest {
+    @Test
+    fun greyOnWhiteFails() {
+        val ratio = contrastRatio(Color(0xFFBBBBBB), Color.White)
+        assertTrue("ratio was $ratio", ratio &lt; 4.5f)       // about 1.9
+    }
+
+    @Test
+    fun darkGreyOnWhitePasses() {
+        val ratio = contrastRatio(Color(0xFF444444), Color.White)
+        assertTrue("ratio was $ratio", ratio &gt;= 4.5f)      // about 9.7
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Approximate values: <code>#BBBBBB</code> on white is about 1.9:1; <code>#444444</code> on white about 9.7:1.) You can also use free online contrast checkers and the Accessibility Scanner (lesson 48).</p>
+<h3 class="v2-h3">Fixing the title (problem A)</h3>
+<p class="v2-p">The simplest way to get good contrast is to use <strong>colour roles in pairs</strong> (lesson 40): <code>onSurface</code> on <code>surface</code>, <code>onPrimary</code> on <code>primary</code> and so on. The Material 3 baseline pairs are designed to meet contrast requirements, and Material Theme Builder generates schemes that do. Problems appear when you hard-code colours or place text on a <strong>photo</strong>. Put a semi-opaque scrim behind text on images.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+
+Text("Order summary", color = MaterialTheme.colorScheme.onSurface)</code></pre></div></div>
+<h3 class="v2-h3">Colour is not enough (problem E)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun PaymentError(message: String) {
+    Row(
+        Modifier
+            .heightIn(min = 48.dp)                           // problem D: grows with text
+            .background(MaterialTheme.colorScheme.errorContainer)
+            .padding(12.dp)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Filled.Warning, contentDescription = null,
+             tint = MaterialTheme.colorScheme.onErrorContainer)
+        Text(
+            "Error: $message",
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">The error now has <strong>an icon, the word "Error"</strong> and a colour, uses a theme pair that meets contrast, grows with large text and is announced when it appears.</p>
+<h3 class="v2-h3">Dark mode, high contrast text and dynamic colour</h3>
+<p class="v2-p">Dark theme needs its own contrast check, not just light. Android also has a <strong>high-contrast text</strong> setting and, on newer versions, contrast level settings that dynamic colour may follow; test with them on. Never assume that because light mode passes, dark mode does.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Colour Contrast</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 15</div><div class="pt">Step-by-Step Build 8: Large Text and Display Size (Problems D and 5)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Rules that make layouts survive 200% text:</p>
+<ol class="v2-ol">
+<li><strong><code>sp</code> for text</strong>, always.</li>
+<li><strong>Do not fix the height</strong> of anything that contains text. Use <code>heightIn(min = ...)</code> or wrap content.</li>
+<li><strong>Prefer <code>weight</code> and wrapping</strong> over fixed widths. A <code>Row</code> with three buttons may need to become a <code>Column</code> at large sizes. <code>FlowRow</code> wraps items automatically (<code>androidx.compose.foundation.layout.FlowRow</code>; some versions require an experimental opt-in).</li>
+<li><strong>Scrollable screens</strong>: anything that can grow taller than the screen must scroll (<code>verticalScroll</code> or a lazy list).</li>
+<li><strong><code>maxLines</code> and <code>overflow</code></strong>: truncating important text is a barrier; only use it when the full text is available elsewhere.</li>
+<li><strong>Never disable zoom or lock orientation</strong> without a strong reason.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ActionButtons(onSave: () -&gt; Unit, onShare: () -&gt; Unit, onDelete: () -&gt; Unit) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Button(onClick = onSave) { Text("Save") }
+        Button(onClick = onShare) { Text("Share") }
+        Button(onClick = onDelete) { Text("Delete") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">At normal size the three buttons sit in one row. At 200% font scale they wrap onto two or three lines instead of being clipped.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: Large Text and Display Size (Problems D and 5)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 15</div><div class="pt">Step-by-Step Build 9: Focus and Reading Order</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Compose reads in a sensible default order: the order of the tree, left to right and top to bottom in LTR languages. Problems occur with <strong>overlapping layouts</strong> and with <strong>floating elements</strong> that are visually first but declared last. You can fix it with traversal semantics:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
+
+@Composable
+fun ScreenWithBanner() {
+    Box(Modifier.semantics { isTraversalGroup = true }) {
+        Text(
+            "Welcome back!",
+            Modifier.semantics { traversalIndex = -1f }   // read first
+        )
+        Text("Your orders", Modifier.semantics { traversalIndex = 0f })
+    }
+}</code></pre></div></div>
+<p class="v2-p">Lower <code>traversalIndex</code> is read earlier within a traversal group. These APIs have been evolving, so check the documentation for the version you use. Always confirm the order by <em>listening</em> with TalkBack: you will notice order bugs in seconds.</p>
+<p class="v2-p">Other focus tips: after a dialog or bottom sheet closes, return focus to the element that opened it (Material components do this); do not trap focus inside a screen with no way out; and make every <strong>gesture or hover-only</strong> action reachable by a visible control.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 9: Focus and Reading Order</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 15</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk13"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Fix the whole BadScreen</strong></p>
+<p class="v2-p">Rewrite the <code>BadScreen</code> from lesson 46 so that all six problems are fixed: contrast (use theme colours), delete icon label and 48 dp target, large-text-safe error banner with icon and text, and a proper Pay button. Add a heading for the title.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun GoodScreen(
+    onDelete: () -&gt; Unit,
+    onPay: () -&gt; Unit,
+    error: String?
+) {
+    Column(Modifier.padding(16.dp)) {
+        Text(
+            "Order summary",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.semantics { heading() }
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Zobo x 2", Modifier.weight(1f))
+            IconButton(onClick = onDelete) {
+                Icon(Icons.Filled.Delete, contentDescription = "Delete Zobo")
+            }
+        }
+        if (error != null) PaymentError(error)    // from Build 7
+        Button(onClick = onPay) { Text("Pay now") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Fixes: A theme colours; B and C <code>IconButton</code> with a description and 48 dp target; D and E <code>PaymentError</code> (min height, icon + text, live region); F a real <code>Button</code>; plus a heading.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Accessible star rating input</strong></p>
+<p class="v2-p">Build a 5-star <strong>input</strong> where the user taps a star to set a rating. Make it accessible: each star has a description ("1 star", "2 stars" ...), the selected state is announced, and each star is a 48 dp target. Use <code>Modifier.selectable</code> and <code>Role.RadioButton</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.selectableGroup
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+
+@Composable
+fun StarInput(rating: Int, onRatingChange: (Int) -&gt; Unit) {
+    Row(Modifier.selectableGroup()) {
+        for (star in 1..5) {
+            val selected = star == rating
+            Icon(
+                imageVector = if (star &lt;= rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                contentDescription = if (star == 1) "1 star" else "$star stars",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .minimumInteractiveComponentSize()
+                    .selectable(
+                        selected = selected,
+                        role = Role.RadioButton,
+                        onClick = { onRatingChange(star) }
+                    )
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>selectableGroup()</code> tells services the stars are a single group of exclusive choices; <code>Role.RadioButton</code> plus <code>selected</code> lets TalkBack announce "3 stars, radio button, selected". (<code>Icons.Outlined.StarBorder</code> is in the extended icons library; if you do not have it, use <code>Icons.Filled.Star</code> with a dimmer tint.)</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Contrast detective</strong></p>
+<p class="v2-p">Using the <code>contrastRatio</code> helper, test these text/background pairs and say which pass for normal text: <code>#767676</code> on white, <code>#777777</code> on white, <code>#FFFFFF</code> on <code>#1B6B3A</code>, <code>#FFFFFF</code> on <code>#3DDC84</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Approximate results: <code>#767676</code> on white is about <strong>4.54:1</strong> (passes, the well-known borderline grey); <code>#777777</code> on white is about 4.48:1 (just <strong>fails</strong> for normal text, though passes for large text); white on <code>#1B6B3A</code> (dark green) is about 6.4:1 (passes); white on <code>#3DDC84</code> (Android green) is roughly 1.7:1 (fails badly; use dark text on that green). Always run the helper rather than trusting your eye, since light-on-light greens look fine on a good screen but fail outdoors.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 15</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: A description on every icon inside a labelled button.</strong> <em>Symptom:</em> TalkBack reads the label twice ("Save, Save button"). <em>Fix:</em> when text already labels the button, give the icon <code>contentDescription = null</code>.</p>
+<p class="v2-p"><strong>Mistake #2: <code>clickable</code> without <code>role</code> on a custom control.</strong> <em>Fix:</em> standard component or <code>role = Role.Button</code>.</p>
+<p class="v2-p"><strong>Mistake #3: <code>clearAndSetSemantics</code> on a container with buttons.</strong> <em>Symptom:</em> buttons inside unreachable. <em>Fix:</em> use it only on non-interactive groups.</p>
+<p class="v2-p"><strong>Mistake #4: Merging an entire screen.</strong> <em>Symptom:</em> one giant announcement. <em>Fix:</em> merge per item.</p>
+<p class="v2-p"><strong>Mistake #5: Gesture-only actions.</strong> <em>Fix:</em> add visible buttons or <code>customActions</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Hard-coded colours in custom components.</strong> <em>Symptom:</em> contrast fails in dark mode. <em>Fix:</em> theme role pairs, tested in both modes.</p>
+<p class="v2-p"><strong>Mistake #7: <code>size(24.dp)</code> on a clickable.</strong> <em>Fix:</em> <code>minimumInteractiveComponentSize()</code> or <code>IconButton</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Fixed-height text containers.</strong> <em>Fix:</em> <code>heightIn(min)</code>.</p>
+<p class="v2-p"><strong>Mistake #9: No announcement for dynamic errors.</strong> <em>Fix:</em> <code>liveRegion</code> or Material's error support.</p>
+<p class="v2-p"><strong>Mistake #10: Testing with the screen reader off only.</strong> <em>Fix:</em> include a 10-minute TalkBack pass per feature.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 15</div><div class="pt">Knowledge Check</div><div class="pc" id="chk15"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> When should <code>contentDescription</code> be <code>null</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">When the image or icon is decorative or when its meaning is already given by adjacent text (for example an icon inside a button that has a text label), so it should be skipped by screen readers.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does <code>Modifier.semantics(mergeDescendants = true)</code> do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It combines the semantics of the node's children into the parent node, so a screen reader treats the group as one item and reads their text together.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> How do you provide an accessible alternative to a swipe-to-delete gesture?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Add <code>customActions</code> with <code>CustomAccessibilityAction("Delete") { ...; true }</code> (and/or a visible delete button) so TalkBack, Switch Access and Voice Access users can trigger the same operation.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What are the minimum contrast ratios for normal text and for large text?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">4.5:1 for normal text and 3:1 for large text (and 3:1 for meaningful icons and component boundaries).</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>minimumInteractiveComponentSize()</code> do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It ensures a composable's touch area is at least 48 × 48 dp, expanding the touch target around a smaller visual without changing how it is drawn.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/make-your-android-app-accessible" rel="noopener noreferrer">Make your Android app accessible pathway</a></li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 4</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-accessibility" rel="noopener noreferrer">Jetpack Compose accessibility codelab</a></li>
+<li><a href="https://developer.android.com/guide/topics/ui/accessibility/apps" rel="noopener noreferrer">Build more accessible apps (developer guide)</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Accessible Order Screen</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a complete <strong>order screen</strong> that passes a TalkBack pass, large text and contrast checks.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A list of three order items; each row is a merged item (name, price) with a delete <code>IconButton</code> (description includes the item name) and custom actions "Increase quantity" and "Decrease quantity".</li>
+<li>A section heading marked with <code>heading()</code>.</li>
+<li>A quantity display with <code>stateDescription</code> ("2 of 5 allowed").</li>
+<li>An error banner (icon, text, live region) that appears when the quantity limit is reached.</li>
+<li>A Pay <code>Button</code> and an optional gift-wrap <code>Switch</code> with a visible label (toggleable role).</li>
+<li>All colours from theme role pairs; a contrast unit test on any custom colours.</li>
+<li>Previews at font scale 1.0 and 2.0.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> write Compose tests (lesson 45) that find the delete button by content description and assert the error banner has the text "Error".</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">OrderScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.accessdemo
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
+private const val MAX_QTY = 5
+
+data class OrderItem(val id: Int, val name: String, val price: Int, val qty: Int)
+
+@Composable
+fun OrderScreen() {
+    var items by remember {
+        mutableStateOf(listOf(OrderItem(1, "Zobo", 250, 1), OrderItem(2, "Akara", 400, 2), OrderItem(3, "Suya", 1500, 5)))
+    }
+    var gift by remember { mutableStateOf(false) }
+    val atLimit = items.any { it.qty &gt;= MAX_QTY }
+
+    fun change(id: Int, delta: Int) {
+        items = items.map { if (it.id == id) it.copy(qty = (it.qty + delta).coerceIn(1, MAX_QTY)) else it }
+    }
+
+    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            "Your order",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.semantics { heading() }
+        )
+
+        LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(items, key = { it.id }) { item -&gt;
+                Card(
+                    Modifier
+                        .fillMaxWidth()
+                        .semantics(mergeDescendants = true) {
+                            stateDescription = "${item.qty} of $MAX_QTY allowed"
+                            customActions = listOf(
+                                CustomAccessibilityAction("Increase quantity") { change(item.id, +1); true },
+                                CustomAccessibilityAction("Decrease quantity") { change(item.id, -1); true }
+                            )
+                        }
+                ) {
+                    Row(
+                        Modifier.padding(start = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("${item.name}, ${item.qty} x ₦${item.price}", Modifier.weight(1f))
+                        IconButton(onClick = { items = items.filterNot { it.id == item.id } }) {
+                            Icon(Icons.Filled.Delete, contentDescription = "Delete ${item.name}")
+                        }
+                    }
+                }
+            }
+        }
+
+        if (atLimit) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .padding(12.dp)
+                    .semantics { liveRegion = LiveRegionMode.Polite },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.Warning, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer)
+                Text(
+                    "Error: maximum $MAX_QTY of one item",
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(value = gift, role = Role.Switch, onValueChange = { gift = it }),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Gift wrap", Modifier.weight(1f))
+            Switch(checked = gift, onCheckedChange = null)   // the row handles the toggle
+        }
+
+        Button(onClick = { }, Modifier.fillMaxWidth()) { Text("Pay now") }
+    }
+}
+
+@Preview(name = "Normal", fontScale = 1.0f, showBackground = true)
+@Preview(name = "Largest", fontScale = 2.0f, showBackground = true)
+@Composable
+private fun OrderScreenPreview() {
+    MaterialTheme { OrderScreen() }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What to check:</strong> with TalkBack on, each row is read as one item with its quantity state, "Actions available" appears and offers Increase and Decrease, the error banner is announced when quantity reaches 5, and the gift-wrap row is read as "Gift wrap, switch, off". At font scale 2.0 nothing is clipped and the page scrolls. In the switch row the <code>Switch</code> has <code>onCheckedChange = null</code> so the whole row is a single 48 dp+ target instead of two nested controls.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 47 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-47-accessibility-in-compose-labels-touch-targ</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 47 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Semantics Properties</li><li>✅ Step-by-Step Build 1: Fix the Labels</li><li>✅ Step-by-Step Build 2: Roles, State and Click Labels</li><li>✅ Step-by-Step Build 3: Merging and Clearing Semantics</li><li>✅ Step-by-Step Build 4: Custom Actions Instead of Gestures</li><li>✅ Step-by-Step Build 5: Live Regions and Announcements</li><li>✅ Step-by-Step Build 6: Touch Targets</li><li>✅ Step-by-Step Build 7: Colour Contrast</li><li>✅ Step-by-Step Build 8: Large Text and Display Size (Problems D and 5)</li><li>✅ Step-by-Step Build 9: Focus and Reading Order</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_46.html" class="ln-btn">&#8592; Lesson 46</a><a href="lesson_48.html" class="ln-btn primary">Lesson 48 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 47 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 59: Wear OS and App Widgets with Compose and Glance — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l59">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 59 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 59</div>
+      <h1>Wear OS and App Widgets with Compose and Glance</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Class Companion: Watch and Widget</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 59</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Take Compose to the wrist with Compose for Wear OS and build app widgets with Jetpack Glance.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Class Companion: Watch and Widget</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Compose is not only for phone screens. The same ideas (composable functions, state, modifiers) also build interfaces for the <strong>wrist</strong> with <strong>Compose for Wear OS</strong>, and for the <strong>home screen</strong> with <strong>Jetpack Glance</strong>, which lets you write <strong>app widgets</strong> in a Compose-like style. This lesson covers the final items of Pathway 5 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-5): <em>Compose for Wear OS introduction</em>, <em>Wear OS with Compose</em> and <em>Compose and Glance for remote surfaces</em>. The related codelab is <em>Compose for Wear OS</em> (https://developer.android.com/codelabs/compose-for-wear-os).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain how <strong>Wear OS design</strong> differs from phone design: tiny <strong>round</strong> screens, glanceable tasks, short sessions, battery.</li>
+<li>Set up a <strong>Wear OS</strong> module and an <strong>emulator</strong>.</li>
+<li>Build screens with <strong><code>androidx.wear.compose</code></strong>: <code>ScalingLazyColumn</code> (or the newer list components), <code>Chip</code>/<code>Button</code>, <code>Text</code>, <code>TimeText</code>, <code>Scaffold</code>.</li>
+<li>Handle <strong>navigation</strong> with <strong><code>SwipeDismissableNavHost</code></strong>.</li>
+<li>Understand <strong>Tiles</strong> and <strong>complications</strong> as Wear's "remote surfaces".</li>
+<li>Build a phone <strong>app widget</strong> with <strong>Glance</strong>: <code>GlanceAppWidget</code>, receiver, <code>provideGlance</code>, <code>GlanceTheme</code>, actions, updates and widget metadata.</li>
+<li>Explain why Glance is <strong>not</strong> ordinary Compose.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> every surface has its own rules. A watch face and a widget cannot show a full app, so each shows the <strong>one thing the user needs right now</strong>.</p>
+<p class="v2-p"><strong>Honesty note:</strong> Wear OS and Glance libraries change quickly (for example, new list components and Material 3 for Wear). Version numbers below are placeholders; check the official documentation for the current APIs before you ship.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Composables, state and modifiers</strong> (lessons 15 to 19).</li>
+<li><strong>Lazy lists</strong> (lesson 21) and <strong>Navigation Compose</strong> (lessons 26 and 55).</li>
+<li><strong>ViewModel and Flows</strong> (lessons 25 and 33).</li>
+<li><strong>Manifest, services and broadcast receivers</strong> (lessons 3 and 42).</li>
+<li><strong>Emulators</strong> (lesson 4).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Designing for Small Surfaces</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The wrist</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Screen about 1.2 to 1.5 inches, often round</td>
+<td>Content near the edge is clipped; centre things</td>
+</tr>
+<tr>
+<td>Glance time of seconds</td>
+<td>One primary action per screen</td>
+</tr>
+<tr>
+<td>Battery</td>
+<td>Avoid constant work; use efficient background APIs</td>
+</tr>
+<tr>
+<td>Input</td>
+<td>Touch, rotating crown or bezel, voice; no keyboard</td>
+</tr>
+<tr>
+<td>Connectivity</td>
+<td>Often paired to a phone; may be standalone with its own network</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Wear OS building blocks</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>App</strong></td>
+<td>Activities with Compose for Wear OS</td>
+</tr>
+<tr>
+<td><strong>Tile</strong></td>
+<td>A swipe-away card with at-a-glance info and quick actions</td>
+</tr>
+<tr>
+<td><strong>Complication</strong></td>
+<td>A small data slot on a watch face (steps, next event)</td>
+</tr>
+<tr>
+<td><strong>Ongoing activity</strong></td>
+<td>Shows a running workout or timer on the watch face</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">App widgets</h3>
+<p class="v2-p">An <strong>app widget</strong> is a small view on the phone's home screen (clock, weather, "next lesson"). It is displayed by the <strong>launcher</strong>, not by your app process, using <strong><code>RemoteViews</code></strong>, a limited serialisable description of views. This is why widgets cannot use arbitrary Compose.</p>
+<p class="v2-p"><strong>Jetpack Glance</strong> gives you a Compose-style API (<code>GlanceAppWidget</code>, <code>Column</code>, <code>Row</code>, <code>Text</code>, <code>Button</code>, <code>LazyColumn</code>) that is <strong>translated to RemoteViews</strong>. You write familiar code, but the composables come from <code>androidx.glance</code>, not <code>androidx.compose</code>. Mixing them does not compile.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Designing for Small Surfaces</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: A Wear OS Project</div><div class="pc" id="chk4"></div></div><div class="pb2"><ol class="v2-ol">
+<li><strong>File → New → New Project → Wear OS → Empty Wear App</strong> (template name may vary).</li>
+<li>Create a <strong>Wear OS</strong> emulator (small round) from Device Manager. The wizard downloads a Wear OS system image.</li>
+<li>Look at the <strong>manifest</strong>: it declares <code>uses-feature android:name="android.hardware.type.watch"</code>, and often a <code>com.google.android.wearable.standalone</code> meta-data flag for apps that work without a phone.</li>
+</ol>
+<p class="v2-p">Dependencies (placeholders for versions):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+wearCompose = "&lt;latest stable&gt;"
+wearTiles = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearCompose" }
+androidx-wear-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "wearCompose" }
+androidx-wear-compose-navigation = { group = "androidx.wear.compose", name = "compose-navigation", version.ref = "wearCompose" }
+androidx-wear-tiles = { group = "androidx.wear.tiles", name = "tiles", version.ref = "wearTiles" }</code></pre></div></div>
+<p class="v2-p">(Wear has its own Material component set: <code>compose-material</code> for Material 2 for Wear and a newer <code>compose-material3</code> with Material 3 Expressive components. Newer templates use the latest; follow whichever your template generates, and check which is current.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: A Wear OS Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Your First Wear Screen</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">A "Next Lesson" watch app for a school: show the next class and a button to mark attendance.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.registerwear
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
+import androidx.wear.compose.material.Chip
+import androidx.wear.compose.material.ChipDefaults
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.PositionIndicator
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.material.Vignette
+import androidx.wear.compose.material.VignettePosition
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { WearApp() }
+    }
+}
+
+@Composable
+fun WearApp() {
+    MaterialTheme {
+        val listState = rememberScalingLazyListState()
+        Scaffold(
+            timeText = { TimeText() },
+            vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+            positionIndicator = { PositionIndicator(scalingLazyListState = listState) }
+        ) {
+            ScalingLazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                item { Text("Next class", textAlign = TextAlign.Center, style = MaterialTheme.typography.title3) }
+                item { Text("Mathematics\n10:30 SS2 B", textAlign = TextAlign.Center) }
+                item {
+                    Chip(
+                        onClick = { /* mark attendance */ },
+                        label = { Text("Mark attendance") },
+                        colors = ChipDefaults.primaryChipColors()
+                    )
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.compose.ui.unit.dp</code>.) Things that differ from phone Compose:</p>
+<ul class="v2-ul">
+<li>The <strong><code>Scaffold</code></strong> is Wear's: it places the <strong>time text</strong> at the top, a <strong>vignette</strong> to blend edges, and a <strong>position indicator</strong> for scrolling.</li>
+<li><strong><code>ScalingLazyColumn</code></strong> is a list whose items <strong>scale and fade towards the curved edges</strong>, matching round screens. Newer Wear releases introduce <strong><code>TransformingLazyColumn</code></strong> with richer transformations; check which one the current guidance recommends for new code.</li>
+<li><strong><code>Chip</code></strong> and <strong><code>Button</code></strong> are Wear-sized, with large touch targets and high contrast. Do not use the phone's Material components on Wear unless the documentation says they are supported.</li>
+<li>Text is <strong>short</strong>. If a label does not fit in about two lines, shorten it.</li>
+</ul>
+<h3 class="v2-h3">Rotary input</h3>
+<p class="v2-p">The crown or rotating bezel scrolls lists. <code>ScalingLazyColumn</code> supports it when it can take focus; in many versions you add <code>Modifier.rotaryScrollable(...)</code> or use the default behaviour. See the "rotary input" page for your version.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Your First Wear Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Navigation on the Watch</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">The watch <strong>back gesture is a swipe from the left edge</strong>, so Wear provides <strong><code>SwipeDismissableNavHost</code></strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.wear.compose.navigation.SwipeDismissableNavHost
+import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+
+@Composable
+fun WearNav() {
+    val navController = rememberSwipeDismissableNavController()
+    SwipeDismissableNavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen(onOpenClass = { id -&gt; navController.navigate("class/$id") })
+        }
+        composable("class/{id}") { entry -&gt;
+            val id = entry.arguments?.getString("id")
+            ClassScreen(id = id)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">It uses the same NavController ideas as lesson 26 with a swipe-to-dismiss transition. (The string-route API shown here is the one in the Wear navigation library; check whether a type-safe version has been added.)</p>
+<h3 class="v2-h3">State and data</h3>
+<p class="v2-p">Use the same architecture as the phone: a <strong>ViewModel</strong>, a <strong><code>StateFlow</code></strong>, and <code>collectAsStateWithLifecycle()</code> (lesson 33). Keep the UI very simple: lists of three to five items, large touch targets, and a single clear action.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Navigation on the Watch</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: Tiles and Complications (Overview)</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">A <strong>Tile</strong> is a card the user swipes to from the watch face. It is defined by a <code>TileService</code> and described with <strong>ProtoLayout</strong> elements (a layout format that the system renders), <strong>not</strong> with Compose UI directly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class NextClassTileService : TileService() {
+
+    override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture&lt;TileBuilders.Tile&gt; =
+        Futures.immediateFuture(
+            TileBuilders.Tile.Builder()
+                .setResourcesVersion("1")
+                .setTileTimeline(
+                    TimelineBuilders.Timeline.fromLayoutElement(
+                        LayoutElementBuilders.Text.Builder()
+                            .setText("Maths 10:30")
+                            .build()
+                    )
+                )
+                .build()
+        )
+
+    override fun onTileResourcesRequest(
+        requestParams: RequestBuilders.ResourcesRequest
+    ): ListenableFuture&lt;ResourceBuilders.Resources&gt; =
+        Futures.immediateFuture(
+            ResourceBuilders.Resources.Builder().setVersion("1").build()
+        )
+}</code></pre></div></div>
+<p class="v2-p">The exact builder APIs differ by Tiles library version (newer versions provide Material components and a kotlin-friendly layout DSL). Register the service in the manifest with the <code>androidx.wear.tiles.action.BIND_TILE_PROVIDER</code> intent filter and the <code>BIND_TILE_PROVIDER</code> permission. Key rules:</p>
+<ul class="v2-ul">
+<li>Tiles are <strong>rendered by the system</strong>, so you describe them; you cannot run arbitrary UI.</li>
+<li>Keep them <strong>cheap</strong>: they refresh on request, not every second.</li>
+<li>Use a <strong>freshness interval</strong> or push updates when data changes.</li>
+</ul>
+<p class="v2-p"><strong>Complications</strong> are provided by a <code>ComplicationDataSourceService</code> that returns <code>ComplicationData</code> (short text, ranged value, icon) for the slot the watch face asks about.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Treat tiles and complications as the next topic to study after this lesson. The programme's Pathway 5 introduces them; the codelabs on developer.android.com go through each step.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Tiles and Complications (Overview)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: Your First App Widget with Glance</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Now move to the phone. A "Next class" widget on the home screen.</p>
+<h3 class="v2-h3">Dependencies</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+glance = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }</code></pre></div></div>
+<h3 class="v2-h3">The widget</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.registerwidget
+
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Column
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+
+class NextClassWidget : GlanceAppWidget() {
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // load data here (suspending work is allowed)
+        val next = "Mathematics, 10:30"
+        provideContent {
+            GlanceTheme {
+                NextClassContent(next)
+            }
+        }
+    }
+}
+
+@Composable
+private fun NextClassContent(next: String) {
+    Column(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(GlanceTheme.colors.widgetBackground)
+            .padding(12.dp)
+            .clickable(actionStartActivity&lt;MainActivity&gt;()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            "Next class",
+            style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 12.sp)
+        )
+        Text(
+            next,
+            style = TextStyle(
+                color = GlanceTheme.colors.onSurface,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">Spot the differences from ordinary Compose:</p>
+<ul class="v2-ul">
+<li><code>GlanceModifier</code>, <strong>not</strong> <code>Modifier</code>.</li>
+<li><code>androidx.glance.layout.Column</code>, <code>Text</code>, <code>Button</code>, <strong>not</strong> the Compose ones.</li>
+<li><code>provideContent { }</code> renders and keeps the widget updated while it is alive; <code>provideGlance</code> may do <strong>suspending</strong> work first.</li>
+<li>Click handling uses <strong>actions</strong> (<code>actionStartActivity</code>, <code>actionRunCallback</code>), not lambdas that run in your app process.</li>
+</ul>
+<h3 class="v2-h3">The receiver</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.glance.appwidget.GlanceAppWidgetReceiver
+
+class NextClassWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = NextClassWidget()
+}</code></pre></div></div>
+<h3 class="v2-h3">The widget metadata</h3>
+<p class="v2-p"><code>res/xml/next_class_widget_info.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/widget_description"
+    android:initialLayout="@layout/glance_default_loading_layout" /&gt;</code></pre></div></div>
+<p class="v2-p">(<code>glance_default_loading_layout</code> comes with the Glance library. <code>updatePeriodMillis="0"</code> means "do not update on a timer"; periodic updates under 30 minutes are not honoured by the system anyway, so update from your own code or WorkManager.)</p>
+<h3 class="v2-h3">The manifest</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;receiver
+    android:name=".NextClassWidgetReceiver"
+    android:exported="true"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.appwidget.action.APPWIDGET_UPDATE" /&gt;
+    &lt;/intent-filter&gt;
+    &lt;meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/next_class_widget_info" /&gt;
+&lt;/receiver&gt;</code></pre></div></div>
+<p class="v2-p">Install the app, long-press the home screen, choose <strong>Widgets</strong>, and drag <strong>Next class</strong> onto the screen.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Your First App Widget with Glance</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: Interactive and Updating Widgets</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Actions that run code</h3>
+<p class="v2-p">Widgets cannot call your composable lambdas. Use an <strong><code>ActionCallback</code></strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
+import androidx.glance.action.ActionParameters.Key
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
+
+private val CountKey = intPreferencesKey("present_count")
+
+class MarkPresentCallback : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        updateAppWidgetState(context, glanceId) { prefs: Preferences.Builder -&gt;
+            // Preferences.Builder variant may be MutablePreferences depending on the version
+        }
+        NextClassWidget().update(context, glanceId)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The exact <code>updateAppWidgetState</code> lambda type depends on the Glance version (<code>MutablePreferences</code> in most). The pattern is stable: <strong>store small state</strong> in the widget's Preferences DataStore, then call <strong><code>update</code></strong> to re-run <code>provideGlance</code>.</p>
+<h3 class="v2-h3">Reading widget state in the content</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.glance.currentState
+
+@Composable
+private fun CounterContent() {
+    val prefs = currentState&lt;Preferences&gt;()
+    val count = prefs[CountKey] ?: 0
+    Column {
+        Text("Present: $count")
+        Button(text = "Mark present", onClick = actionRunCallback&lt;MarkPresentCallback&gt;())
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Updating from elsewhere</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// From a ViewModel, Worker or repository after data changes:
+NextClassWidget().updateAll(context)</code></pre></div></div>
+<p class="v2-p">For periodic refresh, schedule a <strong>WorkManager</strong> <code>PeriodicWorkRequest</code> (minimum 15 minutes) that fetches new data, stores it, and calls <code>updateAll</code>.</p>
+<h3 class="v2-h3">Responsive sizing</h3>
+<p class="v2-p">A widget can be resized. With <code>SizeMode.Responsive</code>, Glance gives you different layouts per size:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>private val Small = DpSize(120.dp, 90.dp)
+private val Large = DpSize(250.dp, 150.dp)
+
+class NextClassWidget : GlanceAppWidget() {
+    override val sizeMode = SizeMode.Responsive(setOf(Small, Large))
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            val size = LocalSize.current
+            if (size.width &gt;= Large.width) WideLayout() else CompactLayout()
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">This is the <strong>adaptive</strong> thinking of lesson 58 applied to widgets.</p>
+<h3 class="v2-h3">Limits to remember</h3>
+<ul class="v2-ul">
+<li>Glance has a <strong>subset</strong> of Compose: no arbitrary <code>Canvas</code> or custom layouts, limited modifiers and a few component types.</li>
+<li>Widgets run in the <strong>launcher process</strong> as RemoteViews, so keep content light.</li>
+<li>Images must be small: large bitmaps can exceed the <strong>RemoteViews memory limit</strong> and the widget fails to load.</li>
+<li>Use <strong><code>GlanceTheme</code></strong> with Material 3 colours for <strong>dynamic colour</strong> on supported devices.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Interactive and Updating Widgets</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 7: Practicalities for Both Surfaces</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Standalone or companion?</h3>
+<p class="v2-p">A Wear app can be <strong>standalone</strong>, working without a phone and using its own network access, or a <strong>companion</strong> that depends on a phone app for data. Standalone is friendlier because many watches are used without the phone nearby, but it means you must handle connectivity, storage and sign-in on a tiny screen. Many apps choose a hybrid: the watch caches data and syncs through the phone when available. Whichever you choose, declare it honestly in the manifest and design the first-run experience so that a user is never stuck on an empty screen.</p>
+<h3 class="v2-h3">Battery and background work</h3>
+<p class="v2-p">A watch battery is small. Avoid wake locks, polling loops and frequent network calls. Prefer <strong>WorkManager</strong> for deferrable work, <strong>Health Services</strong> for sensor and exercise data (instead of reading sensors yourself), and <strong>ongoing activities</strong> for long-running tasks the user should see. Test with the <strong>Battery Historian</strong> or the Profiler, and measure before you assume.</p>
+<h3 class="v2-h3">Testing on small screens</h3>
+<p class="v2-p">Test on both a <strong>round</strong> and a <strong>square</strong> emulator, with <strong>large font</strong> and <strong>bold text</strong> settings turned on in the watch settings. Text that fits at the default size often overflows at the largest size, and clipped text on a round face loses meaning. Use <code>@WearPreviewDevices</code> and <code>@WearPreviewFontScales</code> (from the Wear tooling library, where available) to preview several shapes and font scales at once.</p>
+<h3 class="v2-h3">Glance versus ordinary Compose</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Compose UI</th>
+<th>Glance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runs in</td>
+<td>Your app process</td>
+<td>The launcher, through <code>RemoteViews</code></td>
+</tr>
+<tr>
+<td>Modifier type</td>
+<td><code>Modifier</code></td>
+<td><code>GlanceModifier</code></td>
+</tr>
+<tr>
+<td>Click handling</td>
+<td>Lambdas</td>
+<td>Actions and callbacks</td>
+</tr>
+<tr>
+<td>Animation and custom drawing</td>
+<td>Full</td>
+<td>Not supported</td>
+</tr>
+<tr>
+<td>Lists</td>
+<td><code>LazyColumn</code></td>
+<td>Glance <code>LazyColumn</code> (limited)</td>
+</tr>
+<tr>
+<td>Update model</td>
+<td>Recomposition on state change</td>
+<td>Explicit <code>update</code> or <code>updateAll</code> calls</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Remember that a widget is a <strong>promise of freshness</strong>: if it shows yesterday's timetable, the user stops trusting it. Decide up front who updates it (your app, a Worker, or a push message) and test that path by changing the data while the widget is on the home screen.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Practicalities for Both Surfaces</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Wear versus phone</strong></p>
+<p class="v2-p">List four changes you would make when adapting a phone "Class list" screen for a round watch.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(1) Use <code>ScalingLazyColumn</code> (or the current Wear list) instead of <code>LazyColumn</code>. (2) Use Wear <code>Chip</code>/<code>Button</code> components with large touch targets. (3) Shorten labels and show at most the next few items. (4) Add <code>TimeText</code>, a position indicator and use <code>SwipeDismissableNavHost</code> for back. Optional: support the crown and a Tile for the next class.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Spot the bug</strong></p>
+<p class="v2-p">Why does this widget code not compile?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+
+override suspend fun provideGlance(context: Context, id: GlanceId) {
+    provideContent { Column { Text("Hi") } }
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It imports ordinary <strong>Compose</strong> <code>Column</code> and <code>Text</code>. Glance needs its own: <code>androidx.glance.layout.Column</code> and <code>androidx.glance.text.Text</code>, with <code>GlanceModifier</code> for modifiers.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Update strategy</strong></p>
+<p class="v2-p">The widget should show fresh timetable data. Why not set <code>updatePeriodMillis="60000"</code>, and what should you do instead?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The system does not honour periods shorter than about 30 minutes, and frequent updates waste battery. Instead update <strong>when data changes</strong> with <code>updateAll(context)</code>, and use a WorkManager periodic job (15 minute minimum) for scheduled refreshes.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Using phone Compose components on Wear.</strong> <em>Fix:</em> use the Wear component set.</p>
+<p class="v2-p"><strong>Mistake #2: Putting content at the screen edge of a round display.</strong> <em>Fix:</em> use <code>Scaffold</code>, <code>ScalingLazyColumn</code> and padding.</p>
+<p class="v2-p"><strong>Mistake #3: Importing Compose instead of Glance.</strong> <em>Fix:</em> check imports begin with <code>androidx.glance</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Doing network work in <code>provideContent</code>.</strong> <em>Fix:</em> load in <code>provideGlance</code> before <code>provideContent</code>, or in a Worker.</p>
+<p class="v2-p"><strong>Mistake #5: Expecting lambdas to run in your app.</strong> <em>Fix:</em> use <code>ActionCallback</code>s and actions.</p>
+<p class="v2-p"><strong>Mistake #6: Large bitmaps in widgets.</strong> <em>Fix:</em> downscale or avoid.</p>
+<p class="v2-p"><strong>Mistake #7: Frequent timed updates.</strong> <em>Fix:</em> event-driven updates and WorkManager.</p>
+<p class="v2-p"><strong>Mistake #8: Forgetting to declare the receiver and metadata.</strong> <em>Fix:</em> manifest entry plus appwidget-provider XML.</p>
+<p class="v2-p"><strong>Mistake #9: Testing only on a phone emulator.</strong> <em>Fix:</em> use a Wear emulator and several widget sizes.</p>
+<p class="v2-p"><strong>Mistake #10: Treating alpha APIs as stable.</strong> <em>Fix:</em> read the release notes before upgrading.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why does Wear use <code>SwipeDismissableNavHost</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Back on a watch is a swipe from the left edge, and the host provides that swipe-to-dismiss behaviour.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is <code>ScalingLazyColumn</code> for?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A scrolling list that scales and fades items towards the curved edges of a round screen.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does Glance translate to?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>RemoteViews</code>, which the launcher renders.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> How do you run code when a widget button is tapped?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Use <code>actionRunCallback&lt;YourCallback&gt;()</code> with an <code>ActionCallback</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Name a safe way to refresh widget data.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">A WorkManager job or event-driven code that calls <code>updateAll(context)</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-5" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 5</a></li>
+<li><a href="https://developer.android.com/codelabs/compose-for-wear-os" rel="noopener noreferrer">Compose for Wear OS codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Class Companion: Watch and Widget</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Show the next class on a <strong>watch</strong> and on the <strong>home screen</strong>.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <code>shared</code> data source (a simple Kotlin object with a timetable list is fine).</li>
+<li>A Wear OS app with a <code>ScalingLazyColumn</code> timetable, a <strong>Mark attendance</strong> chip, and a detail screen using <code>SwipeDismissableNavHost</code>.</li>
+<li>A Glance widget that shows the next class, opens the app when tapped, and has a <strong>Mark present</strong> button using an <code>ActionCallback</code>.</li>
+<li>Widget layouts for at least two sizes with <code>SizeMode.Responsive</code>.</li>
+<li>A manifest receiver, metadata XML and a description string.</li>
+<li>A WorkManager job (or a simple call after data change) that refreshes the widget.</li>
+<li>Test on a Wear emulator and a phone, with the widget at two sizes.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add a basic Tile that shows the same next-class text.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The shared data and a widget that reads it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class ClassSlot(val subject: String, val time: String)
+
+object Timetable {
+    val slots = listOf(
+        ClassSlot("Mathematics", "10:30"),
+        ClassSlot("English", "11:30"),
+        ClassSlot("Physics", "13:00")
+    )
+    fun next(): ClassSlot = slots.first()
+}
+
+class NextClassWidget : GlanceAppWidget() {
+    override val sizeMode = SizeMode.Responsive(setOf(DpSize(120.dp, 90.dp), DpSize(250.dp, 150.dp)))
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val next = Timetable.next()
+        provideContent {
+            GlanceTheme {
+                val wide = LocalSize.current.width &gt;= 250.dp
+                Column(
+                    GlanceModifier.fillMaxSize()
+                        .background(GlanceTheme.colors.widgetBackground)
+                        .padding(12.dp)
+                        .clickable(actionStartActivity&lt;MainActivity&gt;())
+                ) {
+                    Text(next.subject, style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp,
+                        color = GlanceTheme.colors.onSurface))
+                    Text(next.time, style = TextStyle(color = GlanceTheme.colors.onSurface))
+                    if (wide) {
+                        Button("Mark present", actionRunCallback&lt;MarkPresentCallback&gt;())
+                    }
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">On the watch, the same <code>Timetable.slots</code> feed the <code>ScalingLazyColumn</code> using <code>items(Timetable.slots.size) { index -&gt; Chip(...) }</code>. Because both surfaces read one data source, the next step is moving it into a repository with Room, exactly as in lessons 34 and 62.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 59 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-59-wear-os-and-app-widgets-with-compose-and-g</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 59 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Designing for Small Surfaces</li><li>✅ Step-by-Step Build 1: A Wear OS Project</li><li>✅ Step-by-Step Build 2: Your First Wear Screen</li><li>✅ Step-by-Step Build 3: Navigation on the Watch</li><li>✅ Step-by-Step Build 4: Tiles and Complications (Overview)</li><li>✅ Step-by-Step Build 5: Your First App Widget with Glance</li><li>✅ Step-by-Step Build 6: Interactive and Updating Widgets</li><li>✅ Step-by-Step Build 7: Practicalities for Both Surfaces</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_58.html" class="ln-btn">&#8592; Lesson 58</a><a href="lesson_60.html" class="ln-btn primary">Lesson 60 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 59 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

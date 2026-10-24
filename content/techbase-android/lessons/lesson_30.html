@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 30: The Data Layer: Repositories and Dependency Injection — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l30">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 30 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 30</div>
+      <h1>The Data Layer: Repositories and Dependency Injection</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Switchable Data Source</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 30</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Separate data access from UI with repositories, then wire dependencies with a manual dependency injection container.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Switchable Data Source</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 29 your ViewModel called <code>PostsApi.service</code> directly. It works, but it quietly welded your screen logic to Retrofit. What if tomorrow the posts come from a database, or you want to show cached posts when offline, or you want to test the ViewModel without the internet? Every change would force you to edit the ViewModel.</p>
+<p class="v2-p">The cure is the <strong>data layer</strong>: a part of your app whose only job is to provide and manage data. Its main citizen is the <strong>repository</strong>. You will also learn <strong>dependency injection</strong>, a fancy name for a simple idea: a class should receive the things it needs instead of creating them itself.</p>
+<p class="v2-p">This lesson covers two items of Pathway 2, Unit 5 of the official <strong>Android Basics with Compose</strong> course: <em>Architecture: The Data Layer</em> and <em>Add repository and Manual Dependency Injection</em>. You will refactor the Posts app from lesson 29, and build a fake repository so that ViewModel tests run without any network.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the role of the data layer and of <strong>repositories</strong> and <strong>data sources</strong>.</li>
+<li>Define a repository as an <strong>interface</strong> with a real and a fake implementation.</li>
+<li>Explain <strong>dependency injection</strong>, <strong>inversion of control</strong> and why they make code testable.</li>
+<li>Build a <strong>manual DI container</strong> and an <code>Application</code> subclass that holds it.</li>
+<li>Create a ViewModel that takes constructor parameters using the <code>viewModelFactory</code> and <code>initializer</code> helpers.</li>
+<li>Write ViewModel tests with a fake repository.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> the UI should not know where data comes from. It asks a repository, and the repository decides: network, cache or database.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Retrofit service and <code>@Serializable</code> models</strong> (lesson 29).</li>
+<li><strong>ViewModel and UI state</strong> (lessons 24 and 25).</li>
+<li><strong>Interfaces and classes</strong> (lesson 11). An interface defines <em>what</em> can be done; a class decides <em>how</em>.</li>
+<li><strong>Unit tests with a fake</strong> (lesson 25).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: The Data Layer</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Recall the layers from lesson 24:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+------------------------------------------+
+| UI layer:   Composables  +  ViewModel    |
++----------------------|-------------------+
+                       | calls suspend functions / collects Flows
++----------------------v-------------------+
+| Data layer: Repositories                 |
+|    +-- Data sources: network, database,  |
+|        files, DataStore                  |
++------------------------------------------+</code></pre></div></div>
+<ul class="v2-ul">
+<li>A <strong>data source</strong> talks to <strong>one</strong> origin of data: a Retrofit service, a Room DAO, a file. It has no business rules.</li>
+<li>A <strong>repository</strong> combines data sources and applies rules. For example: "fetch posts from the network; if that fails, return the cached ones; save new results to the database".</li>
+<li>The UI layer talks only to repositories, never directly to data sources.</li>
+</ul>
+<h3 class="v2-h3">Why have repositories?</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Single source of truth</strong></td>
+<td>Every screen reads posts through one object, so they never disagree.</td>
+</tr>
+<tr>
+<td><strong>Swap the implementation</strong></td>
+<td>Replace network with database without touching the UI.</td>
+</tr>
+<tr>
+<td><strong>Testability</strong></td>
+<td>A ViewModel test uses a fake repository that returns a prepared list.</td>
+</tr>
+<tr>
+<td><strong>Hide details</strong></td>
+<td>The ViewModel does not know about <code>HttpException</code> or SQL.</td>
+</tr>
+<tr>
+<td><strong>Shared logic</strong></td>
+<td>Caching, retries and mapping live in one place.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Dependency injection in plain words</h3>
+<p class="v2-p">Imagine a tailor who must make a shirt. If the tailor <strong>grows the cotton, spins the thread and weaves the cloth</strong> before sewing, the shop is slow, and you cannot change the cloth. If cloth <strong>is handed to</strong> the tailor, they just sew. That is dependency injection.</p>
+<p class="v2-p">Without DI (the class creates what it needs):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class PostsViewModel : ViewModel() {
+    private val repository = NetworkPostsRepository(PostsApi.service) // hard-wired
+}</code></pre></div></div>
+<p class="v2-p">With DI (the class receives it):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class PostsViewModel(private val repository: PostsRepository) : ViewModel()</code></pre></div></div>
+<p class="v2-p">The second version does not care which repository it is given. This is also called <strong>inversion of control</strong>: the creator decides, not the user of the object. It gives you two big wins:</p>
+<ol class="v2-ol">
+<li><strong>Reuse:</strong> swap one implementation for another.</li>
+<li><strong>Testing:</strong> pass in a fake.</li>
+</ol>
+<p class="v2-p">Libraries such as Hilt automate the wiring (lesson 63). Today you write the wiring yourself, which is the best way to understand what the library does.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Data Layer</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Introduce the Repository</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Start from the lesson 29 Posts app.</p>
+<h3 class="v2-h3">Define the repository interface</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsRepository.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.data
+
+import com.example.posts.model.Post
+
+interface PostsRepository {
+    suspend fun getPosts(): List&lt;Post&gt;
+    suspend fun getPost(id: Int): Post
+}</code></pre></div></div>
+<p class="v2-p">The interface names only what the UI needs. It uses the app's own <code>Post</code> class and says nothing about Retrofit.</p>
+<h3 class="v2-h3">The network implementation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">NetworkPostsRepository.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.data
+
+import com.example.posts.model.Post
+import com.example.posts.network.PostsApiService
+
+class NetworkPostsRepository(
+    private val apiService: PostsApiService
+) : PostsRepository {
+
+    override suspend fun getPosts(): List&lt;Post&gt; = apiService.getPosts()
+
+    override suspend fun getPost(id: Int): Post = apiService.getPost(id)
+}</code></pre></div></div>
+<p class="v2-p">Right now it just forwards calls. That looks pointless, but this is the seam that lets you add caching later without touching any screen. (Lesson 34 does exactly that with Room.)</p>
+<h3 class="v2-h3">Note: DTO versus domain model</h3>
+<p class="v2-p">Real services often return fields you do not want in your UI code (<code>created_at</code> as a string, nested objects). A common pattern is to parse into a <strong>network model</strong> (sometimes called a DTO) and <strong>map</strong> to a clean <strong>domain model</strong> inside the repository. Here the two are the same class to keep things small, and lesson 62 shows the mapping.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Introduce the Repository</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: The Dependency Container</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Somebody must create the repository and give it its service. In manual DI that somebody is a <strong>container</strong>, a class that builds and holds the app's long-lived objects.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AppContainer.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.data
+
+import com.example.posts.network.PostsApiService
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+
+interface AppContainer {
+    val postsRepository: PostsRepository
+}
+
+class DefaultAppContainer : AppContainer {
+
+    private val baseUrl = "https://jsonplaceholder.typicode.com/"
+
+    private val json = Json { ignoreUnknownKeys = true }
+
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+        .build()
+
+    private val retrofitService: PostsApiService by lazy {
+        retrofit.create(PostsApiService::class.java)
+    }
+
+    override val postsRepository: PostsRepository by lazy {
+        NetworkPostsRepository(retrofitService)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Notes:</p>
+<ul class="v2-ul">
+<li><code>AppContainer</code> is an <strong>interface</strong> so a test can supply a different container.</li>
+<li>Everything private except the repository: callers only see what they should.</li>
+<li><code>by lazy</code> creates objects when first needed, then reuses them. This makes them effectively <strong>singletons</strong> for the life of the container.</li>
+</ul>
+<h3 class="v2-h3">An Application subclass holds the container</h3>
+<p class="v2-p">The container must live as long as the app does, not as long as one Activity. Android gives you the <code>Application</code> class for this: one instance per process, created before any Activity.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsApplication.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts
+
+import android.app.Application
+import com.example.posts.data.AppContainer
+import com.example.posts.data.DefaultAppContainer
+
+class PostsApplication : Application() {
+
+    lateinit var container: AppContainer
+
+    override fun onCreate() {
+        super.onCreate()
+        container = DefaultAppContainer()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Register it in the manifest by adding <code>android:name</code> to the <code>&lt;application&gt;</code> tag. Forgetting this step is the number one reason the container is never created:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AndroidManifest.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;application
+    android:name=".PostsApplication"
+    android:allowBackup="true"
+    android:icon="@mipmap/ic_launcher"
+    ... &gt;</code></pre></div></div>
+<p class="v2-p">Because <code>onCreate</code> of the <code>Application</code> runs before any Activity, <code>container</code> is ready by the time a ViewModel needs it. Keep <code>Application.onCreate</code> fast: it runs on every cold start, and anything slow here slows down launch. The <code>by lazy</code> properties help, as nothing heavy is built until used.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Dependency Container</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: ViewModel with Constructor Parameters</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">The ViewModel now needs a repository:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.posts.PostsApplication
+import com.example.posts.data.PostsRepository
+import java.io.IOException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+
+class PostsViewModel(
+    private val postsRepository: PostsRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow&lt;PostsUiState&gt;(PostsUiState.Loading)
+    val uiState: StateFlow&lt;PostsUiState&gt; = _uiState.asStateFlow()
+
+    init { loadPosts() }
+
+    fun loadPosts() {
+        viewModelScope.launch {
+            _uiState.value = PostsUiState.Loading
+            _uiState.value = try {
+                PostsUiState.Success(postsRepository.getPosts())
+            } catch (e: IOException) {
+                PostsUiState.Error("No connection. Check your data or Wi-Fi.")
+            } catch (e: HttpException) {
+                PostsUiState.Error("Server error (${e.code()}).")
+            }
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = this[APPLICATION_KEY] as PostsApplication
+                PostsViewModel(application.container.postsRepository)
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.lifecycle.ViewModelProvider</code>.)</p>
+<p class="v2-p">The framework creates ViewModels itself, and by default it only knows how to call a <strong>no-argument</strong> constructor. When yours has parameters you must teach it how to build one. A <strong>factory</strong> does that:</p>
+<ul class="v2-ul">
+<li><code>viewModelFactory { ... }</code> builds a factory from one or more <code>initializer</code> blocks.</li>
+<li><code>initializer { ... }</code> is the recipe for creating a <code>PostsViewModel</code>. Inside it, <code>this</code> gives access to <code>CreationExtras</code>, a bag of values the system supplies, including the <code>Application</code> under <code>APPLICATION_KEY</code>.</li>
+<li>We cast it to <code>PostsApplication</code>, reach the container and pass the repository in.</li>
+</ul>
+<p class="v2-p">Use it in the composable by passing the factory to <code>viewModel()</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun PostsApp(
+    modifier: Modifier = Modifier,
+    viewModel: PostsViewModel = viewModel(factory = PostsViewModel.Factory)
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    PostsScreen(state = state, onRetry = viewModel::loadPosts, modifier = modifier)
+}</code></pre></div></div>
+<p class="v2-p">Run the app. It looks exactly the same as in lesson 29, which is the point of a refactor: behaviour identical, structure better.</p>
+<h3 class="v2-h3">The dependency chain</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>PostsApplication
+   +-- container: DefaultAppContainer
+          +-- retrofit
+          +-- retrofitService  (PostsApiService)
+          +-- postsRepository  (NetworkPostsRepository(retrofitService))
+
+ViewModel factory  --&gt;  application.container.postsRepository  --&gt;  PostsViewModel(repository)</code></pre></div></div>
+<p class="v2-p">Compare this with Hilt in lesson 63: Hilt generates this wiring from annotations, but the shape is the same.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: ViewModel with Constructor Parameters</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: A Fake Repository for Tests</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Because the ViewModel depends on an <strong>interface</strong>, a test can give it anything. A <strong>fake</strong> is a simple working stand-in.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">FakePostsRepository.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.fake
+
+import com.example.posts.data.PostsRepository
+import com.example.posts.model.Post
+import java.io.IOException
+
+class FakePostsRepository : PostsRepository {
+
+    var shouldFail = false
+    var posts = listOf(
+        Post(1, "First", "Body one", 1),
+        Post(2, "Second", "Body two", 1)
+    )
+
+    override suspend fun getPosts(): List&lt;Post&gt; {
+        if (shouldFail) throw IOException("Pretend offline")
+        return posts
+    }
+
+    override suspend fun getPost(id: Int): Post = posts.first { it.id == id }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts
+
+import com.example.posts.fake.FakePostsRepository
+import com.example.posts.ui.PostsUiState
+import com.example.posts.ui.PostsViewModel
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+
+class PostsViewModelTest {
+
+    @get:Rule
+    val mainRule = MainDispatcherRule()          // from lesson 25
+
+    @Test
+    fun init_loadsPostsIntoSuccessState() = runTest {
+        val fake = FakePostsRepository()
+        val viewModel = PostsViewModel(fake)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state is PostsUiState.Success)
+        assertEquals(fake.posts, (state as PostsUiState.Success).posts)
+    }
+
+    @Test
+    fun whenRepositoryFails_stateIsError() = runTest {
+        val fake = FakePostsRepository().apply { shouldFail = true }
+        val viewModel = PostsViewModel(fake)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value is PostsUiState.Error)
+    }
+
+    @Test
+    fun retryAfterFailure_succeeds() = runTest {
+        val fake = FakePostsRepository().apply { shouldFail = true }
+        val viewModel = PostsViewModel(fake)
+        advanceUntilIdle()
+
+        fake.shouldFail = false
+        viewModel.loadPosts()
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value is PostsUiState.Success)
+    }
+}</code></pre></div></div>
+<p class="v2-p">No emulator, no network, no waiting: all three tests run in milliseconds. Compare that with testing against the real API, which would be slow, flaky (the server might be down) and impossible to force into a failure on demand.</p>
+<p class="v2-p">Fakes versus mocks:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Fake</th>
+<th>Mock (Mockito, MockK)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it is</td>
+<td>A real, simple implementation</td>
+<td>An object that records calls and returns scripted answers</td>
+</tr>
+<tr>
+<td>Strength</td>
+<td>Readable, reusable, behaves like the real thing</td>
+<td>Quick for one-off checks</td>
+</tr>
+<tr>
+<td>Risk</td>
+<td>You maintain it</td>
+<td>Tests become tied to implementation details</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The official architecture guidance leans towards fakes, which is why this lesson does too.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: A Fake Repository for Tests</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Putting the Data Layer in Context</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Where does each kind of code belong?</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Code</th>
+<th>Layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Composable</code> functions</td>
+<td>UI</td>
+</tr>
+<tr>
+<td><code>PostsViewModel</code>, <code>PostsUiState</code></td>
+<td>UI (state holder)</td>
+</tr>
+<tr>
+<td><code>PostsRepository</code>, <code>NetworkPostsRepository</code></td>
+<td>Data</td>
+</tr>
+<tr>
+<td><code>PostsApiService</code>, Room DAOs</td>
+<td>Data (data sources)</td>
+</tr>
+<tr>
+<td><code>Post</code></td>
+<td>Shared model</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Dependencies point <strong>downwards</strong> only: UI knows the data layer, the data layer never knows about the UI. If a repository imports a composable or a <code>Context</code> for dialog purposes, something is wrong.</p>
+<h3 class="v2-h3">Where does the data layer's work run?</h3>
+<p class="v2-p">Repositories are <strong>main-safe</strong> when they expose suspend functions: the repository itself switches dispatchers if it needs to. A common pattern is to inject a dispatcher:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class NetworkPostsRepository(
+    private val apiService: PostsApiService,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : PostsRepository {
+    override suspend fun getPosts(): List&lt;Post&gt; =
+        withContext(ioDispatcher) { apiService.getPosts() }
+}</code></pre></div></div>
+<p class="v2-p">Injecting the dispatcher means a test can pass its own test dispatcher. With Retrofit's suspend functions the <code>withContext</code> is unnecessary, but the pattern matters as soon as you call blocking APIs.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Putting the Data Layer in Context</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Add an in-memory cache</strong></p>
+<p class="v2-p">Make <code>NetworkPostsRepository</code> remember the posts after the first successful fetch and return them without calling the network again until <code>refresh = true</code> is passed. Change the interface to <code>suspend fun getPosts(refresh: Boolean = false): List&lt;Post&gt;</code>. Update the fake and ViewModel.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface PostsRepository {
+    suspend fun getPosts(refresh: Boolean = false): List&lt;Post&gt;
+    suspend fun getPost(id: Int): Post
+}
+
+class NetworkPostsRepository(
+    private val apiService: PostsApiService
+) : PostsRepository {
+
+    private var cache: List&lt;Post&gt;? = null
+
+    override suspend fun getPosts(refresh: Boolean): List&lt;Post&gt; {
+        val cached = cache
+        if (cached != null &amp;&amp; !refresh) return cached
+        return apiService.getPosts().also { cache = it }
+    }
+
+    override suspend fun getPost(id: Int): Post = apiService.getPost(id)
+}</code></pre></div></div>
+<p class="v2-p">The fake just accepts the new parameter (<code>override suspend fun getPosts(refresh: Boolean)</code>). The retry button in the ViewModel should call <code>getPosts(refresh = true)</code>.</p>
+<p class="v2-p"><strong>Caveats to discuss:</strong> a plain <code>var</code> is not thread-safe if two coroutines call at once (a <code>Mutex</code> fixes this), and the cache dies with the process. Lesson 34 stores it in Room, which survives restarts.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: A second implementation</strong></p>
+<p class="v2-p">Write <code>SamplePostsRepository</code>, which returns a hard-coded list after a one-second delay, and add a build-time switch in <code>DefaultAppContainer</code> that uses it when a <code>useSampleData</code> flag is true. Explain what you did <strong>not</strong> have to change.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class SamplePostsRepository : PostsRepository {
+    override suspend fun getPosts(refresh: Boolean): List&lt;Post&gt; {
+        delay(1_000)
+        return listOf(Post(1, "Offline post", "Works without internet.", 1))
+    }
+    override suspend fun getPost(id: Int): Post = getPosts().first { it.id == id }
+}
+
+class DefaultAppContainer(private val useSampleData: Boolean = false) : AppContainer {
+    // ... retrofit as before
+    override val postsRepository: PostsRepository by lazy {
+        if (useSampleData) SamplePostsRepository() else NetworkPostsRepository(retrofitService)
+    }
+}</code></pre></div></div>
+<p class="v2-p">You changed <strong>nothing</strong> in the ViewModel or any composable. That is the benefit of programming to an interface: the wiring is the only place that knows which implementation is used. This also gives you an app that demos without internet, useful for screenshots and for workshops with poor connectivity.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Draw your app's dependency graph on paper: which class creates which, and which class only receives. Mark every place that still uses <code>new</code>-style construction (<code>SomeClass(...)</code>) outside the container.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting <code>android:name</code> in the manifest.</strong> <em>Symptom:</em> <code>lateinit property container has not been initialized</code>, or a <code>ClassCastException</code> on the cast. <em>The fix:</em> set <code>android:name=".PostsApplication"</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Repository returns Retrofit types.</strong> <em>What happens:</em> the UI imports Retrofit and cannot be tested without it. <em>The fix:</em> return your own model types and hide transport details.</p>
+<p class="v2-p"><strong>Mistake #3: A repository interface mirrors the API one to one.</strong> <em>What happens:</em> the repository adds nothing. <em>The fix:</em> design the interface around what the UI needs and put rules (caching, merging sources) inside.</p>
+<p class="v2-p"><strong>Mistake #4: A ViewModel that builds its own dependencies.</strong> <em>What happens:</em> it cannot be tested without the network. <em>The fix:</em> constructor injection.</p>
+<p class="v2-p"><strong>Mistake #5: Storing an Activity <code>Context</code> in the container.</strong> <em>What happens:</em> a memory leak. <em>The fix:</em> use the application context, which lives as long as the container.</p>
+<p class="v2-p"><strong>Mistake #6: Heavy work in <code>Application.onCreate</code>.</strong> <em>What happens:</em> slow app start. <em>The fix:</em> lazy creation and background initialisation.</p>
+<p class="v2-p"><strong>Mistake #7: Creating the factory inline on every recomposition.</strong> <em>What happens:</em> confusion about instances. <em>The fix:</em> a <code>companion object</code> factory like <code>PostsViewModel.Factory</code>, which <code>viewModel()</code> caches per owner.</p>
+<p class="v2-p"><strong>Mistake #8: A "god" repository.</strong> <em>What happens:</em> one class handles users, posts, settings. <em>The fix:</em> one repository per data type.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the role of the data layer?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">To provide and manage the app's data and business rules, exposing it to the UI layer through repositories that hide where the data comes from.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the difference between a repository and a data source?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A data source accesses one origin (network, database, file). A repository coordinates one or more data sources and applies rules such as caching, and is the only thing the UI layer talks to.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is dependency injection and why does it help testing?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">A class receives its dependencies (usually through its constructor) instead of creating them. In tests you can pass fakes, so you test the class in isolation without the network or database.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why do ViewModels with constructor parameters need a factory?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The system creates ViewModels and by default only knows how to call a no-argument constructor. A factory tells it how to build your ViewModel, supplying the dependencies.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why is the <code>Application</code> class a good home for the container?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">One instance exists for the whole process and is created before any Activity, so objects held there live as long as the app and are shared by all screens.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-5-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 5, Pathway 2: Data layer and dependency injection</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer" rel="noopener noreferrer">Data layer guide</a></li>
+<li><a href="https://developer.android.com/topic/architecture" rel="noopener noreferrer">Guide to app architecture</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Switchable Data Source</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Extend the Posts app so that the same UI can run on <strong>live</strong> or <strong>sample</strong> data, selected by a switch in a debug settings screen, and prove that with tests.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <code>PostsRepository</code> interface with <code>NetworkPostsRepository</code>, <code>SamplePostsRepository</code> and <code>FakePostsRepository</code> (test only).</li>
+<li>A <code>DefaultAppContainer</code> that exposes a repository chosen by a <code>useSampleData</code> flag.</li>
+<li>A ViewModel built with a factory from the container.</li>
+<li>A <code>Switch</code> in the top bar that flips the flag in an app-level object and reloads the posts. (A simple <code>MutableStateFlow&lt;Boolean&gt;</code> in the container is enough; persistence comes in lesson 35.)</li>
+<li>Three ViewModel unit tests with the fake: success, failure, and retry.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add an in-memory cache with a <code>Mutex</code> to make it thread-safe.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AppContainer.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.data
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+interface AppContainer {
+    val useSampleData: StateFlow&lt;Boolean&gt;
+    fun setUseSampleData(value: Boolean)
+    val postsRepository: PostsRepository
+}
+
+class DefaultAppContainer(
+    private val network: PostsRepository,
+    private val sample: PostsRepository = SamplePostsRepository()
+) : AppContainer {
+
+    private val _useSample = MutableStateFlow(false)
+    override val useSampleData: StateFlow&lt;Boolean&gt; = _useSample.asStateFlow()
+
+    override fun setUseSampleData(value: Boolean) { _useSample.value = value }
+
+    // A small delegating repository: the choice is read at call time,
+    // so flipping the switch takes effect without rebuilding anything.
+    override val postsRepository: PostsRepository = object : PostsRepository {
+        private fun current() = if (_useSample.value) sample else network
+        override suspend fun getPosts(refresh: Boolean) = current().getPosts(refresh)
+        override suspend fun getPost(id: Int) = current().getPost(id)
+    }
+}</code></pre></div></div>
+<p class="v2-p">```PostsViewModel.kt (additions)
+class PostsViewModel(
+    private val container: AppContainer
+) : ViewModel() {</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val useSampleData = container.useSampleData
+
+fun onToggleSample(value: Boolean) {
+    container.setUseSampleData(value)
+    loadPosts()
+}
+
+// loadPosts() uses container.postsRepository.getPosts(refresh = true)</code></pre></div></div>
+<p class="v2-p">}
+```</p>
+<p class="v2-p"><strong>Notes:</strong> the delegating repository is itself an application of the lesson: callers hold one stable <code>PostsRepository</code> while the choice behind it changes. In the real <code>PostsApplication</code>, build the container with <code>DefaultAppContainer(network = NetworkPostsRepository(retrofitService))</code>. For the tests, construct <code>DefaultAppContainer(network = FakePostsRepository(), sample = FakePostsRepository())</code> and check that after <code>setUseSampleData(true)</code> the sample fake's list is returned. The stretch goal's <code>Mutex</code> wraps the cache read and write: <code>mutex.withLock { ... }</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 30 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-30-the-data-layer-repositories-and-dependency</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 30 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Data Layer</li><li>✅ Step-by-Step Build 1: Introduce the Repository</li><li>✅ Step-by-Step Build 2: The Dependency Container</li><li>✅ Step-by-Step Build 3: ViewModel with Constructor Parameters</li><li>✅ Step-by-Step Build 4: A Fake Repository for Tests</li><li>✅ Putting the Data Layer in Context</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_29.html" class="ln-btn">&#8592; Lesson 29</a><a href="lesson_31.html" class="ln-btn primary">Lesson 31 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 30 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

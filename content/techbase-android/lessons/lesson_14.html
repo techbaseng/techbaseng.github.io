@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 14: Collections and Higher-Order Functions — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l14">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 14 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 14</div>
+      <h1>Collections and Higher-Order Functions</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Class Results Analyser</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 14</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Work with List, Set and Map, and transform data with map, filter, fold, groupBy and sorting. Includes the Classes and Collections practice.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Class Results Analyser</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome back! So far your programs have held one value at a time: one name, one price, one score. Real apps never work like that. A messaging app holds hundreds of messages, a shop app holds a list of products, and a school app holds a register of students. Today you learn how Kotlin stores <strong>groups of values</strong> and, more importantly, how to <strong>ask questions of those groups</strong> in one or two lines: <em>Which students passed? What is the total bill? Which items start with the letter B?</em></p>
+<p class="v2-p">Think of a market woman arranging her goods. A <strong>list</strong> is the neat row of tins on her shelf, in order, where two tins can be the same. A <strong>set</strong> is the collection of different <em>kinds</em> of pepper she sells, with no repeats. A <strong>map</strong> is her price board: <em>tomatoes: ₦800, onions: ₦500</em>, a name that points to a value. Kotlin has all three built in.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Create and read <code>List</code>, <code>Set</code> and <code>Map</code> collections.</li>
+<li>Explain the difference between read-only and mutable collections, and choose between them.</li>
+<li>Loop through collections with <code>for</code>, <code>forEach</code>, <code>forEachIndexed</code> and destructuring.</li>
+<li>Transform data with <code>map</code>, <code>filter</code>, <code>flatMap</code>, <code>distinct</code>, <code>take</code> and <code>drop</code>.</li>
+<li>Summarise data with <code>sum</code>, <code>average</code>, <code>count</code>, <code>fold</code> and <code>reduce</code>.</li>
+<li>Organise data with <code>groupBy</code>, <code>associate</code>, <code>sortedBy</code> and <code>partition</code>.</li>
+<li>Test collections with <code>any</code>, <code>all</code>, <code>none</code>, <code>find</code> and <code>firstOrNull</code>.</li>
+<li>Explain what a <strong>sequence</strong> is and when it saves work.</li>
+<li>Combine data classes with collections to solve a realistic problem.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson covers three items from Unit 3 of Google's <strong>Android Basics with Compose</strong> course: <em>Use collections in Kotlin</em>, <em>Higher-order functions with collections</em> and the <em>Practice: Classes and Collections</em> set. We go slower, explain the reasoning behind each function, and give you extra exercises. Official links are at the end.</p>
+</blockquote>
+<h3 class="v2-h3">Why collections matter for Android</h3>
+<p class="v2-p">In lesson 21 you will show a scrollable list of cards on screen. The list on screen is simply a Kotlin <code>List</code> that Compose turns into rows. Every real feature in this course, from a shopping cart to chat messages to database results, arrives as a collection. If you master the functions in this lesson, the rest of the course becomes much easier.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">You should be comfortable with these ideas. Each has a short refresher.</p>
+<h3 class="v2-h3">1. Variables: <code>val</code> and <code>var</code> (lesson 07)</h3>
+<p class="v2-p"><code>val</code> creates a label that cannot be pointed at something else later. <code>var</code> creates a label that can. A collection stored in a <code>val</code> is still the <em>same</em> collection, but, as you will see, whether you can change its <em>contents</em> depends on the type of collection, not on <code>val</code> or <code>var</code>.</p>
+<h3 class="v2-h3">2. Functions and lambdas (lessons 08 and 12)</h3>
+<p class="v2-p">A <strong>lambda</strong> is a small function written in braces and passed around like a value: <code>{ x -&gt; x * 2 }</code>. When a lambda has exactly one parameter you may skip naming it and use <code>it</code>: <code>{ it * 2 }</code>. When the lambda is the last argument of a function you may write it <strong>outside</strong> the parentheses (<em>trailing lambda syntax</em>), and if it is the only argument you may drop the parentheses entirely. This is why <code>list.filter { it &gt; 3 }</code> looks the way it does. A function that takes another function as a parameter is called a <strong>higher-order function</strong>, which is the second half of this lesson's title.</p>
+<h3 class="v2-h3">3. Classes and data classes (lesson 11)</h3>
+<p class="v2-p">A <strong>data class</strong> is a class that mainly holds values, written like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Student(val name: String, val score: Int)</code></pre></div></div>
+<p class="v2-p">Kotlin automatically gives data classes a readable <code>toString()</code>, so <code>println(Student("Ade", 70))</code> prints <code>Student(name=Ade, score=70)</code>. We use data classes throughout this lesson.</p>
+<h3 class="v2-h3">4. Nullability (lesson 10)</h3>
+<p class="v2-p">Some collection functions return a value that might not exist, such as the first item of an empty list. Kotlin represents "might not exist" with a <strong>nullable type</strong> such as <code>Int?</code>. You handle it with <code>?.</code>, <code>?:</code> or a null check.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: Three Kinds of Collection</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Kotlin's standard library has three main collection types. The big question to ask when choosing one is: <em>"What do I need to do with the data?"</em></p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>Order matters?</th>
+<th>Duplicates allowed?</th>
+<th>Look up by</th>
+<th>Everyday picture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List&lt;T&gt;</code></td>
+<td>Yes, each item has a position (index) starting at 0</td>
+<td>Yes</td>
+<td>Position: <code>list[2]</code></td>
+<td>A queue at the bank: Ada is 1st, Tunde is 2nd</td>
+</tr>
+<tr>
+<td><code>Set&lt;T&gt;</code></td>
+<td>No guaranteed meaning (see note below)</td>
+<td>No, each item appears once</td>
+<td>Membership: "is it in there?"</td>
+<td>The set of states a learner has visited</td>
+</tr>
+<tr>
+<td><code>Map&lt;K, V&gt;</code></td>
+<td>By key, not position</td>
+<td>Keys are unique; values may repeat</td>
+<td>Key: <code>map["rice"]</code></td>
+<td>A price board or a phone contacts book</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Note on set order:</strong> <code>setOf</code> and <code>mutableSetOf</code> in practice remember the order you added items (they use a <code>LinkedHashSet</code> behind the scenes). Do not <em>depend</em> on this in your design. Treat a set as "a bag of unique things".</p>
+</blockquote>
+<h3 class="v2-h3">Read-only versus mutable</h3>
+<p class="v2-p">Every collection type comes in two flavours.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Read-only</th>
+<th>Mutable (can change)</th>
+<th>Create with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>List</code></td>
+<td><code>MutableList</code></td>
+<td><code>listOf(...)</code> / <code>mutableListOf(...)</code></td>
+</tr>
+<tr>
+<td><code>Set</code></td>
+<td><code>MutableSet</code></td>
+<td><code>setOf(...)</code> / <code>mutableSetOf(...)</code></td>
+</tr>
+<tr>
+<td><code>Map</code></td>
+<td><code>MutableMap</code></td>
+<td><code>mapOf(...)</code> / <code>mutableMapOf(...)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A <strong>read-only</strong> collection has no <code>add</code> or <code>remove</code> functions at all. You can look, but not touch. This is a safety feature: if you give a read-only list to another part of the program, you know it cannot secretly change it. (More precisely, <code>List</code> is a read-only <em>view</em>; if someone else holds a mutable reference to the same underlying list it can still change. For beginners the practical rule is: <strong>prefer read-only, switch to mutable only when you truly need to add, remove or replace items.</strong>)</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>        val shelf = listOf("tin A", "tin B")        val trolley = mutableListOf("tin A")
+        +-------+-------+                           +-------+
+        | tin A | tin B |   look only               | tin A |  add, remove, replace
+        +-------+-------+                           +-------+</code></pre></div></div>
+<h3 class="v2-h3">How the higher-order functions fit together</h3>
+<p class="v2-p">Almost every collection question is one of a few shapes. Learn the shapes and you can pick the right function every time:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> INPUT collection ──► FUNCTION ──► OUTPUT
+
+ [a, b, c]   map { transform }    ──► [a', b', c']       same size, each item changed
+ [a, b, c]   filter { test }      ──► [a, c]             fewer items, same items
+ [a, b, c]   fold / sum / count   ──► one single value
+ [a, b, c]   groupBy { key }      ──► {k1=[a, c], k2=[b]} a Map of Lists
+ [a, b, c]   sortedBy { key }     ──► [c, a, b]          same items, new order
+ [a, b, c]   any / all / none     ──► true or false</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Think about it:</strong> You have a list of 40 exam scores and you want the average of the ones that passed. Which shapes do you need, and in what order? (First <em>filter</em> to keep the passes, then a single-value summary: <code>average</code>.)</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Three Kinds of Collection</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Worked Examples: Lists</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Open the Kotlin Playground (<code>play.kotlinlang.org</code>) as you did in lesson 06 and type each example. We will predict the output <em>before</em> running it. That habit will make you a better programmer than any trick.</p>
+<h3 class="v2-h3">Example 1: A read-only list</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val fruits = listOf("mango", "orange", "pawpaw", "banana")
+
+    println(fruits)
+    println("Count: ${fruits.size}")
+    println("First item: ${fruits[0]}")
+    println("Last item: ${fruits.last()}")
+    println("Third item: ${fruits.getOrNull(2)}")
+    println("Tenth item: ${fruits.getOrNull(9)}")
+    println("Has orange? ${"orange" in fruits}")
+    println("Position of pawpaw: ${fruits.indexOf("pawpaw")}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[mango, orange, pawpaw, banana]<br/>Count: 4<br/>First item: mango<br/>Last item: banana<br/>Third item: pawpaw<br/>Tenth item: null<br/>Has orange? true<br/>Position of pawpaw: 2</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul">
+<li>Positions are called <strong>indexes</strong> and they start at <strong>0</strong>. So <code>fruits[0]</code> is the first item and the last valid index of a list of four is <code>3</code>.</li>
+<li><code>fruits[9]</code> would <strong>crash</strong> with an <code>IndexOutOfBoundsException</code> because there is no item 9. <code>getOrNull(9)</code> is the safe version: it returns <code>null</code> instead of crashing. Use it whenever the index comes from user input.</li>
+<li><code>in</code> asks "is this value contained here?" and gives <code>true</code> or <code>false</code>.</li>
+</ul>
+<h3 class="v2-h3">Example 2: A mutable list</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val cart = mutableListOf("rice", "beans")
+
+    cart.add("garri")
+    println(cart)
+
+    cart.add(1, "yam")
+    println(cart)
+
+    cart.remove("beans")
+    println(cart)
+
+    cart.removeAt(0)
+    println(cart)
+
+    cart[0] = "plantain"
+    println(cart)
+
+    println("Is the cart empty? ${cart.isEmpty()}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[rice, beans, garri]<br/>[rice, yam, beans, garri]<br/>[rice, yam, garri]<br/>[yam, garri]<br/>[plantain, garri]<br/>Is the cart empty? false</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Follow the cart line by line. <code>add("garri")</code> puts the item at the end. <code>add(1, "yam")</code> inserts at index 1 and pushes the rest along. <code>remove("beans")</code> removes the first item <em>equal to</em> "beans". <code>removeAt(0)</code> removes whatever is at position 0 (<code>rice</code>). <code>cart[0] = "plantain"</code> replaces the item at index 0 (<code>yam</code>).</p>
+<p class="v2-p">Notice that <code>cart</code> is declared with <code>val</code>, yet we changed its contents. <code>val</code> only stops you pointing <code>cart</code> at a <em>different</em> list. It does not freeze the list.</p>
+<h3 class="v2-h3">Example 3: Sets throw away duplicates</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(1, 2, 2, 3, 3, 3)
+    val unique = scores.toSet()
+    println(scores.size)
+    println(unique)
+    println(unique.size)
+
+    val tags = mutableSetOf("kotlin", "android")
+    println(tags.add("compose"))
+    println(tags.add("kotlin"))
+    println(tags)
+
+    val a = setOf(1, 2, 3, 4)
+    val b = setOf(3, 4, 5)
+    println(a union b)
+    println(a intersect b)
+    println(a subtract b)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">6<br/>[1, 2, 3]<br/>3<br/>true<br/>false<br/>[kotlin, android, compose]<br/>[1, 2, 3, 4, 5]<br/>[3, 4]<br/>[1, 2]</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Turning a list into a set with <code>toSet()</code> is the quickest way to remove duplicates. <code>add</code> on a set returns <code>true</code> if the item was new and <code>false</code> if it was already there, so adding <code>"kotlin"</code> a second time changes nothing. <code>union</code> combines two sets, <code>intersect</code> keeps only what both share, and <code>subtract</code> keeps what is in the first but not the second. Those three words are written between the two sets (this style is called <strong>infix</strong> notation).</p>
+<h3 class="v2-h3">Example 4: Maps hold key-value pairs</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val prices = mapOf("rice" to 1500, "beans" to 1200, "garri" to 800)
+
+    println(prices)
+    println("Rice costs ₦${prices["rice"]}")
+    println("Bread costs ${prices["bread"]}")
+    println("Bread or default: ${prices.getOrDefault("bread", 0)}")
+    println(prices.keys)
+    println(prices.values)
+    println("Has beans? ${"beans" in prices}")
+
+    for ((item, price) in prices) {
+        println("$item costs ₦$price")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">{rice=1500, beans=1200, garri=800}<br/>Rice costs ₦1500<br/>Bread costs null<br/>Bread or default: 0<br/>[rice, beans, garri]<br/>[1500, 1200, 800]<br/>Has beans? true<br/>rice costs ₦1500<br/>beans costs ₦1200<br/>garri costs ₦800</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul">
+<li><code>"rice" to 1500</code> creates a <strong>pair</strong>. <code>mapOf</code> takes pairs.</li>
+<li><code>prices["bread"]</code> returns <code>null</code> because there is no such key. The result type is <code>Int?</code> (a nullable <code>Int</code>), which is why Kotlin forces you to think about the missing case.</li>
+<li><code>for ((item, price) in prices)</code> uses <strong>destructuring</strong>: each entry is split into its key and value so you can name them directly.</li>
+</ul>
+<p class="v2-p">Changing a mutable map:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val stock = mutableMapOf("rice" to 10, "beans" to 4)
+    stock["yam"] = 7
+    stock["beans"] = 9
+    stock.remove("rice")
+    println(stock)
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">{beans=9, yam=7}</p>
+</blockquote>
+<p class="v2-p"><code>stock["yam"] = 7</code> adds a new key. <code>stock["beans"] = 9</code> <strong>replaces</strong> the existing value because keys are unique. <code>remove("rice")</code> deletes the whole entry.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Lists</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Worked Examples: Looping Through Collections</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">You already know <code>for</code> loops from lesson 09. They work directly on collections.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+
+    for (s in scores) {
+        println("Score: $s")
+    }
+
+    scores.forEach { println("Again: $it") }
+
+    scores.forEachIndexed { index, s -&gt;
+        println("Student ${index + 1} scored $s")
+    }
+
+    for ((index, s) in scores.withIndex()) {
+        if (s &lt; 50) println("Student ${index + 1} needs help")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Score: 55<br/>Score: 72<br/>Score: 38<br/>Score: 91<br/>Score: 64<br/>Again: 55<br/>Again: 72<br/>Again: 38<br/>Again: 91<br/>Again: 64<br/>Student 1 scored 55<br/>Student 2 scored 72<br/>Student 3 scored 38<br/>Student 4 scored 91<br/>Student 5 scored 64<br/>Student 3 needs help</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>forEach</code> takes a lambda and runs it once per item. <code>forEachIndexed</code> also hands you the index. <code>withIndex()</code> gives you the index inside a normal <code>for</code> loop. Use whichever reads best; in a <code>for</code> loop you can use <code>break</code> and <code>continue</code>, which you cannot use inside a <code>forEach</code> lambda.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Looping Through Collections</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Higher-Order Functions: Transforming and Filtering</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A <strong>higher-order function</strong> takes a function (a lambda) as input. Collections have dozens of them. Instead of writing a loop with a temporary list, you describe <em>what</em> you want.</p>
+<h3 class="v2-h3"><code>map</code>: change every item</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+    val curved = scores.map { it + 5 }
+    println(curved)
+
+    val names = listOf("ade", "bola", "chidi")
+    println(names.map { it.uppercase() })
+    println(names.map { "Hello, $it!" })
+    println(names.map { it.length })
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[60, 77, 43, 96, 69]<br/>[ADE, BOLA, CHIDI]<br/>[Hello, ade!, Hello, bola!, Hello, chidi!]<br/>[3, 4, 5]</p>
+</blockquote>
+<p class="v2-p"><code>map</code> always returns a list with <strong>the same number of items</strong>. The original list is never changed; <code>map</code> builds a new one.</p>
+<h3 class="v2-h3"><code>filter</code>: keep only the items that pass a test</h3>
+<p class="v2-p">The lambda must return <code>true</code> (keep) or <code>false</code> (drop).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+
+    println(scores.filter { it &gt;= 50 })
+    println(scores.filterNot { it &gt;= 50 })
+    println(scores.filter { it % 2 == 0 })
+    println(scores.filter { it &gt;= 50 }.map { it / 10 })
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[55, 72, 91, 64]<br/>[38]<br/>[72, 38, 64]<br/>[5, 7, 9, 6]</p>
+</blockquote>
+<p class="v2-p">The last line is a <strong>chain</strong>. First <code>filter</code> keeps <code>[55, 72, 91, 64]</code>, then <code>map</code> divides each by 10 using whole-number division: 55/10 = 5, 72/10 = 7, 91/10 = 9, 64/10 = 6. Chaining is how you build real queries: read it left to right like a sentence.</p>
+<h3 class="v2-h3">Quick helpers: <code>take</code>, <code>drop</code>, <code>distinct</code>, <code>flatMap</code>, <code>zip</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+    println(scores.take(2))
+    println(scores.drop(3))
+    println(listOf(3, 1, 3, 2, 1).distinct())
+
+    val classes = listOf(listOf("Ade", "Bola"), listOf("Chidi"), listOf("Dayo", "Efe"))
+    println(classes.flatMap { it })
+    println(classes.map { it.size })
+
+    val names = listOf("Ade", "Bola", "Chidi")
+    val marks = listOf(70, 85, 60)
+    println(names.zip(marks))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[55, 72]<br/>[91, 64]<br/>[3, 1, 2]<br/>[Ade, Bola, Chidi, Dayo, Efe]<br/>[2, 1, 2]<br/>[(Ade, 70), (Bola, 85), (Chidi, 60)]</p>
+</blockquote>
+<ul class="v2-ul">
+<li><code>take(n)</code> keeps the first <code>n</code>; <code>drop(n)</code> skips the first <code>n</code>.</li>
+<li><code>distinct()</code> removes repeats, keeping the first occurrence.</li>
+<li><code>flatMap</code> flattens a list of lists into one list. <code>map { it }</code> would keep the nesting; <code>flatMap</code> removes one level.</li>
+<li><code>zip</code> pairs up items from two lists by position.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Higher-Order Functions: Transforming and Filtering</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Higher-Order Functions: Summarising, Grouping and Sorting</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Summaries: <code>sum</code>, <code>average</code>, <code>count</code>, <code>max</code>, <code>min</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+
+    println("Total: ${scores.sum()}")
+    println("Average: ${scores.average()}")
+    println("Highest: ${scores.max()}")
+    println("Lowest: ${scores.min()}")
+    println("Passed: ${scores.count { it &gt;= 50 }}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Total: 320<br/>Average: 64.0<br/>Highest: 91<br/>Lowest: 38<br/>Passed: 4</p>
+</blockquote>
+<p class="v2-p"><code>average()</code> always gives a <code>Double</code>, so <code>320 / 5</code> shows as <code>64.0</code>. On an empty list, <code>max()</code> and <code>min()</code> throw an exception in current Kotlin; use <code>maxOrNull()</code> and <code>minOrNull()</code> when the list might be empty. (Older tutorials used <code>max()</code> to return a nullable value; that changed in Kotlin 1.7, so check which one your tutorial means.)</p>
+<h3 class="v2-h3"><code>fold</code> and <code>reduce</code>: combine everything into one value</h3>
+<p class="v2-p"><code>sum</code> is really a special case of a more general tool. <code>fold</code> takes a <strong>starting value</strong> and a function that combines the running total (the <strong>accumulator</strong>) with each item in turn.</p>
+<p class="v2-p">For <code>listOf(1, 2, 3, 4).fold(10) { acc, n -&gt; acc + n }</code> trace it like this:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Step</th>
+<th><code>acc</code> before</th>
+<th>item <code>n</code></th>
+<th><code>acc</code> after</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>10</td>
+<td>1</td>
+<td>11</td>
+</tr>
+<tr>
+<td>2</td>
+<td>11</td>
+<td>2</td>
+<td>13</td>
+</tr>
+<tr>
+<td>3</td>
+<td>13</td>
+<td>3</td>
+<td>16</td>
+</tr>
+<tr>
+<td>4</td>
+<td>16</td>
+<td>4</td>
+<td>20</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val nums = listOf(1, 2, 3, 4)
+    println(nums.fold(10) { acc, n -&gt; acc + n })
+    println(nums.reduce { acc, n -&gt; acc * n })
+
+    val prices = listOf(1500, 1200, 800)
+    val receipt = prices.fold("Items:") { text, p -&gt; "$text ₦$p" }
+    println(receipt)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">20<br/>24<br/>Items: ₦1500 ₦1200 ₦800</p>
+</blockquote>
+<p class="v2-p"><code>reduce</code> is like <code>fold</code> but uses the <strong>first item</strong> as the starting value, so it has no separate initial value: 1 × 2 × 3 × 4 = 24. Because of that, <code>reduce</code> throws an exception on an empty list, while <code>fold</code> just returns its starting value. <strong>When in doubt, use <code>fold</code>.</strong> Notice also that <code>fold</code> can produce a different type from the items: here numbers go in and a <code>String</code> comes out.</p>
+<h3 class="v2-h3"><code>groupBy</code>: sort items into labelled boxes</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val names = listOf("ade", "bola", "ayo", "bisi", "chidi", "bayo")
+
+    val byLetter = names.groupBy { it.first() }
+    println(byLetter)
+
+    val sizes = names.groupBy { it.length }.mapValues { it.value.size }
+    println(sizes)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">{a=[ade, ayo], b=[bola, bisi, bayo], c=[chidi]}<br/>{3=2, 4=3, 5=1}</p>
+</blockquote>
+<p class="v2-p"><code>groupBy</code> returns a <strong>Map</strong> whose keys come from the lambda and whose values are lists of the items that produced that key. The second line turns each list into its size with <code>mapValues</code>: two names have 3 letters (ade, ayo), three have 4 (bola, bisi, bayo) and one has 5 (chidi).</p>
+<h3 class="v2-h3"><code>associate</code>, <code>associateBy</code> and <code>associateWith</code>: build a Map from a list</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val names = listOf("ade", "bola", "chidi")
+
+    println(names.associateWith { it.length })
+    println(names.associateBy { it.first() })
+    println(names.associate { it to it.uppercase() })
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">{ade=3, bola=4, chidi=5}<br/>{a=ade, b=bola, c=chidi}<br/>{ade=ADE, bola=BOLA, chidi=CHIDI}</p>
+</blockquote>
+<ul class="v2-ul">
+<li><code>associateWith</code> : the item is the key, the lambda gives the value.</li>
+<li><code>associateBy</code> : the lambda gives the key, the item is the value.</li>
+<li><code>associate</code> : the lambda returns a full pair.</li>
+</ul>
+<p class="v2-p">Keys must be unique. If two items produce the same key, <strong>the later one overwrites the earlier one</strong>, silently. Use <code>groupBy</code> when keys may repeat.</p>
+<h3 class="v2-h3">Sorting</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val names = listOf("ade", "bola", "ayo", "bisi", "chidi", "bayo")
+
+    println(names.sorted())
+    println(names.sortedDescending())
+    println(names.sortedBy { it.length })
+    println(names.sortedByDescending { it.length })
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[ade, ayo, bayo, bisi, bola, chidi]<br/>[chidi, bola, bisi, bayo, ayo, ade]<br/>[ade, ayo, bola, bisi, bayo, chidi]<br/>[chidi, bola, bisi, bayo, ade, ayo]</p>
+</blockquote>
+<p class="v2-p"><code>sorted()</code> uses the natural order (alphabetical for text, smallest-first for numbers). <code>sortedBy</code> sorts by whatever the lambda returns. The sort is <strong>stable</strong>: items that tie keep their original relative order. So for length 4, <code>bola</code>, <code>bisi</code>, <code>bayo</code> stay in the order they appeared. Sorting never changes the original list. It returns a new one. (The mutable list has <code>sort()</code> and <code>sortBy {}</code> that change the list in place, but you will rarely need them.)</p>
+<h3 class="v2-h3"><code>partition</code>: split in two</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+    val (passed, failed) = scores.partition { it &gt;= 50 }
+    println("Passed: $passed")
+    println("Failed: $failed")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Passed: [55, 72, 91, 64]<br/>Failed: [38]</p>
+</blockquote>
+<p class="v2-p"><code>partition</code> returns a pair of lists, and destructuring names them right away.</p>
+<h3 class="v2-h3">Questions that return true or false: <code>any</code>, <code>all</code>, <code>none</code>, and finding one item</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val scores = listOf(55, 72, 38, 91, 64)
+
+    println(scores.any { it &gt; 90 })
+    println(scores.all { it &gt; 40 })
+    println(scores.none { it &gt; 100 })
+    println(scores.find { it &gt; 60 })
+    println(scores.firstOrNull { it &gt; 95 })
+    println(scores.isNotEmpty())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">true<br/>false<br/>true<br/>72<br/>null<br/>true</p>
+</blockquote>
+<p class="v2-p"><code>any</code> is "does at least one pass?", <code>all</code> is "do all pass?" and <code>none</code> is "does nobody pass?". <code>find</code> (a friendlier name for <code>firstOrNull</code>) returns the first matching item or <code>null</code>. Because it can be <code>null</code> the result type is <code>Int?</code>, so combine it with <code>?:</code> when you need a fallback: <code>scores.find { it &gt; 95 } ?: 0</code>.</p>
+<h3 class="v2-h3">Higher-order functions on Maps</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val prices = mapOf("rice" to 1500, "beans" to 1200, "garri" to 800)
+
+    println(prices.filter { it.value &gt; 1000 })
+    println(prices.mapValues { it.value + 100 })
+    println(prices.values.sum())
+    println(prices.maxByOrNull { it.value }?.key)
+    println(prices.toList().sortedBy { it.second })
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">{rice=1500, beans=1200}<br/>{rice=1600, beans=1300, garri=900}<br/>3500<br/>rice<br/>[(garri, 800), (beans, 1200), (rice, 1500)]</p>
+</blockquote>
+<p class="v2-p">On a map, each lambda item is an <strong>entry</strong> with <code>.key</code> and <code>.value</code>. <code>maxByOrNull</code> finds the entry whose value is largest; <code>?.key</code> safely reads its key. <code>toList()</code> turns a map into a list of pairs, which has <code>.first</code> and <code>.second</code>, ready for sorting.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Higher-Order Functions: Summarising, Grouping and Sorting</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Sequences: Doing Less Work</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Every function above creates a <strong>brand new list</strong> at each step. For a chain of three operations on a small list that is perfectly fine. For huge data, building a full list at every step wastes time and memory.</p>
+<p class="v2-p">A <strong>sequence</strong> works lazily: it processes <strong>one item at a time through the whole chain</strong> and only does the work when a final result is requested. Convert a collection with <code>asSequence()</code>. Let us watch the difference by printing inside the lambdas.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val nums = listOf(1, 2, 3, 4)
+
+    println("--- List ---")
+    val eager = nums
+        .map { println("map $it"); it * 2 }
+        .filter { println("filter $it"); it &gt; 4 }
+    println(eager)
+
+    println("--- Sequence ---")
+    val lazy = nums.asSequence()
+        .map { println("map $it"); it * 2 }
+        .filter { println("filter $it"); it &gt; 4 }
+        .toList()
+    println(lazy)
+
+    println("--- Sequence with first() ---")
+    val firstHit = nums.asSequence()
+        .map { println("map $it"); it * 2 }
+        .filter { println("filter $it"); it &gt; 4 }
+        .first()
+    println(firstHit)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">--- List ---<br/>map 1<br/>map 2<br/>map 3<br/>map 4<br/>filter 2<br/>filter 4<br/>filter 6<br/>filter 8<br/>[6, 8]<br/>--- Sequence ---<br/>map 1<br/>filter 2<br/>map 2<br/>filter 4<br/>map 3<br/>filter 6<br/>map 4<br/>filter 8<br/>[6, 8]<br/>--- Sequence with first() ---<br/>map 1<br/>filter 2<br/>map 2<br/>filter 4<br/>map 3<br/>filter 6<br/>6</p>
+</blockquote>
+<p class="v2-p"><strong>What this shows:</strong> the list version finishes <em>all</em> the <code>map</code> work before any <code>filter</code> starts. The sequence passes each item through the whole chain before touching the next one. With <code>first()</code> the sequence <strong>stops as soon as it has an answer</strong> (after item 3), never even looking at item 4. Nothing runs at all until a <em>terminal</em> operation such as <code>toList()</code>, <code>first()</code> or <code>sum()</code> is called.</p>
+<p class="v2-p"><strong>When to use sequences:</strong> very large collections, long chains, or when you only need the first few results. For short lists of the sort you see on a phone screen, plain lists are simpler and often just as fast. Start with lists and reach for <code>asSequence()</code> when you have a reason.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Sequences: Doing Less Work</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Practice: Classes and Collections</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">The official <em>Practice: Classes and Collections</em> set asks you to combine classes with the collection functions you just learned. Here is an original set in the same spirit. We will use one data class throughout: a school register.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Student(val name: String, val house: String, val score: Int)
+
+val register = listOf(
+    Student("Ade", "Blue", 72),
+    Student("Bola", "Red", 55),
+    Student("Chidi", "Blue", 38),
+    Student("Dayo", "Green", 91),
+    Student("Efe", "Red", 64),
+    Student("Funmi", "Green", 49)
+)</code></pre></div></div>
+<p class="v2-p">Try each problem on paper first, then check against the worked solution. Scores are out of 100 and the pass mark is 50.</p>
+<ol class="v2-ol">
+<li>Print the names of all students who passed.</li>
+<li>Print the average score of the whole class.</li>
+<li>Print the name of the top student.</li>
+<li>Print the number of students in each house.</li>
+<li>Print the names, sorted from highest score to lowest.</li>
+<li>Print <code>true</code> or <code>false</code>: did every house have at least one student who passed?</li>
+</ol>
+<p class="v2-p">The full solutions are in the first exercise below.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Practice: Classes and Collections</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: The school register</strong></p>
+<p class="v2-p">Create <code>Student</code> and <code>register</code> exactly as shown in the practice set above, and write a <code>main</code> function that solves all six problems. Use one collection function per problem where you can.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Student(val name: String, val house: String, val score: Int)
+
+fun main() {
+    val register = listOf(
+        Student("Ade", "Blue", 72),
+        Student("Bola", "Red", 55),
+        Student("Chidi", "Blue", 38),
+        Student("Dayo", "Green", 91),
+        Student("Efe", "Red", 64),
+        Student("Funmi", "Green", 49)
+    )
+
+    // 1. Names of students who passed
+    println(register.filter { it.score &gt;= 50 }.map { it.name })
+
+    // 2. Average score
+    println(register.map { it.score }.average())
+
+    // 3. Top student
+    println(register.maxByOrNull { it.score }?.name)
+
+    // 4. Students per house
+    println(register.groupBy { it.house }.mapValues { it.value.size })
+
+    // 5. Names from highest score to lowest
+    println(register.sortedByDescending { it.score }.map { it.name })
+
+    // 6. Did every house have at least one student who passed?
+    val everyHousePassed = register
+        .groupBy { it.house }
+        .all { (_, members) -&gt; members.any { it.score &gt;= 50 } }
+    println(everyHousePassed)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[Ade, Bola, Dayo, Efe]<br/>61.5<br/>Dayo<br/>{Blue=2, Red=2, Green=2}<br/>[Dayo, Ade, Efe, Bola, Funmi, Chidi]<br/>true</p>
+</blockquote>
+<p class="v2-p"><strong>Reasoning through it:</strong> the passes are Ade 72, Bola 55, Dayo 91 and Efe 64 (Chidi 38 and Funmi 49 failed). The scores add up to 72 + 55 + 38 + 91 + 64 + 49 = 369, and 369 / 6 = 61.5. Sorted by score the order is 91, 72, 64, 55, 49, 38. For problem 6, Blue has Ade (72), Red has Bola and Efe, and Green has Dayo, so every house has a pass. In <code>all { (_, members) -&gt; ... }</code> the underscore means "I do not need the key".</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Shopping basket report</strong></p>
+<p class="v2-p">You have this basket, where each item has a name, a unit price in naira and a quantity:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Item(val name: String, val price: Int, val quantity: Int)</code></pre></div></div>
+<p class="v2-p">with <code>Item("rice", 1500, 2)</code>, <code>Item("beans", 1200, 1)</code>, <code>Item("garri", 800, 3)</code>, <code>Item("yam", 2000, 1)</code>.</p>
+<p class="v2-p">Print: (a) the total cost of the basket, (b) the names of items that cost more than ₦1000 <em>per unit</em>, sorted alphabetically, (c) a map from item name to its line total (price times quantity), and (d) the name of the most expensive line.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Item(val name: String, val price: Int, val quantity: Int)
+
+fun main() {
+    val basket = listOf(
+        Item("rice", 1500, 2),
+        Item("beans", 1200, 1),
+        Item("garri", 800, 3),
+        Item("yam", 2000, 1)
+    )
+
+    val total = basket.sumOf { it.price * it.quantity }
+    println("Total: ₦$total")
+
+    val pricey = basket.filter { it.price &gt; 1000 }.map { it.name }.sorted()
+    println(pricey)
+
+    val lineTotals = basket.associate { it.name to it.price * it.quantity }
+    println(lineTotals)
+
+    val biggest = basket.maxByOrNull { it.price * it.quantity }
+    println("Biggest line: ${biggest?.name}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Total: ₦8600<br/>[beans, rice, yam]<br/>{rice=3000, beans=1200, garri=2400, yam=2000}<br/>Biggest line: rice</p>
+</blockquote>
+<p class="v2-p">Line totals: rice 1500 x 2 = 3000, beans 1200, garri 800 x 3 = 2400, yam 2000. They add up to 3000 + 1200 + 2400 + 2000 = 8600. <code>sumOf { }</code> is the tidy way to add up a value computed from each item. The items above ₦1000 per unit are rice, beans and yam, and alphabetically that is beans, rice, yam.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Word counter</strong></p>
+<p class="v2-p">Given <code>val text = "to be or not to be that is the question"</code>, print how many times each word appears, as a map, and then print the word that appears most often. (Hint: <code>split(" ")</code> turns text into a list of words; then <code>groupBy</code> and <code>mapValues</code>.)</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val text = "to be or not to be that is the question"
+
+    val counts = text.split(" ")
+        .groupBy { it }
+        .mapValues { it.value.size }
+    println(counts)
+
+    val top = counts.maxByOrNull { it.value }
+    println("Most common: ${top?.key} (${top?.value} times)")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">{to=2, be=2, or=1, not=1, that=1, is=1, the=1, question=1}<br/>Most common: to (2 times)</p>
+</blockquote>
+<p class="v2-p"><code>groupBy { it }</code> uses the word itself as the key, so identical words land in the same list. <code>to</code> and <code>be</code> both appear twice; <code>maxByOrNull</code> returns the <strong>first</strong> entry with the largest value, and <code>to</code> comes first.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">In the Playground, create a list of at least eight numbers of your own. Using chained functions, print: the numbers greater than your list's average, the same numbers doubled, and whether <em>any</em> number is divisible by 7. Predict each result on paper before running.</p></div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Trying to <code>add</code> to a read-only list.</strong> <em>The wrong code:</em> <code>val items = listOf("a"); items.add("b")</code> <em>The problem:</em> <code>List</code> has no <code>add</code> function, so you get <code>Unresolved reference: add</code>. <em>The fix:</em> declare it with <code>mutableListOf</code>, or build a new list with <code>val more = items + "b"</code>. The <code>+</code> operator returns a <strong>new</strong> list and leaves the old one alone.</p>
+<p class="v2-p"><strong>Mistake #2: Using an index that does not exist.</strong> <em>The wrong code:</em> <code>val list = listOf(1, 2, 3); println(list[3])</code> <em>The problem:</em> valid indexes are 0, 1 and 2, so this crashes with <code>IndexOutOfBoundsException</code>. <em>The fix:</em> use <code>getOrNull(3)</code> or check <code>list.lastIndex</code> first. A list of size <code>n</code> has last index <code>n - 1</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Using <code>first()</code> on a list that might be empty.</strong> <em>The wrong code:</em> <code>emptyList&lt;Int&gt;().first()</code> <em>The problem:</em> throws <code>NoSuchElementException</code>. <em>The fix:</em> <code>firstOrNull()</code>, then handle <code>null</code> with <code>?:</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Expecting <code>map</code> or <code>sorted</code> to change the original.</strong> <em>The wrong code:</em> <code>scores.sorted(); println(scores)</code> <em>The problem:</em> <code>sorted()</code> returns a <strong>new</strong> list; the original is untouched, so the output is the old order. <em>The fix:</em> store the result: <code>val ordered = scores.sorted()</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Confusing <code>map</code> and <code>forEach</code>.</strong> <em>The wrong code:</em> <code>val doubled = scores.forEach { it * 2 }</code> <em>The problem:</em> <code>forEach</code> returns <code>Unit</code> (nothing useful). <em>The fix:</em> use <code>map</code> to <em>produce</em> a new list, and <code>forEach</code> only to <em>do</em> something with each item, such as printing.</p>
+<p class="v2-p"><strong>Mistake #6: Duplicate keys in <code>associateBy</code>.</strong> <em>The wrong code:</em> <code>names.associateBy { it.first() }</code> on <code>["ade", "ayo"]</code> <em>The problem:</em> both have the key <code>a</code>, so only <code>ayo</code> survives. <em>The fix:</em> use <code>groupBy</code> when keys can repeat.</p>
+<p class="v2-p"><strong>Mistake #7: Forgetting that <code>reduce</code> fails on an empty list.</strong> <em>The fix:</em> use <code>fold(initialValue)</code>, or <code>sum()</code> for plain totals.</p>
+<p class="v2-p"><strong>Mistake #8: Writing <code>it</code> inside a nested lambda and getting the wrong item.</strong> <em>The wrong code:</em> <code>groups.map { it.map { it * 2 } }</code> <em>The problem:</em> the inner <code>it</code> hides the outer <code>it</code>, which is confusing to read. <em>The fix:</em> name the parameters: <code>groups.map { group -&gt; group.map { n -&gt; n * 2 } }</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What is the difference between <code>listOf</code> and <code>mutableListOf</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>listOf</code> creates a read-only <code>List</code>: you can read items but there are no <code>add</code> or <code>remove</code> functions. <code>mutableListOf</code> creates a <code>MutableList</code> whose contents you can add to, remove from and replace.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does this print? <code>println(listOf(4, 8, 15, 16).filter { it % 2 == 0 }.map { it / 2 })</code></p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>[2, 4, 8]</code>. The <code>filter</code> keeps the even numbers <code>[4, 8, 16]</code> (15 is odd), then <code>map</code> halves each one.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why is <code>val scores = mutableListOf(1, 2)</code> followed by <code>scores.add(3)</code> allowed even though <code>scores</code> is a <code>val</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>val</code> means the <em>label</em> <code>scores</code> cannot be pointed at a different list. It does not make the list itself unchangeable. Whether the contents can change depends on the collection type (<code>MutableList</code> here).</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What does <code>listOf("a", "bb", "cc", "d").groupBy { it.length }</code> return?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A map from length to the items of that length: <code>{1=[a, d], 2=[bb, cc]}</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Give one reason to use a sequence instead of a list, and one situation where a plain list is fine.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">A sequence processes items lazily, one at a time through the whole chain, so it avoids building intermediate lists and can stop early (for example with <code>first()</code>). It helps with very large collections or long chains. For short lists, such as the handful of items shown on a phone screen, a plain list is simpler and fast enough.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-3-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 3: Display lists and use Material Design</a>: the official pathway this lesson follows.</li>
+<li><a href="https://kotlinlang.org/docs/collections-overview.html" rel="noopener noreferrer">Kotlin docs: Collections overview</a>: the full reference for List, Set and Map.</li>
+<li><a href="https://kotlinlang.org/docs/sequences.html" rel="noopener noreferrer">Kotlin docs: Sequences</a>: lazy processing in depth.</li>
+<li><a href="https://play.kotlinlang.org/" rel="noopener noreferrer">Kotlin Playground</a>: run every example in this lesson.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Class Results Analyser</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a small console program that analyses the results of a class and prints a tidy report. This is the kind of logic that will later sit behind a real school app.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a data class <code>Result(val student: String, val subject: String, val score: Int)</code>.</li>
+<li>Create a list of at least ten results covering at least three students and three subjects (every student should have a score in every subject).</li>
+<li>Print each student's <strong>average</strong> score across subjects.</li>
+<li>Print each subject's <strong>highest</strong> score and who achieved it.</li>
+<li>Use <code>partition</code> to print who passed (average of 50 or more) and who did not.</li>
+<li>Print the students ranked from the highest average to the lowest, with their position (1, 2, 3 ...).</li>
+<li>Use at least one of <code>groupBy</code>, <code>associate</code>, <code>fold</code> and <code>any</code>/<code>all</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a mutable map that records each student's grade letter (A for 70 or more, B for 60 to 69, C for 50 to 59, F below 50) using <code>when</code>, and print how many students got each grade.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Main.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Result(val student: String, val subject: String, val score: Int)
+
+fun gradeFor(average: Double): String = when {
+    average &gt;= 70 -&gt; "A"
+    average &gt;= 60 -&gt; "B"
+    average &gt;= 50 -&gt; "C"
+    else -&gt; "F"
+}
+
+fun main() {
+    val results = listOf(
+        Result("Ade", "Maths", 80), Result("Ade", "English", 60), Result("Ade", "Science", 70),
+        Result("Bola", "Maths", 45), Result("Bola", "English", 55), Result("Bola", "Science", 40),
+        Result("Chidi", "Maths", 90), Result("Chidi", "English", 75), Result("Chidi", "Science", 85)
+    )
+
+    // Average per student
+    val averages: Map&lt;String, Double&gt; = results
+        .groupBy { it.student }
+        .mapValues { (_, rows) -&gt; rows.map { it.score }.average() }
+
+    println("=== AVERAGES ===")
+    averages.forEach { (student, avg) -&gt; println("$student: $avg") }
+
+    // Best score per subject
+    println("=== TOP IN EACH SUBJECT ===")
+    results.groupBy { it.subject }.forEach { (subject, rows) -&gt;
+        val best = rows.maxByOrNull { it.score }
+        println("$subject: ${best?.student} (${best?.score})")
+    }
+
+    // Pass and fail
+    val (passed, failed) = averages.toList().partition { it.second &gt;= 50 }
+    println("=== PASSED ===")
+    println(passed.map { it.first })
+    println("=== NOT PASSED ===")
+    println(failed.map { it.first })
+
+    // Ranking
+    println("=== RANKING ===")
+    averages.toList()
+        .sortedByDescending { it.second }
+        .forEachIndexed { index, (student, avg) -&gt;
+            println("${index + 1}. $student ($avg)")
+        }
+
+    // Stretch: grade counts
+    val gradeCounts = mutableMapOf&lt;String, Int&gt;()
+    for ((_, avg) in averages) {
+        val grade = gradeFor(avg)
+        gradeCounts[grade] = (gradeCounts[grade] ?: 0) + 1
+    }
+    println("=== GRADES ===")
+    println(gradeCounts)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">=== AVERAGES ===<br/>Ade: 70.0<br/>Bola: 46.666666666666664<br/>Chidi: 83.33333333333333<br/>=== TOP IN EACH SUBJECT ===<br/>Maths: Chidi (90)<br/>English: Chidi (75)<br/>Science: Chidi (85)<br/>=== PASSED ===<br/>[Ade, Chidi]<br/>=== NOT PASSED ===<br/>[Bola]<br/>=== RANKING ===<br/>1. Chidi (83.33333333333333)<br/>2. Ade (70.0)<br/>3. Bola (46.666666666666664)<br/>=== GRADES ===<br/>{A=2, F=1}</p>
+</blockquote>
+<p class="v2-p"><strong>Notes on the solution:</strong> Ade's average is (80 + 60 + 70) / 3 = 70.0, Bola's is (45 + 55 + 40) / 3 = 46.67 and Chidi's is (90 + 75 + 85) / 3 = 83.33. The long decimals are normal for floating-point numbers; in a real app you would round them for display, for example with <code>"%.1f".format(avg)</code>. The <code>(student, avg)</code> in <code>forEachIndexed</code> is destructuring of the pair. The grade map uses <code>gradeCounts[grade] ?: 0</code> to start a count at zero the first time a grade appears. Because the order of grades follows the order the students are processed (Ade first, then Bola, then Chidi), the map prints <code>{A=2, F=1}</code>: Ade creates <code>A</code>, Bola creates <code>F</code>, Chidi increments <code>A</code>; map printing follows insertion order, so the keys appear as <code>A</code> then <code>F</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 14 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-14-collections-and-higher-order-functions</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 14 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Three Kinds of Collection</li><li>✅ Worked Examples: Lists</li><li>✅ Worked Examples: Looping Through Collections</li><li>✅ Higher-Order Functions: Transforming and Filtering</li><li>✅ Higher-Order Functions: Summarising, Grouping and Sorting</li><li>✅ Sequences: Doing Less Work</li><li>✅ Practice: Classes and Collections</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_13.html" class="ln-btn">&#8592; Lesson 13</a><a href="lesson_15.html" class="ln-btn primary">Lesson 15 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 14 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

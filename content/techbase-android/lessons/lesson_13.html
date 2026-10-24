@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 13: Generics, Objects and Extensions — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l13">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 13 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 13</div>
+      <h1>Generics, Objects and Extensions</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Market Stall Toolkit</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 13</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Write type-safe reusable code with generics, singleton and companion objects, extension functions and scope functions.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Market Stall Toolkit</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to the lesson where Kotlin starts to feel like a real professional toolbox. You already know how to write functions, classes and lambdas. Now you will learn four techniques that working Android developers use every single day:</p>
+<ul class="v2-ul">
+<li><strong>Generics</strong>, which let one class or function work safely with many different types.</li>
+<li><strong>Singleton and companion objects</strong>, which give you exactly one shared instance of something.</li>
+<li><strong>Extension functions and properties</strong>, which let you add new abilities to types you did not write.</li>
+<li><strong>Scope functions</strong> (<code>let</code>, <code>run</code>, <code>with</code>, <code>apply</code>, <code>also</code>), which make setup and null-handling code short and readable.</li>
+</ul>
+<p class="v2-p">Picture a school's lost-and-found box. A box does not care whether it holds a water bottle, a calculator or a jacket. It just holds <em>something</em>, and when you take the item out you get back the same kind of thing you put in. That is a generic container. Kotlin's <code>List&lt;String&gt;</code> and <code>List&lt;Int&gt;</code> are the same idea. You have already been using generics without knowing it.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Write your own <strong>generic classes</strong> and <strong>generic functions</strong> with type parameters such as <code>T</code>.</li>
+<li>Add a <strong>constraint</strong> to a type parameter so it only accepts suitable types.</li>
+<li>Create a <strong>singleton</strong> with the <code>object</code> keyword.</li>
+<li>Use a <strong>companion object</strong> for shared constants and factory functions.</li>
+<li>Write <strong>extension functions</strong> and <strong>extension properties</strong>, and explain their limits.</li>
+<li>Choose the right <strong>scope function</strong> for the job.</li>
+<li>Combine all of these in a small quiz engine.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson matches the <em>Generics, objects, and extensions</em> pathway from Unit 3 of Google's official <strong>Android Basics with Compose</strong> course. That pathway builds a quiz-style app step by step. We build our own original quiz engine and add more practice. The official link is in the resources at the end.</p>
+</blockquote>
+<h3 class="v2-h3">Why this matters for Android</h3>
+<ul class="v2-ul">
+<li><code>ViewModel</code>, <code>StateFlow</code>, <code>List</code> and <code>Result</code> are all generic. You will read generic signatures like <code>MutableStateFlow&lt;UiState&gt;</code> for the rest of this course.</li>
+<li>Libraries add extension functions to Android types. Writing <code>modifier.padding(16.dp)</code> is an extension function call, and <code>16.dp</code> is an extension property on <code>Int</code>.</li>
+<li>Many Android databases, settings holders and loggers are singletons.</li>
+<li>Scope functions such as <code>apply</code> appear in almost every piece of setup code you will read.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. Classes, properties and methods (lesson 11)</h3>
+<p class="v2-p">You should know how to declare <code>class Student(val name: String)</code>, create an instance and call its functions. You should also recall <code>data class</code>, <code>enum class</code>, <code>interface</code> and <code>override</code>.</p>
+<h3 class="v2-h3">2. Function types and lambdas (lesson 12)</h3>
+<p class="v2-p">Scope functions take a lambda as their last parameter, so trailing lambda syntax and <code>it</code> should feel familiar. If <code>{ it * 2 }</code> looks strange, revisit lesson 12 first.</p>
+<h3 class="v2-h3">3. Nullability (lesson 10)</h3>
+<p class="v2-p">You should be comfortable with <code>String?</code>, the safe call <code>?.</code> and the fact that Kotlin refuses to let you call a method on a possibly-null value without checking.</p>
+<h3 class="v2-h3">4. Types and inference (lesson 07)</h3>
+<p class="v2-p">Kotlin usually works out types for you (<code>val age = 24</code> is an <code>Int</code>). In this lesson you will see the compiler infer types in more places, including inside angle brackets.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: Generics</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The problem generics solve</h3>
+<p class="v2-p">Suppose you need a box that holds one item. Without generics you might write one class per type:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class IntBox(val item: Int)
+class StringBox(val item: String)
+class BooleanBox(val item: Boolean)
+// ... and one for every other type, forever</code></pre></div></div>
+<p class="v2-p">That is repetition, and repetition breeds bugs. Another idea is to use the type <code>Any</code> (Kotlin's "anything" type). But then, when you take the item out, you get an <code>Any</code>, and you must guess what it really is. Guessing wrongly crashes the app.</p>
+<p class="v2-p">Generics give you the third option: write the class <strong>once</strong>, leaving a blank for the type. The blank is called a <strong>type parameter</strong>, and by convention it is a single capital letter:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Letter</th>
+<th>Usually means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T</code></td>
+<td><strong>T</strong>ype (the general-purpose choice)</td>
+</tr>
+<tr>
+<td><code>E</code></td>
+<td><strong>E</strong>lement (inside collections)</td>
+</tr>
+<tr>
+<td><code>K</code>, <code>V</code></td>
+<td><strong>K</strong>ey and <strong>V</strong>alue (in maps)</td>
+</tr>
+<tr>
+<td><code>R</code></td>
+<td><strong>R</strong>esult</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  class Box&lt;T&gt;(val item: T)
+            |
+            +-- a blank for the type, filled in when you use it
+
+  Box&lt;Int&gt;(5)           the blank becomes Int
+  Box&lt;String&gt;("shoes")  the blank becomes String</code></pre></div></div>
+<p class="v2-p">Kotlin fills the blank in for you when it can: <code>Box(5)</code> is automatically a <code>Box&lt;Int&gt;</code>.</p>
+<h3 class="v2-h3">Constraints: limiting what the blank may be</h3>
+<p class="v2-p">Sometimes "any type at all" is too loose. A function that finds the bigger of two things must be able to <em>compare</em> them, and not every type can be compared. You can put a limit on the blank with a colon:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  &lt;T : Comparable&lt;T&gt;&gt;      T must be something that can be compared with itself
+  &lt;T : Priced&gt;             T must be something that implements the Priced interface</code></pre></div></div>
+<p class="v2-p">This is called an <strong>upper bound</strong> or <strong>constraint</strong>. It is a promise to the compiler: "whatever T turns out to be, it has at least these abilities". In return, inside the function you may use those abilities.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Analogy:</strong> A generic container is a lunch box. A constraint is a label on it: "hot food only". Now you know the item will survive a microwave, so you can safely heat the box without checking what is inside.</p>
+</blockquote>
+<h3 class="v2-h3">A short word on <code>in</code> and <code>out</code></h3>
+<p class="v2-p">You may see <code>List&lt;out E&gt;</code> or <code>Comparable&lt;in T&gt;</code> in documentation. These markers control whether, for example, a <code>List&lt;String&gt;</code> may be used where a <code>List&lt;Any&gt;</code> is expected. Reading a list of strings as a list of "anythings" is safe, which is why <code>List</code> is declared with <code>out</code>. You do not need to write these yourself yet. Just recognise them when you meet them.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Generics</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Worked Examples: Generics</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">Example 1: A generic class</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Box&lt;T&gt;(val item: T) {
+    fun describe(): String = "Box holds $item"
+}
+
+fun main() {
+    val numberBox = Box(5)
+    val wordBox = Box("shoes")
+    val flagBox = Box(true)
+
+    println(numberBox.describe())
+    println(wordBox.describe())
+    println(flagBox.describe())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Box holds 5<br/>Box holds shoes<br/>Box holds true</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> One class definition, three different types. Kotlin infers <code>Box&lt;Int&gt;</code>, <code>Box&lt;String&gt;</code> and <code>Box&lt;Boolean&gt;</code>. Because the compiler knows <code>numberBox.item</code> is an <code>Int</code>, writing <code>numberBox.item + 1</code> works, and writing <code>wordBox.item + 1</code> is a compile error.</p>
+<h3 class="v2-h3">Example 2: A generic function</h3>
+<p class="v2-p">Type parameters for functions go <strong>before</strong> the function name.</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun &lt;T&gt; repeatItem(item: T, times: Int): String {
+    return List(times) { item }.joinToString(", ")
+}
+
+fun main() {
+    println(repeatItem("Hi", 3))
+    println(repeatItem(7, 2))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Hi, Hi, Hi<br/>7, 7</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>List(times) { item }</code> builds a list that contains <code>item</code> the given number of times (lists are covered fully in lesson 14), and <code>joinToString(", ")</code> glues the elements into one string. The function never needs to know what <code>T</code> is.</p>
+<h3 class="v2-h3">Example 3: A constraint with <code>Comparable</code></h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun &lt;T : Comparable&lt;T&gt;&gt; biggest(a: T, b: T): T {
+    return if (a &gt; b) a else b
+}
+
+fun main() {
+    println(biggest(3, 9))
+    println(biggest("apple", "mango"))
+    println(biggest(2.5, 1.5))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">9<br/>mango<br/>2.5</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The <code>&gt;</code> operator needs <code>compareTo</code>, which every <code>Comparable</code> type has. <code>Int</code>, <code>String</code> and <code>Double</code> are all comparable, so all three calls compile. Strings compare alphabetically, and <code>"mango"</code> sorts after <code>"apple"</code>. If you remove the constraint and write plain <code>&lt;T&gt;</code>, the line <code>a &gt; b</code> becomes a compile error, because Kotlin cannot promise that an arbitrary <code>T</code> can be compared.</p>
+<h3 class="v2-h3">Example 4: A constraint with your own interface</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface Priced {
+    val price: Int
+}
+
+data class Shirt(override val price: Int) : Priced
+data class Shoes(override val price: Int) : Priced
+
+fun &lt;T : Priced&gt; totalPrice(first: T, second: T): Int {
+    return first.price + second.price
+}
+
+fun main() {
+    println(totalPrice(Shirt(3000), Shirt(4500)))
+    println(totalPrice(Shoes(12000), Shoes(8000)))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">7500<br/>20000</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Inside <code>totalPrice</code> you can read <code>.price</code> because the constraint guarantees it exists. Both arguments must be the <em>same</em> <code>T</code>, so <code>totalPrice(Shirt(1), Shoes(2))</code> would not compile. If you wanted to allow mixing, you would write the parameters as <code>Priced</code> instead of <code>T</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Generics</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Conceptual Understanding: Objects</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Singletons with <code>object</code></h3>
+<p class="v2-p">Normally you create many instances of a class. Sometimes you want <strong>exactly one</strong>: a single settings holder, a single logger, a single scoreboard. That pattern is called a <strong>singleton</strong>, and Kotlin builds it into the language. Replace <code>class</code> with <code>object</code> and you are done:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>object AppConfig {
+    const val APP_NAME = "Techbase Quiz"
+    var launchCount = 0
+
+    fun recordLaunch() {
+        launchCount++
+    }
+}</code></pre></div></div>
+<p class="v2-p">There is no constructor and you never write <code>AppConfig()</code>. You use the name directly, and Kotlin creates the one and only instance the first time it is needed.</p>
+<h3 class="v2-h3">Companion objects</h3>
+<p class="v2-p">A <strong>companion object</strong> is an <code>object</code> that lives <em>inside</em> a class and belongs to the class itself rather than to any one instance. If you have used <code>static</code> in Java, a companion object fills that role. It is the right home for constants and <strong>factory functions</strong> (functions that create instances).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Instance members              Companion members
+  (one per object)              (one per class)
+  ---------------------         -----------------------
+  student.name                  Student.create("Ada")
+  student.greet()               Student.count</code></pre></div></div>
+<h3 class="v2-h3">Which one do I use?</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>You want</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One global thing with no instances at all</td>
+<td><code>object</code></td>
+</tr>
+<tr>
+<td>A constant or helper that belongs to a class</td>
+<td><code>companion object</code></td>
+</tr>
+<tr>
+<td>A constant known at compile time (number or string)</td>
+<td><code>const val</code> inside an object or companion</td>
+</tr>
+<tr>
+<td>Many instances</td>
+<td>A normal <code>class</code></td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Objects</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Worked Examples: Objects</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Example 5: A singleton in action</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>object AppConfig {
+    const val APP_NAME = "Techbase Quiz"
+    var launchCount = 0
+
+    fun recordLaunch() {
+        launchCount++
+    }
+}
+
+fun main() {
+    println(AppConfig.APP_NAME)
+    AppConfig.recordLaunch()
+    AppConfig.recordLaunch()
+    println("Launches: ${AppConfig.launchCount}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Techbase Quiz<br/>Launches: 2</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Both calls to <code>recordLaunch()</code> changed the <em>same</em> object, which is why the count reached 2. <code>const val</code> marks a value fixed at compile time. It is only allowed on <code>String</code> and the basic number and boolean types, and only at the top level or inside an <code>object</code> or companion object.</p>
+<h3 class="v2-h3">Example 6: A companion object and a factory function</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Student private constructor(val name: String) {
+
+    companion object {
+        const val SCHOOL = "Techbase Academy"
+        var created = 0
+
+        fun create(name: String): Student {
+            created++
+            return Student(name)
+        }
+    }
+
+    fun introduce() {
+        println("$name attends $SCHOOL")
+    }
+}
+
+fun main() {
+    val ada = Student.create("Ada")
+    val bola = Student.create("Bola")
+
+    ada.introduce()
+    bola.introduce()
+    println("Students created: ${Student.created}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Ada attends Techbase Academy<br/>Bola attends Techbase Academy<br/>Students created: 2</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The constructor is <code>private</code>, so outside code cannot write <code>Student("Ada")</code>. The only way in is <code>Student.create(...)</code>, which also keeps count. A companion object can call the private constructor because it is <em>inside</em> the class. This is a common way to force every instance to be created in a controlled way.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Objects</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Conceptual Understanding: Extensions</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Adding abilities to types you do not own</h3>
+<p class="v2-p">You cannot open Kotlin's <code>String</code> class and add a function to it. But you can write an <strong>extension function</strong>, which <em>looks</em> like a member of the class when you call it. The recipe is to put the type you are extending in front of the function name, followed by a dot:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  fun  String . shout (): String = ...
+       |        |
+       |        +-- the new function's name
+       +-- the "receiver type": the thing being extended</code></pre></div></div>
+<p class="v2-p">Inside the extension, the keyword <code>this</code> means the value the function was called on (and you can often leave <code>this</code> out).</p>
+<p class="v2-p">An <strong>extension property</strong> is the same idea for properties. It cannot store data (there is no hidden field), so it must have a getter that computes its value.</p>
+<h3 class="v2-h3">The rules and limits</h3>
+<ul class="v2-ul">
+<li>An extension <strong>cannot access private members</strong> of the class it extends. It is only a tidy way of calling public things.</li>
+<li>If the class already has a member function with the same name and parameters, <strong>the member wins</strong>. Extensions never override.</li>
+<li>Extensions are resolved by the declared type at compile time, not changed by inheritance at run time.</li>
+<li>They are not magic: <code>"hi".shout()</code> compiles to an ordinary function call <code>shout("hi")</code>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Analogy:</strong> Giving a friend a phone case with a card holder does not change the phone. It just lets you do something extra with it that feels built in.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Extensions</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Worked Examples: Extensions</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Example 7: Extension functions</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun String.shout(): String = this.uppercase() + "!"
+
+fun Int.isEven(): Boolean = this % 2 == 0
+
+fun Int.toNaira(): String = "₦$this"
+
+fun main() {
+    println("hello".shout())
+    println(4.isEven())
+    println(7.isEven())
+    println(1500.toNaira())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">HELLO!<br/>true<br/>false<br/>₦1500</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Each function is declared outside any class, yet is called like a built-in. In <code>toNaira</code>, <code>this</code> is the <code>Int</code> the function was called on (<code>1500</code>), so the string template builds <code>₦1500</code>.</p>
+<h3 class="v2-h3">Example 8: Extension properties</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val String.vowelCount: Int
+    get() = count { it in "aeiouAEIOU" }
+
+val Int.squared: Int
+    get() = this * this
+
+fun main() {
+    println("Ibadan".vowelCount)
+    println("Rhythm".vowelCount)
+    println(7.squared)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">3<br/>0<br/>49</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>"Ibadan"</code> contains the vowels <code>I</code>, <code>a</code> and <code>a</code>, so the count is 3. <code>"Rhythm"</code> has none among <code>aeiou</code>, so 0. The <code>count { ... }</code> call runs the lambda on each character and counts the ones for which it returns <code>true</code>. Notice that extension properties use <code>get()</code> instead of <code>= value</code>, because they cannot hold a value of their own.</p>
+<h3 class="v2-h3">Example 9: Extending a generic type</h3>
+<p class="v2-p">Extensions and generics combine well. This one works on a list of <em>any</em> element type:</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun &lt;T&gt; List&lt;T&gt;.secondOrNull(): T? {
+    return if (this.size &gt;= 2) this[1] else null
+}
+
+fun main() {
+    println(listOf("a", "b", "c").secondOrNull())
+    println(listOf(10).secondOrNull())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">b<br/>null</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The <code>&lt;T&gt;</code> before <code>List&lt;T&gt;</code> declares the type parameter that the extension uses. The return type is <code>T?</code> because there might be no second element. The built-in function <code>getOrNull(1)</code> does the same job, but writing it yourself shows the pieces working together.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Extensions</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Conceptual Understanding: Scope Functions</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Five helpers, one idea</h3>
+<p class="v2-p">The Kotlin standard library has five small functions that run a block of code "in the scope of" an object: <code>let</code>, <code>run</code>, <code>with</code>, <code>apply</code> and <code>also</code>. They do the same basic job, but they differ in two ways:</p>
+<ol class="v2-ol">
+<li><strong>How the object is referred to inside the block:</strong> as <code>it</code>, or as <code>this</code> (which means you can often just write property names).</li>
+<li><strong>What the whole call returns:</strong> the lambda's last value, or the object itself.</li>
+</ol>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Object inside is</th>
+<th>Returns</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>let</code></td>
+<td><code>it</code></td>
+<td>the lambda result</td>
+<td>run code only if a value is not null; transform a value</td>
+</tr>
+<tr>
+<td><code>run</code></td>
+<td><code>this</code></td>
+<td>the lambda result</td>
+<td>compute something using the object's members</td>
+</tr>
+<tr>
+<td><code>with(obj)</code></td>
+<td><code>this</code></td>
+<td>the lambda result</td>
+<td>several calls on one object (not an extension, you pass the object in)</td>
+</tr>
+<tr>
+<td><code>apply</code></td>
+<td><code>this</code></td>
+<td>the object itself</td>
+<td>configure an object right after creating it</td>
+</tr>
+<tr>
+<td><code>also</code></td>
+<td><code>it</code></td>
+<td>the object itself</td>
+<td>a side effect such as logging, without changing the chain</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A memory trick: <strong><code>apply</code> and <code>also</code> hand the object back</strong> (apply it, then give it back). <strong><code>let</code>, <code>run</code> and <code>with</code> hand back whatever the block produced.</strong> And <strong><code>it</code> goes with <code>let</code> and <code>also</code></strong>, while <code>this</code> goes with <code>run</code>, <code>with</code> and <code>apply</code>. Keep the table open until it becomes habit. Nobody memorises it on the first day.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Do not overdo it.</strong> Scope functions are optional. If a plain <code>val</code> and two lines are clearer, use those. Nesting several scope functions inside each other usually makes code harder to read.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Scope Functions</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Worked Examples: Scope Functions</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Example 10: <code>let</code> for null handling</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val name: String? = "tunde"
+    val nothing: String? = null
+
+    name?.let { println("Hello ${it.uppercase()}") }
+    nothing?.let { println("This never prints") }
+    println("Done")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Hello TUNDE<br/>Done</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> With the safe call <code>?.let</code>, the block runs only when the value is not null, and inside it <code>it</code> is a non-null <code>String</code>. The second <code>let</code> is skipped completely. This replaces a lot of <code>if (x != null)</code> blocks.</p>
+<h3 class="v2-h3">Example 11: <code>apply</code> to configure an object</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Profile {
+    var name = ""
+    var city = ""
+    var age = 0
+}
+
+fun main() {
+    val profile = Profile().apply {
+        name = "Ada"
+        city = "Ibadan"
+        age = 20
+    }
+    println("${profile.name}, ${profile.city}, ${profile.age}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Ada, Ibadan, 20</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Inside <code>apply</code>, <code>this</code> is the new <code>Profile</code>, so <code>name = "Ada"</code> really means <code>this.name = "Ada"</code>. <code>apply</code> then returns the profile itself, which is why it can be assigned straight to <code>val profile</code>. Without <code>apply</code> you would have to write <code>profile.name = ...</code> three times.</p>
+<h3 class="v2-h3">Example 12: <code>also</code>, <code>run</code> and <code>with</code></h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Profile {
+    var name = ""
+    var city = ""
+    var age = 0
+}
+
+fun main() {
+    val sum = (2 + 3).also { println("Sum is $it") }
+
+    val profile = Profile().apply {
+        name = "Ada"
+        city = "Ibadan"
+        age = 20
+    }
+
+    val summary = profile.run { "$name lives in $city" }
+    val line = with(profile) { "$name is $age" }
+
+    println(sum)
+    println(summary)
+    println(line)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Sum is 5<br/>5<br/>Ada lives in Ibadan<br/>Ada is 20</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>also</code> ran its side effect (the print), then handed back the original <code>5</code>, so <code>sum</code> is <code>5</code>. <code>run</code> and <code>with</code> both return the last expression in the block, here a string. The difference between them is only how you write it: <code>profile.run { ... }</code> versus <code>with(profile) { ... }</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Scope Functions</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Step-by-Step Build: A Generic Quiz Engine</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Now we combine everything into one small program, a tiny version of the quiz idea from the official pathway. It has a generic <code>Question&lt;T&gt;</code> (answers can be text, numbers or true/false), an <code>enum</code> for difficulty, a singleton scoreboard and an extension function that checks answers.</p>
+<h3 class="v2-h3">Step 1: The data</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>enum class Difficulty { EASY, MEDIUM, HARD }
+
+data class Question&lt;T&gt;(
+    val text: String,
+    val answer: T,
+    val difficulty: Difficulty
+)</code></pre></div></div>
+<p class="v2-p"><code>Question&lt;String&gt;</code> holds a text answer, <code>Question&lt;Int&gt;</code> a number, <code>Question&lt;Boolean&gt;</code> a yes/no. One class covers all three, and the compiler checks the type of every answer you supply.</p>
+<h3 class="v2-h3">Step 2: A singleton scoreboard</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>object Scoreboard {
+    var points = 0
+        private set
+
+    fun award(difficulty: Difficulty) {
+        points += when (difficulty) {
+            Difficulty.EASY -&gt; 1
+            Difficulty.MEDIUM -&gt; 2
+            Difficulty.HARD -&gt; 3
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>private set</code> means any code can <em>read</em> <code>points</code>, but only the object itself can change it. That protects the score from accidental edits. The <code>when</code> over an enum must cover every case, and because it is used as an expression, Kotlin checks that you did.</p>
+<h3 class="v2-h3">Step 3: An extension on a generic type</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun &lt;T&gt; Question&lt;T&gt;.check(given: T): Boolean {
+    val correct = given == answer
+    if (correct) Scoreboard.award(difficulty)
+    val result = if (correct) "correct" else "wrong, answer was $answer"
+    println("$text -&gt; $result")
+    return correct
+}</code></pre></div></div>
+<p class="v2-p"><code>check</code> is added to <em>every</em> <code>Question&lt;T&gt;</code>. It compares the given answer to the real one, awards points on success and prints a result. Inside the function we can read <code>answer</code>, <code>text</code> and <code>difficulty</code> directly, because <code>this</code> is the question.</p>
+<h3 class="v2-h3">Step 4: Run it</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val capital = Question("Capital of Nigeria?", "Abuja", Difficulty.EASY)
+    val states = Question("How many states does Nigeria have, not counting the FCT?", 36, Difficulty.MEDIUM)
+    val typed = Question("Is Kotlin statically typed?", true, Difficulty.MEDIUM)
+
+    capital.check("Abuja")
+    states.check(35)
+    typed.check(true)
+
+    println("Points: ${Scoreboard.points}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Capital of Nigeria? -&gt; correct<br/>How many states does Nigeria have, not counting the FCT? -&gt; wrong, answer was 36<br/>Is Kotlin statically typed? -&gt; correct<br/>Points: 3</p>
+</blockquote>
+<p class="v2-p"><strong>Working it out:</strong> The first answer is right and is worth 1 point. The second is wrong (35, not 36), so no points. The third is right and <code>MEDIUM</code> is worth 2. The total is 1 + 2 = 3. Try <code>states.check("36")</code>: it will not compile, because <code>states</code> is a <code>Question&lt;Int&gt;</code> and a <code>String</code> is not an <code>Int</code>. That compile error is generics protecting you.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: A Generic Quiz Engine</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: A generic wrapper</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Write a generic function and a constrained generic function.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Write <code>fun &lt;T&gt; wrap(item: T): String</code> that returns the item inside square brackets.</li>
+<li>Print <code>wrap(5)</code>, <code>wrap("a")</code> and <code>wrap(2.5)</code>.</li>
+<li>Write <code>fun &lt;T : Comparable&lt;T&gt;&gt; smallest(a: T, b: T): T</code> and print <code>smallest(8, 3)</code> and <code>smallest("zebra", "ant")</code>.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun &lt;T&gt; wrap(item: T): String = "[$item]"
+
+fun &lt;T : Comparable&lt;T&gt;&gt; smallest(a: T, b: T): T {
+    return if (a &lt; b) a else b
+}
+
+fun main() {
+    println(wrap(5))
+    println(wrap("a"))
+    println(wrap(2.5))
+    println(smallest(8, 3))
+    println(smallest("zebra", "ant"))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">[5]<br/>[a]<br/>[2.5]<br/>3<br/>ant</p>
+</blockquote>
+<p class="v2-p"><code>"ant"</code> comes before <code>"zebra"</code> alphabetically, so it is the smaller string.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: A ticket machine</strong></p>
+<p class="v2-p">Create a singleton <code>TicketMachine</code> with a <code>private set</code> property <code>lastTicket</code> starting at 0 and a function <code>next(): Int</code> that increases it by one and returns it. Then create a class <code>Bus</code> with a companion object holding <code>const val OPERATOR = "Ibadan Express"</code>. Print the operator, then take three tickets and print each.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>object TicketMachine {
+    var lastTicket = 0
+        private set
+
+    fun next(): Int {
+        lastTicket++
+        return lastTicket
+    }
+}
+
+class Bus {
+    companion object {
+        const val OPERATOR = "Ibadan Express"
+    }
+}
+
+fun main() {
+    println(Bus.OPERATOR)
+    println("Ticket ${TicketMachine.next()}")
+    println("Ticket ${TicketMachine.next()}")
+    println("Ticket ${TicketMachine.next()}")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Ibadan Express<br/>Ticket 1<br/>Ticket 2<br/>Ticket 3</p>
+</blockquote>
+<p class="v2-p">Because <code>TicketMachine</code> is a singleton, the counter is shared by every caller and never repeats a number.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Extensions and scope functions together</strong></p>
+<ol class="v2-ol">
+<li>Write an extension function <code>String.isPalindrome(): Boolean</code> that ignores letter case. Test <code>"Level"</code>, <code>"Kayak"</code> and <code>"Ibadan"</code>.</li>
+<li>Write an extension property <code>val Int.cubed: Int</code> and print <code>3.cubed</code>.</li>
+<li>Create a class <code>Settings</code> with <code>var theme = "light"</code> and <code>var fontSize = 14</code>. Build one using <code>apply</code> so the theme is <code>"dark"</code> and the font size is <code>18</code>, then print it using <code>with</code>.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun String.isPalindrome(): Boolean {
+    val cleaned = this.lowercase()
+    return cleaned == cleaned.reversed()
+}
+
+val Int.cubed: Int
+    get() = this * this * this
+
+class Settings {
+    var theme = "light"
+    var fontSize = 14
+}
+
+fun main() {
+    println("Level".isPalindrome())
+    println("Kayak".isPalindrome())
+    println("Ibadan".isPalindrome())
+    println(3.cubed)
+
+    val settings = Settings().apply {
+        theme = "dark"
+        fontSize = 18
+    }
+    with(settings) {
+        println("Theme: $theme, size: $fontSize")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">true<br/>true<br/>false<br/>27<br/>Theme: dark, size: 18</p>
+</blockquote>
+<p class="v2-p"><code>"Level"</code> becomes <code>"level"</code>, which reads the same backwards. <code>"ibadan"</code> reversed is <code>"nadabi"</code>, which is different.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Write an extension function <code>fun Double.toNairaString(): String</code> that returns <code>"₦"</code> followed by the number. Use <code>?.let</code> on a nullable <code>Double?</code> price so that the converted text prints only when the price is not null. Test it once with a value and once with <code>null</code>.</p></div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Using a generic type without a constraint, then calling a method on it.</strong> <em>The wrong code:</em> <code>fun &lt;T&gt; bigger(a: T, b: T) = if (a &gt; b) a else b</code>. <em>The problem:</em> Kotlin cannot promise that <code>T</code> supports <code>&gt;</code>. <em>The fix:</em> add the bound, <code>&lt;T : Comparable&lt;T&gt;&gt;</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Using <code>Any</code> when you meant a generic.</strong> <em>The wrong code:</em> <code>class Box(val item: Any)</code>. <em>The problem:</em> when you read <code>item</code> back it is just <code>Any</code>, and wrong guesses crash at run time. <em>The fix:</em> <code>class Box&lt;T&gt;(val item: T)</code> keeps the exact type.</p>
+<p class="v2-p"><strong>Mistake #3: Trying to create an instance of an <code>object</code>.</strong> <em>The wrong code:</em> <code>val c = AppConfig()</code>. <em>The problem:</em> an object has no constructor, because it already <em>is</em> the single instance. <em>The fix:</em> use it by name: <code>AppConfig.recordLaunch()</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Forgetting that a companion lives on the class.</strong> <em>The wrong code:</em> <code>val s = Student("x"); s.created</code>. <em>The problem:</em> companion members belong to the class, not to instances. <em>The fix:</em> <code>Student.created</code>.</p>
+<p class="v2-p"><strong>Mistake #5: <code>const val</code> with a non-constant value.</strong> <em>The wrong code:</em> <code>const val NOW = System.currentTimeMillis()</code>. <em>The problem:</em> <code>const</code> values must be known when the code is compiled. <em>The fix:</em> use plain <code>val</code>, which can be computed at run time.</p>
+<p class="v2-p"><strong>Mistake #6: Expecting an extension to reach private members.</strong> <em>The wrong code:</em> an extension that reads a <code>private val</code> of the class. <em>The fix:</em> extensions only see what any outside code sees. If you need the data, expose it properly in the class.</p>
+<p class="v2-p"><strong>Mistake #7: Expecting an extension to replace a member.</strong> <em>The problem:</em> if <code>String</code> already has a function called <code>shout()</code> with the same parameters (it does not, but imagine), your extension would never be called, since members always win. <em>The fix:</em> choose a different name.</p>
+<p class="v2-p"><strong>Mistake #8: Mixing up <code>apply</code> and <code>let</code>.</strong> <em>The wrong code:</em> <code>val p = Profile().let { name = "Ada" }</code> where <code>name</code> is a property of <code>Profile</code>. <em>The problem:</em> <code>let</code> gives you <code>it</code>, not <code>this</code>, so the bare <code>name</code> is unresolved. And <code>let</code> returns the lambda result, so <code>p</code> would not be a <code>Profile</code> anyway. <em>The fix:</em> use <code>apply</code> for configuring, or write <code>it.name = "Ada"</code> if you really want <code>let</code>.</p>
+<p class="v2-p"><strong>Mistake #9: Giving an extension property a stored value.</strong> <em>The wrong code:</em> <code>val Int.doubled: Int = this * 2</code>. <em>The problem:</em> extension properties cannot have backing fields or initialisers. <em>The fix:</em> <code>val Int.doubled: Int get() = this * 2</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What does the <code>T</code> in <code>class Box&lt;T&gt;</code> stand for, and when is it filled in?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>T</code> is a <strong>type parameter</strong>, a blank for a type. It is filled in when you create or use the class, for example <code>Box&lt;String&gt;("x")</code>, or automatically by type inference as in <code>Box(5)</code>.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why does <code>fun &lt;T&gt; bigger(a: T, b: T) = if (a &gt; b) a else b</code> not compile, and how do you fix it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Because an unconstrained <code>T</code> might not support comparison. Add an upper bound: <code>fun &lt;T : Comparable&lt;T&gt;&gt; bigger(a: T, b: T): T</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between an <code>object</code> and a <code>companion object</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">An <code>object</code> is a standalone singleton with one instance. A <code>companion object</code> is declared <em>inside</em> a class and holds members (constants, factory functions) that belong to the class itself rather than to its instances.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Which scope function is best for configuring a new object, and what does it return?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>apply</code>. Inside the block the object is <code>this</code>, so you can set properties by name, and <code>apply</code> returns the object itself.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Can an extension function read a <code>private</code> property of the class it extends? What if the class already has a member with the same name?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">No, extensions can only use public members. And if the class has a member with the same signature, the member always wins over the extension.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-3-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 3, Pathway 1: Generics, objects and extensions</a>: the official pathway this lesson is based on.</li>
+<li><a href="https://kotlinlang.org/docs/generics.html" rel="noopener noreferrer">Kotlin docs: Generics</a>: type parameters, bounds and variance in full.</li>
+<li><a href="https://kotlinlang.org/docs/object-declarations.html" rel="noopener noreferrer">Kotlin docs: Object declarations and expressions</a>: singletons and companion objects.</li>
+<li><a href="https://kotlinlang.org/docs/extensions.html" rel="noopener noreferrer">Kotlin docs: Extensions</a>: everything about extension functions and properties.</li>
+<li><a href="https://kotlinlang.org/docs/scope-functions.html" rel="noopener noreferrer">Kotlin docs: Scope functions</a>: a detailed comparison of <code>let</code>, <code>run</code>, <code>with</code>, <code>apply</code> and <code>also</code>.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Market Stall Toolkit</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a small shop toolkit for a market stall, using a constrained generic class, a singleton for shop settings, extension functions and scope functions.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Declare <code>interface Priced { val price: Int }</code> and <code>data class Item(val name: String, override val price: Int) : Priced</code>.</li>
+<li>Write a generic class <code>Crate&lt;T : Priced&gt;(val contents: T, val quantity: Int)</code> with a function <code>total(): Int</code> that returns the item price times the quantity.</li>
+<li>Write an extension function <code>fun Int.toNaira(): String</code> returning the number with a <code>₦</code> in front.</li>
+<li>Create <code>object ShopSettings</code> with <code>const val SHOP_NAME = "Mama Tola Stores"</code> and <code>var discountPercent = 10</code>.</li>
+<li>Write two extension functions on <code>Crate&lt;T&gt;</code> (for any <code>T : Priced</code>): <code>summary()</code> returning text like <code>2 x ₦45000 = ₦90000</code>, and <code>discountedTotal()</code> which subtracts <code>discountPercent</code> percent from the total.</li>
+<li>In <code>main</code>, print a welcome line, then summaries for 2 bags of rice at 45000 and 1 bag of beans at 38000.</li>
+<li>Print the discounted rice total, change the discount to 20 using <code>apply</code>, and print it again.</li>
+<li>Use <code>?.let</code> with a nullable coupon code to print a message only when the code exists. Test with a real code and with <code>null</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a companion object to <code>Item</code> with a factory function <code>fun free(name: String): Item</code> that creates an item priced at 0, and print a <code>Crate</code> of three free samples.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Main.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface Priced {
+    val price: Int
+}
+
+data class Item(val name: String, override val price: Int) : Priced {
+    companion object {
+        fun free(name: String): Item = Item(name, 0)
+    }
+}
+
+class Crate&lt;T : Priced&gt;(val contents: T, val quantity: Int) {
+    fun total(): Int = contents.price * quantity
+}
+
+fun Int.toNaira(): String = "₦$this"
+
+object ShopSettings {
+    const val SHOP_NAME = "Mama Tola Stores"
+    var discountPercent = 10
+}
+
+fun &lt;T : Priced&gt; Crate&lt;T&gt;.summary(): String {
+    return "$quantity x ${contents.price.toNaira()} = ${total().toNaira()}"
+}
+
+fun &lt;T : Priced&gt; Crate&lt;T&gt;.discountedTotal(): Int {
+    return total() - total() * ShopSettings.discountPercent / 100
+}
+
+fun main() {
+    println("Welcome to ${ShopSettings.SHOP_NAME}")
+
+    val rice = Crate(Item("Rice bag", 45000), 2)
+    val beans = Crate(Item("Beans bag", 38000), 1)
+    println(rice.summary())
+    println(beans.summary())
+
+    println("Rice after ${ShopSettings.discountPercent}% off: ${rice.discountedTotal().toNaira()}")
+    ShopSettings.apply { discountPercent = 20 }
+    println("Rice after ${ShopSettings.discountPercent}% off: ${rice.discountedTotal().toNaira()}")
+
+    val coupon: String? = "WELCOME"
+    val missing: String? = null
+    coupon?.let { println("Coupon $it applied") }
+    missing?.let { println("This never prints") }
+
+    val samples = Crate(Item.free("Pepper sample"), 3)
+    println(samples.summary())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Welcome to Mama Tola Stores<br/>2 x ₦45000 = ₦90000<br/>1 x ₦38000 = ₦38000<br/>Rice after 10% off: ₦81000<br/>Rice after 20% off: ₦72000<br/>Coupon WELCOME applied<br/>3 x ₦0 = ₦0</p>
+</blockquote>
+<p class="v2-p"><strong>How it works:</strong> The rice total is <code>45000 * 2 = 90000</code>. A 10 percent discount is <code>90000 * 10 / 100 = 9000</code>, leaving 81000. After the discount changes to 20, the reduction is 18000, leaving 72000. The <code>missing?.let</code> line prints nothing because the value is <code>null</code>. The <code>Crate</code> class only accepts types that implement <code>Priced</code>, so <code>Crate("hello", 2)</code> would be rejected by the compiler.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 13 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-13-generics-objects-and-extensions</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 13 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Generics</li><li>✅ Worked Examples: Generics</li><li>✅ Conceptual Understanding: Objects</li><li>✅ Worked Examples: Objects</li><li>✅ Conceptual Understanding: Extensions</li><li>✅ Worked Examples: Extensions</li><li>✅ Conceptual Understanding: Scope Functions</li><li>✅ Worked Examples: Scope Functions</li><li>✅ Step-by-Step Build: A Generic Quiz Engine</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_12.html" class="ln-btn">&#8592; Lesson 12</a><a href="lesson_14.html" class="ln-btn primary">Lesson 14 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 13 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

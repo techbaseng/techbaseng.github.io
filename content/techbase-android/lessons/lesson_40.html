@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 40: Material Design 3: Theming, Dynamic Color and Typography — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l40">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 40 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 40</div>
+      <h1>Material Design 3: Theming, Dynamic Color and Typography</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Naija Snacks: A Fully Themed Menu</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 40</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Customise colours, shapes and type, support dark theme and dynamic colour, and style text with downloadable and variable fonts.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Naija Snacks: A Fully Themed Menu</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 22 you met theming for the first time: you opened the <code>Theme.kt</code> file that Android Studio generated and changed a colour or two. This lesson takes you inside that file. By the end you will understand <strong>every line</strong> of it and be able to build a theme from scratch, so that your app has its own identity instead of looking like a template.</p>
+<p class="v2-p">This lesson covers three items of Pathway 2 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2): the <em>Material Design System</em> ideas, <em>Theme your app with Material Design 3</em>, and <em>Styling text</em>. It follows the structure of the official <em>Theming in Jetpack Compose with Material 3</em> codelab, but with our own example app.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what a <strong>design system</strong> is and why Material 3 is one.</li>
+<li>Build a <code>ColorScheme</code> with <code>lightColorScheme</code> and <code>darkColorScheme</code>, and understand the colour <strong>roles</strong> (primary, onPrimary, container, surface and so on).</li>
+<li>Turn on <strong>dynamic colour</strong> safely on Android 12 and above, with a fallback.</li>
+<li>Define <code>Typography</code> and <code>Shapes</code>, and read them with <code>MaterialTheme</code>.</li>
+<li>Support light and dark theme, and make system bars match.</li>
+<li>Style text with <code>TextStyle</code>, <code>AnnotatedString</code>, <code>SpanStyle</code>, <code>ParagraphStyle</code>, custom fonts, <strong>downloadable fonts</strong> and <strong>variable fonts</strong>.</li>
+<li>Override a theme for just one part of the screen.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> never write a colour, font size or corner radius directly inside a screen. Write a <strong>role</strong> (<code>MaterialTheme.colorScheme.primary</code>, <code>MaterialTheme.typography.titleLarge</code>). Change the theme once, and the whole app follows, including dark mode.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Composables, <code>Text</code>, <code>Modifier</code></strong> (lessons 15–16).</li>
+<li><strong>Basic Material 3 components</strong> such as <code>Button</code>, <code>Card</code>, <code>Scaffold</code> (lessons 17–21).</li>
+<li><strong>A <code>Theme.kt</code> file exists in your project</strong> (lesson 22 and lesson 15's project template).</li>
+<li><strong><code>sp</code> is for text, <code>dp</code> is for everything else</strong> (lesson 15).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: What Is a Design System?</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Imagine a school in Ibadan that prints its own exercise books. If every teacher picked their own cover colour, handwriting font and logo position, nothing would look like it came from one school. So the school writes a short <strong>style guide</strong>: "Our colour is green, headings are bold, the badge sits top left, corners are slightly rounded." Now every book looks consistent, and a new teacher does not have to guess.</p>
+<p class="v2-p">A <strong>design system</strong> is that style guide for software: a shared set of rules (colour, type, shape, spacing, motion) plus ready-made components that obey the rules. <strong>Material Design 3</strong> (often called <em>Material You</em> or <em>M3</em>) is Google's design system. In Compose, it lives in the <code>androidx.compose.material3</code> library and has three pillars you control:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Pillar</th>
+<th>Compose type</th>
+<th>What it controls</th>
+<th>How you read it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Colour</td>
+<td><code>ColorScheme</code></td>
+<td>A set of named colour <strong>roles</strong></td>
+<td><code>MaterialTheme.colorScheme.primary</code></td>
+</tr>
+<tr>
+<td>Typography</td>
+<td><code>Typography</code></td>
+<td>A set of named text <strong>styles</strong></td>
+<td><code>MaterialTheme.typography.bodyLarge</code></td>
+</tr>
+<tr>
+<td>Shape</td>
+<td><code>Shapes</code></td>
+<td>A set of corner sizes</td>
+<td><code>MaterialTheme.shapes.medium</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">All three are bundled by one composable, <code>MaterialTheme</code>, which makes them available to everything inside it through <code>CompositionLocal</code>s. A <code>Button</code> placed inside <code>MaterialTheme</code> automatically uses the <code>primary</code> colour and the <code>labelLarge</code> text style. You never pass them in.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>setContent {
+  MyAppTheme {                     &lt;- wraps MaterialTheme(colorScheme, typography, shapes)
+    Scaffold {
+      Button(onClick = { }) {      &lt;- reads colorScheme.primary, shapes.full, typography.labelLarge
+        Text("Pay")
+      }
+    }
+  }
+}</code></pre></div></div>
+<h3 class="v2-h3">Roles, not colours</h3>
+<p class="v2-p">A beginner thinks in colours: "make the button green". Material thinks in <strong>roles</strong>: "this is the <em>most important action</em>". The role is then assigned a colour by the theme. The big advantage is automatic dark mode: in dark theme the role <code>primary</code> simply points to a lighter green, and nothing in your screens changes.</p>
+<p class="v2-p">Roles come in <strong>pairs</strong>: a colour and the colour to use <em>on top of it</em>. This is how Material guarantees readable text.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Role</th>
+<th>Meaning</th>
+<th>Text/icon colour used on it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>primary</code></td>
+<td>Key components: main buttons, active states</td>
+<td><code>onPrimary</code></td>
+</tr>
+<tr>
+<td><code>primaryContainer</code></td>
+<td>Less prominent fills: tonal buttons, chips</td>
+<td><code>onPrimaryContainer</code></td>
+</tr>
+<tr>
+<td><code>secondary</code> / <code>secondaryContainer</code></td>
+<td>Less prominent components</td>
+<td><code>onSecondary</code> / <code>onSecondaryContainer</code></td>
+</tr>
+<tr>
+<td><code>tertiary</code> / <code>tertiaryContainer</code></td>
+<td>Accents that balance primary and secondary</td>
+<td><code>onTertiary</code> / <code>onTertiaryContainer</code></td>
+</tr>
+<tr>
+<td><code>error</code> / <code>errorContainer</code></td>
+<td>Errors</td>
+<td><code>onError</code> / <code>onErrorContainer</code></td>
+</tr>
+<tr>
+<td><code>background</code></td>
+<td>Behind all content</td>
+<td><code>onBackground</code></td>
+</tr>
+<tr>
+<td><code>surface</code></td>
+<td>Cards, sheets, menus</td>
+<td><code>onSurface</code></td>
+</tr>
+<tr>
+<td><code>surfaceVariant</code></td>
+<td>Alternate surfaces, input fields</td>
+<td><code>onSurfaceVariant</code></td>
+</tr>
+<tr>
+<td><code>outline</code> / <code>outlineVariant</code></td>
+<td>Borders and dividers</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>inverseSurface</code></td>
+<td>Snackbars</td>
+<td><code>inverseOnSurface</code></td>
+</tr>
+<tr>
+<td><code>surfaceContainerLowest</code> … <code>surfaceContainerHighest</code></td>
+<td>A ladder of surface tones for layered UI</td>
+<td><code>onSurface</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Some role names have been added or reorganised as Material 3 has matured (for example the <code>surfaceContainer*</code> ladder), so treat the table as the idea and check the <code>ColorScheme</code> reference for the exact list in the version you use.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What Is a Design System?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Step-by-Step Build 1: Creating a Colour Scheme</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">We will theme a small app called <strong>Naija Snacks</strong> (a menu of snacks with a price). Start a new <em>Empty Activity</em> project named <code>NaijaSnacks</code>, package <code>com.example.naijasnacks</code>. Open <code>ui/theme/Color.kt</code>.</p>
+<p class="v2-p">Android Studio's template gives you a few constants. Replace the file with your own palette. Colours in Compose are <code>Color(0xAARRGGBB)</code> values; <code>FF</code> means fully opaque.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Color.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Light theme
+val PrimaryLight = Color(0xFF1B6B3A)
+val OnPrimaryLight = Color(0xFFFFFFFF)
+val PrimaryContainerLight = Color(0xFFA8F5B7)
+val OnPrimaryContainerLight = Color(0xFF00210D)
+
+val SecondaryLight = Color(0xFF8A5100)
+val OnSecondaryLight = Color(0xFFFFFFFF)
+val SecondaryContainerLight = Color(0xFFFFDCBD)
+val OnSecondaryContainerLight = Color(0xFF2C1600)
+
+val BackgroundLight = Color(0xFFFCFDF7)
+val OnBackgroundLight = Color(0xFF1A1C19)
+val SurfaceLight = Color(0xFFFCFDF7)
+val OnSurfaceLight = Color(0xFF1A1C19)
+
+// Dark theme
+val PrimaryDark = Color(0xFF8DD89C)
+val OnPrimaryDark = Color(0xFF00391A)
+val PrimaryContainerDark = Color(0xFF00522A)
+val OnPrimaryContainerDark = Color(0xFFA8F5B7)
+
+val SecondaryDark = Color(0xFFFFB86B)
+val OnSecondaryDark = Color(0xFF4A2800)
+val SecondaryContainerDark = Color(0xFF693C00)
+val OnSecondaryContainerDark = Color(0xFFFFDCBD)
+
+val BackgroundDark = Color(0xFF1A1C19)
+val OnBackgroundDark = Color(0xFFE2E3DD)
+val SurfaceDark = Color(0xFF1A1C19)
+val OnSurfaceDark = Color(0xFFE2E3DD)</code></pre></div></div>
+<p class="v2-p">Where did these numbers come from? You do not have to invent a whole palette by hand. The <strong>Material Theme Builder</strong> (a free web tool and a Figma plugin from the Material Design team) takes one <strong>source colour</strong> and generates a harmonious light and dark palette, and can export Compose code. Search for "Material Theme Builder" to find it. Note the pattern in the output above: in light theme the main colour is <strong>dark</strong> with <strong>light</strong> text on it; in dark theme the main colour is <strong>light</strong> with <strong>dark</strong> text on it.</p>
+<p class="v2-p">Now build the two schemes in <code>Theme.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Theme.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks.ui.theme
+
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+
+private val LightColors: ColorScheme = lightColorScheme(
+    primary = PrimaryLight,
+    onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryContainerLight,
+    onPrimaryContainer = OnPrimaryContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    secondaryContainer = SecondaryContainerLight,
+    onSecondaryContainer = OnSecondaryContainerLight,
+    background = BackgroundLight,
+    onBackground = OnBackgroundLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight,
+)
+
+private val DarkColors: ColorScheme = darkColorScheme(
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryContainerDark,
+    onPrimaryContainer = OnPrimaryContainerDark,
+    secondary = SecondaryDark,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryContainerDark,
+    onSecondaryContainer = OnSecondaryContainerDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark,
+)</code></pre></div></div>
+<p class="v2-p"><code>lightColorScheme(...)</code> and <code>darkColorScheme(...)</code> are factory functions with defaults for every role. You override only the roles you care about; the rest keep Material's baseline purple defaults. That is useful but also a trap: forgetting a role (say <code>tertiary</code>) leaves a baseline purple leaking into your green app, usually in a component you did not test. For a shipping app, define all the roles, or generate them with the Theme Builder.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Creating a Colour Scheme</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Step-by-Step Build 2: The Theme Composable, Dark Theme and Dynamic Colour</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Now add the composable that applies everything. Append this to <code>Theme.kt</code> (keep the imports from above and add the new ones):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Theme.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks.ui.theme
+
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+
+@Composable
+fun NaijaSnacksTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = true,
+    content: @Composable () -&gt; Unit
+) {
+    val colorScheme = when {
+        dynamicColor &amp;&amp; Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S -&gt; {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -&gt; DarkColors
+        else -&gt; LightColors
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
+        content = content
+    )
+}</code></pre></div></div>
+<p class="v2-p">(<code>AppTypography</code> and <code>AppShapes</code> come in the next phases. Until you write them, comment those two lines out.)</p>
+<p class="v2-p">Let us read the <code>when</code> block carefully, because this is the heart of the file:</p>
+<ol class="v2-ol">
+<li><strong>Dynamic colour branch.</strong> <code>Build.VERSION_CODES.S</code> is Android 12 (API 31). From Android 12, the system can extract a palette from the user's <strong>wallpaper</strong>, and <code>dynamicLightColorScheme(context)</code> returns a <code>ColorScheme</code> built from it. Two people with different wallpapers see different, matching app colours. This is the "Material You" feature.</li>
+<li><strong>Dark branch.</strong> On older phones, or when dynamic colour is off, use your own dark scheme.</li>
+<li><strong>Light branch.</strong> Otherwise your own light scheme.</li>
+</ol>
+<p class="v2-p"><code>isSystemInDarkTheme()</code> reads the system setting (Settings → Display → Dark theme) and recomposes your UI automatically when the user flips it, with no restart needed for a Compose app.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Design choice:</strong> dynamic colour is wonderful for system-like apps, but if your <strong>brand colour matters</strong> (a bank, a school, a football club), set <code>dynamicColor = false</code> so your logo and UI never clash with a random wallpaper. Many apps offer a switch in settings. Whichever you choose, <strong>always keep the static fallback</strong> because many phones in the field run Android 11 or lower.</p>
+</blockquote>
+<h3 class="v2-h3">Testing both modes</h3>
+<p class="v2-p">In the preview, you can render both themes side by side. Add this to <code>MainActivity.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks
+
+import android.content.res.Configuration
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.naijasnacks.ui.theme.NaijaSnacksTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            NaijaSnacksTheme {
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    SnackCard("Chin chin", "₦500")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SnackCard(name: String, price: String, modifier: Modifier = Modifier) {
+    Card(modifier.padding(16.dp)) {
+        Column(Modifier.padding(16.dp)) {
+            Text(name, style = MaterialTheme.typography.titleLarge)
+            Text(price, style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = { }) { Text("Add to cart") }
+        }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun SnackCardPreview() {
+    NaijaSnacksTheme(dynamicColor = false) {
+        SnackCard("Chin chin", "₦500")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Two stacked <code>@Preview</code> annotations give you two preview panels. <code>uiMode = Configuration.UI_MODE_NIGHT_YES</code> forces night mode in the preview. We pass <code>dynamicColor = false</code> in previews so the preview shows <em>your</em> palette rather than the preview device's default wallpaper colours.</p>
+<p class="v2-p">Compare light and dark. The card colour, text colour and button colour all flipped without a single <code>if</code> in <code>SnackCard</code>. That is the benefit of roles.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Theme Composable, Dark Theme and Dynamic Colour</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Step-by-Step Build 3: Using Colours Correctly</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Read colours from the theme, never from constants, inside screens.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun PromoBanner(text: String) {
+    Box(
+        Modifier
+            .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .padding(12.dp)
+    ) {
+        Text(text, color = MaterialTheme.colorScheme.onTertiaryContainer)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Notice the <strong>pair</strong>: background <code>tertiaryContainer</code>, text <code>onTertiaryContainer</code>. If you pair <code>tertiaryContainer</code> with <code>onSurface</code>, contrast may be too low in one of the modes, and you will not notice until someone uses dark theme.</p>
+<h3 class="v2-h3">contentColorFor and LocalContentColor</h3>
+<p class="v2-p">Many components pick text colour for you. <code>Surface(color = ...)</code> calls <code>contentColorFor(color)</code> which maps a background role to its matching "on" colour, and places it in <code>LocalContentColor</code>. <code>Text</code> and <code>Icon</code> default to <code>LocalContentColor</code>. That is why this works with no explicit text colour:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun ErrorNotice(message: String) {
+    Surface(color = MaterialTheme.colorScheme.errorContainer) {
+        Text(message) // automatically onErrorContainer
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Adding your own extra colours</h3>
+<p class="v2-p">Sometimes the design needs a colour Material does not define, for example a "success" green or a brand colour for a payment provider. Do not scatter hex codes. Add a small custom holder with a <code>CompositionLocal</code>, so it also follows dark mode:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.graphics.Color
+
+@Immutable
+data class ExtraColors(
+    val success: Color,
+    val onSuccess: Color,
+    val warning: Color
+)
+
+val LocalExtraColors = compositionLocalOf {
+    ExtraColors(
+        success = Color(0xFF2E7D32),
+        onSuccess = Color.White,
+        warning = Color(0xFFB26A00)
+    )
+}</code></pre></div></div>
+<p class="v2-p">Provide it inside your theme function with <code>CompositionLocalProvider(LocalExtraColors provides ...) { MaterialTheme(...) }</code>, choosing different values for light and dark, and read it as <code>LocalExtraColors.current.success</code>. This is exactly how <code>MaterialTheme</code> itself works.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Using Colours Correctly</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Step-by-Step Build 4: Typography</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p"><code>Typography</code> is a set of <strong>named text styles</strong>. Material 3 defines fifteen, in five groups of three sizes:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Group</th>
+<th>Styles</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Display</td>
+<td><code>displayLarge</code>, <code>displayMedium</code>, <code>displaySmall</code></td>
+<td>Very large, short text such as hero numbers</td>
+</tr>
+<tr>
+<td>Headline</td>
+<td><code>headlineLarge</code>, <code>headlineMedium</code>, <code>headlineSmall</code></td>
+<td>Screen titles</td>
+</tr>
+<tr>
+<td>Title</td>
+<td><code>titleLarge</code>, <code>titleMedium</code>, <code>titleSmall</code></td>
+<td>Section headings, app bars, card titles</td>
+</tr>
+<tr>
+<td>Body</td>
+<td><code>bodyLarge</code>, <code>bodyMedium</code>, <code>bodySmall</code></td>
+<td>Paragraphs and most text</td>
+</tr>
+<tr>
+<td>Label</td>
+<td><code>labelLarge</code>, <code>labelMedium</code>, <code>labelSmall</code></td>
+<td>Buttons, chips, captions</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Each style is a <code>TextStyle</code> with font family, size, weight, line height and letter spacing. Create <code>ui/theme/Type.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Type.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks.ui.theme
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+val AppTypography = Typography(
+    titleLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.1.sp
+    )
+)</code></pre></div></div>
+<p class="v2-p">Any style you leave out keeps its Material default. <code>FontFamily.SansSerif</code> is the device's default sans-serif, which is good for a first pass. Notice the sizes are in <strong><code>sp</code></strong>, which scales with the user's font-size setting. Never use <code>dp</code> for text: a user who needs larger text for reading would be ignored (see lessons 46–47 on accessibility).</p>
+<h3 class="v2-h3">Changing every style at once</h3>
+<p class="v2-p">If you want the same font family for the whole app, you do not have to rewrite fifteen styles. Use <code>copy</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+
+fun Typography.withFontFamily(family: FontFamily): Typography = copy(
+    displayLarge = displayLarge.copy(fontFamily = family),
+    displayMedium = displayMedium.copy(fontFamily = family),
+    displaySmall = displaySmall.copy(fontFamily = family),
+    headlineLarge = headlineLarge.copy(fontFamily = family),
+    headlineMedium = headlineMedium.copy(fontFamily = family),
+    headlineSmall = headlineSmall.copy(fontFamily = family),
+    titleLarge = titleLarge.copy(fontFamily = family),
+    titleMedium = titleMedium.copy(fontFamily = family),
+    titleSmall = titleSmall.copy(fontFamily = family),
+    bodyLarge = bodyLarge.copy(fontFamily = family),
+    bodyMedium = bodyMedium.copy(fontFamily = family),
+    bodySmall = bodySmall.copy(fontFamily = family),
+    labelLarge = labelLarge.copy(fontFamily = family),
+    labelMedium = labelMedium.copy(fontFamily = family),
+    labelSmall = labelSmall.copy(fontFamily = family)
+)</code></pre></div></div>
+<p class="v2-p">Then <code>val AppTypography = Typography().withFontFamily(BrandFont)</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Typography</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Step-by-Step Build 5: Fonts, Downloadable Fonts and Variable Fonts</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">This is the <em>Styling text</em> part of the programme. There are three ways to bring a font into your app, and the right choice depends on size and flexibility.</p>
+<h3 class="v2-h3">Option A: bundle a font file in <code>res/font</code></h3>
+<ol class="v2-ol">
+<li>In Android Studio, switch the Project view to <strong>Android</strong>, right-click <code>res</code>, choose <strong>New → Android Resource Directory</strong>, set <strong>Resource type</strong> to <code>font</code>.</li>
+<li>Copy font files (<code>.ttf</code> or <code>.otf</code>) into <code>res/font</code>. File names must be lowercase letters, digits and underscores only (for example <code>baloo_regular.ttf</code>).</li>
+<li>Reference them:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Type.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import com.example.naijasnacks.R
+
+val BrandFont = FontFamily(
+    Font(R.font.baloo_regular, FontWeight.Normal),
+    Font(R.font.baloo_bold, FontWeight.Bold)
+)</code></pre></div></div>
+<p class="v2-p"><em>Pros:</em> works offline immediately, you control the exact file. <em>Cons:</em> each weight is a separate file, so your APK grows, and you must respect the font's <strong>licence</strong> (many Google Fonts are under the SIL Open Font License, which allows bundling, but always check).</p>
+<h3 class="v2-h3">Option B: downloadable fonts</h3>
+<p class="v2-p">The device downloads the font from <strong>Google Fonts</strong> through <em>Google Play services</em> the first time it is needed, and shares it with other apps. Your app stays small.</p>
+<p class="v2-p">Dependency (look up the latest stable version of <code>androidx.compose.ui:ui-text-google-fonts</code>; it is versioned together with Compose):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[libraries]
+androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts" }</code></pre></div></div>
+<p class="v2-p">With the Compose BOM in your project the version is supplied for you. Then in your build file add <code>implementation(libs.androidx.compose.ui.text.google.fonts)</code>.</p>
+<p class="v2-p">In code you need a <code>GoogleFont.Provider</code>. The provider needs a <strong>certificate array</strong> resource, which Android Studio's tooling can create for you (in the XML font tooling, choose a Google Fonts font and it adds the resources), or you can copy the official certificate arrays from the documentation; do not type certificate hashes from memory.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Type.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font as GoogleFontLoader
+import androidx.compose.ui.text.googlefonts.GoogleFont
+import com.example.naijasnacks.R
+
+private val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+private val bodyFont = GoogleFont("Nunito")
+
+val NunitoFamily = FontFamily(
+    GoogleFontLoader(googleFont = bodyFont, fontProvider = provider, weight = FontWeight.Normal),
+    GoogleFontLoader(googleFont = bodyFont, fontProvider = provider, weight = FontWeight.Bold)
+)</code></pre></div></div>
+<p class="v2-p">(Check the <em>Use downloadable fonts</em> page in the official Compose docs for the current import names and the certificate array, because this API is updated from time to time.)</p>
+<p class="v2-p">Important behaviour: the font may <strong>not be available on the first launch</strong>, for instance with no data connection or without Google Play services. Compose shows the <strong>fallback</strong> font until the download finishes. Always add a fallback to your <code>FontFamily</code> and test in airplane mode:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val SafeFamily = FontFamily(
+    GoogleFontLoader(googleFont = bodyFont, fontProvider = provider),
+    androidx.compose.ui.text.font.Font(R.font.nunito_regular) // bundled backup
+)</code></pre></div></div>
+<p class="v2-p"><em>Pros:</em> tiny APK, shared across apps. <em>Cons:</em> needs Google Play services and a connection once; not ideal for devices without them.</p>
+<h3 class="v2-h3">Option C: variable fonts</h3>
+<p class="v2-p">A normal font has fixed weights (Regular, Bold). A <strong>variable font</strong> is one file that contains an entire <strong>axis</strong> of variation, for example weight from 100 to 900, width, or italic slant. You can ask for weight 450 and get exactly that. In Compose, from API 26, you describe the axis settings with <code>FontVariation</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
+import androidx.compose.ui.text.font.FontWeight
+import com.example.naijasnacks.R
+
+@OptIn(ExperimentalTextApi::class)
+val FlexFamily = FontFamily(
+    Font(
+        resId = R.font.roboto_flex_variable,
+        weight = FontWeight.Normal,
+        variationSettings = FontVariation.Settings(
+            FontVariation.weight(400),
+            FontVariation.width(100f)
+        )
+    ),
+    Font(
+        resId = R.font.roboto_flex_variable,
+        weight = FontWeight.Bold,
+        variationSettings = FontVariation.Settings(
+            FontVariation.weight(700),
+            FontVariation.width(100f)
+        )
+    )
+)</code></pre></div></div>
+<p class="v2-p">You use the <em>same file</em> twice with different settings. The opt-in annotation reflects that parts of this API were experimental at the time of writing; check the current <em>Fonts in Compose</em> documentation, because annotations are removed as APIs stabilise. Variable fonts are a good fit when you want several weights from one file, so the APK stays small, but only some fonts ship in variable form, and axis support differs between fonts.</p>
+<h3 class="v2-h3">Which should you choose?</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Need</th>
+<th>Choose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Guaranteed to work offline, one or two weights</td>
+<td>Bundled font</td>
+</tr>
+<tr>
+<td>Smallest APK, wide choice of Google Fonts</td>
+<td>Downloadable font with a bundled fallback</td>
+</tr>
+<tr>
+<td>Many weights from one file</td>
+<td>Variable font</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Fonts, Downloadable Fonts and Variable Fonts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Step-by-Step Build 6: Styling Text in Depth</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">TextStyle and the Text parameters</h3>
+<p class="v2-p"><code>Text</code> has many parameters; the ones you will use daily:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun StyledTextDemo() {
+    Text(
+        text = "Jollof rice with fried plantain and moin moin, served hot every afternoon.",
+        style = MaterialTheme.typography.bodyLarge,
+        fontStyle = FontStyle.Italic,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.2.sp,
+        textAlign = TextAlign.Start,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
+    )
+}</code></pre></div></div>
+<p class="v2-p">Parameters passed directly (<code>fontStyle</code>, <code>fontWeight</code>) <strong>override</strong> the same property inside <code>style</code>. So <code>style</code> is your base and the parameters are tweaks. With <code>maxLines = 2</code> and <code>TextOverflow.Ellipsis</code>, long text is cut with "…". Note that without a <code>maxLines</code>, text wraps without limit.</p>
+<h3 class="v2-h3">Several styles in one text: AnnotatedString</h3>
+<p class="v2-p">If you want one word <strong>bold</strong> or a different colour in a sentence, you cannot use three <code>Text</code> composables, because they would not wrap as a paragraph. Use <code>AnnotatedString</code>, built with <code>buildAnnotatedString</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
+
+@Composable
+fun PriceLine(oldPrice: String, newPrice: String) {
+    val text = buildAnnotatedString {
+        append("Was ")
+        withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+            append(oldPrice)
+        }
+        append(" now ")
+        withStyle(
+            SpanStyle(
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            append(newPrice)
+        }
+    }
+    Text(text)
+}</code></pre></div></div>
+<p class="v2-p"><code>SpanStyle</code> changes character-level properties (colour, weight, decoration, font). <code>ParagraphStyle</code> changes paragraph-level ones (alignment, line height, indentation) and applies to whole paragraphs.</p>
+<h3 class="v2-h3">Clickable text with links</h3>
+<p class="v2-p">Modern Compose has a <code>LinkAnnotation</code> for links inside text, which handles clicks and accessibility for you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
+
+@Composable
+fun TermsLine() {
+    val linkStyle = TextLinkStyles(
+        style = SpanStyle(
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline
+        )
+    )
+    Text(
+        buildAnnotatedString {
+            append("By continuing you accept our ")
+            withLink(LinkAnnotation.Url("https://developer.android.com", linkStyle)) {
+                append("terms")
+            }
+            append(".")
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">This API replaced the older <code>ClickableText</code> approach, which is not recommended any more. Check the <em>Style text</em> documentation if names have shifted.</p>
+<h3 class="v2-h3">Selectable text, brush and shadows</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun FancyTitle() {
+    Text(
+        "Naija Snacks",
+        style = TextStyle(
+            fontSize = 36.sp,
+            fontWeight = FontWeight.ExtraBold,
+            brush = Brush.linearGradient(listOf(Color(0xFF1B6B3A), Color(0xFFFFB86B))),
+            shadow = Shadow(Color.Gray, Offset(2f, 4f), blurRadius = 4f)
+        )
+    )
+}
+
+@Composable
+fun CopyableAddress() {
+    SelectionContainer {
+        Text("12 Dugbe Road, Ibadan")
+    }
+}</code></pre></div></div>
+<p class="v2-p">By default text is <strong>not selectable</strong>. Wrap it in <code>SelectionContainer</code> to let the user long-press and copy. Gradient text looks nice but check contrast (lesson 47).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Styling Text in Depth</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Step-by-Step Build 7: Shapes</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><code>Shapes</code> defines five corner sizes in Material 3: <code>extraSmall</code>, <code>small</code>, <code>medium</code>, <code>large</code>, <code>extraLarge</code>. Components use them: buttons are fully rounded, cards use <code>medium</code>, dialogs use <code>extraLarge</code>, and so on.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Shape.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks.ui.theme
+
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
+
+val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = CutCornerShape(topStart = 24.dp, bottomEnd = 24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)</code></pre></div></div>
+<p class="v2-p">Apply a shape to your own composable with <code>Modifier.clip(MaterialTheme.shapes.medium)</code> or pass <code>shape = MaterialTheme.shapes.large</code> to a component such as <code>Card</code>. Remember <code>RoundedCornerShape(50)</code> (a percentage) gives a pill.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Shapes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Step-by-Step Build 8: System Bars and Edge-to-Edge</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">On recent Android versions apps draw <strong>edge to edge</strong>, behind the status bar and the navigation bar. Calling <code>enableEdgeToEdge()</code> before <code>setContent</code> (as we did) makes the bars transparent and chooses light or dark icons to match the system theme. Then you must keep your content out from under the bars, which <code>Scaffold</code> does for you through its <code>innerPadding</code> parameter:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun SnackScreen() {
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -&gt;
+        Text("Menu", modifier = Modifier.padding(innerPadding))
+    }
+}</code></pre></div></div>
+<p class="v2-p">If you ignore <code>innerPadding</code>, your content hides under the status bar. If the template warns that <code>innerPadding</code> is unused, that is the reason.</p>
+<h3 class="v2-h3">Overriding the theme for one section</h3>
+<p class="v2-p"><code>MaterialTheme</code> can be nested. A theme inside a theme overrides only what you set:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun SaleBanner() {
+    MaterialTheme(
+        colorScheme = MaterialTheme.colorScheme.copy(
+            primary = MaterialTheme.colorScheme.error,
+            onPrimary = MaterialTheme.colorScheme.onError
+        )
+    ) {
+        Surface(color = MaterialTheme.colorScheme.primary) {
+            Text("SALE: 20% off today")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Inside the inner block, <code>primary</code> is now the error colour. Use this sparingly (for example for a "danger zone" settings section).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: System Bars and Edge-to-Edge</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Theme a school app</strong></p>
+<p class="v2-p">Create a theme for a school app called <strong>Ibadan Scholars</strong>. Use a navy blue as the primary colour (light and dark variants), amber as secondary, <code>dynamicColor = false</code> by default, and <code>titleLarge</code> in bold 24 sp. Show a card that uses <code>primaryContainer</code>/<code>onPrimaryContainer</code>. Preview it in light and dark mode.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+private val Light = lightColorScheme(
+    primary = Color(0xFF1F3A7A),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFDCE2FF),
+    onPrimaryContainer = Color(0xFF001A41),
+    secondary = Color(0xFF8A5A00),
+    onSecondary = Color.White
+)
+
+private val Dark = darkColorScheme(
+    primary = Color(0xFFB2C5FF),
+    onPrimary = Color(0xFF0A2A6B),
+    primaryContainer = Color(0xFF29458E),
+    onPrimaryContainer = Color(0xFFDCE2FF),
+    secondary = Color(0xFFFFBA4C),
+    onSecondary = Color(0xFF462C00)
+)
+
+private val ScholarTypography = Typography(
+    titleLarge = TextStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp, lineHeight = 30.sp)
+)
+
+@Composable
+fun ScholarsTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -&gt; Unit
+) {
+    MaterialTheme(
+        colorScheme = if (darkTheme) Dark else Light,
+        typography = ScholarTypography,
+        content = content
+    )
+}</code></pre></div></div>
+<p class="v2-p">The card:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun NoticeCard() {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    ) {
+        Text("Mid-term break begins Friday", style = MaterialTheme.typography.titleLarge)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>Typography(titleLarge = ...)</code> keeps the 14 other styles as defaults.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Rich price text</strong></p>
+<p class="v2-p">Write a composable <code>Receipt(item, qty, total)</code> that shows "2 × Chin chin = ₦1,000" where the <strong>total</strong> is bold and coloured with <code>primary</code>, and the multiplication sign and "=" use <code>onSurfaceVariant</code>. Use one <code>Text</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+
+@Composable
+fun Receipt(item: String, qty: Int, total: String) {
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val strong = MaterialTheme.colorScheme.primary
+    Text(
+        buildAnnotatedString {
+            append("$qty ")
+            withStyle(SpanStyle(color = muted)) { append("× ") }
+            append(item)
+            withStyle(SpanStyle(color = muted)) { append(" = ") }
+            withStyle(SpanStyle(color = strong, fontWeight = FontWeight.Bold)) { append(total) }
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">One <code>Text</code> means one paragraph that wraps correctly on narrow screens. Three separate <code>Text</code> composables in a <code>Row</code> would not.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: A theme switch</strong></p>
+<p class="v2-p">Add a <code>Switch</code> to your app that lets the user choose between <em>System</em>, <em>Light</em> and <em>Dark</em> theme, and apply the choice to the theme function. Keep the choice in a <code>rememberSaveable</code> for now (lesson 35 shows how to store it in DataStore).</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+
+enum class ThemeChoice { System, Light, Dark }
+
+@Composable
+fun ThemedApp() {
+    var choice by rememberSaveable { mutableStateOf(ThemeChoice.System) }
+    val dark = when (choice) {
+        ThemeChoice.System -&gt; isSystemInDarkTheme()
+        ThemeChoice.Light -&gt; false
+        ThemeChoice.Dark -&gt; true
+    }
+    NaijaSnacksTheme(darkTheme = dark) {
+        Column {
+            ThemeChoice.entries.forEach { option -&gt;
+                Row {
+                    RadioButton(selected = choice == option, onClick = { choice = option })
+                    Text(option.name)
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">A "System/Light/Dark" choice is better as radio buttons than as a single <code>Switch</code>, because there are three states. (<code>ThemeChoice.entries</code> needs Kotlin 1.9 or later; use <code>values()</code> on older versions.)</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Hard-coding colours in screens.</strong> <code>Color(0xFF1B6B3A)</code> inside a screen will not change in dark mode. <em>Fix:</em> read <code>MaterialTheme.colorScheme.primary</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Wrong pair.</strong> Using <code>primaryContainer</code> with <code>onPrimary</code> text. <em>Symptom:</em> poor contrast in one mode. <em>Fix:</em> use matching pairs, or let <code>Surface</code> choose via <code>contentColorFor</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Leaving some roles at default.</strong> <em>Symptom:</em> a stray baseline purple in a date picker or a chip. <em>Fix:</em> define all the roles, or generate the scheme with Material Theme Builder.</p>
+<p class="v2-p"><strong>Mistake #4: Dynamic colour with no fallback.</strong> <em>Symptom:</em> a crash on Android 11 and lower from calling <code>dynamicLightColorScheme</code>. <em>Fix:</em> guard with <code>Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Using <code>dp</code> for text sizes.</strong> <em>Symptom:</em> text ignores the user's font-size setting. <em>Fix:</em> <code>sp</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Relying on a downloadable font being there.</strong> <em>Symptom:</em> the wrong font on first launch or without Play services. <em>Fix:</em> give a fallback font in the family.</p>
+<p class="v2-p"><strong>Mistake #7: Three <code>Text</code>s in a <code>Row</code> to mix styles.</strong> <em>Symptom:</em> odd wrapping. <em>Fix:</em> <code>buildAnnotatedString</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Previews that only show light mode.</strong> <em>Symptom:</em> dark mode bugs ship. <em>Fix:</em> stack a <code>uiMode</code> night preview.</p>
+<p class="v2-p"><strong>Mistake #9: Ignoring <code>innerPadding</code> from <code>Scaffold</code>.</strong> <em>Symptom:</em> content under the status bar or navigation bar. <em>Fix:</em> apply the padding.</p>
+<p class="v2-p"><strong>Mistake #10: Forgetting font licences.</strong> <em>Symptom:</em> a legal problem later. <em>Fix:</em> check the licence of any font you bundle. Open-licensed families such as those on Google Fonts are a safe starting point.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What are colour roles and why does Material use them instead of fixed colours?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Roles are named purposes (such as <code>primary</code>, <code>onPrimary</code>, <code>surface</code>) that the theme maps to actual colours. Screens refer to the purpose, so changing the theme, or switching to dark mode or dynamic colour, changes every screen automatically while keeping text readable through paired "on" colours.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> How do you enable dynamic colour safely?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Check <code>Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S</code> (Android 12), then use <code>dynamicLightColorScheme(context)</code> or <code>dynamicDarkColorScheme(context)</code>. Otherwise fall back to your own light and dark schemes.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Which three objects does <code>MaterialTheme</code> take, and how do you read them?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>colorScheme</code>, <code>typography</code> and <code>shapes</code>. Read them with <code>MaterialTheme.colorScheme</code>, <code>MaterialTheme.typography</code> and <code>MaterialTheme.shapes</code> anywhere inside the theme.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is the difference between <code>SpanStyle</code> and <code>ParagraphStyle</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>SpanStyle</code> styles characters within a range (colour, weight, decoration). <code>ParagraphStyle</code> styles whole paragraphs (alignment, line height, indent).</p></div>
+<p class="v2-p"><strong>Question 5.</strong> When would you choose a variable font over a bundled static font?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">When you need several weights, widths or slants of one family and want a single smaller file instead of one file per weight. You then use <code>FontVariation</code> settings on the same resource.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 2: Layouts, theming and animation</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-theming" rel="noopener noreferrer">Jetpack Compose theming codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+<li><a href="https://developer.android.com/develop/ui/compose/designsystems/material3" rel="noopener noreferrer">Material Design 3 in Compose</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Naija Snacks: A Fully Themed Menu</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Turn the Naija Snacks demo into a polished, themed menu app that looks right in light, dark and (on Android 12+) wallpaper-driven colour.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A theme with a full light and dark <code>ColorScheme</code> of your own colours, a <code>dynamicColor</code> parameter, and a static fallback.</li>
+<li>A downloaded or bundled brand font used for all text, with a safe fallback.</li>
+<li>Custom <code>Shapes</code>: cards use <code>medium</code>, price tags use a pill shape.</li>
+<li>A menu of at least eight snacks in a <code>LazyColumn</code>, each in a <code>Card</code>, with the name in <code>titleLarge</code> and the price shown through <code>AnnotatedString</code> (naira sign in a different colour).</li>
+<li>A theme chooser (System, Light, Dark) at the top, plus a dynamic colour switch that is hidden on Android 11 and lower.</li>
+<li>Light and dark previews.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add an <code>ExtraColors</code> composition local with a "spicy" colour that differs in dark mode, and use it for a chilli badge.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.naijasnacks
+
+import android.os.Build
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
+import com.example.naijasnacks.ui.theme.NaijaSnacksTheme
+
+enum class ThemeChoice { System, Light, Dark }
+
+data class Snack(val name: String, val naira: Int)
+
+private val menu = listOf(
+    Snack("Chin chin", 500), Snack("Puff puff", 300), Snack("Suya", 1500),
+    Snack("Akara", 400), Snack("Gala", 350), Snack("Plantain chips", 600),
+    Snack("Meat pie", 700), Snack("Zobo", 250)
+)
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent { SnacksApp() }
+    }
+}
+
+@Composable
+fun SnacksApp() {
+    var choice by rememberSaveable { mutableStateOf(ThemeChoice.System) }
+    var dynamic by rememberSaveable { mutableStateOf(false) }
+    val dark = when (choice) {
+        ThemeChoice.System -&gt; isSystemInDarkTheme()
+        ThemeChoice.Light -&gt; false
+        ThemeChoice.Dark -&gt; true
+    }
+
+    NaijaSnacksTheme(darkTheme = dark, dynamicColor = dynamic) {
+        Scaffold { innerPadding -&gt;
+            LazyColumn(
+                contentPadding = PaddingValues(
+                    start = 16.dp, end = 16.dp,
+                    top = innerPadding.calculateTopPadding() + 8.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 8.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        ThemeChoice.entries.forEach { option -&gt;
+                            RadioButton(selected = choice == option, onClick = { choice = option })
+                            Text(option.name)
+                        }
+                    }
+                }
+                if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S) {
+                    item {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Switch(checked = dynamic, onCheckedChange = { dynamic = it })
+                            Text("  Use wallpaper colours")
+                        }
+                    }
+                }
+                items(menu, key = { it.name }) { snack -&gt; SnackRow(snack) }
+            }
+        }
+    }
+}
+
+@Composable
+fun SnackRow(snack: Snack) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Text(snack.name, style = MaterialTheme.typography.titleLarge)
+            Text(
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.secondary)) { append("₦") }
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("%,d".format(snack.naira)) }
+                },
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What you should see:</strong> a list of eight cards in green and cream; switching to <em>Dark</em> turns the screen dark with light-green accents. On Android 12 or later, the "Use wallpaper colours" switch appears, and turning it on changes every colour to match your wallpaper. The pill-shaped price tag from requirement 3 is a <code>Surface(shape = RoundedCornerShape(50))</code> around the price <code>Text</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 40 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-40-material-design-3-theming-dynamic-color-an</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 40 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What Is a Design System?</li><li>✅ Step-by-Step Build 1: Creating a Colour Scheme</li><li>✅ Step-by-Step Build 2: The Theme Composable, Dark Theme and Dynamic Colour</li><li>✅ Step-by-Step Build 3: Using Colours Correctly</li><li>✅ Step-by-Step Build 4: Typography</li><li>✅ Step-by-Step Build 5: Fonts, Downloadable Fonts and Variable Fonts</li><li>✅ Step-by-Step Build 6: Styling Text in Depth</li><li>✅ Step-by-Step Build 7: Shapes</li><li>✅ Step-by-Step Build 8: System Bars and Edge-to-Edge</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_39.html" class="ln-btn">&#8592; Lesson 39</a><a href="lesson_41.html" class="ln-btn primary">Lesson 41 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 40 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 62: The Data Layer: Repositories, Data Sources and Source of Truth — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l62">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 62 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 62</div>
+      <h1>The Data Layer: Repositories, Data Sources and Source of Truth</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: A Tested Payments Repository</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 62</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Design repositories and data sources, expose immutable data, handle errors and threading, and test the data layer.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ A Tested Payments Repository</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">The <strong>data layer</strong> contains your app's <strong>data and business rules about that data</strong>. It decides how data is created, stored and changed, and it hides <strong>where</strong> the data comes from: a network server, a local database, a file, a sensor or memory. The UI layer never needs to know. It asks a <strong>repository</strong> for data and receives it.</p>
+<p class="v2-p">This lesson covers <em>Data Layer</em> and <em>The Data layer - MAD Skills</em> from the <strong>Modern Android App Architecture</strong> programme (https://developer.android.com/courses/android-architecture), based on the official page https://developer.android.com/topic/architecture/data-layer and the recommendations at https://developer.android.com/topic/architecture/recommendations.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the roles of <strong>repositories</strong> and <strong>data sources</strong>.</li>
+<li>Expose <strong>immutable</strong> data through <strong><code>Flow</code></strong> and <strong><code>suspend</code></strong> functions.</li>
+<li>Design <strong>models per layer</strong> (network, database, domain) and <strong>map</strong> between them.</li>
+<li>Handle <strong>errors</strong> with <code>Result</code> or sealed types, and keep <strong>threading</strong> correct.</li>
+<li>Implement a repository that combines <strong>Retrofit</strong> and <strong>Room</strong>.</li>
+<li>Add <strong>in-memory caching</strong> and <strong>multiple data sources</strong>.</li>
+<li>Write <strong>fakes</strong> and test repositories properly.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a repository is a promise: "ask me for data and I will give you the best I have, without telling you how I got it".</p>
+<p class="v2-p"><strong>Honesty note:</strong> Room 3 package names are used below, as in lesson 34. If your project uses Room 2.x, change <code>androidx.room3</code> to <code>androidx.room</code> and follow the mapping in lesson 34.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Layers and the dependency rule</strong> (lessons 60 and 61).</li>
+<li><strong>Room, DAOs and Flow</strong> (lesson 34).</li>
+<li><strong>Retrofit and Kotlin serialization</strong> (lesson 29).</li>
+<li><strong>Coroutines, dispatchers and Flow</strong> (lesson 33).</li>
+<li><strong>Interfaces and fakes</strong> (lesson 60).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Repositories and Data Sources</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>ViewModel / Use case
+        │ asks
+        ▼
+  Repository           ← one per type of data (Students, Payments)
+   │          │
+   ▼          ▼
+Local data   Remote data
+source       source
+(Room DAO)   (Retrofit service)</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>Responsibility</th>
+<th>Never</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Data source</strong></td>
+<td>Works with <strong>one</strong> source (a DAO, a service, a file, DataStore)</td>
+<td>Combine other sources or know the UI</td>
+</tr>
+<tr>
+<td><strong>Repository</strong></td>
+<td>Exposes data to the rest of the app, <strong>resolves conflicts between sources</strong>, holds business rules about data, <strong>chooses threads</strong></td>
+<td>Expose DAOs, DTOs or Cursors; reference ViewModels</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The official guidance lists what a repository does:</p>
+<ul class="v2-ul">
+<li><strong>Exposes data</strong> to the rest of the app.</li>
+<li><strong>Centralises changes</strong> to the data.</li>
+<li><strong>Resolves conflicts</strong> between multiple data sources.</li>
+<li><strong>Abstracts sources</strong> from the rest of the app.</li>
+<li><strong>Contains business logic</strong> that concerns the data.</li>
+</ul>
+<h3 class="v2-h3">One repository per type of data</h3>
+<p class="v2-p">Create <code>StudentsRepository</code>, <code>PaymentsRepository</code>, <code>SettingsRepository</code>. Do not create <code>AppRepository</code> containing everything. Each type of data has its own lifecycle, sources and rules.</p>
+<h3 class="v2-h3">Naming conventions (recommended)</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>Pattern</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Data type</td>
+<td>Data type + <code>Repository</code></td>
+<td><code>PaymentsRepository</code></td>
+</tr>
+<tr>
+<td>Data source</td>
+<td>Type + source + <code>DataSource</code></td>
+<td><code>PaymentsLocalDataSource</code>, <code>PaymentsRemoteDataSource</code></td>
+</tr>
+<tr>
+<td>Models</td>
+<td>Source-specific suffixes</td>
+<td><code>PaymentEntity</code> (database), <code>PaymentDto</code> or <code>NetworkPayment</code> (network), <code>Payment</code> (app model)</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Repositories and Data Sources</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: Models for Each Layer</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">A single model class shared by network, database and UI looks tidy but couples everything. If the server renames <code>amt</code> to <code>amount_paid</code>, the screen would break. The recommended approach is <strong>separate models</strong> with <strong>mappers</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Network model: shaped like the server's JSON
+@Serializable
+data class PaymentDto(
+    val id: Int,
+    @SerialName("student_name") val studentName: String,
+    @SerialName("amount_kobo") val amountKobo: Long,
+    @SerialName("paid_at") val paidAt: String          // ISO-8601
+)
+
+// Database model: shaped like the table
+@Entity(tableName = "payments")
+data class PaymentEntity(
+    @PrimaryKey val id: Int,
+    val studentName: String,
+    val amountKobo: Long,
+    val paidAtEpochMillis: Long
+)
+
+// App model: shaped like what the app needs
+data class Payment(
+    val id: Int,
+    val studentName: String,
+    val amountNaira: Long,
+    val paidAt: Instant
+)</code></pre></div></div>
+<p class="v2-p">Mapping functions sit next to the models (extension functions are idiomatic):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun PaymentDto.toEntity() = PaymentEntity(
+    id = id,
+    studentName = studentName,
+    amountKobo = amountKobo,
+    paidAtEpochMillis = Instant.parse(paidAt).toEpochMilli()
+)
+
+fun PaymentEntity.toModel() = Payment(
+    id = id,
+    studentName = studentName,
+    amountNaira = amountKobo / 100,
+    paidAt = Instant.ofEpochMilli(paidAtEpochMillis)
+)</code></pre></div></div>
+<p class="v2-p">Notice the benefit: money is stored in <strong>kobo</strong> (a whole number, avoiding rounding errors) while the UI model uses naira. The server's date string becomes a real <code>Instant</code>. The ViewModel never sees <code>PaymentDto</code>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>When is one model enough?</strong> For tiny apps where the formats match, a single model is fine. Introduce separate models when they start to diverge. Do not create three identical classes "just in case".</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Models for Each Layer</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Data Sources</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Local data source (Room)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Dao
+interface PaymentDao {
+    @Query("SELECT * FROM payments ORDER BY paidAtEpochMillis DESC")
+    fun observeAll(): Flow&lt;List&lt;PaymentEntity&gt;&gt;
+
+    @Upsert
+    suspend fun upsertAll(payments: List&lt;PaymentEntity&gt;)
+
+    @Query("DELETE FROM payments")
+    suspend fun clear()
+}</code></pre></div></div>
+<p class="v2-p">(<code>@Upsert</code> inserts or updates in one call; it exists in Room 2.5 and later and in Room 3. Check the current imports as in lesson 34.)</p>
+<h3 class="v2-h3">Remote data source (Retrofit)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface PaymentApi {
+    @GET("payments")
+    suspend fun getPayments(@Query("since") since: String? = null): List&lt;PaymentDto&gt;
+
+    @POST("payments")
+    suspend fun createPayment(@Body body: NewPaymentDto): PaymentDto
+}</code></pre></div></div>
+<p class="v2-p">Retrofit's <code>suspend</code> functions run network work <strong>off the main thread</strong> by themselves, so a call can safely be made from <code>viewModelScope</code> with the default dispatcher. Even so, the repository still decides which dispatcher to use for <strong>CPU work</strong> such as mapping large lists.</p>
+<h3 class="v2-h3">Wrapping with <code>DataSource</code> classes</h3>
+<p class="v2-p">Wrapping the DAO and the API in small classes keeps the repository free of framework details and easy to fake:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class PaymentsLocalDataSource(private val dao: PaymentDao) {
+    fun observeAll(): Flow&lt;List&lt;PaymentEntity&gt;&gt; = dao.observeAll()
+    suspend fun saveAll(items: List&lt;PaymentEntity&gt;) = dao.upsertAll(items)
+}
+
+class PaymentsRemoteDataSource(private val api: PaymentApi) {
+    suspend fun fetchAll(): List&lt;PaymentDto&gt; = api.getPayments()
+    suspend fun create(payment: NewPaymentDto): PaymentDto = api.createPayment(payment)
+}</code></pre></div></div>
+<p class="v2-p">Some teams skip the wrapper and let the repository use the DAO or API directly, because they are already interfaces. Both are acceptable; use the wrapper when it adds a real seam for testing or hides details.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Data Sources</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: The Repository</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">The contract</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface PaymentsRepository {
+    /** Observes stored payments. Emits again whenever data changes. */
+    fun observePayments(): Flow&lt;List&lt;Payment&gt;&gt;
+
+    /** Fetches the latest payments from the server and stores them. */
+    suspend fun refresh(): Result&lt;Unit&gt;
+
+    /** Records a payment. */
+    suspend fun record(studentName: String, amountNaira: Long): Result&lt;Payment&gt;
+}</code></pre></div></div>
+<p class="v2-p">Principles in this small interface:</p>
+<ul class="v2-ul">
+<li><strong>Reads are <code>Flow</code></strong>: the UI gets updates automatically.</li>
+<li><strong>One-shot actions are <code>suspend</code></strong>: callable only from a coroutine, off the main thread by the repository's own choice.</li>
+<li><strong>Results are explicit</strong>: failures are values (<code>Result</code>), not surprises.</li>
+<li><strong>Nothing mutable leaks</strong>: lists are read-only; models are immutable.</li>
+</ul>
+<h3 class="v2-h3">The implementation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class DefaultPaymentsRepository(
+    private val local: PaymentsLocalDataSource,
+    private val remote: PaymentsRemoteDataSource,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : PaymentsRepository {
+
+    override fun observePayments(): Flow&lt;List&lt;Payment&gt;&gt; =
+        local.observeAll()
+            .map { entities -&gt; entities.map { it.toModel() } }
+            .flowOn(ioDispatcher)
+
+    override suspend fun refresh(): Result&lt;Unit&gt; = withContext(ioDispatcher) {
+        runCatchingNetwork {
+            val dtos = remote.fetchAll()
+            local.saveAll(dtos.map { it.toEntity() })
+        }
+    }
+
+    override suspend fun record(studentName: String, amountNaira: Long): Result&lt;Payment&gt; =
+        withContext(ioDispatcher) {
+            runCatchingNetwork {
+                val dto = remote.create(NewPaymentDto(studentName, amountNaira * 100))
+                val entity = dto.toEntity()
+                local.saveAll(listOf(entity))
+                entity.toModel()
+            }
+        }
+}</code></pre></div></div>
+<p class="v2-p">Key decisions here:</p>
+<ul class="v2-ul">
+<li>The UI <strong>observes the database</strong>, which is the <strong>single source of truth</strong>. <code>refresh()</code> writes new data into the database; observers update automatically (lesson 64 develops this).</li>
+<li><code>ioDispatcher</code> is <strong>injected</strong> with a default. Tests pass a test dispatcher.</li>
+<li><code>flowOn(ioDispatcher)</code> affects the <strong>upstream</strong> of the flow (the DAO query and the mapping), not the collector.</li>
+<li>The repository maps <code>PaymentEntity</code> to <code>Payment</code>: no database type leaves the data layer.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Repository</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: Errors</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Network and disk failures are <strong>normal events</strong>, not exceptional ones. Decide how errors travel.</p>
+<h3 class="v2-h3">A careful <code>runCatching</code></h3>
+<p class="v2-p">Kotlin's <code>runCatching</code> catches <strong>every</strong> <code>Throwable</code>, including <code>CancellationException</code>. Catching that breaks coroutine cancellation. Write a helper that rethrows it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>suspend inline fun &lt;T&gt; runCatchingNetwork(block: () -&gt; T): Result&lt;T&gt; =
+    try {
+        Result.success(block())
+    } catch (e: CancellationException) {
+        throw e                                  // never swallow cancellation
+    } catch (e: IOException) {
+        Result.failure(e)                        // no connection, timeouts
+    } catch (e: HttpException) {
+        Result.failure(e)                        // server answered with an error code
+    }</code></pre></div></div>
+<p class="v2-p">(<code>HttpException</code> comes from Retrofit; <code>IOException</code> from <code>java.io</code>.)</p>
+<h3 class="v2-h3">A domain-flavoured error type</h3>
+<p class="v2-p">When the UI should react differently (retry, sign in again, show a message), a sealed type is clearer than a raw exception:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface DataError {
+    data object NoConnection : DataError
+    data object Unauthorised : DataError
+    data class Server(val code: Int) : DataError
+    data class Unknown(val cause: Throwable) : DataError
+}
+
+class DataException(val error: DataError) : Exception()
+
+fun Throwable.toDataError(): DataError = when (this) {
+    is IOException -&gt; DataError.NoConnection
+    is HttpException -&gt; if (code() == 401) DataError.Unauthorised else DataError.Server(code())
+    else -&gt; DataError.Unknown(this)
+}</code></pre></div></div>
+<p class="v2-p">The ViewModel maps <code>DataError</code> to user-friendly state (<code>"Check your connection"</code>). The repository does <strong>not</strong> produce UI strings; it produces data and errors, and the UI layer decides the wording and language.</p>
+<h3 class="v2-h3">What about errors in flows?</h3>
+<p class="v2-p">An exception thrown inside a flow terminates it. The ViewModel adds <code>.catch { ... }</code> (lesson 61). Inside repositories, use <code>catch</code> only when you can <strong>recover</strong> (for example, fall back to cached data); otherwise let it flow downstream.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Errors</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: Caching and Multiple Sources</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">In-memory cache with a mutex</h3>
+<p class="v2-p">For data that is read often and changes rarely (such as school settings), keep a small in-memory cache with a <strong>mutex</strong> to protect it from concurrent access:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class SettingsRepository(
+    private val remote: SettingsRemoteDataSource,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) {
+    private val mutex = Mutex()
+    private var cached: Settings? = null
+
+    suspend fun settings(forceRefresh: Boolean = false): Settings {
+        if (!forceRefresh) cached?.let { return it }          // fast path, no lock
+        return mutex.withLock {
+            // check again: another coroutine may have loaded while we waited
+            if (!forceRefresh) cached?.let { return it }
+            withContext(ioDispatcher) { remote.fetch() }.also { cached = it }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Points to notice: the cache is <strong>private</strong>, the lock covers only the update, and the second check avoids loading twice.</p>
+<h3 class="v2-h3">Combining sources: the policy decides</h3>
+<p class="v2-p">A repository may read from several sources. State your <strong>policy</strong> clearly:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Policy</th>
+<th>Behaviour</th>
+<th>Good for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Network-first</strong></td>
+<td>Try the network, fall back to disk</td>
+<td>Data that must be fresh</td>
+</tr>
+<tr>
+<td><strong>Cache-first</strong></td>
+<td>Show disk instantly, refresh in the background</td>
+<td>Feeds, lists</td>
+</tr>
+<tr>
+<td><strong>Offline-first (database as truth)</strong></td>
+<td>UI reads only the database; sync updates it</td>
+<td>Apps used with poor connectivity</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Offline-first is the recommended default for many apps and is the subject of lesson 64.</p>
+<h3 class="v2-h3">Writing: where do changes go?</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Meaning</th>
+<th>Trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Online-only</strong></td>
+<td>Send to the server; update the database on success</td>
+<td>Simple; fails offline</td>
+</tr>
+<tr>
+<td><strong>Queued</strong></td>
+<td>Save locally, mark as pending, upload later (WorkManager)</td>
+<td>Works offline; needs sync logic</td>
+</tr>
+<tr>
+<td><strong>Lazy</strong></td>
+<td>Save locally, sync eventually</td>
+<td>Fast; conflict handling needed</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Caching and Multiple Sources</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: Testing with Fakes</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">The guidance is to <strong>prefer fakes over mocks</strong>: a fake is a small working implementation, so tests describe behaviour instead of recorded calls.</p>
+<p class="v2-p">A fake can only replace a class if callers depend on an abstraction. So make the data sources <strong>interfaces</strong> (the Room and Retrofit versions from Build 2 become implementations such as <code>RoomPaymentsLocalDataSource</code>), and fakes become trivial:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface PaymentsLocalDataSource {
+    fun observeAll(): Flow&lt;List&lt;PaymentEntity&gt;&gt;
+    suspend fun saveAll(items: List&lt;PaymentEntity&gt;)
+}
+
+class FakeLocal : PaymentsLocalDataSource {
+    private val state = MutableStateFlow&lt;List&lt;PaymentEntity&gt;&gt;(emptyList())
+    override fun observeAll() = state
+    override suspend fun saveAll(items: List&lt;PaymentEntity&gt;) {
+        state.value = (state.value.associateBy { it.id } + items.associateBy { it.id }).values.toList()
+    }
+}
+
+class FakeRemote(var result: () -&gt; List&lt;PaymentDto&gt;) : PaymentsRemoteDataSource {
+    override suspend fun fetchAll(): List&lt;PaymentDto&gt; = result()
+    override suspend fun create(payment: NewPaymentDto): PaymentDto = error("not needed")
+}</code></pre></div></div>
+<p class="v2-p">(<code>PaymentsRemoteDataSource</code> is likewise turned into an interface with the production class <code>RetrofitPaymentsRemoteDataSource</code>.) Now the tests:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class DefaultPaymentsRepositoryTest {
+
+    private val dto = PaymentDto(1, "Ada", 150_000_00, "2026-10-01T09:00:00Z")
+
+    @Test
+    fun refresh_stores_remote_payments_and_observers_see_them() = runTest {
+        val local = FakeLocal()
+        val repo = DefaultPaymentsRepository(local, FakeRemote { listOf(dto) }, StandardTestDispatcher(testScheduler))
+
+        val result = repo.refresh()
+
+        assertTrue(result.isSuccess)
+        assertEquals(listOf("Ada"), repo.observePayments().first().map { it.studentName })
+    }
+
+    @Test
+    fun refresh_failure_returns_failure_and_keeps_old_data() = runTest {
+        val local = FakeLocal().apply { saveAll(listOf(dto.toEntity())) }
+        val repo = DefaultPaymentsRepository(local, FakeRemote { throw IOException("offline") }, StandardTestDispatcher(testScheduler))
+
+        val result = repo.refresh()
+
+        assertTrue(result.isFailure)
+        assertEquals(1, repo.observePayments().first().size)      // old data survives
+    }
+}</code></pre></div></div>
+<p class="v2-p">The second test captures an important rule of offline apps: <strong>a failed refresh must not erase what the user already has</strong>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Testing with Fakes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 7: Threading and Ownership Rules</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Two questions decide whether a data layer is pleasant or painful to use: <strong>who chooses the thread</strong>, and <strong>who owns the work</strong>.</p>
+<h3 class="v2-h3">Who chooses the thread?</h3>
+<p class="v2-p">The recommendation is that <strong>suspend functions in the data layer are main-safe</strong>. That means a caller on the main thread can call <code>repository.refresh()</code> without freezing the screen, because the repository switches to the right dispatcher internally. The ViewModel then needs no <code>withContext</code> calls and no knowledge of how slow the operation is. Room and Retrofit already move their own blocking work off the main thread, but your own mapping of thousands of rows, file reads or image processing is not covered by that promise, so wrap such work in <code>withContext(ioDispatcher)</code> or <code>defaultDispatcher</code> yourself. Use the <strong>IO</strong> dispatcher for waiting on disks and sockets, and the <strong>Default</strong> dispatcher for heavy computation such as sorting, filtering or parsing a very large list.</p>
+<h3 class="v2-h3">Who owns the work?</h3>
+<p class="v2-p">Most work started by a repository should last only as long as the <strong>caller</strong> is interested. If the ViewModel is cleared, a running <code>refresh()</code> is cancelled with it. That is correct for reads. Some work must <strong>outlive</strong> the screen, such as uploading a payment the user has just recorded: if they press back, the upload should still finish. For that case the repository needs a longer-lived scope, which you inject as an <strong>application-level <code>CoroutineScope</code></strong> (a <code>SupervisorJob</code> plus a dispatcher), or you hand the job to <strong>WorkManager</strong>, which also survives process death and retries with back-off. Avoid <code>GlobalScope</code>, because nothing owns it and you cannot cancel or test it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class DefaultPaymentsRepository(
+    private val local: PaymentsLocalDataSource,
+    private val remote: PaymentsRemoteDataSource,
+    private val ioDispatcher: CoroutineDispatcher,
+    private val appScope: CoroutineScope          // lives as long as the application
+) : PaymentsRepository {
+
+    suspend fun recordAndKeepUploading(studentName: String, amountNaira: Long) {
+        // saved locally at once; the upload continues even if the caller is cancelled
+        appScope.launch(ioDispatcher) { upload(studentName, amountNaira) }
+    }
+
+    private suspend fun upload(studentName: String, amountNaira: Long) { /* ... */ }
+}</code></pre></div></div>
+<p class="v2-p">In lesson 64 you will replace this ad hoc scope with a WorkManager worker so that unsent payments survive a restart.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Threading and Ownership Rules</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Leaky repository</strong></p>
+<p class="v2-p">Find three problems in this interface and fix them.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface StudentsRepository {
+    fun getStudents(): MutableList&lt;StudentEntity&gt;
+    fun loadFromServer(callback: (List&lt;StudentDto&gt;) -&gt; Unit)
+    fun dao(): StudentDao
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(1) It returns a <strong>mutable</strong> list, so callers could change shared data. (2) It exposes <strong>database and network models</strong> (<code>StudentEntity</code>, <code>StudentDto</code>) instead of app models. (3) It exposes the <strong>DAO</strong>, breaking the abstraction, and uses a <strong>callback</strong> rather than coroutines. Fix:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface StudentsRepository {
+    fun observeStudents(): Flow&lt;List&lt;Student&gt;&gt;
+    suspend fun refresh(): Result&lt;Unit&gt;
+}</code></pre></div></div></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Cancellation</strong></p>
+<p class="v2-p">Why is this helper dangerous, and what is the fix?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>suspend fun &lt;T&gt; safeCall(block: suspend () -&gt; T): Result&lt;T&gt; =
+    try { Result.success(block()) } catch (e: Exception) { Result.failure(e) }</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>CancellationException</code> is an <code>Exception</code>. When the coroutine is cancelled (for example the user leaves the screen), the exception is caught and turned into a failure, so the coroutine may carry on instead of stopping. Rethrow it first:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>suspend fun &lt;T&gt; safeCall(block: suspend () -&gt; T): Result&lt;T&gt; =
+    try { Result.success(block()) }
+    catch (e: CancellationException) { throw e }
+    catch (e: Exception) { Result.failure(e) }</code></pre></div></div></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Policy choice</strong></p>
+<p class="v2-p">For each data type choose network-first, cache-first or offline-first: (a) the bursar's list of payments in an area with unreliable networks; (b) a live exchange rate; (c) the school's timetable that changes once a term.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(a) Offline-first: the database is the truth and sync happens when possible. (b) Network-first: stale values are misleading, with the last known value as a labelled fallback. (c) Cache-first: show stored data immediately and refresh occasionally in the background.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Exposing DAOs, DTOs or entities to the UI.</strong> <em>Fix:</em> map to app models in the repository.</p>
+<p class="v2-p"><strong>Mistake #2: Returning mutable collections.</strong> <em>Fix:</em> return <code>List</code>, copy on change.</p>
+<p class="v2-p"><strong>Mistake #3: Swallowing <code>CancellationException</code>.</strong> <em>Fix:</em> rethrow it.</p>
+<p class="v2-p"><strong>Mistake #4: One giant repository.</strong> <em>Fix:</em> one per type of data.</p>
+<p class="v2-p"><strong>Mistake #5: Hard-coded dispatchers.</strong> <em>Fix:</em> inject them with sensible defaults.</p>
+<p class="v2-p"><strong>Mistake #6: Clearing local data before the refresh succeeds.</strong> <em>Fix:</em> write only after success; use transactions when replacing.</p>
+<p class="v2-p"><strong>Mistake #7: Putting UI text in repositories.</strong> <em>Fix:</em> return typed errors; the UI picks wording.</p>
+<p class="v2-p"><strong>Mistake #8: Money as <code>Double</code>.</strong> <em>Fix:</em> use whole units (kobo) or <code>BigDecimal</code>.</p>
+<p class="v2-p"><strong>Mistake #9: Mocking every call in tests.</strong> <em>Fix:</em> write simple fakes.</p>
+<p class="v2-p"><strong>Mistake #10: Using <code>GlobalScope</code> for sync.</strong> <em>Fix:</em> use a scope the app owns, or WorkManager.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What are the main responsibilities of a repository?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Expose data, centralise changes, resolve conflicts between sources, abstract the sources, and hold business logic about the data.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why use separate network, database and app models?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">So that a change in one format (a renamed JSON field, a new column) does not ripple through the whole app; mappers absorb the change.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>flowOn(ioDispatcher)</code> change?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It changes the context of the upstream operators (the flow's producer and earlier operators), not the collector.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why prefer fakes over mocks?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Fakes behave like real implementations, so tests check results and stay valid when internal calls change; mocks tie tests to specific calls.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What must happen if a refresh fails while offline?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">The existing local data must remain, and the failure is reported as a value so the UI can show a message.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/android-architecture" rel="noopener noreferrer">Modern Android App Architecture programme</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer" rel="noopener noreferrer">Data layer</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer/offline-first" rel="noopener noreferrer">Offline-first apps</a></li>
+<li><a href="https://developer.android.com/topic/architecture/recommendations" rel="noopener noreferrer">Recommendations for Android architecture</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">A Tested Payments Repository</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build and test the data layer for the FeeTracker payments feature.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create <code>PaymentDto</code>, <code>PaymentEntity</code> and <code>Payment</code>, with mappers in both directions where needed.</li>
+<li>Define <code>PaymentsLocalDataSource</code> and <code>PaymentsRemoteDataSource</code> as <strong>interfaces</strong>, with Room and Retrofit implementations (or a fake remote with <code>delay</code> if you have no server).</li>
+<li>Implement <code>DefaultPaymentsRepository</code> with <code>observePayments()</code>, <code>refresh()</code> and <code>record()</code> exposing <code>Flow</code> and <code>Result</code>.</li>
+<li>Use the careful <code>runCatchingNetwork</code> helper and a <code>DataError</code> mapping.</li>
+<li>Inject the dispatcher.</li>
+<li>Add fakes and write at least five tests: successful refresh, failed refresh keeps old data, record success updates observers, cancellation is not swallowed, and mapping converts kobo to naira.</li>
+<li>Document the repository's sync policy in a comment at the top of the class.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add an in-memory cache for <code>settings</code> with a mutex and test that two concurrent calls hit the remote only once.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A cancellation test and a mapping test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class RunCatchingNetworkTest {
+    @Test
+    fun cancellation_is_rethrown() = runTest {
+        val job = launch {
+            runCatchingNetwork { throw CancellationException("stop") }
+            fail("should not continue")
+        }
+        job.join()
+        assertTrue(job.isCancelled)
+    }
+}
+
+class MappersTest {
+    @Test
+    fun entity_converts_kobo_to_naira() {
+        val entity = PaymentEntity(1, "Ada", amountKobo = 150_000_00, paidAtEpochMillis = 0)
+        assertEquals(150_000L, entity.toModel().amountNaira)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The concurrent-cache stretch test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun concurrent_calls_load_once() = runTest {
+    var calls = 0
+    val remote = object : SettingsRemoteDataSource {
+        override suspend fun fetch(): Settings { calls++; delay(100); return Settings("ISCGS") }
+    }
+    val repo = SettingsRepository(remote, StandardTestDispatcher(testScheduler))
+
+    val a = async { repo.settings() }
+    val b = async { repo.settings() }
+    awaitAll(a, b)
+
+    assertEquals(1, calls)
+}</code></pre></div></div>
+<p class="v2-p">A top-of-class policy comment (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Policy: offline-first. The UI observes the database only. refresh() downloads
+payments and upserts them; a failed refresh never deletes local data.
+record() posts to the server and, on success, stores the returned payment.</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 62 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-62-the-data-layer-repositories-data-sources-a</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 62 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Repositories and Data Sources</li><li>✅ Step-by-Step Build 1: Models for Each Layer</li><li>✅ Step-by-Step Build 2: Data Sources</li><li>✅ Step-by-Step Build 3: The Repository</li><li>✅ Step-by-Step Build 4: Errors</li><li>✅ Step-by-Step Build 5: Caching and Multiple Sources</li><li>✅ Step-by-Step Build 6: Testing with Fakes</li><li>✅ Step-by-Step Build 7: Threading and Ownership Rules</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_61.html" class="ln-btn">&#8592; Lesson 61</a><a href="lesson_63.html" class="ln-btn primary">Lesson 63 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 62 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

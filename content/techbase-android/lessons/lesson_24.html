@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 24: App Architecture and the ViewModel — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l24">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 24 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 24</div>
+      <h1>App Architecture and the ViewModel</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Tip Split Tracker with a ViewModel</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 24</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Learn why architecture matters, how the UI layer works, and move state out of composables into a ViewModel.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Tip Split Tracker with a ViewModel</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 23 you met a painful fact: rotate the phone and your Activity is destroyed. You fixed a counter with <code>rememberSaveable</code>, which is fine for a few small numbers. But real screens hold a lot more: a list loaded from the network, a form with ten fields, the logic that decides what to show. Piling all of that into composables makes code that is hard to read, hard to test and easy to break.</p>
+<p class="v2-p">The Android answer is <strong>architecture</strong>: a set of simple rules about where each kind of code lives. The first and most important tool is the <strong>ViewModel</strong>, a class that holds your screen's state and logic and <strong>survives rotation</strong>.</p>
+<p class="v2-p">This lesson covers three items from Unit 4 of Google's official <strong>Android Basics with Compose</strong> course: <em>Intro to App architecture</em>, <em>Architecture: The UI Layer</em> and <em>ViewModel and State in Compose</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain separation of concerns and why apps are split into a <strong>UI layer</strong> and a <strong>data layer</strong>.</li>
+<li>Describe <strong>unidirectional data flow</strong> (state down, events up).</li>
+<li>Create a <code>ViewModel</code>, get it in Compose with <code>viewModel()</code> and see that it survives configuration changes.</li>
+<li>Model a whole screen as an immutable <strong>UI state</strong> data class.</li>
+<li>Expose state with <code>MutableStateFlow</code> and <code>asStateFlow</code>, and collect it with <code>collectAsStateWithLifecycle()</code>.</li>
+<li>Move the Dessert Clicker state out of the composable into a ViewModel.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> composables should <em>draw</em> state and <em>report</em> events. They should not <em>own</em> important state or business rules.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>State, <code>remember</code> and <code>rememberSaveable</code></strong> (lessons 17 and 23).</li>
+<li><strong>Data classes and <code>copy</code></strong> (lesson 11). <code>copy</code> makes a new object with a few fields changed, which you will use constantly with UI state.</li>
+<li><strong>Lambdas and function types</strong> (lesson 12). A parameter of type <code>() -&gt; Unit</code> is a callback.</li>
+<li><strong>The Dessert Clicker app from lesson 23.</strong> If you did not build it, you can follow along with the code in this lesson; the screen is small.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Why Architecture?</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Imagine a restaurant with no separation of jobs: one person takes orders, cooks, washes dishes, handles money and cleans tables. It works for two customers and collapses at twenty. A real restaurant has a waiter (talks to customers), a kitchen (prepares food) and a storeroom (holds ingredients). Each can change without rewriting the others.</p>
+<p class="v2-p">App architecture applies the same idea, called <strong>separation of concerns</strong>: each class has <strong>one reason to change</strong>.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Benefit</th>
+<th>What it means for you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Testability</strong></td>
+<td>Logic in a plain class can be tested on your laptop in milliseconds. Logic inside composables needs an emulator.</td>
+</tr>
+<tr>
+<td><strong>Survives change</strong></td>
+<td>State outside the Activity is not lost on rotation.</td>
+</tr>
+<tr>
+<td><strong>Teamwork</strong></td>
+<td>One person can build the screen while another builds the network code.</td>
+</tr>
+<tr>
+<td><strong>Readability</strong></td>
+<td>You know where to look for a bug.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">The layers</h3>
+<p class="v2-p">Google's guide to app architecture recommends <strong>layers</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+--------------------------------------------------+
+|  UI layer           what the user sees           |
+|   Composables  &lt;--- state --- ViewModel          |
+|        |                          ^              |
+|        +---------- events --------+              |
++----------------------|---------------------------+
+                       |
++----------------------v---------------------------+
+|  Data layer         where data comes from        |
+|   Repositories, network, database, files         |
++--------------------------------------------------+</code></pre></div></div>
+<ul class="v2-ul">
+<li>The <strong>UI layer</strong> shows data on screen and handles user input. It has two parts: <strong>UI elements</strong> (your composables) and <strong>state holders</strong> (usually ViewModels) that decide what the UI should show.</li>
+<li>The <strong>data layer</strong> holds your app's data and business rules: a repository that reads from a web service or a database. You build it in lessons 29, 30 and 34.</li>
+<li>An optional <strong>domain layer</strong> sits between them for complex reusable logic (lesson 62).</li>
+</ul>
+<p class="v2-p">Today you work in the UI layer. Dessert Clicker has no data layer yet.</p>
+<h3 class="v2-h3">Unidirectional data flow</h3>
+<p class="v2-p">The key rule of modern UI code is <strong>unidirectional data flow (UDF)</strong>:</p>
+<ul class="v2-ul">
+<li><strong>State flows down:</strong> the ViewModel holds the state and hands it to the composables.</li>
+<li><strong>Events flow up:</strong> when the user taps something, the composable calls a function on the ViewModel. It does not change the state itself.</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>      state (read-only)
+  ViewModel ──────────────────▶ Composable draws it
+      ▲                              │
+      └──────── events ◀─────────────┘
+        (onClick calls viewModel.dessertClicked())</code></pre></div></div>
+<p class="v2-p">Why bother? There is exactly <strong>one place</strong> where state changes, so you can always answer "who changed this value?" Debugging becomes simple, and tests simply call the ViewModel's functions and check the state.</p>
+<h3 class="v2-h3">What is a ViewModel?</h3>
+<p class="v2-p">A <code>ViewModel</code> is a class from the Jetpack Lifecycle library with two helpful properties:</p>
+<ol class="v2-ol">
+<li>It holds screen state and the logic that changes it.</li>
+<li>Android <strong>keeps the same instance alive across configuration changes</strong>. It is destroyed only when the user really leaves the screen (for example, presses Back out of the Activity).</li>
+</ol>
+<p class="v2-p">So after rotation, the new Activity asks for the ViewModel and gets back the <strong>same object</strong> with the same state. This is cheaper and bigger than <code>rememberSaveable</code>: you can keep objects of any type, not just things that fit in a Bundle.</p>
+<p class="v2-p">Be honest about its limits: a ViewModel does <strong>not</strong> survive process death. Anything critical must also be saved with <code>SavedStateHandle</code> (covered in lesson 25 and lesson 26) or persisted to storage (lessons 34 and 35).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Why Architecture?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Dependencies</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">The Empty Activity template does not always include the Compose ViewModel integration. Open <code>gradle/libs.versions.toml</code> and look for a lifecycle entry. If you do not see <code>lifecycle-viewmodel-compose</code> and <code>lifecycle-runtime-compose</code>, add them. Look up the latest stable versions on the official Lifecycle release page (https://developer.android.com/jetpack/androidx/releases/lifecycle) rather than copying a number from a tutorial. Since the catalog layout varies by Android Studio version, the shape below is what matters:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+lifecycle = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }</code></pre></div></div>
+<p class="v2-p">Then add them to <code>app/build.gradle.kts</code> and click <strong>Sync Now</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+}</code></pre></div></div>
+<p class="v2-p">Lesson 28 explains this system fully. For today just follow the pattern.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Dependencies</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Model the Screen with a UI State Class</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Everything the screen displays goes into <strong>one immutable data class</strong>. For Dessert Clicker that is the revenue, the number sold and the dessert to show.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DessertUiState.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker.ui
+
+data class DessertUiState(
+    val revenue: Int = 0,
+    val dessertsSold: Int = 0,
+    val currentDessertIndex: Int = 0,
+    val currentDessertName: String = "Cupcake"
+)</code></pre></div></div>
+<p class="v2-p">Properties are <code>val</code>, not <code>var</code>. The class is <strong>immutable</strong>: you never change an existing state object, you create a new one with <code>copy</code>. That is what lets Compose reliably detect a change.</p>
+<p class="v2-p">We store the dessert's <strong>name and index</strong>, not the whole <code>Dessert</code> object, to keep the example simple. In larger apps you may store the object itself. Reusing the data from lesson 23:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Dessert.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker
+
+data class Dessert(val name: String, val price: Int, val startProductionAmount: Int)
+
+val desserts = listOf(
+    Dessert("Cupcake", price = 5, startProductionAmount = 0),
+    Dessert("Donut", price = 10, startProductionAmount = 5),
+    Dessert("Eclair", price = 15, startProductionAmount = 20),
+    Dessert("Froyo", price = 30, startProductionAmount = 50),
+    Dessert("Gingerbread", price = 50, startProductionAmount = 100)
+)
+
+fun determineDessertIndex(dessertsSold: Int): Int {
+    var index = 0
+    for ((i, dessert) in desserts.withIndex()) {
+        if (dessertsSold &gt;= dessert.startProductionAmount) index = i else break
+    }
+    return index
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Model the Screen with a UI State Class</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: The ViewModel</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Create <code>DessertViewModel.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DessertViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker.ui
+
+import androidx.lifecycle.ViewModel
+import com.example.dessertclicker.desserts
+import com.example.dessertclicker.determineDessertIndex
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+class DessertViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(DessertUiState())
+    val uiState: StateFlow&lt;DessertUiState&gt; = _uiState.asStateFlow()
+
+    fun onDessertClicked() {
+        _uiState.update { current -&gt;
+            val sold = current.dessertsSold + 1
+            val index = determineDessertIndex(sold)
+            current.copy(
+                revenue = current.revenue + desserts[current.currentDessertIndex].price,
+                dessertsSold = sold,
+                currentDessertIndex = index,
+                currentDessertName = desserts[index].name
+            )
+        }
+    }
+
+    fun onReset() {
+        _uiState.value = DessertUiState()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Read it slowly:</p>
+<ul class="v2-ul">
+<li><code>MutableStateFlow&lt;DessertUiState&gt;</code> is an observable box that always holds one value and tells observers when it changes. It is part of Kotlin coroutines (the flow library) which you will meet properly in lessons 28 and 33.</li>
+<li><code>_uiState</code> is <strong>private and mutable</strong>: only the ViewModel can change it.</li>
+<li><code>uiState</code> is <strong>public and read-only</strong> (<code>StateFlow</code>), created with <code>asStateFlow()</code>. Composables can read it but cannot assign to it. This is called a <strong>backing property</strong> and the underscore naming is the Kotlin convention for it.</li>
+<li><code>onDessertClicked()</code> is the event handler. <code>update { }</code> computes the new value from the old one <strong>atomically</strong>, which is safe even if two things call it at once.</li>
+<li>Note that the revenue uses the price of the dessert that was <strong>on screen when it was tapped</strong> (the old index), then the index moves on.</li>
+</ul>
+<p class="v2-p">The ViewModel has no import from <code>androidx.compose</code> and no reference to the Activity or any composable. That is deliberate: it means you can test it with plain JUnit (lesson 25).</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Never</strong> pass a <code>Context</code>, an Activity or a composable into a ViewModel. The ViewModel outlives the Activity and would leak it, holding the old screen in memory. If you need a Context, you will use <code>AndroidViewModel</code> or dependency injection (lessons 30 and 63).</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The ViewModel</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Connect the ViewModel to Compose</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Now rewrite the screen. The composable receives <strong>state</strong> and <strong>callbacks</strong>, and does not know the ViewModel exists. This makes it previewable and testable.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DessertClickerScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+@Composable
+fun DessertClickerApp(
+    modifier: Modifier = Modifier,
+    viewModel: DessertViewModel = viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    DessertClickerScreen(
+        uiState = uiState,
+        onDessertClicked = viewModel::onDessertClicked,
+        onReset = viewModel::onReset,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun DessertClickerScreen(
+    uiState: DessertUiState,
+    onDessertClicked: () -&gt; Unit,
+    onReset: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = onDessertClicked) {
+            Text(uiState.currentDessertName, style = MaterialTheme.typography.headlineMedium)
+        }
+        Text(
+            text = "Desserts sold: ${uiState.dessertsSold}",
+            modifier = Modifier.padding(top = 24.dp),
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = "Total revenue: ₦${uiState.revenue}",
+            style = MaterialTheme.typography.titleLarge
+        )
+        OutlinedButton(onClick = onReset, modifier = Modifier.padding(top = 16.dp)) {
+            Text("Reset")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DessertClickerScreenPreview() {
+    DessertClickerScreen(
+        uiState = DessertUiState(revenue = 45, dessertsSold = 7, currentDessertName = "Donut"),
+        onDessertClicked = {},
+        onReset = {}
+    )
+}</code></pre></div></div>
+<h3 class="v2-h3">What each piece does</h3>
+<ul class="v2-ul">
+<li><code>viewModel()</code> returns the ViewModel scoped to the nearest owner (here, the Activity). The <strong>first</strong> call creates it, and <strong>later</strong> calls, including after rotation, return the same instance. Notice the default parameter value, so callers can replace it in tests or previews.</li>
+<li><code>collectAsStateWithLifecycle()</code> converts the <code>StateFlow</code> into Compose <code>State</code>, collecting only while the screen is at least in the started state (lesson 23). <code>by</code> unwraps it so you can write <code>uiState</code> instead of <code>uiState.value</code>. Note the import of <code>getValue</code>.</li>
+<li><code>viewModel::onDessertClicked</code> is a <strong>function reference</strong>: a shorter way to write <code>{ viewModel.onDessertClicked() }</code>.</li>
+<li><code>DessertClickerScreen</code> is <strong>stateless</strong>: it takes state in and sends events out. The preview feeds it fake state, so you can design it without running the app.</li>
+</ul>
+<p class="v2-p">Finally, call it from <code>MainActivity</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>setContent {
+    DessertClickerTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -&gt;
+            DessertClickerApp(modifier = Modifier.padding(innerPadding))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Run it, tap seven times, <strong>rotate</strong>. The numbers survive, and there is no <code>rememberSaveable</code> in sight. Check Logcat: the Activity is destroyed and recreated, yet the ViewModel keeps its state.</p>
+<p class="v2-p">Now press Home and run <code>adb shell am kill com.example.dessertclicker</code>, then reopen the app. The numbers are <strong>gone</strong>. That is the limitation: a ViewModel survives rotation, not process death. Lesson 25 shows how <code>SavedStateHandle</code> closes this gap, and lessons 34 and 35 show how to persist data permanently.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Connect the ViewModel to Compose</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">State Hoisting</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The pattern you just used has a name: <strong>state hoisting</strong>. You moved (hoisted) state out of a composable into a caller so the composable becomes stateless, and you replaced direct changes with callbacks. The recipe has two parts:</p>
+<ol class="v2-ol">
+<li>State goes <strong>in</strong> as a parameter (<code>value</code>, <code>uiState</code>).</li>
+<li>Events go <strong>out</strong> as lambdas (<code>onValueChange</code>, <code>onClick</code>).</li>
+</ol>
+<p class="v2-p">Benefits: the composable is reusable, testable and previewable, and there is a <strong>single source of truth</strong>, so two parts of the UI can never disagree about the value.</p>
+<p class="v2-p">A useful rule of thumb: hoist state to the <strong>lowest common ancestor</strong> that needs it. Tiny UI-only state such as "is this dropdown open" can stay in a composable with <code>remember</code>. State that affects business logic or needs to survive should live in the ViewModel. Lesson 54 explores this decision more.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>State Hoisting</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: A to-do counter with a ViewModel</strong></p>
+<p class="v2-p">Build a small screen with a text field and an <strong>Add</strong> button. Each time the user adds a task, show it in a list underneath. The tasks must survive rotation.</p>
+<p class="v2-p">Requirements:</p>
+<ol class="v2-ol">
+<li><code>TodoUiState(val tasks: List&lt;String&gt; = emptyList(), val draft: String = "")</code>.</li>
+<li><code>TodoViewModel</code> with <code>onDraftChange(text)</code>, <code>onAdd()</code> (ignores blank text and clears the draft).</li>
+<li>A stateless <code>TodoScreen</code> and a <code>TodoApp</code> that connects it.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class TodoUiState(
+    val tasks: List&lt;String&gt; = emptyList(),
+    val draft: String = ""
+)
+
+class TodoViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(TodoUiState())
+    val uiState: StateFlow&lt;TodoUiState&gt; = _uiState.asStateFlow()
+
+    fun onDraftChange(text: String) {
+        _uiState.update { it.copy(draft = text) }
+    }
+
+    fun onAdd() {
+        _uiState.update { current -&gt;
+            val text = current.draft.trim()
+            if (text.isEmpty()) current
+            else current.copy(tasks = current.tasks + text, draft = "")
+        }
+    }
+}
+
+@Composable
+fun TodoApp(modifier: Modifier = Modifier, viewModel: TodoViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    TodoScreen(state, viewModel::onDraftChange, viewModel::onAdd, modifier)
+}
+
+@Composable
+fun TodoScreen(
+    state: TodoUiState,
+    onDraftChange: (String) -&gt; Unit,
+    onAdd: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = state.draft,
+            onValueChange = onDraftChange,
+            label = { Text("New task") }
+        )
+        Button(onClick = onAdd, modifier = Modifier.padding(vertical = 8.dp)) {
+            Text("Add")
+        }
+        LazyColumn {
+            items(state.tasks) { task -&gt; Text(task, modifier = Modifier.padding(4.dp)) }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why <code>current.tasks + text</code>:</strong> the <code>+</code> operator on a read-only list returns a <strong>new</strong> list, so the state object stays immutable. Mutating a list in place would not trigger an update.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Spot the UDF violation</strong></p>
+<p class="v2-p">A teammate wrote this. Explain what is wrong and fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Counter(viewModel: CounterViewModel) {
+    var count by remember { mutableIntStateOf(0) }
+    Button(onClick = { count++; viewModel.log(count) }) {
+        Text("Count: $count")
+    }
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The screen keeps a <strong>second copy</strong> of the state (<code>count</code>) in the composable while the ViewModel also receives it. There are now two sources of truth, and the composable's copy is lost on rotation. The composable also changes state directly instead of sending an event.</p>
+<p class="v2-p">The fix: hold <code>count</code> in the ViewModel's UI state, expose it as a <code>StateFlow</code>, give the ViewModel an <code>onIncrement()</code> function, and make the composable take <code>count: Int</code> and <code>onIncrement: () -&gt; Unit</code>. The composable then only draws and reports.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Add a <strong><code>Reset</code></strong> confirmation to Dessert Clicker: keep a <code>showResetDialog: Boolean</code> in <code>DessertUiState</code>, add <code>onResetRequested()</code> and <code>onResetDismissed()</code> to the ViewModel, and show an <code>AlertDialog</code> when it is true. Decide: should this boolean live in the ViewModel or in the composable with <code>remember</code>? Write one sentence defending your choice.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Exposing the mutable flow.</strong> <em>The wrong code:</em> <code>val uiState = MutableStateFlow(DessertUiState())</code>. <em>What happens:</em> any composable can write to it, which breaks the one-way flow. <em>The fix:</em> private <code>_uiState</code> plus a public read-only <code>uiState</code> via <code>asStateFlow()</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Mutating state in place.</strong> <em>The wrong code:</em> a <code>var</code> field or a <code>MutableList</code> mutated inside <code>update</code>. <em>What happens:</em> the object reference is the same, so observers may not be notified and the UI does not redraw. <em>The fix:</em> immutable <code>val</code> properties and <code>copy</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Storing a <code>Context</code> or composable in the ViewModel.</strong> <em>What happens:</em> memory leaks and crashes after rotation. <em>The fix:</em> pass plain data, use <code>AndroidViewModel</code> only if you truly need the application context, or inject dependencies.</p>
+<p class="v2-p"><strong>Mistake #4: Creating the ViewModel with a constructor call.</strong> <em>The wrong code:</em> <code>val vm = DessertViewModel()</code> inside a composable. <em>What happens:</em> a new ViewModel on every recomposition and rotation, so state is lost. <em>The fix:</em> <code>viewModel()</code>, which returns the retained instance.</p>
+<p class="v2-p"><strong>Mistake #5: Passing the ViewModel deep into the UI tree.</strong> <em>What happens:</em> every composable depends on the ViewModel, so none can be previewed or reused. <em>The fix:</em> get the ViewModel at the top-level screen composable and pass <strong>state and lambdas</strong> down.</p>
+<p class="v2-p"><strong>Mistake #6: Forgetting <code>getValue</code> import for <code>by</code>.</strong> <em>Symptom:</em> <em>Property delegate must have a getValue method.</em> <em>The fix:</em> <code>import androidx.compose.runtime.getValue</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Thinking the ViewModel survives everything.</strong> <em>What happens:</em> state vanishes after process death. <em>The fix:</em> <code>SavedStateHandle</code> for small essential state, storage for real data.</p>
+<p class="v2-p"><strong>Mistake #8: Business rules in the composable.</strong> <em>What happens:</em> logic such as "which dessert to show" is repeated or untestable. <em>The fix:</em> put rules in the ViewModel or a plain Kotlin function, and test them (lesson 25).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does separation of concerns mean, and name two benefits.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Each class or layer has one responsibility. Benefits include testability, easier maintenance, survival of state across configuration changes, and parallel teamwork.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What are the two parts of the UI layer?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">UI elements that render data (composables) and state holders (such as ViewModels) that hold the data and logic and expose it to the UI.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Describe unidirectional data flow.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">State flows down from the state holder to the UI, and events flow up from the UI to the state holder, which updates the state. The UI never changes the state directly, so there is a single source of truth.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is <code>_uiState</code> private and <code>uiState</code> public?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">So only the ViewModel can modify the state, while the UI can read it. The public property is a read-only <code>StateFlow</code> created with <code>asStateFlow()</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Does a ViewModel survive a configuration change? A process death?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It survives configuration changes such as rotation because the system retains the instance. It does not survive process death, so essential state must also be saved with <code>SavedStateHandle</code> or persisted to storage.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-4-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 4, Pathway 1</a>: <em>Intro to App architecture</em>, <em>Architecture: The UI layer</em> and <em>ViewModel and State in Compose</em>.</li>
+<li><a href="https://developer.android.com/topic/architecture" rel="noopener noreferrer">Guide to app architecture</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer" rel="noopener noreferrer">UI layer</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/stateholders" rel="noopener noreferrer">State holders and UI state</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Tip Split Tracker with a ViewModel</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Rebuild a small bill splitter with proper architecture, and prove that it survives rotation.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li><code>BillUiState(billAmount: String, people: Int, tipPercent: Int)</code> with computed read-only properties <code>tipAmount</code>, <code>total</code> and <code>perPerson</code>.</li>
+<li><code>BillViewModel</code> with <code>onBillChange(String)</code>, <code>onPeopleChange(Int)</code> (never below 1) and <code>onTipChange(Int)</code> (0 to 30).</li>
+<li>A stateless <code>BillScreen</code> plus a connected <code>BillApp</code>.</li>
+<li>Invalid input (blank or non-numeric bill) is treated as 0 and never crashes.</li>
+<li>A preview with sample state.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> write down, in two sentences, why the computed values are properties of the state class and not stored fields.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">BillViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.billsplit
+
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class BillUiState(
+    val billAmount: String = "",
+    val people: Int = 1,
+    val tipPercent: Int = 10
+) {
+    private val bill: Double get() = billAmount.toDoubleOrNull() ?: 0.0
+    val tipAmount: Double get() = bill * tipPercent / 100.0
+    val total: Double get() = bill + tipAmount
+    val perPerson: Double get() = total / people
+}
+
+class BillViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(BillUiState())
+    val uiState: StateFlow&lt;BillUiState&gt; = _uiState.asStateFlow()
+
+    fun onBillChange(text: String) = _uiState.update { it.copy(billAmount = text) }
+
+    fun onPeopleChange(count: Int) = _uiState.update { it.copy(people = count.coerceAtLeast(1)) }
+
+    fun onTipChange(percent: Int) = _uiState.update { it.copy(tipPercent = percent.coerceIn(0, 30)) }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">BillScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.billsplit
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+@Composable
+fun BillApp(modifier: Modifier = Modifier, viewModel: BillViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    BillScreen(
+        state = state,
+        onBillChange = viewModel::onBillChange,
+        onPeopleChange = viewModel::onPeopleChange,
+        onTipChange = viewModel::onTipChange,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun BillScreen(
+    state: BillUiState,
+    onBillChange: (String) -&gt; Unit,
+    onPeopleChange: (Int) -&gt; Unit,
+    onTipChange: (Int) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = state.billAmount,
+            onValueChange = onBillChange,
+            label = { Text("Bill amount (₦)") }
+        )
+        Row(modifier = Modifier.padding(vertical = 8.dp)) {
+            Button(onClick = { onPeopleChange(state.people - 1) }) { Text("-") }
+            Text("  ${state.people} people  ", modifier = Modifier.padding(top = 12.dp))
+            Button(onClick = { onPeopleChange(state.people + 1) }) { Text("+") }
+        }
+        Text("Tip: ${state.tipPercent}%")
+        Slider(
+            value = state.tipPercent.toFloat(),
+            onValueChange = { onTipChange(it.toInt()) },
+            valueRange = 0f..30f
+        )
+        Text("Tip amount: ₦%.2f".format(state.tipAmount))
+        Text("Total: ₦%.2f".format(state.total))
+        Text("Each pays: ₦%.2f".format(state.perPerson))
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Stretch answer:</strong> computed values derived from other fields are always consistent with them, because they cannot be forgotten when the inputs change. Storing them as fields would create copies that could drift out of sync, which is the very problem a single source of truth prevents. (<code>String.format</code> uses the device locale for the decimal separator, a trap lesson 20 explained.)</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 24 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-24-app-architecture-and-the-viewmodel</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 24 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Why Architecture?</li><li>✅ Step-by-Step Build 1: Dependencies</li><li>✅ Step-by-Step Build 2: Model the Screen with a UI State Class</li><li>✅ Step-by-Step Build 3: The ViewModel</li><li>✅ Step-by-Step Build 4: Connect the ViewModel to Compose</li><li>✅ State Hoisting</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_23.html" class="ln-btn">&#8592; Lesson 23</a><a href="lesson_25.html" class="ln-btn primary">Lesson 25 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 24 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

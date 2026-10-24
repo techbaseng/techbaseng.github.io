@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 15: Introduction to Jetpack Compose and Text Composables — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l15">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 15 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 15</div>
+      <h1>Introduction to Jetpack Compose and Text Composables</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Poster Composer: A Community Event Card</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 15</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Build your first Compose UI: composable functions, Text, Preview, and the birthday card app.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Poster Composer: A Community Event Card</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to the most exciting phase of the course! You have set up Android Studio (lessons 01 to 05) and learned the Kotlin you need (lessons 06 to 14). Now you finally start <strong>building screens</strong>. Today you meet <strong>Jetpack Compose</strong>, the modern toolkit that Google recommends for building Android user interfaces, and you use it to make a real, good-looking <strong>birthday card app</strong>.</p>
+<p class="v2-p">Picture a sign-writer in the market painting a shop board. Old-style Android was like giving the sign-writer a long instruction sheet written in a separate language (XML) and then telling a second person (Kotlin) to go and change the paint later. Compose is like the sign-writer simply <em>describing the board in one language</em>: "a big bold greeting, and under it, a smaller name, to the right." If the greeting changes, you describe the board again and Compose repaints what needs repainting.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what Jetpack Compose is and what "declarative UI" means.</li>
+<li>Read the code of a freshly generated Compose project: <code>MainActivity</code>, <code>setContent</code>, the theme and <code>Surface</code>.</li>
+<li>Write your own <strong>composable functions</strong> and follow the rules for them.</li>
+<li>Show and style text with <code>Text</code>, <code>fontSize</code>, <code>fontWeight</code>, <code>color</code>, <code>textAlign</code> and <code>lineHeight</code>.</li>
+<li>Explain the difference between <code>sp</code> and <code>dp</code>.</li>
+<li>Preview your UI without running the app, using <code>@Preview</code>.</li>
+<li>Arrange several composables with <code>Column</code> and <code>Box</code>, and give them space with <code>Modifier</code>.</li>
+<li>Move text into <code>strings.xml</code> and show it with <code>stringResource</code>.</li>
+<li>Build the Birthday Card app and a second Compose Article app.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson covers three items from Unit 1, Pathway 3 of Google's <strong>Android Basics with Compose</strong> course: <em>Intro to Jetpack Compose</em>, <em>Design a birthday card app</em> and <em>Build a simple app with text composables</em> (the "Compose Article" practice app). We follow the same ideas with our own code and designs. Links to the official pages are at the end.</p>
+</blockquote>
+<h3 class="v2-h3">Costs and requirements</h3>
+<p class="v2-p">Compose previews and the emulator both use memory. If your laptop has 8 GB of RAM, close your browser tabs before running the emulator, or use a real phone as you learned in lesson 05. Previews (this lesson's star feature) are lighter than the emulator, so you can do a lot of your work without launching it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. A working Android Studio project (lessons 02 and 03)</h3>
+<p class="v2-p">You need Android Studio installed and the ability to create an <em>Empty Activity</em> project and press <strong>Run</strong>. If you cannot yet, go back to lesson 03, <em>Create Your First App</em>.</p>
+<h3 class="v2-h3">2. Functions and parameters (lesson 08)</h3>
+<p class="v2-p">A Compose screen is built from <strong>functions</strong>. You must be comfortable with <code>fun</code>, parameters, default values and named arguments such as <code>Text(text = "Hi", fontSize = 20.sp)</code>.</p>
+<h3 class="v2-h3">3. Lambdas and trailing lambda syntax (lesson 12)</h3>
+<p class="v2-p">Compose code leans on lambdas. When you see this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Column {
+    Text("One")
+    Text("Two")
+}</code></pre></div></div>
+<p class="v2-p">the braces after <code>Column</code> are a <strong>lambda</strong> passed as the last argument, written outside the parentheses. Inside it, you list the children. This is exactly the trailing lambda syntax from lesson 12.</p>
+<h3 class="v2-h3">4. Strings and templates (lesson 06)</h3>
+<p class="v2-p"><code>"Hello $name"</code> inserts a value into text. Android has its own, translation-friendly version of this idea using <code>strings.xml</code>, which you meet later in this lesson.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: Declarative UI and Composable Functions</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is Jetpack Compose?</h3>
+<p class="v2-p"><strong>Jetpack Compose</strong> is Android's modern UI toolkit. You write your user interface entirely in Kotlin, by calling functions that each describe a piece of the screen. It is part of <strong>Jetpack</strong>, Google's family of Android libraries that you add to a project as dependencies.</p>
+<h3 class="v2-h3">Declarative versus imperative</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Style</th>
+<th>You write</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Imperative</strong> (old Views)</td>
+<td>Step-by-step commands: <em>find the label, set its text, change its colour</em></td>
+<td>Directing a painter stroke by stroke</td>
+</tr>
+<tr>
+<td><strong>Declarative</strong> (Compose)</td>
+<td>A description of what the screen <em>should look like</em> for the current data</td>
+<td>Handing the painter a photo of the finished picture</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">In Compose you do not reach into the screen and tweak it. You write a function that says "given this name, show this greeting." When the data changes, Compose calls your function again and updates the screen. Lesson 17 and 19 show how data changes trigger that, using <em>state</em>.</p>
+<h3 class="v2-h3">A composable function</h3>
+<p class="v2-p">A <strong>composable function</strong> is an ordinary Kotlin function with the <code>@Composable</code> annotation. It does not return the UI. It <em>emits</em> UI into the tree that Compose is building.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun Greeting(name: String) {
+    Text(text = "Hello, $name!")
+}</code></pre></div></div>
+<p class="v2-p">The rules to remember:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Rule</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Add <code>@Composable</code> above <code>fun</code>.</td>
+<td>It tells the Compose compiler this function describes UI.</td>
+</tr>
+<tr>
+<td>Composables can only be called from other composables (or from <code>setContent</code>).</td>
+<td>Compose needs to be tracking the call.</td>
+</tr>
+<tr>
+<td>Name them with a <strong>noun in PascalCase</strong>: <code>Greeting</code>, <code>BirthdayCard</code>.</td>
+<td>It is the Compose style guide's convention, and it makes them look like UI elements. Normal functions use camelCase verbs.</td>
+</tr>
+<tr>
+<td>Accept a <code>modifier: Modifier = Modifier</code> parameter.</td>
+<td>It lets the caller control size and position. You will see this pattern everywhere.</td>
+</tr>
+<tr>
+<td>Do not rely on a return value.</td>
+<td>A composable normally returns nothing (<code>Unit</code>).</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">The UI tree</h3>
+<p class="v2-p">Composables call other composables, so your screen is a <strong>tree</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>setContent
+   └── BirthdayCardTheme          (colours, fonts)
+         └── Surface              (a background)
+               └── BirthdayGreeting
+                     ├── Text("Happy Birthday Ada!")
+                     └── Text("From Tunde")</code></pre></div></div>
+<p class="v2-p">Each branch is a function call. The leaves are the things the user actually sees, such as <code>Text</code>.</p>
+<h3 class="v2-h3">Why composables are cheap to repeat</h3>
+<p class="v2-p">Because the UI is only a description, calling a composable many times costs little. You can make a <code>Greeting</code> for ten names with a loop. Compose also skips work: when data has not changed it does not redraw that part. This is called <strong>recomposition</strong> and lesson 19 explains it properly.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Declarative UI and Composable Functions</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step: Create the Project and Read Its Code</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">Step 1: Create the project</h3>
+<ol class="v2-ol">
+<li>In Android Studio, choose <strong>File &gt; New &gt; New Project</strong> (or <strong>New Project</strong> on the Welcome screen).</li>
+<li>Pick the <strong>Empty Activity</strong> template. (Recent versions also offer an <em>Empty Views Activity</em>. That one is the old XML style. Make sure you choose the one that mentions Compose or is simply named <em>Empty Activity</em>. Template names move between Studio versions, so read the template's description.)</li>
+<li>Name: <code>Birthday Card</code>. Package name: <code>com.techbase.birthdaycard</code>. Language: <strong>Kotlin</strong>. Choose a minimum SDK that Studio recommends (the default is fine for learning).</li>
+<li>Click <strong>Finish</strong> and wait for Gradle to sync. The first sync downloads libraries, so use a good connection. It can be several hundred megabytes on a new installation.</li>
+</ol>
+<h3 class="v2-h3">Step 2: Find the files</h3>
+<p class="v2-p">In the <strong>Project</strong> panel (left side, switch the view to <strong>Android</strong>), open <code>app &gt; kotlin+java &gt; com.techbase.birthdaycard</code>. You will see:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>com.techbase.birthdaycard
+├── MainActivity.kt          &lt;- the entry point of your screen
+└── ui
+    └── theme
+        ├── Color.kt         &lt;- your colour palette
+        ├── Theme.kt         &lt;- BirthdayCardTheme { ... }
+        └── Type.kt          &lt;- text styles (Typography)</code></pre></div></div>
+<h3 class="v2-h3">Step 3: Read <code>MainActivity.kt</code></h3>
+<p class="v2-p">The generated file looks roughly like this. Your Studio version may differ in small details, for example it may wrap the greeting in a <code>Scaffold</code>, but the idea is the same:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.birthdaycard
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.techbase.birthdaycard.ui.theme.BirthdayCardTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            BirthdayCardTheme {
+                Greeting(name = "Android")
+            }
+        }
+    }
+}
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    BirthdayCardTheme {
+        Greeting("Android")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Block by block:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>class MainActivity : ComponentActivity()</code></td>
+<td>An <strong>Activity</strong> is one screen-sized window of your app. <code>ComponentActivity</code> is the base class that supports Compose. Lesson 23 explains the Activity lifecycle.</td>
+</tr>
+<tr>
+<td><code>onCreate(...)</code></td>
+<td>Android calls this when the screen is created. Our setup goes here.</td>
+</tr>
+<tr>
+<td><code>super.onCreate(savedInstanceState)</code></td>
+<td>Lets the parent class do its own set-up first. Always keep it.</td>
+</tr>
+<tr>
+<td><code>enableEdgeToEdge()</code></td>
+<td>Lets the app draw behind the status bar and navigation bar, which is the modern Android look. Because of this you must sometimes add padding so your content is not hidden underneath them. We handle that below.</td>
+</tr>
+<tr>
+<td><code>setContent { ... }</code></td>
+<td>The bridge from Android to Compose. Everything inside the braces is composable.</td>
+</tr>
+<tr>
+<td><code>BirthdayCardTheme { ... }</code></td>
+<td>Applies the app's colours, typography and shapes to everything inside (lesson 22 covers theming).</td>
+</tr>
+<tr>
+<td><code>@Preview</code></td>
+<td>Marks a function that Android Studio should render in its <strong>Design</strong> pane. It is only for development; it does not ship in the app's behaviour.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Run the app (the green triangle). You should see "Hello Android!" in the top-left corner of the screen. Congratulations: that is a Compose app.</p>
+<h3 class="v2-h3">Step 4: Meet the Preview pane</h3>
+<p class="v2-p">At the top right of the code editor are three buttons: <strong>Code</strong>, <strong>Split</strong> and <strong>Design</strong>. Choose <strong>Split</strong>. If the preview says it is out of date, click <strong>Build &amp; Refresh</strong> (or the refresh icon). You should see the text "Hello Android!" on a white card inside the preview, <strong>without starting an emulator</strong>.</p>
+<p class="v2-p">Edit the text in <code>Greeting</code> and look at the preview: after a short build it updates. Previews are the fastest feedback loop you have, so use them constantly.</p>
+<p class="v2-p">A few preview rules:</p>
+<ul class="v2-ul">
+<li>A <code>@Preview</code> function must be <code>@Composable</code> and must take <strong>no parameters</strong> (unless you use a special advanced feature covered in lesson 44).</li>
+<li><code>showBackground = true</code> paints a background so white text would not vanish.</li>
+<li>You can have several previews in a file to see different states.</li>
+<li>If the preview shows an error, read the message in the pane; it is usually a missing import or a build error elsewhere.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Create the Project and Read Its Code</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step: Making Text Look the Way You Want</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><code>Text</code> is the composable that shows words. The version to use is <code>androidx.compose.material3.Text</code>. You can pass only the <code>text</code> or add many styling parameters.</p>
+<h3 class="v2-h3">The most useful <code>Text</code> parameters</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Example</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td><code>"Hello"</code></td>
+<td>The words to show.</td>
+</tr>
+<tr>
+<td><code>fontSize</code></td>
+<td><code>32.sp</code></td>
+<td>Size of the letters.</td>
+</tr>
+<tr>
+<td><code>fontWeight</code></td>
+<td><code>FontWeight.Bold</code></td>
+<td>Thickness: <code>Light</code>, <code>Normal</code>, <code>Medium</code>, <code>SemiBold</code>, <code>Bold</code>.</td>
+</tr>
+<tr>
+<td><code>fontStyle</code></td>
+<td><code>FontStyle.Italic</code></td>
+<td>Slanted text.</td>
+</tr>
+<tr>
+<td><code>fontFamily</code></td>
+<td><code>FontFamily.Serif</code>, <code>Cursive</code>, <code>Monospace</code></td>
+<td>A built-in family of letter shapes.</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td><code>Color(0xFF3E2723)</code></td>
+<td>Text colour.</td>
+</tr>
+<tr>
+<td><code>textAlign</code></td>
+<td><code>TextAlign.Center</code></td>
+<td>Alignment <em>inside the width the Text has</em>.</td>
+</tr>
+<tr>
+<td><code>lineHeight</code></td>
+<td><code>36.sp</code></td>
+<td>Distance between lines.</td>
+</tr>
+<tr>
+<td><code>letterSpacing</code></td>
+<td><code>2.sp</code></td>
+<td>Extra gap between letters.</td>
+</tr>
+<tr>
+<td><code>maxLines</code> and <code>overflow</code></td>
+<td><code>2</code>, <code>TextOverflow.Ellipsis</code></td>
+<td>Cut long text with "..."</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>MaterialTheme.typography.headlineMedium</code></td>
+<td>A bundle of settings from the theme.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3"><code>sp</code> versus <code>dp</code></h3>
+<p class="v2-p">Compose measures space with two units, and mixing them up is the number one beginner slip.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Unit</th>
+<th>Stands for</th>
+<th>Used for</th>
+<th>Scales with the user's font-size setting?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dp</code></td>
+<td>density-independent pixels</td>
+<td>Sizes of things: padding, widths, heights</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>sp</code></td>
+<td>scale-independent pixels</td>
+<td><strong>Text size only</strong></td>
+<td><strong>Yes</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A phone can have a tiny screen with a crowded display or a large one. A <code>dp</code> is built so that 16.dp looks about the same physical size on both. An <code>sp</code> is the same, but it also multiplies by the person's <strong>font size preference</strong> in the phone's Settings. A learner who struggles to read small text raises that setting; if you used <code>dp</code> for text, you would ignore their choice. That is why text always uses <code>sp</code> (lesson 47 returns to this under accessibility).</p>
+<p class="v2-p">Both units need an import and the dot-suffix on a number:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp</code></pre></div></div>
+<h3 class="v2-h3">Example: a styled greeting</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun StyledGreeting() {
+    Text(
+        text = "Happy Birthday!",
+        fontSize = 40.sp,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Serif,
+        color = Color(0xFF6A1B9A),
+        textAlign = TextAlign.Center,
+        lineHeight = 48.sp
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StyledGreetingPreview() {
+    StyledGreeting()
+}</code></pre></div></div>
+<p class="v2-p"><strong>What you should see in the preview:</strong> the words "Happy Birthday!" in bold, serif, purple letters at the top-left of the preview.</p>
+<p class="v2-p">A few things to notice:</p>
+<ul class="v2-ul">
+<li><code>Color(0xFF6A1B9A)</code> builds a colour from a hexadecimal number. The first two digits (<code>FF</code>) mean fully opaque, then red, green and blue pairs (<code>6A</code>, <code>1B</code>, <code>9A</code>). Import it from <code>androidx.compose.ui.graphics.Color</code>.</li>
+<li><code>textAlign = TextAlign.Center</code> has no visible effect on a single short line, because the <code>Text</code> is only as wide as its words. Alignment works <em>inside</em> the width the <code>Text</code> has. Give the <code>Text</code> more width (for example <code>Modifier.fillMaxWidth()</code>) and the centring becomes visible. This puzzles almost everyone the first time.</li>
+<li>When two lines of large text wrap, <code>lineHeight</code> keeps them from touching or drifting apart. A good rule of thumb is a line height of roughly 1.1 to 1.3 times the font size for headings.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Making Text Look the Way You Want</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step: Arranging Composables with Column, Box and Modifier</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A screen holds more than one thing. Lesson 16 teaches layouts in full, but you need a small taste now.</p>
+<h3 class="v2-h3">Column, Row and Box in one minute</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Composable</th>
+<th>Arranges children</th>
+<th>Picture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td>Top to bottom</td>
+<td>Stack of plates</td>
+</tr>
+<tr>
+<td><code>Row</code></td>
+<td>Left to right</td>
+<td>Children sitting on a bench</td>
+</tr>
+<tr>
+<td><code>Box</code></td>
+<td>On top of each other</td>
+<td>Papers on a desk</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> Column            Row               Box
+ +-------+         +---+---+---+     +---------+
+ |   A   |         | A | B | C |     |  A (bg) |
+ |   B   |         +---+---+---+     |    B    |
+ |   C   |                           +---------+
+ +-------+                             B sits over A</code></pre></div></div>
+<h3 class="v2-h3">Modifier: how you decorate and size a composable</h3>
+<p class="v2-p">A <strong>Modifier</strong> is a chain of instructions that changes how a composable looks or behaves: its size, padding, background, click behaviour and more. You build it by chaining calls with dots, and <strong>order matters</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Modifier
+    .fillMaxWidth()      // take all the available width
+    .padding(16.dp)      // then add 16dp of space around the content</code></pre></div></div>
+<p class="v2-p">Common modifiers:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Modifier</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fillMaxSize()</code>, <code>fillMaxWidth()</code>, <code>fillMaxHeight()</code></td>
+<td>Fill the space the parent offers.</td>
+</tr>
+<tr>
+<td><code>padding(16.dp)</code></td>
+<td>Space <em>inside</em> the edge of this element (between its border and its content).</td>
+</tr>
+<tr>
+<td><code>size(48.dp)</code>, <code>width(...)</code>, <code>height(...)</code></td>
+<td>Exact sizes.</td>
+</tr>
+<tr>
+<td><code>background(Color)</code></td>
+<td>Paint a background colour.</td>
+</tr>
+<tr>
+<td><code>safeDrawingPadding()</code></td>
+<td>Add padding so content avoids the status bar, navigation bar and cut-outs. We use it because of <code>enableEdgeToEdge()</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A neat trick to remember the order rule: <code>Modifier.padding(16.dp).background(Color.Red)</code> puts the padding <strong>outside</strong> the red area (the red box is smaller). <code>Modifier.background(Color.Red).padding(16.dp)</code> paints the red first, then pads the content <strong>inside</strong> it. Try both in a preview to <em>see</em> it.</p>
+<h3 class="v2-h3">Alignment and Arrangement (preview)</h3>
+<p class="v2-p"><code>Column</code> has two parameters that place its children: <code>verticalArrangement</code> (how children are spaced <strong>along</strong> the column, up and down) and <code>horizontalAlignment</code> (where they sit <strong>across</strong> the column, left to right). For now remember that <code>Arrangement.Center</code> centres the group vertically and <code>Alignment.CenterHorizontally</code> centres it sideways. Lesson 16 explores this in depth.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Arranging Composables with Column, Box and Modifier</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step: Strings in `strings.xml`</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">We have been typing words directly into code. That works but has two problems: you cannot translate the app easily, and the same wording ends up copied in many places. Android keeps visible text in a resource file instead.</p>
+<ol class="v2-ol">
+<li>Open <code>app &gt; res &gt; values &gt; strings.xml</code>.</li>
+<li>Add your strings:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Birthday Card&lt;/string&gt;
+    &lt;string name="happy_birthday_text"&gt;Happy Birthday %1$s!&lt;/string&gt;
+    &lt;string name="signature_text"&gt;From %1$s&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p"><code>%1$s</code> is a <strong>placeholder</strong>: "the first argument, as a string". A translator can move it wherever their language needs. For example, a Yoruba or French version might put the name in a different spot in the sentence.</p>
+<ol class="v2-ol" start="3">
+<li>Use them in Compose with <code>stringResource</code>:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.res.stringResource
+
+// inside a composable:
+val message = stringResource(R.string.happy_birthday_text, "Ada")
+val signature = stringResource(R.string.signature_text, "Tunde")</code></pre></div></div>
+<p class="v2-p"><code>R</code> is a class Android generates that holds an id for every resource. <code>R.string.happy_birthday_text</code> is that string's id. <code>stringResource</code> can only be called from a composable.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Tip:</strong> If <code>R</code> shows as red, you probably need to build the project (<strong>Build &gt; Make Project</strong>) so Android generates it, or the file is in a different package from your namespace. If so, add <code>import com.techbase.birthdaycard.R</code>.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Strings in `strings.xml`</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build: The Birthday Card App</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Time to put it all together. We build in three small stages and look at the result of each.</p>
+<h3 class="v2-h3">Stage 1: The greeting composable</h3>
+<p class="v2-p">Create <code>BirthdayGreeting</code>: two texts in a column. Replace the contents of <code>MainActivity.kt</code> below the imports as shown in stage 3; first read the composable on its own:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun BirthdayGreeting(message: String, from: String, modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(8.dp)
+    ) {
+        Text(
+            text = message,
+            fontSize = 56.sp,
+            lineHeight = 64.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF3E2723),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = from,
+            fontSize = 28.sp,
+            fontStyle = FontStyle.Italic,
+            color = Color(0xFF3E2723),
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.End)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">How it works:</p>
+<ul class="v2-ul">
+<li>The function takes the two texts as <strong>parameters</strong>, so the card is reusable for anyone. It does not know it is for Ada.</li>
+<li>The <code>modifier</code> parameter has a default of <code>Modifier</code>, so callers may ignore it. Inside we use <code>modifier.padding(8.dp)</code>, which means "whatever the caller asked for, plus 8dp of padding". Passing the caller's modifier to the outermost element is a convention to follow.</li>
+<li><code>Column(verticalArrangement = Arrangement.Center)</code> centres both texts vertically when the column is tall (it will be, because the caller passes <code>fillMaxSize</code>).</li>
+<li>The first <code>Text</code> uses <code>fillMaxWidth()</code> so <code>TextAlign.Center</code> is visible.</li>
+<li>The signature uses <code>Modifier.align(Alignment.End)</code>, which only exists inside a <code>Column</code>, and pushes it to the right-hand side.</li>
+<li>Both texts set <code>color</code> explicitly. See the common mistakes for why that matters.</li>
+</ul>
+<h3 class="v2-h3">Stage 2: The parent that supplies the background</h3>
+<p class="v2-p">In <code>MainActivity</code>, we wrap the greeting in a <code>Surface</code> that gives a warm background colour.</p>
+<h3 class="v2-h3">Stage 3: The complete file</h3>
+<p class="v2-p">Replace the <strong>whole</strong> of <code>MainActivity.kt</code> with this. It includes every import:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.birthdaycard
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.techbase.birthdaycard.ui.theme.BirthdayCardTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            BirthdayCardTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = Color(0xFFFFF3E0)
+                ) {
+                    BirthdayGreeting(
+                        message = stringResource(R.string.happy_birthday_text, "Ada"),
+                        from = stringResource(R.string.signature_text, "Tunde"),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .safeDrawingPadding()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BirthdayGreeting(message: String, from: String, modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(8.dp)
+    ) {
+        Text(
+            text = message,
+            fontSize = 56.sp,
+            lineHeight = 64.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF3E2723),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = from,
+            fontSize = 28.sp,
+            fontStyle = FontStyle.Italic,
+            color = Color(0xFF3E2723),
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.End)
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Birthday card")
+@Composable
+fun BirthdayGreetingPreview() {
+    BirthdayCardTheme {
+        BirthdayGreeting(
+            message = "Happy Birthday Ada!",
+            from = "From Tunde",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What you should see when you run it:</strong> a warm cream-coloured screen. In the vertical middle, "Happy Birthday Ada!" appears large, bold and centred, probably wrapping onto two or three lines on a phone. Underneath it, on the right-hand side, is the italic signature "From Tunde". Nothing hides behind the status bar because of <code>safeDrawingPadding()</code>.</p>
+<p class="v2-p">The preview looks almost the same, except the background is white (the cream comes from the <code>Surface</code> that only exists in <code>MainActivity</code>). That is normal: a preview shows <em>only the composable you call in it</em>.</p>
+<h3 class="v2-h3">Understanding <code>Surface</code></h3>
+<p class="v2-p"><code>Surface</code> is a Material composable that paints a background and sets the default text colour for its children. We gave it a custom <code>color</code>. Because that colour is not one of the theme's colours, Compose does not know what text colour suits it, so we set <code>color</code> on each <code>Text</code> ourselves. If we had used <code>MaterialTheme.colorScheme.background</code>, the text would follow the light or dark theme automatically.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: The Birthday Card App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Step-by-Step Build: The Compose Article App</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">The official course follows the birthday card with a <em>Compose Article</em> practice app: a title, a short paragraph and a long paragraph, with correct spacing and justified text. Here is our own version, an article about learning to code in Ibadan. Create a new Empty Activity project named <code>Compose Article</code> with package <code>com.techbase.composearticle</code>, and replace <code>MainActivity.kt</code> with:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.composearticle
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.techbase.composearticle.ui.theme.ComposeArticleTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            ComposeArticleTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    ArticleScreen(modifier = Modifier.safeDrawingPadding())
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ArticleScreen(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+                .background(Color(0xFF00695C)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.banner_text),
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Text(
+            text = stringResource(R.string.article_title),
+            fontSize = 28.sp,
+            modifier = Modifier.padding(16.dp)
+        )
+        Text(
+            text = stringResource(R.string.article_intro),
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp)
+        )
+        Text(
+            text = stringResource(R.string.article_body),
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ArticleScreenPreview() {
+    ComposeArticleTheme {
+        ArticleScreen()
+    }
+}</code></pre></div></div>
+<p class="v2-p">and <code>res/values/strings.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Compose Article&lt;/string&gt;
+    &lt;string name="banner_text"&gt;Techbase Academy, Ibadan&lt;/string&gt;
+    &lt;string name="article_title"&gt;Why Learn to Build Android Apps?&lt;/string&gt;
+    &lt;string name="article_intro"&gt;Most people in Nigeria meet the internet through a phone, so an app is often the shortest path between an idea and the people who need it.&lt;/string&gt;
+    &lt;string name="article_body"&gt;Building an app teaches you to break a big problem into small pieces, to test your ideas quickly, and to care about the person on the other side of the screen. You do not need an expensive computer to begin: a modest laptop, a free copy of Android Studio and steady practice are enough. Start with one small screen, make it work, and then add the next piece. Every professional developer began exactly this way.&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p"><strong>What you should see:</strong> a teal banner across the top with white text centred inside it (<code>Box</code> with <code>contentAlignment = Alignment.Center</code> places its child in the middle). Below it, a title and two justified paragraphs with comfortable margins. <code>verticalScroll</code> lets the screen scroll when the text is longer than the display, which will happen on small phones or with a big font setting.</p>
+<p class="v2-p"><strong>Why it works:</strong> <code>Box</code> stacks the banner text over the coloured rectangle. The <code>start</code> and <code>end</code> padding on the intro paragraph is applied with named arguments. <code>padding(start = 16.dp, end = 16.dp)</code> leaves the top and bottom untouched. The whole thing is a <code>Column</code>, so the pieces stack in order.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: The Compose Article App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Your own greeting card</strong></p>
+<p class="v2-p">Change the Birthday Card app so it becomes a <strong>graduation card</strong> for a friend of your choice. Requirements:</p>
+<ol class="v2-ol">
+<li>Put the wording in <code>strings.xml</code> using placeholders for the friend's name and your name.</li>
+<li>Use a different <code>fontFamily</code> for the main message.</li>
+<li>Change the background colour of the <code>Surface</code>.</li>
+<li>Make the signature appear at the <strong>start</strong> (left) instead of the end.</li>
+<li>Write a second <code>@Preview</code> that shows a very long name, so you can check that the text still wraps nicely.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Add or change strings:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Birthday Card&lt;/string&gt;
+    &lt;string name="graduation_text"&gt;Congratulations, %1$s!&lt;/string&gt;
+    &lt;string name="signature_text"&gt;From %1$s&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p">Update the composable (imports unchanged except <code>FontFamily</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.text.font.FontFamily
+
+@Composable
+fun GraduationGreeting(message: String, from: String, modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(8.dp)
+    ) {
+        Text(
+            text = message,
+            fontSize = 48.sp,
+            lineHeight = 56.sp,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color(0xFF1B5E20),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = from,
+            fontSize = 24.sp,
+            color = Color(0xFF1B5E20),
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.Start)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LongNamePreview() {
+    GraduationGreeting(
+        message = "Congratulations, Oluwaseun Adebayo-Johnson!",
+        from = "From Tunde",
+        modifier = Modifier.fillMaxSize()
+    )
+}</code></pre></div></div>
+<p class="v2-p">In <code>MainActivity</code>, change the <code>Surface</code> colour to something like <code>Color(0xFFE8F5E9)</code> and call <code>GraduationGreeting(message = stringResource(R.string.graduation_text, "Ada"), from = stringResource(R.string.signature_text, "Tunde"), modifier = Modifier.fillMaxSize().safeDrawingPadding())</code>.</p>
+<p class="v2-p"><strong>What you should see:</strong> a pale green screen with the serif, dark green message in the middle and the signature on the left. The long-name preview wraps the congratulation over several lines without cutting words off the screen.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix the broken composable</strong></p>
+<p class="v2-p">This code has <strong>four</strong> problems. Find them before running.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Text
+
+fun welcomeMessage(name: String) {
+    Text(
+        text = "Welcome $name",
+        fontSize = 24,
+        color = "blue"
+    )
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><ol class="v2-ol">
+<li>The function is missing <code>@Composable</code>. Without it, calling <code>Text</code> gives the error <em>@Composable invocations can only happen from the context of a @Composable function</em>.</li>
+<li><code>fontSize = 24</code> is an <code>Int</code>. Text size needs a <code>TextUnit</code>, so write <code>24.sp</code> (and import <code>androidx.compose.ui.unit.sp</code>).</li>
+<li><code>color = "blue"</code> is a <code>String</code>. Colours are <code>Color</code> values: <code>Color.Blue</code> or <code>Color(0xFF0000FF)</code> (import <code>androidx.compose.ui.graphics.Color</code>).</li>
+<li>The name <code>welcomeMessage</code> starts with a lowercase letter. It works, but composables that emit UI should be named in PascalCase, so rename it <code>WelcomeMessage</code>.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun WelcomeMessage(name: String) {
+    Text(
+        text = "Welcome $name",
+        fontSize = 24.sp,
+        color = Color.Blue
+    )
+}</code></pre></div></div></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: A recipe card</strong></p>
+<p class="v2-p">Build a screen, with a <code>@Preview</code>, that shows a recipe card for jollof rice: a bold title, a line "Serves 4", a short paragraph of method text, and a footer line in small italic text aligned to the right. Put all the text in <code>strings.xml</code>, use a coloured <code>Box</code> as a header, and make the content scroll.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Recipe Card&lt;/string&gt;
+    &lt;string name="recipe_title"&gt;Jollof Rice&lt;/string&gt;
+    &lt;string name="recipe_serves"&gt;Serves 4&lt;/string&gt;
+    &lt;string name="recipe_method"&gt;Fry blended pepper and tomato until the water dries and the oil rises. Add stock, seasoning and washed rice. Cover tightly and cook on low heat until the rice is soft.&lt;/string&gt;
+    &lt;string name="recipe_footer"&gt;Best eaten hot, with plantain.&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.recipecard
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun RecipeCard(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .background(Color(0xFFE65100)),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = stringResource(R.string.recipe_title),
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+        Text(
+            text = stringResource(R.string.recipe_serves),
+            fontSize = 18.sp,
+            modifier = Modifier.padding(16.dp)
+        )
+        Text(
+            text = stringResource(R.string.recipe_method),
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+        Text(
+            text = stringResource(R.string.recipe_footer),
+            fontSize = 14.sp,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.End)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RecipeCardPreview() {
+    RecipeCard()
+}</code></pre></div></div>
+<p class="v2-p">The footer's <code>align(Alignment.End)</code> works because it sits directly inside a <code>Column</code>. Using <code>Modifier.padding(horizontal = 16.dp)</code> is a shortcut for the same padding on the left and right.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Create a new project and show your name, your town and one sentence about why you are learning Android. Style each line differently (size, weight, colour), keep the words in <code>strings.xml</code>, and use the <strong>Split</strong> view to check the result without running the emulator.</p></div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting <code>@Composable</code>.</strong> <em>The wrong code:</em> a plain <code>fun Greeting() { Text("Hi") }</code> <em>The problem:</em> the compiler reports that <code>@Composable</code> invocations can only happen from a composable context. <em>The fix:</em> put <code>@Composable</code> on the line directly above <code>fun</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Typing a size without <code>sp</code> or <code>dp</code>.</strong> <em>The wrong code:</em> <code>fontSize = 24</code> or <code>padding(16)</code>. <em>The problem:</em> the number is an <code>Int</code>, not a unit, so the types do not match. <em>The fix:</em> <code>24.sp</code> for text and <code>16.dp</code> for spacing, with the matching imports from <code>androidx.compose.ui.unit</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Using <code>dp</code> for text size.</strong> <em>The wrong code:</em> <code>fontSize = 20.dp</code> <em>The problem:</em> a type error, but even if you convert it, text must scale with the user's font preference. <em>The fix:</em> <code>sp</code> for text, <code>dp</code> for everything else.</p>
+<p class="v2-p"><strong>Mistake #4: Importing the wrong <code>Text</code>.</strong> <em>The symptom:</em> parameters are not recognised, or text ignores the theme. <em>The fix:</em> make sure the import is <code>androidx.compose.material3.Text</code>. Android Studio may offer several <code>Text</code> classes when you press <code>Alt + Enter</code>; pick the Material 3 one.</p>
+<p class="v2-p"><strong>Mistake #5: Centred text that does not look centred.</strong> <em>The wrong code:</em> <code>Text("Hi", textAlign = TextAlign.Center)</code> on its own. <em>The problem:</em> the <code>Text</code> is only as wide as its words, so there is nothing to centre inside. <em>The fix:</em> add <code>modifier = Modifier.fillMaxWidth()</code>, or centre the whole composable with the parent's <code>horizontalAlignment</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Dark text on a dark background.</strong> <em>The problem:</em> you set a custom <code>Surface</code> colour and then your phone's dark mode switches the default text to near-white (or the opposite), making it unreadable. <em>The fix:</em> either use theme colours (<code>MaterialTheme.colorScheme.background</code>, which come with matching content colours) or set the <code>color</code> of your text explicitly. Test your screen in both light and dark mode (lesson 22 covers dark theme).</p>
+<p class="v2-p"><strong>Mistake #7: Content hidden under the status bar.</strong> <em>The cause:</em> <code>enableEdgeToEdge()</code> lets your app draw behind the system bars. <em>The fix:</em> add <code>Modifier.safeDrawingPadding()</code>, <code>statusBarsPadding()</code>, or use a <code>Scaffold</code> (lesson 38) and apply its <code>innerPadding</code>.</p>
+<p class="v2-p"><strong>Mistake #8: <code>@Preview</code> with parameters.</strong> <em>The wrong code:</em> <code>@Preview @Composable fun P(name: String) { ... }</code> <em>The problem:</em> previews cannot be given arguments this way. <em>The fix:</em> create a no-parameter preview function that calls your composable with sample values.</p>
+<p class="v2-p"><strong>Mistake #9: Hard-coding long text in composables.</strong> <em>The problem:</em> translations are impossible and changes happen in many places. <em>The fix:</em> put text in <code>strings.xml</code> and use <code>stringResource(R.string.name)</code>.</p>
+<p class="v2-p"><strong>Mistake #10: Putting <code>R.string.x</code> directly into <code>Text</code>.</strong> <em>The wrong code:</em> <code>Text(R.string.title)</code> <em>The problem:</em> <code>R.string.title</code> is just an <code>Int</code> id, not the words. <em>The fix:</em> <code>Text(stringResource(R.string.title))</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What does the <code>@Composable</code> annotation tell Android Studio and the compiler, and where can a composable function be called from?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It marks the function as one that describes part of the UI, so the Compose compiler can track it. A composable can only be called from another composable function or from the <code>setContent { }</code> block of an Activity.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the difference between <code>sp</code> and <code>dp</code>, and which should you use for text?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Both are density-independent units. <code>sp</code> also scales with the user's font-size setting, so it is used for text. <code>dp</code> does not, and is used for sizes and spacing such as padding, width and height.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>@Preview</code> do, and why is it useful?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It tells Android Studio to render that composable in the Design or Split pane, so you see your UI immediately without installing and launching the app on an emulator or phone. It speeds up development. A preview function must be <code>@Composable</code> and take no parameters.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> In <code>Modifier.padding(16.dp).background(Color.Red)</code>, is the padding inside or outside the red area? What happens if you swap the two calls?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The padding is <strong>outside</strong> the red area, because it was applied first, so the red box is smaller. If you swap them (<code>background(...)</code> then <code>padding(...)</code>) the red is painted first and the padding is applied <strong>inside</strong> it, giving a larger red area with the content inset. Modifier order matters.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why should the visible words of an app live in <code>strings.xml</code>, and how do you read one in Compose?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It keeps wording in one place, lets the app be translated into other languages, and supports placeholders like <code>%1$s</code>. In Compose you read it with <code>stringResource(R.string.the_name)</code>, adding arguments for placeholders, for example <code>stringResource(R.string.happy_birthday_text, "Ada")</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-1-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 1: Your first Android app</a>: the official pathway for this lesson (birthday card and Compose Article).</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-basics" rel="noopener noreferrer">Jetpack Compose basics codelab</a>: a longer walk-through of the same ideas.</li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a>: the wider Compose curriculum.</li>
+<li><a href="https://developer.android.com/studio/intro" rel="noopener noreferrer">Android Studio user guide</a>: tour of the IDE, including the Compose preview.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Poster Composer: A Community Event Card</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Create a one-screen app that shows a poster for a real or imaginary community event, such as a church programme, a school open day or a coding class. It is a great first portfolio screenshot.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a new Empty Activity project named <code>Event Poster</code> with package <code>com.techbase.eventposter</code>.</li>
+<li>Write a composable <code>EventPoster(title, date, venue, details, modifier)</code> that takes all the words as parameters. Do <strong>not</strong> put words directly in this composable.</li>
+<li>Show the title large and bold, the date and venue in medium size, and the details as a paragraph with <code>TextAlign.Justify</code>.</li>
+<li>Use a coloured background with at least one <code>Box</code> and one <code>Column</code>. Choose text colours with enough contrast against the background.</li>
+<li>Put all text in <code>strings.xml</code> and read it with <code>stringResource</code>.</li>
+<li>Use <code>Modifier.safeDrawingPadding()</code> and <code>verticalScroll</code> so nothing is hidden or cut off.</li>
+<li>Add a <code>@Preview</code> and check it in the Split view.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a second <code>@Preview</code> using a long event title, and a third where the text colour is changed for a dark poster. Check that all three look good.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Event Poster&lt;/string&gt;
+    &lt;string name="event_title"&gt;Techbase Open Day&lt;/string&gt;
+    &lt;string name="event_date"&gt;Saturday, 12 December&lt;/string&gt;
+    &lt;string name="event_venue"&gt;Venue: Techbase Academy, Ibadan&lt;/string&gt;
+    &lt;string name="event_details"&gt;Come and see what our learners have built. There will be live app demonstrations, a short talk on how to start learning Android, and time to ask questions. Everyone is welcome, and no experience is needed.&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.eventposter
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.techbase.eventposter.ui.theme.EventPosterTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            EventPosterTheme {
+                EventPoster(
+                    title = stringResource(R.string.event_title),
+                    date = stringResource(R.string.event_date),
+                    venue = stringResource(R.string.event_venue),
+                    details = stringResource(R.string.event_details),
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EventPoster(
+    title: String,
+    date: String,
+    venue: String,
+    details: String,
+    modifier: Modifier = Modifier,
+    textColor: Color = Color.White
+) {
+    Box(modifier = modifier.background(Color(0xFF1A237E))) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp)
+        ) {
+            Text(
+                text = title,
+                color = textColor,
+                fontSize = 44.sp,
+                lineHeight = 52.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Text(
+                text = date,
+                color = textColor,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = venue,
+                color = textColor,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+            Text(
+                text = details,
+                color = textColor,
+                fontSize = 18.sp,
+                lineHeight = 26.sp,
+                textAlign = TextAlign.Justify,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun EventPosterPreview() {
+    EventPosterTheme {
+        EventPoster(
+            title = "Techbase Open Day",
+            date = "Saturday, 12 December",
+            venue = "Venue: Techbase Academy, Ibadan",
+            details = "Come and see what our learners have built.",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Long title")
+@Composable
+fun EventPosterLongTitlePreview() {
+    EventPosterTheme {
+        EventPoster(
+            title = "The Annual Techbase Community Programming Showcase and Open Day",
+            date = "Saturday, 12 December",
+            venue = "Venue: Techbase Academy, Ibadan",
+            details = "Come and see what our learners have built.",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What you should see:</strong> a deep blue poster with a large bold white title, the date and venue beneath it, and a justified paragraph of details. In the long-title preview the title wraps over several lines and nothing is cut off, and on a small phone the whole poster scrolls. The text colour is white on dark blue, which has strong contrast. The <code>textColor</code> parameter has a default so you can change it for other designs without editing the body of the composable.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 15 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-15-introduction-to-jetpack-compose-and-text-c</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 15 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Declarative UI and Composable Functions</li><li>✅ Step-by-Step: Create the Project and Read Its Code</li><li>✅ Step-by-Step: Making Text Look the Way You Want</li><li>✅ Step-by-Step: Arranging Composables with Column, Box and Modifier</li><li>✅ Step-by-Step: Strings in `strings.xml`</li><li>✅ Step-by-Step Build: The Birthday Card App</li><li>✅ Step-by-Step Build: The Compose Article App</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_14.html" class="ln-btn">&#8592; Lesson 14</a><a href="lesson_16.html" class="ln-btn primary">Lesson 16 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 15 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

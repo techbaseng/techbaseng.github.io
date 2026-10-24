@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 70: Migrate Room Database to Kotlin Multiplatform — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l70">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 70 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 70</div>
+      <h1>Migrate Room Database to Kotlin Multiplatform</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: A Shared Room Database for FeeTracker</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 70</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Move your database layer into shared code with Room KMP, a bundled SQLite driver and platform database builders, then take the KMP quiz.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ A Shared Room Database for FeeTracker</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">The database is often the biggest piece of Android code that blocks sharing. In lesson 34 you used <strong>Room</strong>, which looked Android-only: <code>@Entity</code>, <code>@Dao</code> and <code>@Database</code> backed by the phone's SQLite. Room now supports <strong>Kotlin Multiplatform</strong>, so the same entities, DAOs and queries can live in <code>commonMain</code> and run on Android and iOS (and desktop). Moving the database is the last big step in sharing the data layer.</p>
+<p class="v2-p">This lesson covers <em>Migrate Room Database to Kotlin Multiplatform</em> and the <em>Kotlin Multiplatform quiz</em> topics from the <strong>Kotlin Multiplatform</strong> programme (https://developer.android.com/courses/pathways/kotlin-multiplatform), following the Android Developers guide <strong>Set up Room for Kotlin Multiplatform</strong> (https://developer.android.com/kotlin/multiplatform/room) and the Room setup page (https://developer.android.com/training/data-storage/room).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what makes Room portable: <strong><code>SQLiteDriver</code></strong>, <strong>KSP per target</strong> and a <strong>database constructor</strong>.</li>
+<li><strong>Move</strong> entities, DAOs and the database class to <code>commonMain</code>.</li>
+<li>Configure <strong>KSP for every target</strong> and the <strong>schema directory</strong>.</li>
+<li>Write a <strong>platform-specific database builder</strong> for Android and iOS.</li>
+<li>Use the <strong>bundled SQLite driver</strong> and know why it matters.</li>
+<li>Test the database from <strong>common</strong> code.</li>
+<li>Review the whole programme with a <strong>quiz-style checklist</strong>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> Room KMP changes <strong>how the database is created</strong>, not <strong>how you use it</strong>. Entities, DAOs, <code>Flow</code> and <code>suspend</code> functions stay the same.</p>
+<p class="v2-p"><strong>Honesty note:</strong> this course teaches <strong>Room 3</strong> (<code>androidx.room3</code>, lesson 34) with Room 2.x equivalents. Room's multiplatform setup was introduced in Room 2.7 and is carried into Room 3, but names such as the Gradle plugin, the constructor annotation, and the driver artifacts are updated from release to release, and I could not check every one against the live documentation while writing. <strong>Use the official page as the source of truth for exact imports and artifact coordinates</strong>, and use this lesson for the structure and reasoning.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Room entities, DAOs, <code>Flow</code>, migrations</strong> (lesson 34).</li>
+<li><strong>Repositories and offline-first design</strong> (lessons 62 and 64).</li>
+<li><strong>KMP structure, source sets, <code>expect</code>/<code>actual</code></strong> (lessons 66 to 68).</li>
+<li><strong>KSP</strong> (lessons 34 and 65).</li>
+<li><strong>Interfaces for platform services</strong> (lesson 68).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: What Room Needs to Be Portable</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Room on Android used the <strong>framework's SQLite</strong> through Android classes (<code>SupportSQLiteDatabase</code>). That does not exist on iOS. Three changes make Room portable:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>SQLiteDriver</code></strong> (from <code>androidx.sqlite</code>)</td>
+<td>A small, multiplatform interface for opening a database and running statements. Room talks to the driver instead of Android classes</td>
+</tr>
+<tr>
+<td><strong>Bundled SQLite driver</strong></td>
+<td>A driver that ships <strong>its own copy of SQLite</strong> inside your app, so the same SQLite version runs on every platform</td>
+</tr>
+<tr>
+<td><strong>KSP per target</strong></td>
+<td>Room's compiler generates code for each target, so the processor is added to each</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Room 3, which you learned in lesson 34, is already built on the driver idea (you saw <code>setDriver(AndroidSQLiteDriver())</code>). Moving to KMP replaces the Android-only driver with a <strong>bundled</strong> one in shared code, and makes the <strong>database builder</strong> platform-specific.</p>
+<h3 class="v2-h3">The flow</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>commonMain
+  @Entity, @Dao, @Database  ── generated per target by KSP ──► Android impl, iOS impl
+  expect object AppDatabaseConstructor : RoomDatabaseConstructor&lt;AppDatabase&gt;
+
+androidMain   builder:  Room.databaseBuilder(context, name)  + driver
+iosMain       builder:  Room.databaseBuilder(path)           + driver
+commonMain    getRoomDatabase(builder): AppDatabase          (applies driver, dispatcher, build)</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What Room Needs to Be Portable</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step Build 1: Dependencies and Plugins</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">Version catalog</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+room = "&lt;latest stable Room 3&gt;"
+sqlite = "&lt;latest stable androidx.sqlite&gt;"
+ksp = "&lt;matches your Kotlin version&gt;"
+
+[libraries]
+androidx-room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
+androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "sqlite" }
+
+[plugins]
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidx-room = { id = "androidx.room3", version.ref = "room" }</code></pre></div></div>
+<p class="v2-p">(The Room Gradle plugin's id has changed between Room 2.x (<code>androidx.room</code>) and Room 3. Check the setup page. The <strong>Room Gradle plugin</strong> is the supported way to configure the <strong>schema directory</strong> for KMP projects.)</p>
+<h3 class="v2-h3">The shared module's build file</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/build.gradle.kts
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
+}
+
+kotlin {
+    android { namespace = "com.example.fees.shared"; compileSdk = 36; minSdk = 24 }
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.sqlite.bundled)
+        }
+    }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")      // committed to Git; used for migrations and tests
+}
+
+dependencies {
+    // KSP must run for EVERY target. One line per target:
+    add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+}</code></pre></div></div>
+<p class="v2-p">The line to remember is the <strong>per-target KSP</strong>: with a single-platform project you wrote <code>ksp(...)</code>; in KMP, Room's compiler must generate code for each target, so you add the processor to <code>kspAndroid</code>, <code>kspIosArm64</code> and <code>kspIosSimulatorArm64</code>. Forgetting one gives the classic error "<code>Room database implementation not found</code>" when you run that platform. (If you also declare a JVM desktop target, add <code>kspJvm</code>.) With the dedicated Android library plugin, the configuration name for the Android target is <code>kspAndroid</code>; with the legacy <code>androidTarget()</code>, check the name KSP generates for your setup.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Dependencies and Plugins</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step Build 2: Move Entities, DAOs and the Database</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Move these files to <code>shared/src/commonMain/kotlin/...</code>. They are almost unchanged.</p>
+<h3 class="v2-h3">Entity and DAO</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+import androidx.room3.Dao
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
+import androidx.room3.Query
+import androidx.room3.Upsert
+import kotlinx.coroutines.flow.Flow
+
+@Entity(tableName = "payments")
+data class PaymentEntity(
+    @PrimaryKey val id: Int,
+    val studentName: String,
+    val amountKobo: Long,
+    val paidAtEpochMillis: Long
+)
+
+@Dao
+interface PaymentDao {
+    @Query("SELECT * FROM payments ORDER BY paidAtEpochMillis DESC")
+    fun observeAll(): Flow&lt;List&lt;PaymentEntity&gt;&gt;
+
+    @Upsert
+    suspend fun upsertAll(payments: List&lt;PaymentEntity&gt;)
+
+    @Query("DELETE FROM payments")
+    suspend fun clear()
+}</code></pre></div></div>
+<p class="v2-p">Notes: nothing here refers to Android. If your entity used <code>java.time.Instant</code>, <code>java.util.Date</code>, or <code>android.*</code> types, change them to <strong>primitives</strong> (as here, epoch milliseconds) or write <strong>type converters</strong> that use multiplatform types (<code>kotlinx-datetime</code>). Type converters are written in common code and registered with the same annotation as in lesson 34 (<code>@ColumnTypeConverter</code> in Room 3, <code>@TypeConverter</code> in Room 2.x).</p>
+<h3 class="v2-h3">The database class and its constructor</h3>
+<p class="v2-p">On Android you could call the generated <code>AppDatabase_Impl</code> by reflection. On iOS there is no reflection, so Room KMP needs an explicit <strong>database constructor</strong> that you declare as an <code>expect object</code>. KSP generates the <code>actual</code> for each platform.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+import androidx.room3.ConstructedBy
+import androidx.room3.Database
+import androidx.room3.RoomDatabase
+import androidx.room3.RoomDatabaseConstructor
+
+@Database(entities = [PaymentEntity::class], version = 1, exportSchema = true)
+@ConstructedBy(AppDatabaseConstructor::class)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun paymentDao(): PaymentDao
+}
+
+// The compiler generates the 'actual' implementations
+@Suppress("KotlinNoActualForExpect")
+expect object AppDatabaseConstructor : RoomDatabaseConstructor&lt;AppDatabase&gt; {
+    override fun initialize(): AppDatabase
+}</code></pre></div></div>
+<p class="v2-p"><code>@Suppress("KotlinNoActualForExpect")</code> hides the IDE warning that no <code>actual</code> exists in your source: KSP generates it at build time.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Move Entities, DAOs and the Database</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step Build 3: Platform-Specific Builders</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Only one thing really differs by platform: <strong>where the database file lives</strong>. Each platform supplies a <strong>builder</strong> that knows the path, and shared code finishes the job.</p>
+<h3 class="v2-h3">Common: finish building</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import kotlinx.coroutines.Dispatchers
+
+fun getRoomDatabase(builder: RoomDatabase.Builder&lt;AppDatabase&gt;): AppDatabase =
+    builder
+        .setDriver(BundledSQLiteDriver())
+        .setQueryCoroutineContext(Dispatchers.Default)    // IO dispatcher is not in common code on all targets
+        .build()</code></pre></div></div>
+<p class="v2-p">Two details deserve attention:</p>
+<ul class="v2-ul">
+<li><strong><code>BundledSQLiteDriver</code></strong> includes SQLite inside your app. The same SQLite version and features (such as full-text search and JSON functions) then behave identically on Android and iOS, instead of depending on whatever the phone ships. The cost is a larger app (a few megabytes).</li>
+<li><strong>Dispatchers:</strong> <code>Dispatchers.IO</code> is available on the JVM and, in recent coroutines versions, on native too, but in older setups it was not in common code. Choose <code>Dispatchers.Default</code> (or an injected dispatcher) unless your coroutines version documents <code>IO</code> as available in common code.</li>
+</ul>
+<h3 class="v2-h3">Android builder</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidMain
+import android.content.Context
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+
+fun getDatabaseBuilder(context: Context): RoomDatabase.Builder&lt;AppDatabase&gt; {
+    val appContext = context.applicationContext
+    val dbFile = appContext.getDatabasePath("fees.db")
+    return Room.databaseBuilder&lt;AppDatabase&gt;(
+        context = appContext,
+        name = dbFile.absolutePath
+    )
+}</code></pre></div></div>
+<h3 class="v2-h3">iOS builder</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// iosMain
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSUserDomainMask
+
+fun getDatabaseBuilder(): RoomDatabase.Builder&lt;AppDatabase&gt; {
+    val dbFilePath = documentDirectory() + "/fees.db"
+    return Room.databaseBuilder&lt;AppDatabase&gt;(name = dbFilePath)
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private fun documentDirectory(): String {
+    val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
+        directory = NSDocumentDirectory,
+        inDomain = NSUserDomainMask,
+        appropriateForURL = null,
+        create = false,
+        error = null
+    )
+    return requireNotNull(documentDirectory?.path)
+}</code></pre></div></div>
+<p class="v2-p">The two functions have the <strong>same name and a different signature</strong> (Android needs a <code>Context</code>), so they are not an <code>expect</code>/<code>actual</code> pair; each platform app calls its own. That is fine: the app wiring, not shared code, creates the database and passes the finished <code>AppDatabase</code> into shared classes.</p>
+<h3 class="v2-h3">Wiring it in</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Android app
+val database = getRoomDatabase(getDatabaseBuilder(applicationContext))
+val repository = DefaultPaymentsRepository(database.paymentDao(), ...)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">swift</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// iOS app (Swift), via a small Kotlin helper in iosMain that wraps the builder
+let database = DatabaseFactory().create()   // calls getRoomDatabase(getDatabaseBuilder())</code></pre></div></div>
+<p class="v2-p">With Hilt in the Android app (lesson 65), the <code>@Provides</code> function from lesson 68 simply returns <code>getRoomDatabase(getDatabaseBuilder(context))</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Platform-Specific Builders</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step Build 4: Migrating an Existing Database</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">If the app is already in the Play Store with users, their data lives in a Room 2.x (or Room 3) database file on Android. Moving to KMP must <strong>not</strong> lose it.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Concern</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Schema</strong></td>
+<td>Keep the same tables, columns and <code>version</code>. Do not change the schema during the move</td>
+</tr>
+<tr>
+<td><strong>Database file name and location</strong></td>
+<td>Use the <strong>same path</strong> on Android (<code>getDatabasePath("fees.db")</code> matches the old name)</td>
+</tr>
+<tr>
+<td><strong>Driver change</strong></td>
+<td>Moving to the bundled driver changes the SQLite engine, not the file format; SQLite files are portable across versions</td>
+</tr>
+<tr>
+<td><strong>Existing migrations</strong></td>
+<td>Keep your <code>Migration</code> objects and register them with <code>addMigrations(...)</code> in the common builder (migrations written with the driver-based <code>SQLiteConnection</code> API work on all platforms; older ones using <code>SupportSQLiteDatabase</code> must be rewritten)</td>
+</tr>
+<tr>
+<td><strong>Auto migrations</strong></td>
+<td><code>@Database(autoMigrations = ...)</code> continues to work with exported schemas</td>
+</tr>
+<tr>
+<td><strong>Testing</strong></td>
+<td>Open a saved copy of an old database on a device and verify the data</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A migration written for KMP uses the driver connection API:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+import androidx.room3.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
+
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE payments ADD COLUMN receiptNumber TEXT")
+    }
+}
+
+fun getRoomDatabase(builder: RoomDatabase.Builder&lt;AppDatabase&gt;): AppDatabase =
+    builder
+        .setDriver(BundledSQLiteDriver())
+        .setQueryCoroutineContext(Dispatchers.Default)
+        .addMigrations(MIGRATION_1_2)
+        .build()</code></pre></div></div>
+<p class="v2-p">(<code>Migration.migrate</code> takes a <code>SQLiteConnection</code> in the driver-based API; the older <code>SupportSQLiteDatabase</code> signature is Android-only. Check the migration guide for your Room version.)</p>
+<p class="v2-p"><strong>Roll out carefully:</strong> release the KMP-based Android app to a small percentage of users first (staged rollout, lesson 49) and watch for database crashes before going wider.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Migrating an Existing Database</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build 5: Testing the Database from Common Code</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Room KMP lets you test in <code>commonTest</code> with an <strong>in-memory database</strong>, which runs on every target:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/androidHostTest or a platform source set that has a driver and a builder
+// For a common test you need an in-memory builder from each platform; the pattern:
+
+// commonTest
+expect fun createInMemoryDatabase(): AppDatabase</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidHostTest (needs AndroidX test core to supply a Context) or androidDeviceTest
+actual fun createInMemoryDatabase(): AppDatabase =
+    Room.inMemoryDatabaseBuilder&lt;AppDatabase&gt;(ApplicationProvider.getApplicationContext())
+        .setDriver(BundledSQLiteDriver())
+        .setQueryCoroutineContext(Dispatchers.Unconfined)
+        .build()</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonTest
+class PaymentDaoTest {
+    private lateinit var db: AppDatabase
+
+    @BeforeTest fun setUp() { db = createInMemoryDatabase() }
+    @AfterTest fun tearDown() { db.close() }
+
+    @Test
+    fun upsert_then_observe_returns_rows() = runTest {
+        db.paymentDao().upsertAll(listOf(PaymentEntity(1, "Ada", 150_000_00, 0)))
+        val rows = db.paymentDao().observeAll().first()
+        assertEquals("Ada", rows.single().studentName)
+    }
+}</code></pre></div></div>
+<p class="v2-p">(The exact in-memory builder name and parameters differ by Room version and platform. Check the testing section of the setup page. The key idea is that your <strong>DAO tests are shared</strong>, and only the way to create the database differs.)</p>
+<h3 class="v2-h3">Other persistence in KMP</h3>
+<ul class="v2-ul">
+<li><strong>DataStore</strong> (preferences or typed) also supports multiplatform, using a file path per platform, in the same style as Room's builder.</li>
+<li><strong>SQLDelight</strong> is a popular alternative to Room that generates Kotlin from SQL and has long supported KMP. Choose it if you prefer writing SQL files, or if you started before Room supported KMP.</li>
+<li>Whichever you use, the repository from lesson 62 stays the same, because it depends on interfaces.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Testing the Database from Common Code</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Step-by-Step Build 6: Programme Review (The KMP Quiz Topics)</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">The programme ends with a quiz on the Kotlin Multiplatform basics. Use this checklist, and answer each in your own words before looking at the notes:</p>
+<ol class="v2-ol">
+<li><strong>What is KMP, and what does it share?</strong> Logic across targets; UI optional.</li>
+<li><strong>How is common code compiled for iOS?</strong> Kotlin/Native to a framework.</li>
+<li><strong>What are source sets, and which one can see which?</strong> Platform sets see common; never the reverse.</li>
+<li><strong><code>expect</code>/<code>actual</code> versus interfaces?</strong> Stateless facts versus services.</li>
+<li><strong>Which test library works in common code?</strong> <code>kotlin.test</code>.</li>
+<li><strong>How does Android Studio create a shared module?</strong> New Module wizard, "Kotlin Multiplatform Shared Module".</li>
+<li><strong>What task does Xcode call for direct integration?</strong> <code>embedAndSignAppleFrameworkForXcode</code>.</li>
+<li><strong>What does klibs.io do?</strong> Searches multiplatform libraries by supported targets.</li>
+<li><strong>What makes Room portable?</strong> The <code>SQLiteDriver</code> API, bundled SQLite, a database constructor, KSP per target.</li>
+<li><strong>Why a bundled driver?</strong> Identical SQLite behaviour across platforms.</li>
+</ol>
+<p class="v2-p">If you can answer all ten, you have the whole pathway.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Programme Review (The KMP Quiz Topics)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Debug the crash</strong></p>
+<p class="v2-p">The app builds, runs on Android, and crashes on iOS with a message that the database implementation cannot be found. List the two most likely missing pieces.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(1) The Room compiler was not added for the iOS targets (<code>kspIosArm64</code> and <code>kspIosSimulatorArm64</code>), so no implementation was generated. (2) The <code>@ConstructedBy</code> annotation or the <code>expect object ... : RoomDatabaseConstructor</code> is missing, so Room cannot instantiate the database without reflection.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Common or platform?</strong></p>
+<p class="v2-p">For each, say commonMain or a platform source set: (a) <code>@Dao interface</code>; (b) <code>Room.databaseBuilder(context, path)</code>; (c) <code>getRoomDatabase(builder)</code>; (d) the iOS document directory lookup.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>commonMain</code>. (b) <code>androidMain</code> (it needs a <code>Context</code>). (c) <code>commonMain</code>, because it only configures the builder. (d) <code>iosMain</code>, because it uses Apple's Foundation APIs.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Protect user data</strong></p>
+<p class="v2-p">You are shipping the KMP version of an app whose users already have data. Give four precautions.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(1) Keep the same schema and <code>version</code>, with no schema changes in the same release. (2) Keep the same database file name and location on Android. (3) Keep and test all existing migrations, rewriting any that use the old Android-only API. (4) Test with a saved copy of a real old database, then use a staged rollout and watch crash and database error rates. Back up or export data if the app has a way to do so.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Adding KSP for only one target.</strong> <em>Fix:</em> add the Room compiler for every target.</p>
+<p class="v2-p"><strong>Mistake #2: No <code>@ConstructedBy</code> constructor.</strong> <em>Fix:</em> declare the <code>expect object</code> and the annotation.</p>
+<p class="v2-p"><strong>Mistake #3: Leaving <code>java.*</code> types in entities.</strong> <em>Fix:</em> use primitives or multiplatform types.</p>
+<p class="v2-p"><strong>Mistake #4: Forgetting the schema directory.</strong> <em>Fix:</em> configure it with the Room plugin and commit the files.</p>
+<p class="v2-p"><strong>Mistake #5: Changing the schema while moving to KMP.</strong> <em>Fix:</em> move first, change later.</p>
+<p class="v2-p"><strong>Mistake #6: Using the Android framework driver in common code.</strong> <em>Fix:</em> use the bundled driver.</p>
+<p class="v2-p"><strong>Mistake #7: Creating several database instances.</strong> <em>Fix:</em> build one and share it.</p>
+<p class="v2-p"><strong>Mistake #8: Old migrations using Android-only types.</strong> <em>Fix:</em> rewrite them with the driver connection API.</p>
+<p class="v2-p"><strong>Mistake #9: Testing only on Android.</strong> <em>Fix:</em> share DAO tests and run them on each target.</p>
+<p class="v2-p"><strong>Mistake #10: Copying setup code from an old blog.</strong> <em>Fix:</em> check the current official page.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the role of <code>BundledSQLiteDriver</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It ships SQLite inside the app so the same SQLite behaviour runs on every platform, and it works in common code.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why do we add the Room compiler to several KSP configurations?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Code must be generated for each target, so each needs the processor.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>@ConstructedBy</code> solve?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It tells Room how to instantiate the generated database on platforms without reflection, via a generated <code>actual</code> of the <code>RoomDatabaseConstructor</code>.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Which part of the setup is platform-specific?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The database builder, because the file location is different on each platform.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What should stay the same during the migration?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">The schema, version, file name and location on Android, and the user's data.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/kotlin-multiplatform" rel="noopener noreferrer">Kotlin Multiplatform programme</a></li>
+<li><a href="https://developer.android.com/kotlin/multiplatform/room" rel="noopener noreferrer">Set up Room for Kotlin Multiplatform</a></li>
+<li><a href="https://developer.android.com/training/data-storage/room" rel="noopener noreferrer">Room setup</a></li>
+<li><a href="https://developer.android.com/kotlin/multiplatform" rel="noopener noreferrer">Kotlin Multiplatform on Android Developers</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">A Shared Room Database for FeeTracker</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Move the FeeTracker database into the shared module and prove it works on Android, with iOS configured.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Add the Room runtime, bundled driver, KSP and the Room Gradle plugin to <code>:shared</code>, with the compiler on <strong>every</strong> target's KSP configuration.</li>
+<li>Move <code>PaymentEntity</code>, <code>PaymentDao</code> and <code>AppDatabase</code> into <code>commonMain</code>, with the <code>@ConstructedBy</code> constructor.</li>
+<li>Write <code>getRoomDatabase(builder)</code> in common code using <code>BundledSQLiteDriver</code>.</li>
+<li>Write the Android builder in <code>androidMain</code> and the iOS builder in <code>iosMain</code>.</li>
+<li>Provide the database to the Android app through Hilt and replace the old Android-only database class.</li>
+<li>Keep the schema, <code>version</code> and file name identical, and add one migration (version 1 to 2, a nullable <code>receiptNumber</code> column) written with the driver connection API.</li>
+<li>Write DAO tests that run against an in-memory database, and a migration test that opens an exported version-1 schema.</li>
+<li>Write a short rollout plan for existing users.</li>
+<li>Answer the ten quiz topics from Build 6 in your own words.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> replace the Android-only DataStore in your app with multiplatform DataStore and share your settings repository.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The rollout plan (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Before release
+ - Schema, version and file name unchanged (fees.db, version 1) -&gt; then migration to 2 in a later release
+ - Verified: open a copy of a production-style database from the previous app version; all rows present
+ - All unit tests and DAO tests green on Android; iOS tests green in macOS CI
+
+Release
+ - Staged rollout: 5% -&gt; 20% -&gt; 50% -&gt; 100% over a week
+ - Watch Play Console / Crashlytics for SQLiteException and migration errors
+
+Rollback
+ - Halt the rollout; previous version remains installable (database format unchanged)</code></pre></div></div>
+<p class="v2-p">The Hilt provider:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+    @Provides @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+        getRoomDatabase(getDatabaseBuilder(context))
+
+    @Provides
+    fun providePaymentDao(db: AppDatabase): PaymentDao = db.paymentDao()
+}</code></pre></div></div>
+<p class="v2-p">An in-memory DAO test and a quiz answer example:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun clear_removes_all_rows() = runTest {
+    val dao = db.paymentDao()
+    dao.upsertAll(listOf(PaymentEntity(1, "Ada", 100, 0), PaymentEntity(2, "Tunde", 200, 0)))
+    dao.clear()
+    assertTrue(dao.observeAll().first().isEmpty())
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Q9 (What makes Room portable?)
+Room talks to a small SQLiteDriver interface instead of Android classes, so it can run on any platform
+that has a driver. The bundled driver ships SQLite with the app for identical behaviour. KSP generates
+the Room code for each target, and an expect object with @ConstructedBy lets Room create the database
+on platforms without reflection.</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 70 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-70-migrate-room-database-to-kotlin-multiplatf</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 70 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What Room Needs to Be Portable</li><li>✅ Step-by-Step Build 1: Dependencies and Plugins</li><li>✅ Step-by-Step Build 2: Move Entities, DAOs and the Database</li><li>✅ Step-by-Step Build 3: Platform-Specific Builders</li><li>✅ Step-by-Step Build 4: Migrating an Existing Database</li><li>✅ Step-by-Step Build 5: Testing the Database from Common Code</li><li>✅ Step-by-Step Build 6: Programme Review (The KMP Quiz Topics)</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_69.html" class="ln-btn">&#8592; Lesson 69</a><a href="lesson_71.html" class="ln-btn primary">Lesson 71 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 70 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

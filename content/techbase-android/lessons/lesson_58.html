@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 58: Adaptive Apps for Phones, Tablets and Foldables — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l58">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 58 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 58</div>
+      <h1>Adaptive Apps for Phones, Tablets and Foldables</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: ClassRegister for Every Screen</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 58</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Build adaptive apps with window size classes, canonical layouts, list-detail panes, navigation suites and foldable postures.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ ClassRegister for Every Screen</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 27 you met window size classes and built a first list-detail layout. This lesson goes further. Your app will not only run on a phone held upright. It will run on tablets, on foldables that open and close, on Chromebooks, in <strong>split-screen</strong> and <strong>freeform windows</strong>, on a desktop-sized display, and in a window the user drags to any shape. Android's guidance is simple: <strong>do not design for devices, design for window sizes</strong>.</p>
+<p class="v2-p">This lesson covers <em>Implementing Android apps for all screen sizes</em> and <em>Build adaptive apps</em> from Pathway 5 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-5), and the adaptive-layouts material linked from it (for example the codelab at https://codelabs.developers.google.com/jetpack-compose-adaptability).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain why <strong>window size</strong>, not device type or orientation, drives layout.</li>
+<li>Read <strong>window size classes</strong> and build <strong>breakpoint-based</strong> layouts.</li>
+<li>Apply the <strong>canonical layouts</strong>: <strong>list-detail</strong>, <strong>supporting pane</strong> and <strong>feed</strong>.</li>
+<li>Use the <strong>Material 3 adaptive</strong> scaffolds and navigation suite (with care about their release status).</li>
+<li>React to <strong>foldable postures</strong> such as <strong>tabletop</strong> and <strong>book</strong> with <strong>Jetpack WindowManager</strong>.</li>
+<li>Support <strong>resizing</strong>, <strong>configuration changes</strong>, <strong>keyboard</strong>, <strong>mouse</strong> and <strong>stylus</strong> input.</li>
+<li>Test adaptive layouts on a <strong>resizable emulator</strong>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a window is a rectangle whose size can change at any time. Write layouts as functions of that rectangle and every device, present and future, is covered.</p>
+<p class="v2-p"><strong>Honesty note:</strong> the adaptive libraries are updated often and some APIs are marked experimental. Class names below match the libraries at the time of writing; check the official release notes for the current names and stability before shipping.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Window size classes, <code>NavigationSuiteScaffold</code> and the hand-built list-detail</strong> (lesson 27).</li>
+<li><strong>ViewModel and state hoisting</strong> (lessons 25 and 37).</li>
+<li><strong>Navigation Compose</strong> (lessons 26 and 55).</li>
+<li><strong>Lazy lists and grids</strong> (lessons 21 and 39).</li>
+<li><strong>Android Studio emulators</strong> (lesson 4).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Why Adaptive?</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Large screens are mainstream</h3>
+<p class="v2-p">Tablets, foldables and ChromeOS devices are a large audience, and on a big screen a stretched phone layout looks lazy: lines of text 1,000 pixels wide, one small button in a sea of white. Google Play also reviews apps against <strong>large-screen quality guidelines</strong>, and apps that adapt can get better visibility on those devices. (Exact Play surfacing rules change; check the current documentation.)</p>
+<h3 class="v2-h3">Orientation is not the signal</h3>
+<p class="v2-p">An old habit was "landscape means wide". But a phone in <strong>split-screen</strong> is narrow even in landscape, and a tablet in portrait is still wide. A window can be resized by the user at any time. So the question to ask is "how many dp wide and tall is <strong>my window</strong> now?", never "what device is this?".</p>
+<h3 class="v2-h3">Window size classes</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Class</th>
+<th>Width breakpoint</th>
+<th>Typical window</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compact</strong></td>
+<td>below 600 dp</td>
+<td>Phone in portrait, small split-screen pane</td>
+</tr>
+<tr>
+<td><strong>Medium</strong></td>
+<td>600 dp up to 840 dp</td>
+<td>Tablet in portrait, unfolded foldable, large phone in landscape</td>
+</tr>
+<tr>
+<td><strong>Expanded</strong></td>
+<td>840 dp and above</td>
+<td>Tablet in landscape, desktop windows</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Newer releases of the window-size-class library add <strong>larger breakpoints</strong> (such as large and extra-large widths for desktop-like windows). Check the current WindowManager documentation for the full set. Height classes (compact, medium, expanded) exist too; width is usually the one that drives navigation and pane layouts.</p>
+<h3 class="v2-h3">Canonical layouts</h3>
+<p class="v2-p">Rather than invent a layout from scratch, use proven patterns:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Layout</th>
+<th>Idea</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>List-detail</strong></td>
+<td>A list on one side, the selected item's detail on the other</td>
+<td>Email, messages, a student register</td>
+</tr>
+<tr>
+<td><strong>Supporting pane</strong></td>
+<td>A main pane plus a smaller related pane</td>
+<td>A document with comments, a lesson with notes</td>
+</tr>
+<tr>
+<td><strong>Feed</strong></td>
+<td>Content cards in a flexible grid that grows columns with width</td>
+<td>News, social, product catalogue</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Each layout shows <strong>one pane on compact</strong> windows (navigating between them) and <strong>two panes on wide</strong> windows.</p>
+<h3 class="v2-h3">Adaptive navigation</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Window</th>
+<th>Navigation component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compact</td>
+<td><strong>Navigation bar</strong> at the bottom</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td><strong>Navigation rail</strong> at the side</td>
+</tr>
+<tr>
+<td>Expanded</td>
+<td><strong>Navigation rail</strong> or permanent <strong>navigation drawer</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>NavigationSuiteScaffold</code> chooses automatically (lesson 27).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Why Adaptive?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Dependencies and a Window Size Class</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">The adaptive libraries are separate from Compose Material 3. In <code>libs.versions.toml</code> use placeholders for versions and look up the latest stable ones:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+adaptive = "&lt;latest stable&gt;"
+material3 = "&lt;latest stable&gt;"
+windowManager = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-compose-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "material3" }
+androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptive" }
+androidx-compose-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "adaptive" }
+androidx-compose-material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "adaptive" }
+androidx-compose-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "windowManager" }</code></pre></div></div>
+<p class="v2-p">Add the entries you need to <code>build.gradle.kts</code> with <code>implementation(libs....)</code>. (Coordinates can change as libraries graduate; confirm them in the documentation.)</p>
+<h3 class="v2-h3">Calculate the current window size class</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+
+class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            AppTheme {
+                val sizeClass = calculateWindowSizeClass(this)
+                SchoolApp(widthClass = sizeClass.widthSizeClass)
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">An alternative that does not need the activity is <code>currentWindowAdaptiveInfo()</code> from the adaptive library, which returns the window size class and fold information as a state-backed value:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.window.core.layout.WindowWidthSizeClass
+
+@Composable
+fun SchoolApp() {
+    val info = currentWindowAdaptiveInfo()
+    val widthClass = info.windowSizeClass.windowWidthSizeClass
+    val twoPane = widthClass != WindowWidthSizeClass.COMPACT
+    // ...
+}</code></pre></div></div>
+<p class="v2-p">(The exact property and type names have shifted between releases, for example towards width-in-dp comparisons such as <code>isWidthAtLeastBreakpoint(...)</code>. Check the current API; the idea is stable.)</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Rule:</strong> pass <strong>size information</strong> down as parameters (a boolean such as <code>twoPane</code>, or the size class). Composables deep in the tree should not call <code>calculateWindowSizeClass</code> themselves; hoist it once at the top.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Dependencies and a Window Size Class</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: A Master-Detail Register, Properly</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Our running example is <strong>ClassRegister</strong>: a list of students and a detail pane. The state lives in a ViewModel and is shared by both layouts.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Student(val id: Int, val name: String, val form: String, val notes: String)
+
+data class RegisterUiState(
+    val students: List&lt;Student&gt; = emptyList(),
+    val selectedId: Int? = null
+) {
+    val selected: Student? get() = students.firstOrNull { it.id == selectedId }
+}
+
+class RegisterViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(
+        RegisterUiState(
+            students = listOf(
+                Student(1, "Adaeze Okoye", "SS2", "Strong in Mathematics."),
+                Student(2, "Tunde Bello", "SS1", "Needs support in English."),
+                Student(3, "Funke Adebayo", "SS3", "Prefect. Science class.")
+            )
+        )
+    )
+    val uiState: StateFlow&lt;RegisterUiState&gt; = _uiState.asStateFlow()
+
+    fun select(id: Int?) = _uiState.update { it.copy(selectedId = id) }
+}</code></pre></div></div>
+<h3 class="v2-h3">A simple adaptive screen without the scaffold</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun RegisterScreen(
+    state: RegisterUiState,
+    twoPane: Boolean,
+    onSelect: (Int?) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    if (twoPane) {
+        Row(modifier.fillMaxSize()) {
+            StudentList(
+                students = state.students,
+                selectedId = state.selectedId,
+                onSelect = { onSelect(it) },
+                modifier = Modifier.weight(0.4f)
+            )
+            VerticalDivider()
+            StudentDetail(
+                student = state.selected,
+                modifier = Modifier.weight(0.6f)
+            )
+        }
+    } else {
+        // One pane at a time; back returns to the list
+        if (state.selected == null) {
+            StudentList(state.students, null, { onSelect(it) }, modifier.fillMaxSize())
+        } else {
+            BackHandler { onSelect(null) }
+            StudentDetail(state.selected, modifier.fillMaxSize(), onBack = { onSelect(null) })
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Observe what is shared: the <strong>ViewModel and <code>selectedId</code></strong>. When a user unfolds a phone, <code>twoPane</code> flips to <code>true</code>, and the same selection now appears as the right-hand pane without losing position. That continuity is the heart of an adaptive app.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Why <code>selectedId</code> not <code>selected</code>?</strong> An id survives process changes and recomposition cleanly, and the object is looked up from the current list. Storing the whole object can leave stale copies.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: A Master-Detail Register, Properly</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: The Material 3 Adaptive Scaffolds</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">The Material 3 adaptive library provides scaffolds that implement canonical layouts, including <strong>animation, dividers and window-aware behaviour</strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Scaffold</th>
+<th>Layout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ListDetailPaneScaffold</code></td>
+<td>List-detail</td>
+</tr>
+<tr>
+<td><code>SupportingPaneScaffold</code></td>
+<td>Main pane plus a supporting pane</td>
+</tr>
+<tr>
+<td><code>NavigableListDetailPaneScaffold</code>, <code>NavigableSupportingPaneScaffold</code></td>
+<td>The above, plus a <strong>navigator</strong> that manages which pane is shown and back handling</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">At the time of writing, parts of this library are marked <code>@ExperimentalMaterial3AdaptiveApi</code>; opt in explicitly and expect small renames.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun RegisterAdaptive(students: List&lt;Student&gt;) {
+    val navigator = rememberListDetailPaneScaffoldNavigator&lt;Int&gt;()   // content key: the student id
+    val scope = rememberCoroutineScope()
+
+    NavigableListDetailPaneScaffold(
+        navigator = navigator,
+        listPane = {
+            AnimatedPane {
+                StudentList(
+                    students = students,
+                    selectedId = navigator.currentDestination?.contentKey,
+                    onSelect = { id -&gt;
+                        scope.launch {
+                            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id)
+                        }
+                    }
+                )
+            }
+        },
+        detailPane = {
+            AnimatedPane {
+                val id = navigator.currentDestination?.contentKey
+                StudentDetail(student = students.firstOrNull { it.id == id })
+            }
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">(Depending on the library version, <code>navigateTo</code> is a <code>suspend</code> function, as here, or a regular one; and <code>navigateBack</code> has similar variants. The IDE will tell you.)</p>
+<p class="v2-p">How it behaves:</p>
+<ul class="v2-ul">
+<li><strong>Expanded window:</strong> both panes appear side by side. Selecting an item updates the detail pane.</li>
+<li><strong>Compact window:</strong> one pane at a time. <code>navigateTo(Detail, id)</code> shows the detail pane, and the system <strong>back gesture</strong> returns to the list because the scaffold's navigator handles back.</li>
+<li><strong>Resizing:</strong> when the window changes size, the scaffold re-evaluates how many panes fit and keeps the current destination.</li>
+</ul>
+<p class="v2-p">For selection to survive configuration changes, the navigator's content key must be <strong>saveable</strong>: an <code>Int</code> or <code>String</code> works, an arbitrary class needs a custom saver or <code>@Parcelize</code>/<code>@Serializable</code>.</p>
+<h3 class="v2-h3">Supporting pane</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun LessonScreen(lesson: Lesson) {
+    val navigator = rememberSupportingPaneScaffoldNavigator()
+
+    NavigableSupportingPaneScaffold(
+        navigator = navigator,
+        mainPane = { AnimatedPane { LessonText(lesson) } },
+        supportingPane = { AnimatedPane { LessonNotes(lesson) } }
+    )
+}</code></pre></div></div>
+<p class="v2-p">On a compact window the user sees the main pane, with a way (a button) to open the supporting pane, which replaces it; on wide windows both are visible.</p>
+<h3 class="v2-h3">Adaptive navigation again, with custom behaviour</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+
+@Composable
+fun AppNav(content: @Composable () -&gt; Unit) {
+    var current by rememberSaveable { mutableStateOf(Destination.Register) }
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            Destination.entries.forEach { dest -&gt;
+                item(
+                    selected = current == dest,
+                    onClick = { current = dest },
+                    icon = { Icon(dest.icon, contentDescription = null) },
+                    label = { Text(dest.label) }
+                )
+            }
+        }
+    ) {
+        content()
+    }
+}</code></pre></div></div>
+<p class="v2-p">The suite picks bar, rail or drawer from the window's adaptive info. You can override that choice with a <code>layoutType</code> parameter when you have a reason, for example to keep a bottom bar on a medium window.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Material 3 Adaptive Scaffolds</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Foldables and Postures</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">A <strong>foldable</strong> can be flat, half-open (like a laptop, <strong>book posture</strong>) or propped like a stand (<strong>tabletop posture</strong>). <strong>Jetpack WindowManager</strong> exposes the <strong>fold</strong> as a <code>FoldingFeature</code> with:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>state</code></td>
+<td><code>FLAT</code> or <code>HALF_OPENED</code></td>
+</tr>
+<tr>
+<td><code>orientation</code></td>
+<td><code>HORIZONTAL</code> or <code>VERTICAL</code> fold line</td>
+</tr>
+<tr>
+<td><code>occlusionType</code></td>
+<td>Whether the fold hides content (<code>FULL</code>) or not (<code>NONE</code>)</td>
+</tr>
+<tr>
+<td><code>isSeparating</code></td>
+<td>Whether the fold divides the display into two logical areas</td>
+</tr>
+<tr>
+<td><code>bounds</code></td>
+<td>The fold's rectangle in the window</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Detect tabletop posture</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
+
+@OptIn(ExperimentalContracts::class)
+fun isTableTopPosture(feature: FoldingFeature?): Boolean {
+    contract { returns(true) implies (feature != null) }
+    return feature?.state == FoldingFeature.State.HALF_OPENED &amp;&amp;
+        feature.orientation == FoldingFeature.Orientation.HORIZONTAL
+}
+
+class MainActivity : ComponentActivity() {
+    private val foldState = MutableStateFlow&lt;FoldingFeature?&gt;(null)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                WindowInfoTracker.getOrCreate(this@MainActivity)
+                    .windowLayoutInfo(this@MainActivity)
+                    .map { info -&gt; info.displayFeatures.filterIsInstance&lt;FoldingFeature&gt;().firstOrNull() }
+                    .collect { foldState.value = it }
+            }
+        }
+
+        setContent {
+            val fold by foldState.collectAsStateWithLifecycle()
+            AppTheme { VideoCallScreen(tabletop = isTableTopPosture(fold)) }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>ExperimentalContracts</code> needs <code>@OptIn(kotlin.contracts.ExperimentalContracts::class)</code>; the contract is optional and can be removed.)</p>
+<h3 class="v2-h3">Use the posture</h3>
+<p class="v2-p">In <strong>tabletop</strong>, show the video or content in the top half, and the controls in the bottom half, so the phone stands on a table and the controls lie flat under your hands:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun VideoCallScreen(tabletop: Boolean) {
+    if (tabletop) {
+        Column(Modifier.fillMaxSize()) {
+            VideoArea(Modifier.weight(1f))        // top half
+            ControlsArea(Modifier.weight(1f))     // bottom half
+        }
+    } else {
+        Box(Modifier.fillMaxSize()) {
+            VideoArea(Modifier.fillMaxSize())
+            ControlsArea(Modifier.align(Alignment.BottomCenter))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Rules for foldables:</p>
+<ol class="v2-ol">
+<li><strong>Never place critical content under the hinge</strong> if <code>occlusionType == FULL</code>.</li>
+<li><strong>Keep state</strong> across fold and unfold; handle configuration changes yourself or use ViewModel and <code>rememberSaveable</code>.</li>
+<li>Test the <strong>book</strong> posture too: when the fold is vertical and separating, a two-pane layout with the divider on the fold looks natural.</li>
+<li>Do not assume a fold exists; <code>FoldingFeature</code> is <code>null</code> on ordinary devices.</li>
+</ol><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Foldables and Postures</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Step-by-Step Build 5: Resizability, Input and Quality</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Do not lock orientation or resizing</h3>
+<p class="v2-p">On large screens, a manifest that forbids rotation or resizing makes the app <strong>letterboxed</strong> (a phone-sized column in the middle of the screen) because the system respects it. For apps targeting recent Android versions, the platform increasingly <strong>ignores</strong> such restrictions on large screens (the exact thresholds and behaviour changed across Android 16 and later; check the current docs). The robust approach is to avoid them:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:resizeableActivity="true" /&gt;
+&lt;!-- Avoid: android:screenOrientation="portrait" and android:resizeableActivity="false" --&gt;</code></pre></div></div>
+<p class="v2-p">Handle configuration changes properly: let the activity recreate and restore from the ViewModel and saved state, or declare <code>android:configChanges</code> only for cases like video playback where you handle them yourself.</p>
+<h3 class="v2-h3">Input beyond touch</h3>
+<p class="v2-p">Large-screen users have a <strong>keyboard, mouse, trackpad and stylus</strong>. Support:</p>
+<ul class="v2-ul">
+<li><strong>Keyboard shortcuts</strong> and focus order (Tab and arrow keys). Compose provides <code>Modifier.onKeyEvent</code>, <code>Modifier.onPreviewKeyEvent</code> and <code>Modifier.focusable()</code>.</li>
+<li><strong>Hover states</strong> and tooltips for mouse users, <strong>right-click</strong> context menus.</li>
+<li><strong>Drag and drop</strong>, <strong>text selection</strong> with <code>SelectionContainer</code>.</li>
+<li><strong>Stylus</strong> input for notes and drawing.</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun KeyboardAwareList(onSearch: () -&gt; Unit, content: @Composable () -&gt; Unit) {
+    Box(
+        Modifier.onPreviewKeyEvent { event -&gt;
+            if (event.type == KeyEventType.KeyDown &amp;&amp; event.isCtrlPressed &amp;&amp; event.key == Key.F) {
+                onSearch()
+                true            // consumed
+            } else false
+        }
+    ) { content() }
+}</code></pre></div></div>
+<h3 class="v2-h3">Layout rules of thumb for wide windows</h3>
+<ul class="v2-ul">
+<li><strong>Do not stretch</strong>: cap reading width (about 600 to 840 dp for text) using <code>Modifier.widthIn(max = 840.dp)</code> with centred content.</li>
+<li><strong>Grow columns, not cards</strong>: use <code>LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 180.dp))</code>.</li>
+<li><strong>Use space for context</strong>: show the detail beside the list rather than a bigger list.</li>
+<li><strong>Reachability</strong>: on tablets, place frequent actions near edges where hands rest; avoid tiny controls in the far corners.</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentGrid(students: List&lt;Student&gt;) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 200.dp),
+        contentPadding = PaddingValues(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(students, key = { it.id }) { StudentCard(it) }
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Test it</h3>
+<ul class="v2-ul">
+<li>Android Studio's <strong>resizable emulator</strong> (phone, foldable, tablet, desktop in one AVD) lets you resize the window live.</li>
+<li>Use <strong>Foldable</strong> and <strong>Pixel Tablet</strong> AVD definitions; the foldable emulator has virtual hinge sensors in the extended controls.</li>
+<li>In <strong>Compose previews</strong>, add <code>@PreviewScreenSizes</code> or <code>@Preview(device = Devices.TABLET)</code> to preview several window sizes at once.</li>
+<li><strong>Large-screen quality checklists</strong> from the Android documentation list the tiers (Tier 3 basic, Tier 2 differentiated, Tier 1 optimised). Check the current wording on the developer site.</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@PreviewScreenSizes
+@Composable
+fun RegisterPreview() {
+    AppTheme { RegisterScreen(sampleState, twoPane = false, onSelect = {}) }
+}</code></pre></div></div>
+<p class="v2-p">(<code>@PreviewScreenSizes</code> renders several window shapes in the preview pane. For a preview to reflect real window classes, make the screen read the window size inside the composable rather than from a hard-coded parameter.)</p>
+<h3 class="v2-h3">Automated tests with a fixed window size</h3>
+<p class="v2-p">In Compose UI tests, you can test a layout at a known width by wrapping it in a <code>Box(Modifier.width(900.dp))</code> or by parametrising the <code>twoPane</code> boolean, which is another reason to <strong>hoist</strong> it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@get:Rule val rule = createComposeRule()
+
+@Test
+fun twoPane_showsListAndDetail() {
+    rule.setContent { AppTheme { RegisterScreen(sampleState.copy(selectedId = 1), twoPane = true, onSelect = {}) } }
+    rule.onNodeWithText("Adaeze Okoye").assertExists()
+    rule.onNodeWithText("Strong in Mathematics.").assertExists()
+}
+
+@Test
+fun singlePane_showsOnlyList() {
+    rule.setContent { AppTheme { RegisterScreen(sampleState, twoPane = false, onSelect = {}) } }
+    rule.onNodeWithText("Strong in Mathematics.").assertDoesNotExist()
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Resizability, Input and Quality</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Choose the layout</strong></p>
+<p class="v2-p">For each window, choose the navigation component and number of panes for a list-detail email app: (a) a phone in portrait, (b) the same phone with its app in a 500 dp split-screen pane, (c) a tablet in landscape, (d) an unfolded foldable at 700 dp width.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(a) Compact: bottom navigation bar, one pane (list, then detail). (b) Still compact (500 dp is below 600 dp), so the same as (a), even if the device is a big tablet. (c) Expanded: navigation rail or drawer, two panes (list plus detail). (d) Medium: navigation rail, and two panes if there is room (often yes at 700 dp with a narrow list); otherwise one. Decisions come from the <strong>window</strong>, not the device.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Stretched text</strong></p>
+<p class="v2-p">A reading screen displays a long paragraph full-width on a 1,200 dp window. Fix it so the text is a comfortable width and centred.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Reader(text: String) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .widthIn(max = 720.dp)
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState())
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">Long lines are hard to read: aim for roughly 45 to 90 characters per line. <code>widthIn(max = ...)</code> leaves small windows alone and caps wide ones.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Selection across a fold</strong></p>
+<p class="v2-p">The user selects a student on the phone's cover screen (compact), then unfolds the device (expanded). Describe what should happen and which two design choices make it work.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The unfolded layout should show the list with the same student highlighted and their detail on the right, with no reset. It works because (1) <strong>state is hoisted</strong> into the ViewModel (or the navigator with a saveable content key), so recreation after the configuration change keeps <code>selectedId</code>, and (2) the <strong>layout decision is a pure function</strong> of window size, so the same state renders as one pane or two.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Branching on device type.</strong> <em>Fix:</em> branch on window size.</p>
+<p class="v2-p"><strong>Mistake #2: Locking orientation or disabling resizing.</strong> <em>Fix:</em> support all window shapes.</p>
+<p class="v2-p"><strong>Mistake #3: Calling the size-class calculation deep in the tree.</strong> <em>Fix:</em> hoist and pass down.</p>
+<p class="v2-p"><strong>Mistake #4: Stretching phone layouts to tablets.</strong> <em>Fix:</em> use two panes, adaptive grids and <code>widthIn</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Losing state on resize or fold.</strong> <em>Fix:</em> ViewModel plus saveable state, ids as keys.</p>
+<p class="v2-p"><strong>Mistake #6: Content under the hinge.</strong> <em>Fix:</em> read <code>FoldingFeature</code> bounds and <code>occlusionType</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Ignoring keyboard and mouse.</strong> <em>Fix:</em> focus order, shortcuts, hover.</p>
+<p class="v2-p"><strong>Mistake #8: Assuming experimental adaptive APIs never change.</strong> <em>Fix:</em> pin versions and read release notes.</p>
+<p class="v2-p"><strong>Mistake #9: Testing only on one phone.</strong> <em>Fix:</em> resizable emulator and preview sizes.</p>
+<p class="v2-p"><strong>Mistake #10: Forgetting back handling in the one-pane case.</strong> <em>Fix:</em> use the scaffold navigator or <code>BackHandler</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What window width is the boundary between compact and medium?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">600 dp (compact is below it; medium runs from 600 dp up to 840 dp).</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Name the three canonical layouts.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">List-detail, supporting pane and feed.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why store <code>selectedId</code> rather than the selected object?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">An id is small, saveable and always resolves against the current data, so selection survives recreation without stale copies.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What does tabletop posture mean, and how would you design for it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A foldable half-open with a horizontal fold. Put content in the top half and controls in the bottom half.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why avoid <code>screenOrientation="portrait"</code> and <code>resizeableActivity="false"</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">They cause letterboxing or are ignored on large screens, and they block multi-window, so the app feels broken on tablets and desktop-style windows.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-5" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 5</a></li>
+<li><a href="https://codelabs.developers.google.com/jetpack-compose-adaptability" rel="noopener noreferrer">Build adaptive apps codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">ClassRegister for Every Screen</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Make the ClassRegister app adapt to phones, tablets and foldables.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <code>RegisterViewModel</code> holding students and <code>selectedId</code> (as in Build 2).</li>
+<li>A hoisted size class, with a <strong>bar on compact</strong>, <strong>rail on medium</strong> and <strong>rail or drawer on expanded</strong> (via <code>NavigationSuiteScaffold</code>).</li>
+<li>A <strong>list-detail</strong> layout using either the hand-built <code>Row</code> or <code>NavigableListDetailPaneScaffold</code>.</li>
+<li>A <strong>grid</strong> on a separate "Gallery" tab with <code>GridCells.Adaptive</code>.</li>
+<li>Text content capped with <code>widthIn</code>.</li>
+<li>A <strong>tabletop-aware</strong> screen for any media or camera feature (a stub is fine).</li>
+<li>No orientation locks; <code>resizeableActivity="true"</code>.</li>
+<li>Two UI tests (single-pane and two-pane) and previews with <code>@PreviewScreenSizes</code>.</li>
+<li>Verify on the resizable emulator and write down what you saw at each size.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add keyboard shortcut <code>Ctrl+F</code> to focus a search field, and a mouse hover highlight on rows.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A compact version of the root:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun ClassRegisterApp(vm: RegisterViewModel = viewModel()) {
+    val state by vm.uiState.collectAsStateWithLifecycle()
+    val info = currentWindowAdaptiveInfo()
+    val twoPane = info.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+
+    var tab by rememberSaveable { mutableStateOf(Tab.Register) }
+
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            Tab.entries.forEach {
+                item(
+                    selected = tab == it,
+                    onClick = { tab = it },
+                    icon = { Icon(it.icon, contentDescription = null) },
+                    label = { Text(it.label) }
+                )
+            }
+        }
+    ) {
+        when (tab) {
+            Tab.Register -&gt; RegisterScreen(state, twoPane, onSelect = vm::select)
+            Tab.Gallery -&gt; StudentGrid(state.students)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Expected behaviour on the resizable emulator (example notes):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Phone (compact)   bottom bar, list, tap student -&gt; detail, back returns to list
+Foldable unfolded rail on the left, list + detail side by side, selection kept
+Tablet landscape  rail, two panes, gallery shows 4-5 columns
+Desktop window    same, text capped at 720 dp and centred</code></pre></div></div>
+<p class="v2-p">Remember to check each result on a real device where you can; layouts are only proven by looking at them.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 58 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-58-adaptive-apps-for-phones-tablets-and-folda</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 58 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Why Adaptive?</li><li>✅ Step-by-Step Build 1: Dependencies and a Window Size Class</li><li>✅ Step-by-Step Build 2: A Master-Detail Register, Properly</li><li>✅ Step-by-Step Build 3: The Material 3 Adaptive Scaffolds</li><li>✅ Step-by-Step Build 4: Foldables and Postures</li><li>✅ Step-by-Step Build 5: Resizability, Input and Quality</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_57.html" class="ln-btn">&#8592; Lesson 57</a><a href="lesson_59.html" class="ln-btn primary">Lesson 59 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 58 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

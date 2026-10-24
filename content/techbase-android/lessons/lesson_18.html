@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 18: Debugging with Android Studio — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l18">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 18 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 18</div>
+      <h1>Debugging with Android Studio</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Bug Hunt: The Exam Marks Calculator</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 18</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Find and fix bugs with Logcat, breakpoints, stepping, watches and conditional breakpoints.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Bug Hunt: The Exam Marks Calculator</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome back! In lesson 17 you built a Dice Roller that reacts to taps. Sooner or later every app you build will do something you did not expect: a wrong total, a button that does nothing, or the dreaded "App keeps stopping" dialog. Today you learn what professional developers do in that moment. They do not guess and they do not panic. They <strong>debug</strong>.</p>
+<p class="v2-p">A bug is a gap between what you <em>meant</em> the program to do and what it <em>actually</em> does. Debugging is the detective work of closing that gap. Think of a mechanic whose danfo bus makes a strange noise. A bad mechanic replaces parts at random. A good one listens, opens the bonnet, tests one part at a time and finds the real cause. Android Studio gives you the stethoscope, the torch and the spanner.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Write messages to <strong>Logcat</strong> with <code>Log.d</code>, <code>Log.i</code>, <code>Log.w</code> and <code>Log.e</code>, and explain the six log levels.</li>
+<li>Filter Logcat by tag, level, package and message text so you can find one line among thousands.</li>
+<li>Read a <strong>stack trace</strong> from the top and find the exact line in your own code that crashed.</li>
+<li>Set a <strong>breakpoint</strong>, run your app in <strong>debug mode</strong> and pause it mid-execution.</li>
+<li>Use the <strong>Debug tool window</strong>: Variables, Watches, the call stack (Frames), and the step buttons (step over, step into, step out, resume).</li>
+<li>Use <strong>Evaluate Expression</strong> to test an idea on a paused app without editing code.</li>
+<li>Set a <strong>conditional breakpoint</strong> that only stops when something interesting happens.</li>
+<li>Follow a repeatable five-step method for hunting a bug.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson matches the official <em>Use the debugger in Android Studio</em> codelab, part of Unit 2, Pathway 2 of Google's <strong>Android Basics with Compose</strong> course. The official codelab walks through one sample app. We use our own app with two deliberate bugs, go further into Logcat and conditional breakpoints, and give you a method you can reuse for the rest of the course.</p>
+</blockquote>
+<h3 class="v2-h3">Why this lesson matters</h3>
+<p class="v2-p">Beginners often think good programmers write code without bugs. They do not. Good programmers are simply fast at <em>finding</em> bugs. A skilled debugger can fix in ten minutes what takes a guesser two hours, and the skills transfer to every later lesson: networking, databases, background work. Time spent here is repaid many times.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">You should be comfortable with the following. Skim the lesson number if any item feels shaky.</p>
+<h3 class="v2-h3">1. A running Compose app</h3>
+<p class="v2-p">You need an Android Studio project with an <em>Empty Activity</em> and a working emulator or phone (lessons 3 to 5). If you can press <strong>Run</strong> and see your app, you are ready.</p>
+<h3 class="v2-h3">2. Functions, <code>if</code> and loops</h3>
+<p class="v2-p">We debug a function that loops over a list and an <code>if</code> that applies a discount. Both appear in lessons 8 and 9.</p>
+<h3 class="v2-h3">3. Data classes and lists</h3>
+<p class="v2-p">A <code>data class</code> is a small container for related values, such as a name and a price. A <code>List</code> holds several of them (lessons 11 and 14).</p>
+<h3 class="v2-h3">4. Basic state in Compose</h3>
+<p class="v2-p">You saw <code>remember { mutableStateOf(...) }</code> in lesson 17: a value that, when changed, makes the screen redraw. Lesson 19 explains it fully. Here we use it only to show a result on the screen.</p>
+<h3 class="v2-h3">5. The Android Studio layout</h3>
+<p class="v2-p">Android Studio has a <strong>Run</strong> tool window and a <strong>Logcat</strong> tool window along the bottom edge. If you cannot see them, use <strong>View &gt; Tool Windows</strong> or click the icons on the bottom toolbar. Menu names move slightly between versions, so look for the nearest match.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: How Bugs Hide</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Three kinds of bug</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Kind</th>
+<th>What happens</th>
+<th>Example</th>
+<th>How you notice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compile-time error</strong></td>
+<td>The code is not valid Kotlin, so the app will not build.</td>
+<td>A missing bracket.</td>
+<td>Red underline and a Build error. Fix it before running.</td>
+</tr>
+<tr>
+<td><strong>Runtime crash</strong></td>
+<td>The app builds but throws an <strong>exception</strong> while running.</td>
+<td>Reading item number 3 in a list of 3.</td>
+<td>The app closes. Logcat shows a red stack trace.</td>
+</tr>
+<tr>
+<td><strong>Logic bug</strong></td>
+<td>The app runs and shows an answer, but the answer is wrong.</td>
+<td>A discount that takes off 90 percent instead of 10.</td>
+<td>Nothing warns you. Only <em>you</em> know the answer is wrong.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Logic bugs are the sneakiest, because the computer is happily doing exactly what you told it. Crashes at least tell you where they happened.</p>
+<h3 class="v2-h3">Your three debugging tools</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>              YOUR APP (running)
+                    |
+   +----------------+-----------------+
+   |                |                 |
+ LOGCAT        STACK TRACE       DEBUGGER
+ "What did     "Where did it     "Freeze time and
+  the app       crash, and        look inside the
+  say?"         who called        app's memory."
+                whom?"</code></pre></div></div>
+<ul class="v2-ul">
+<li><strong>Logcat</strong> is the app's diary. You write sentences into it (<code>Log.d</code>) and Android writes its own as well. It is cheap and works on any device, but you only see what you remembered to log.</li>
+<li><strong>Stack traces</strong> are the app's last words when it crashes. They list the chain of function calls that led to the crash.</li>
+<li><strong>The debugger</strong> pauses the app on a line you choose and lets you inspect every variable, then run the code one line at a time. It is the most powerful tool, but it takes a minute to set up.</li>
+</ul>
+<h3 class="v2-h3">The five-step debugging method</h3>
+<p class="v2-p">Write this down. It works for every bug in every language.</p>
+<ol class="v2-ol">
+<li><strong>Reproduce it.</strong> Find exact steps that trigger the bug every time. A bug you cannot reproduce cannot be fixed.</li>
+<li><strong>Read the evidence.</strong> Read the error message and stack trace <em>top to bottom</em> before touching any code.</li>
+<li><strong>Form one hypothesis.</strong> "I think the loop runs one time too many." One guess, written as a sentence.</li>
+<li><strong>Test the hypothesis</strong> with a log line or a breakpoint. Do not change code yet. Confirm that your guess is true.</li>
+<li><strong>Fix, then re-run the original steps</strong> to prove the bug is gone, and check that you broke nothing else.</li>
+</ol>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Think about it:</strong> Why is step 4 (testing the guess) separate from step 5 (fixing)? Because fixing a wrong guess can hide the symptom while leaving the real cause alive, and then the bug returns later in a worse place.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: How Bugs Hide</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">The Practice App: Market Basket</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">We will debug a tiny app called <strong>Market Basket</strong>. It lists three things you bought at Bodija market, adds up the cost and gives a 10 percent discount when the total is above ₦10,000. It contains two deliberate bugs. Build it exactly as written first, then hunt the bugs with the tools above.</p>
+<h3 class="v2-h3">Step 1: Create the project</h3>
+<ol class="v2-ol">
+<li>Choose <strong>File &gt; New &gt; New Project</strong> and pick <strong>Empty Activity</strong>.</li>
+<li>Name it <code>Market Basket</code>, set the package name to <code>com.techbase.basket</code>, and keep the defaults for language (Kotlin) and build configuration.</li>
+<li>Wait for Gradle to finish syncing.</li>
+</ol>
+<h3 class="v2-h3">Step 2: The logic file</h3>
+<p class="v2-p">Right-click the <code>com.techbase.basket</code> package, choose <strong>New &gt; Kotlin Class/File</strong>, pick <strong>File</strong> and name it <code>Basket</code>. Replace the content with this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Basket.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.basket
+
+import android.util.Log
+
+private const val TAG = "BasketLogic"
+
+data class BasketItem(val name: String, val price: Int, val quantity: Int)
+
+/** Adds up price times quantity for every item. */
+fun basketTotal(items: List&lt;BasketItem&gt;): Int {
+    var total = 0
+    for (i in 0..items.size) {
+        val item = items[i]
+        Log.d(TAG, "Adding ${item.name}: ${item.price} x ${item.quantity}")
+        total += item.price * item.quantity
+    }
+    return total
+}
+
+/** Gives 10 percent off when the total is above 10,000 naira. */
+fun applyDiscount(total: Int): Int {
+    return if (total &gt; 10_000) total / 10 else total
+}</code></pre></div></div>
+<p class="v2-p">Do not fix anything yet. Both functions are wrong on purpose.</p>
+<h3 class="v2-h3">Step 3: The screen</h3>
+<p class="v2-p">Open <code>MainActivity.kt</code> and replace its content:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.basket
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+private const val TAG = "BasketScreen"
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    BasketScreen()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BasketScreen(modifier: Modifier = Modifier) {
+    val items = listOf(
+        BasketItem("Rice", 4_500, 2),
+        BasketItem("Beans", 1_500, 1),
+        BasketItem("Garri", 800, 3)
+    )
+    var result by remember { mutableStateOf("Tap the button") }
+
+    Column(
+        modifier = modifier.padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        items.forEach { item -&gt;
+            Text("${item.name}: ${item.quantity} x ₦${item.price}")
+        }
+        Button(
+            onClick = {
+                Log.d(TAG, "Calculate tapped")
+                val total = basketTotal(items)
+                val payable = applyDiscount(total)
+                Log.i(TAG, "total=$total payable=$payable")
+                result = "You pay ₦$payable"
+            }
+        ) {
+            Text("Calculate")
+        }
+        Text(result, style = MaterialTheme.typography.headlineSmall)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Block by block.</strong> <code>BasketScreen</code> keeps a list of three items and one piece of state, <code>result</code>, holding the sentence to show. When the button is tapped it logs a line, calls our two logic functions, logs the numbers, and updates <code>result</code>. The screen then redraws with the new text. The <code>Log.d</code> and <code>Log.i</code> calls are the beginning of your Logcat diary.</p>
+<p class="v2-p"><strong>What should happen:</strong> 4,500 x 2 is 9,000, plus 1,500, plus 800 x 3 which is 2,400, so the total is <strong>₦12,900</strong>. That is above 10,000, so a 10 percent discount of 1,290 leaves <strong>₦11,610</strong>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Practice App: Market Basket</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Logcat: Your App&#x27;s Diary</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Run the app (green triangle) and tap <strong>Calculate</strong>. Something goes wrong: the app closes. Good. A bug to hunt.</p>
+<h3 class="v2-h3">Opening Logcat</h3>
+<p class="v2-p">Click <strong>Logcat</strong> in the bottom tool bar (or <strong>View &gt; Tool Windows &gt; Logcat</strong>). Make sure the device drop-down at the top shows your emulator or phone. You will see a fast-moving river of text. Android itself logs hundreds of lines a minute, so the skill is not reading Logcat, it is <strong>filtering</strong> it.</p>
+<h3 class="v2-h3">Log levels</h3>
+<p class="v2-p">Every log line has a <strong>level</strong> that says how important it is. There are six, from least to most serious.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Level</th>
+<th>Function</th>
+<th>Letter</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Verbose</td>
+<td><code>Log.v</code></td>
+<td>V</td>
+<td>Very chatty detail you will normally hide.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td><code>Log.d</code></td>
+<td>D</td>
+<td>Developer notes while you are fixing something, such as values of variables.</td>
+</tr>
+<tr>
+<td>Info</td>
+<td><code>Log.i</code></td>
+<td>I</td>
+<td>Normal milestones: "user signed in".</td>
+</tr>
+<tr>
+<td>Warning</td>
+<td><code>Log.w</code></td>
+<td>W</td>
+<td>Something odd that the app survived.</td>
+</tr>
+<tr>
+<td>Error</td>
+<td><code>Log.e</code></td>
+<td>E</td>
+<td>Something failed. Crashes appear here.</td>
+</tr>
+<tr>
+<td>Assert</td>
+<td><code>Log.wtf</code></td>
+<td>A</td>
+<td>"What a terrible failure": a situation that should never happen. Rarely used.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Each call takes a <strong>tag</strong> (a short label, by convention the class name) and a <strong>message</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.util.Log
+
+private const val TAG = "BasketScreen"
+
+fun demoLogging(total: Int) {
+    Log.d(TAG, "total is $total")                 // debug note
+    Log.i(TAG, "Calculation finished")            // information
+    Log.w(TAG, "Total is unusually large: $total") // warning
+    Log.e(TAG, "Could not read item")             // error
+}</code></pre></div></div>
+<p class="v2-p">A call with an exception attached prints the stack trace as well: <code>Log.e(TAG, "Failed", exception)</code>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Tip:</strong> Logging runs on a real device, so never log passwords, tokens or personal data. Anyone who plugs in your phone with a cable can read Logcat. Remove noisy debug logs before you publish (lesson 49 covers release preparation).</p>
+</blockquote>
+<h3 class="v2-h3">Filtering Logcat</h3>
+<p class="v2-p">The Logcat search box at the top accepts plain words and <strong>key:value filters</strong>. The syntax below is the one used by recent Android Studio versions. Older versions have a different filter dialog, so if a key is not recognised, look for the filter drop-down next to the search box.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>You type</th>
+<th>What you see</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tag:BasketScreen</code></td>
+<td>Only lines whose tag is <code>BasketScreen</code>.</td>
+</tr>
+<tr>
+<td><code>package:mine</code></td>
+<td>Only lines from your own app. Very useful.</td>
+</tr>
+<tr>
+<td><code>level:error</code></td>
+<td>Errors and worse.</td>
+</tr>
+<tr>
+<td><code>message:total</code></td>
+<td>Lines whose message contains the word <code>total</code>.</td>
+</tr>
+<tr>
+<td><code>package:mine level:debug</code></td>
+<td>Your app, debug level and above. Several filters are combined with a space.</td>
+</tr>
+<tr>
+<td><code>-tag:chatty</code></td>
+<td>A minus sign <strong>excludes</strong> lines with that tag.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Try it now. Type <code>package:mine</code> and look at your lines. You should see something similar to this, in the order the code ran:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">D  Calculate tapped<br/>D  Adding Rice: 4500 x 2<br/>D  Adding Beans: 1500 x 1<br/>D  Adding Garri: 800 x 3<br/>E  FATAL EXCEPTION: main</p>
+</blockquote>
+<p class="v2-p">The last line is the clue. The logs prove the loop handled all three items, then something went wrong <em>after</em> Garri, which suggests it tried to go on to a fourth item that does not exist. We have a hypothesis already, without any debugger. That is the power of good logs.</p>
+<h3 class="v2-h3">Where Logcat is not enough</h3>
+<p class="v2-p">Logs only show what you remembered to log, and each new log needs a re-build and re-run. For a bug deep inside a calculation, you want to <em>freeze</em> the app and look around. That is the debugger.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Logcat: Your App&#x27;s Diary</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Reading a Stack Trace</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When an exception is not handled, Android prints a <strong>stack trace</strong> in red. The trace for our crash will look similar to this. Exact wording and line numbers vary by Android version and by your code.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>FATAL EXCEPTION: main
+Process: com.techbase.basket, PID: 8123
+java.lang.ArrayIndexOutOfBoundsException: length=3; index=3
+    at java.util.Arrays$ArrayList.get(Arrays.java:3585)
+    at com.techbase.basket.BasketKt.basketTotal(Basket.kt:13)
+    at com.techbase.basket.MainActivityKt$BasketScreen$1$1.invoke(MainActivity.kt:62)
+    at androidx.compose.foundation.ClickableNode$clickPointerInput$3.invoke(Clickable.kt:...)
+    ...</code></pre></div></div>
+<h3 class="v2-h3">How to read it</h3>
+<ol class="v2-ol">
+<li><strong>The first line after <code>FATAL EXCEPTION</code></strong> names the exception type and a message: <code>ArrayIndexOutOfBoundsException: length=3; index=3</code>. Translation: "You asked for item number 3, but the list has only 3 items (numbered 0, 1, 2)."</li>
+<li><strong>Then come the frames</strong>, one per function call, newest first. Each is <code>at package.Class.function(File.kt:line)</code>.</li>
+<li><strong>The frames from Android or library code</strong> (<code>java.util</code>, <code>androidx</code>, <code>android.</code>) are plumbing. Skip down to the <strong>first frame that is in your own package</strong>, here <code>com.techbase.basket.BasketKt.basketTotal(Basket.kt:13)</code>.</li>
+<li><strong>Click the blue <code>Basket.kt:13</code></strong> link. Android Studio opens that file at that line. The crash happened <em>at or just after</em> that line.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>read the trace like a family tree, from the crash upwards:
+
+  Arrays$ArrayList.get      &lt;- the library said "no such index"
+        ^ called by
+  basketTotal(Basket.kt:13) &lt;- YOUR code asked for index 3   &lt;-- start here
+        ^ called by
+  BasketScreen onClick      &lt;- the button handler called basketTotal
+        ^ called by
+  Compose click handling    &lt;- framework plumbing</code></pre></div></div>
+<p class="v2-p">Line 13 is <code>val item = items[i]</code>. Now look at the loop above it: <code>for (i in 0..items.size)</code>. In Kotlin <code>0..3</code> includes <strong>3</strong>. A list of three items has indexes 0, 1 and 2, so the loop made one visit too many. This is the famous <strong>off-by-one error</strong>.</p>
+<p class="v2-p">The fix is to use <code>until</code>, which stops <em>before</em> the end value, or to loop over the items directly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>for (i in 0 until items.size) { /* ... */ }   // indexes 0, 1, 2
+for (item in items) { /* ... */ }              // simplest and safest</code></pre></div></div>
+<p class="v2-p">Apply the second form in <code>Basket.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun basketTotal(items: List&lt;BasketItem&gt;): Int {
+    var total = 0
+    for (item in items) {
+        Log.d(TAG, "Adding ${item.name}: ${item.price} x ${item.quantity}")
+        total += item.price * item.quantity
+    }
+    return total
+}</code></pre></div></div>
+<p class="v2-p">Run again and tap <strong>Calculate</strong>. No crash. But the screen says <strong>You pay ₦1290</strong>, not ₦11,610. We have a second bug, a logic bug, and no stack trace to help. Time for the debugger.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading a Stack Trace</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">The Debugger: Freezing Time</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Breakpoints</h3>
+<p class="v2-p">A <strong>breakpoint</strong> is a flag on a line of code that says: "when execution reaches here, pause the whole app before running this line."</p>
+<ol class="v2-ol">
+<li>Open <code>MainActivity.kt</code> and find the line <code>val total = basketTotal(items)</code>.</li>
+<li>Click once in the grey <strong>gutter</strong> (the narrow strip with line numbers) beside that line. A red dot appears. That is your breakpoint. Click it again to remove it.</li>
+</ol>
+<h3 class="v2-h3">Running in debug mode</h3>
+<p class="v2-p">A normal <strong>Run</strong> does not stop at breakpoints. You need <strong>Debug</strong>:</p>
+<ul class="v2-ul">
+<li>Click the <strong>bug icon</strong> in the toolbar (next to the green Run triangle), or use <strong>Run &gt; Debug 'app'</strong>.</li>
+<li>Android Studio installs the app in debug mode and opens the <strong>Debug</strong> tool window at the bottom.</li>
+<li>Tap <strong>Calculate</strong> in the app. The app freezes, the breakpoint line turns blue, and the Debug window shows the app's internal state.</li>
+</ul>
+<p class="v2-p">If the app does not stop, check that the red dot is solid (not a red circle with a line through it, which means it is muted) and that you pressed the bug icon, not the triangle. Debugging is slower than normal running and uses more memory, which matters on a modest laptop. Close other heavy programs if the emulator stalls.</p>
+<h3 class="v2-h3">Anatomy of the Debug window</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+--------------------------------------------------------------+
+| Debug: app    [Debugger] [Logcat]                            |
++--------------------------------------------------------------+
+| TOOLBAR: Resume | Pause | Stop | Step Over | Step Into |     |
+|          Step Out | Run to Cursor | Evaluate Expression      |
++----------------------+---------------------------------------+
+| FRAMES (call stack)  | VARIABLES  and  WATCHES               |
+|  &gt; onClick           |  items = ArrayList (size = 3)         |
+|    invoke            |  result = "Tap the button"            |
+|    ...               |  total = (not yet assigned)           |
++----------------------+---------------------------------------+</code></pre></div></div>
+<ul class="v2-ul">
+<li><strong>Frames</strong> shows the same chain of calls as a stack trace, but live. Click a frame to see the variables as they were in that function.</li>
+<li><strong>Variables</strong> shows every value in scope. Click the small arrows to open objects, so you can look inside <code>items</code> and see each <code>BasketItem</code>.</li>
+<li><strong>Watches</strong> is a list of expressions you type in, such as <code>items.size</code>, that Studio re-calculates at every pause. Click the <strong>+</strong> in the Watches area.</li>
+</ul>
+<h3 class="v2-h3">The step buttons</h3>
+<p class="v2-p">When paused, you control time with these buttons. Shortcuts below are the defaults on Windows and Linux; on a Mac, hover over each button to see its shortcut, because they use the Command and Option keys.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Button</th>
+<th>Typical shortcut</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Resume Program</strong></td>
+<td><code>F9</code></td>
+<td>Run on until the next breakpoint (or until the app ends).</td>
+</tr>
+<tr>
+<td><strong>Step Over</strong></td>
+<td><code>F8</code></td>
+<td>Run <strong>this line</strong> completely, including any functions it calls, then pause on the next line.</td>
+</tr>
+<tr>
+<td><strong>Step Into</strong></td>
+<td><code>F7</code></td>
+<td>If this line calls a function you wrote, jump <strong>inside</strong> it and pause on its first line.</td>
+</tr>
+<tr>
+<td><strong>Step Out</strong></td>
+<td><code>Shift + F8</code></td>
+<td>Finish the current function and pause in whoever called it.</td>
+</tr>
+<tr>
+<td><strong>Run to Cursor</strong></td>
+<td><code>Alt + F9</code></td>
+<td>Run until the line where your text cursor sits.</td>
+</tr>
+<tr>
+<td><strong>Evaluate Expression</strong></td>
+<td><code>Alt + F8</code></td>
+<td>Open a mini calculator that can run any Kotlin expression on the paused app.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Step Over versus Step Into</strong> is the one to remember. Imagine reading a recipe that says "make the stew (see page 40)". <em>Step over</em> means "trust the stew recipe, move to the next line". <em>Step into</em> means "turn to page 40 and read it".</p>
+<h3 class="v2-h3">Hunting Bug 2</h3>
+<p class="v2-p">With the app paused on <code>val total = basketTotal(items)</code>:</p>
+<ol class="v2-ol">
+<li>Press <strong>Step Over</strong> (<code>F8</code>). The line runs and <code>total</code> appears in Variables. It should read <code>12900</code>. That is right! So <code>basketTotal</code> is now correct.</li>
+<li>The next line is <code>val payable = applyDiscount(total)</code>. Press <strong>Step Into</strong> (<code>F7</code>) this time. The debugger jumps into <code>applyDiscount</code> in <code>Basket.kt</code>, with <code>total = 12900</code> visible.</li>
+<li>Press <strong>Step Over</strong> once. You are paused on the <code>if</code> line. Since <code>total &gt; 10_000</code> is true, the code takes the first branch and calculates <code>total / 10</code>.</li>
+<li>Look at the Variables or hover over <code>total / 10</code>. It is <code>1290</code>. The code returns <em>one tenth of the price</em>, not the price minus one tenth. We have found it: the discount formula is wrong.</li>
+</ol>
+<p class="v2-p">You never needed to guess. Each step shrank the search area: first the total (fine), then the discount (wrong), then the formula.</p>
+<h3 class="v2-h3">Evaluate Expression: test the fix before writing it</h3>
+<p class="v2-p">Still paused inside <code>applyDiscount</code>, open <strong>Evaluate Expression</strong> (<code>Alt + F8</code>, or the calculator icon). Type <code>total - total / 10</code> and press <strong>Evaluate</strong>. The result is <code>11610</code>, which is the number we expected. You tested the fix without changing a single line of code or restarting. You can evaluate almost any Kotlin expression, call functions, and inspect objects here.</p>
+<p class="v2-p">Now apply the fix:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun applyDiscount(total: Int): Int {
+    return if (total &gt; 10_000) total - total / 10 else total
+}</code></pre></div></div>
+<p class="v2-p">Press <strong>Stop</strong> (red square), then <strong>Run</strong> again and tap <strong>Calculate</strong>. The screen reads <strong>You pay ₦11610</strong>. Both bugs are fixed. Compare Logcat with <code>package:mine</code>:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">D  Calculate tapped<br/>D  Adding Rice: 4500 x 2<br/>D  Adding Beans: 1500 x 1<br/>D  Adding Garri: 800 x 3<br/>I  total=12900 payable=11610</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Debugger: Freezing Time</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Advanced Breakpoints: Conditions, Logpoints and Exception Stops</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">The problem with simple breakpoints</h3>
+<p class="v2-p">Suppose the basket held <strong>200</strong> items and the bug only happens for the item called <code>"Yam"</code>. A plain breakpoint inside the loop would pause 200 times. You would press Resume until your finger hurt. Android Studio offers three better answers.</p>
+<h3 class="v2-h3">Conditional breakpoints</h3>
+<p class="v2-p">Put a breakpoint on the <code>total += item.price * item.quantity</code> line in <code>Basket.kt</code>. Then <strong>right-click the red dot</strong>. A small pop-up appears with a <strong>Condition</strong> box. Type a Kotlin expression that returns true or false:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>item.name == "Garri"</code></pre></div></div>
+<p class="v2-p">Now the app pauses only when the condition is true. With our three items it stops once, on Garri, and you can see <code>item.quantity</code> is 3. Other useful conditions:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>item.price &gt; 4000          // only expensive items
+total &gt; 9000               // only after the running total passes 9000</code></pre></div></div>
+<p class="v2-p">If you mistype the condition, Studio normally pauses anyway and complains, so check the Debug window for a message.</p>
+<h3 class="v2-h3">Logpoints (breakpoints that write instead of pause)</h3>
+<p class="v2-p">In the same right-click pop-up, tick <strong>Evaluate and log</strong> and type a message such as <code>"item=" + item.name</code>. The breakpoint no longer stops the app. It prints to the Debug console and the app runs at full speed. Logpoints let you add a log without editing code, rebuilding, or remembering to delete it later. Untick <strong>Suspend</strong> in the pop-up if the dialog offers it, so the app does not pause.</p>
+<h3 class="v2-h3">Exception breakpoints</h3>
+<p class="v2-p">Open <strong>Run &gt; View Breakpoints</strong> (or <code>Ctrl + Shift + F8</code>). Use the <strong>+</strong> button to add a <strong>Java Exception Breakpoint</strong> and choose a type such as <code>ArrayIndexOutOfBoundsException</code> or the general <code>IndexOutOfBoundsException</code>. Now the debugger stops <em>at the moment the exception is thrown</em>, with all variables still alive, instead of after the app has already died. This is gold for crashes that are hard to trace.</p>
+<h3 class="v2-h3">Housekeeping</h3>
+<ul class="v2-ul">
+<li><strong>Mute Breakpoints</strong> (the red dot with a slash in the Debug toolbar) turns all stops off temporarily.</li>
+<li><strong>Breakpoints stay in the project</strong> until you remove them, so tidy up when you are done. A forgotten breakpoint in a loop makes the app look frozen.</li>
+<li><strong>Debug is slower than Run.</strong> Never judge the speed of your app while debugging.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Advanced Breakpoints: Conditions, Logpoints and Exception Stops</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Log, filter and find</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Use Logcat as a diary and filter it.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Add a <code>Log.d</code> inside <code>applyDiscount</code> that records the incoming total and whether the discount was applied. Use tag <code>"BasketLogic"</code>.</li>
+<li>Run the app, tap <strong>Calculate</strong> and use the Logcat search box to show only lines with <code>tag:BasketLogic</code>.</li>
+<li>Change the filter to also hide the <code>Adding</code> lines using a minus filter on their message text.</li>
+<li>Write down the exact Logcat text you needed.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun applyDiscount(total: Int): Int {
+    val discounted = total &gt; 10_000
+    Log.d(TAG, "applyDiscount: total=$total discounted=$discounted")
+    return if (discounted) total - total / 10 else total
+}</code></pre></div></div>
+<p class="v2-p">Filter to your tag with <code>tag:BasketLogic</code>. To hide the <code>Adding</code> lines add <code>-message:Adding</code>, giving <code>tag:BasketLogic -message:Adding</code>. The only line left should be:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">D  applyDiscount: total=12900 discounted=true</p>
+</blockquote>
+<p class="v2-p">Note that the <code>Adding</code> lines come from <code>basketTotal</code>, which also uses the tag <code>BasketLogic</code>, so the minus filter is what separates them.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: A new bug, found by stepping</strong></p>
+<p class="v2-p">Add a fourth item <code>BasketItem("Palm oil", 3_000, 0)</code> and a rule that <strong>free items</strong> (quantity 0) must not appear in the total. First write <code>basketTotal</code> <em>wrongly</em> so it also adds one extra naira for each item (a "packing fee"). Then use a <strong>conditional breakpoint</strong> on <code>item.quantity == 0</code> and Step Over to watch how <code>total</code> changes for that item. Explain in one sentence what the debugger showed you.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun basketTotal(items: List&lt;BasketItem&gt;): Int {
+    var total = 0
+    for (item in items) {
+        total += item.price * item.quantity + 1   // wrong: fee added even for free items
+    }
+    return total
+}</code></pre></div></div>
+<p class="v2-p">Put a breakpoint on the <code>total +=</code> line, right-click it and set the condition <code>item.quantity == 0</code>. When it stops on Palm oil, Variables shows <code>total = 12903</code>. Press <strong>Step Over</strong>: <code>total</code> becomes <code>12904</code>, although <code>0 * 3000</code> is zero. The debugger showed that an item with quantity zero still increased the total by 1, so the <code>+ 1</code> must only apply to items you actually bought. A correct version:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun basketTotal(items: List&lt;BasketItem&gt;): Int {
+    var total = 0
+    for (item in items) {
+        if (item.quantity &gt; 0) {
+            total += item.price * item.quantity
+        }
+    }
+    return total
+}</code></pre></div></div></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Catch a crash with an exception breakpoint</strong></p>
+<p class="v2-p">Temporarily change the loop back to <code>for (i in 0..items.size)</code>. Add a <strong>Java Exception Breakpoint</strong> for <code>IndexOutOfBoundsException</code> (tick both caught and uncaught), run in debug mode and tap <strong>Calculate</strong>. Find the value of <code>i</code> and <code>items.size</code> at the moment the debugger stops, then fix the loop.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">In <strong>Run &gt; View Breakpoints</strong>, click <strong>+</strong>, choose <strong>Java Exception Breakpoints</strong>, and type <code>IndexOutOfBoundsException</code>. (<code>ArrayIndexOutOfBoundsException</code> extends it, so the broader type also catches ours.) When the debugger stops, Variables shows <code>i = 3</code> and <code>items</code> with <code>size = 3</code>. Since valid indexes are 0 to 2, <code>i</code> is one too large.</p>
+<p class="v2-p">The fix is <code>for (i in 0 until items.size)</code> or, better, <code>for (item in items)</code>. Remove the exception breakpoint when you are finished so it does not interrupt unrelated work.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Open any earlier project of yours (the Dice Roller from lesson 17 is perfect). Add a <code>Log.d</code> inside the button's click handler that prints the rolled number, then run in <strong>Debug</strong> mode with a breakpoint on that line. Press <strong>Step Over</strong> and read the value of the variable in the Variables pane. Check that it matches what you see on screen.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Pressing Run instead of Debug.</strong> <em>The symptom:</em> you set a breakpoint and the app never stops. <em>The fix:</em> use the bug icon (<strong>Debug 'app'</strong>). If the app is already running, stop it and start it in debug mode, or use the <strong>Attach Debugger to Android Process</strong> button.</p>
+<p class="v2-p"><strong>Mistake #2: Reading the bottom of the stack trace first.</strong> <em>The problem:</em> the bottom shows framework plumbing that is the same for every crash. <em>The fix:</em> read the exception name and message at the top, then find the first frame in <strong>your own package</strong>.</p>
+<p class="v2-p"><strong>Mistake #3: Fixing without reproducing.</strong> <em>The wrong approach:</em> "I think I saw it crash once, so I changed something." <em>The fix:</em> always write down the exact taps that trigger the bug, change one thing, and repeat those exact taps. If the bug is gone, you have evidence. If you changed three things at once, you will never know which one worked.</p>
+<p class="v2-p"><strong>Mistake #4: Too much logging.</strong> <em>The wrong code:</em> a <code>Log.d</code> on every line, so Logcat becomes a wall of text. <em>The fix:</em> log decisions and key values only, use a clear tag per class, and filter with <code>tag:</code> and <code>package:mine</code>. Delete temporary logs afterwards.</p>
+<p class="v2-p"><strong>Mistake #5: Using <code>println</code> in an Android app.</strong> <em>The problem:</em> <code>println</code> output may not appear where you expect in Logcat and has no tag or level, so you cannot filter it. <em>The fix:</em> use <code>Log.d(TAG, "...")</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Stepping <em>into</em> library code by accident.</strong> <em>The symptom:</em> you press <code>F7</code> on a line and land in a file you do not recognise. <em>The fix:</em> press <strong>Step Out</strong> (<code>Shift + F8</code>) to return, and use <strong>Step Over</strong> by default. Only step into functions you wrote and want to inspect.</p>
+<p class="v2-p"><strong>Mistake #7: Leaving breakpoints or sensitive logs in the app.</strong> <em>The problem:</em> breakpoints make later runs seem to hang, and logs can leak private data. <em>The fix:</em> review <strong>Run &gt; View Breakpoints</strong> and your <code>Log</code> calls before you share or release an app.</p>
+<p class="v2-p"><strong>Mistake #8: Believing the first idea.</strong> <em>The problem:</em> you assume the bug is in line 13 because that is where the crash showed, but the real cause is where a bad value was <em>created</em>, maybe ten lines earlier. <em>The fix:</em> use the Frames list and Variables to walk back to where the wrong value first appeared.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Name the six Logcat levels from least to most serious and say which function writes an error.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Verbose, Debug, Info, Warn, Error, Assert. An error is written with <code>Log.e(tag, message)</code>.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> A stack trace lists many frames. Which frame do you look at first, and why?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The first frame that belongs to your own app's package. Frames above it are library or framework code that reacted to your bad call. The line number in your frame shows where your code triggered the exception.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> You are paused on a line that calls <code>calculateFee(order)</code>, a function you wrote. What is the difference between <strong>Step Over</strong> and <strong>Step Into</strong>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Step Over runs the whole call to <code>calculateFee</code> and pauses on the next line of the current function. Step Into jumps inside <code>calculateFee</code> and pauses on its first line, so you can watch it run one line at a time.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> A loop runs 500 times but the bug appears only when <code>item.id == 237</code>. What is the best breakpoint to use?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A <strong>conditional breakpoint</strong> with the condition <code>item.id == 237</code>. It stays silent for the other 499 passes. A logpoint is useful too if you only want to print values rather than pause.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <strong>Evaluate Expression</strong> let you do, and why is that useful?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It runs any Kotlin expression against the paused app and shows the result, so you can test a calculation, inspect an object or try a fix idea without editing code or restarting the app.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-2-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 2, Pathway 2</a>: the official pathway that contains the <em>Use the debugger in Android Studio</em> codelab.</li>
+<li><a href="https://developer.android.com/studio/debug" rel="noopener noreferrer">Debug your app</a>: official guide to the debugger, breakpoints and the Debug window.</li>
+<li><a href="https://developer.android.com/studio/debug/logcat" rel="noopener noreferrer">Write and view logs with Logcat</a>: the filter syntax and Logcat settings.</li>
+<li><a href="https://developer.android.com/reference/android/util/Log" rel="noopener noreferrer">Log reference</a>: every <code>Log</code> function and level.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Bug Hunt: The Exam Marks Calculator</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Find and fix three planted bugs in a small marks app using Logcat, a stack trace and the debugger, and keep a written <strong>bug diary</strong> explaining each one. This is a portfolio piece that proves you can debug, which employers value highly.</p>
+<p class="v2-p"><strong>Setup:</strong> Create a new Empty Activity project called <code>Marks Check</code> (package <code>com.techbase.marks</code>) and add the buggy code below. The four students scored 70, 50, 85 and 45. The correct report is: average <strong>62</strong> (250 divided by 4, rounded down), highest <strong>85</strong>, and <strong>3</strong> students passed (a pass is 50 or above).</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Run the app and tap <strong>Check</strong>. Copy the stack trace into your bug diary, circle the first frame in your own package, and fix the crash (Bug 1).</li>
+<li>Run again. The report now shows a wrong highest mark. Use a <strong>breakpoint and Step Over</strong> to find why, recording the Variables you saw (Bug 2).</li>
+<li>The pass count is also wrong. Use a <strong>conditional breakpoint</strong> (<code>m == 50</code>) or <strong>Evaluate Expression</strong> to find why (Bug 3).</li>
+<li>Add at least two <code>Log.d</code> lines with your own tag and show the filter you used (<code>tag:...</code>).</li>
+<li>For each bug write three lines in the diary: <em>symptom</em>, <em>cause</em>, <em>fix</em>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add an <strong>exception breakpoint</strong> and a <strong>logpoint</strong>, and describe in the diary when each is better than a normal breakpoint.</p>
+<p class="v2-p">Here is the buggy starter code:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Marks.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.marks
+
+import android.util.Log
+
+private const val TAG = "MarksLogic"
+
+fun average(marks: List&lt;Int&gt;): Int {
+    var sum = 0
+    for (i in 0..marks.size) {
+        sum += marks[i]
+    }
+    return sum / marks.size
+}
+
+fun highest(marks: List&lt;Int&gt;): Int {
+    var best = 0
+    for (m in marks) {
+        if (m &lt; best) best = m
+    }
+    return best
+}
+
+fun passCount(marks: List&lt;Int&gt;): Int {
+    var count = 0
+    for (m in marks) {
+        if (m &gt; 50) count++
+    }
+    Log.d(TAG, "passCount=$count")
+    return count
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.marks
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) { MarksScreen() }
+            }
+        }
+    }
+}
+
+@Composable
+fun MarksScreen() {
+    val marks = listOf(70, 50, 85, 45)
+    var report by remember { mutableStateOf("Tap Check") }
+    Column(modifier = Modifier.padding(24.dp)) {
+        Text("Marks: $marks")
+        Button(onClick = {
+            report = "Average ${average(marks)}, top ${highest(marks)}, passed ${passCount(marks)}"
+        }) { Text("Check") }
+        Text(report)
+    }
+}</code></pre></div></div></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p"><strong>Bug 1, the crash.</strong> The loop <code>for (i in 0..marks.size)</code> visits index 4 in a list of four. The stack trace shows an index-out-of-bounds exception (the exact wording varies by Android version) and the first frame in your package is <code>average(Marks.kt:9)</code>. Fix: loop over the values themselves.</p>
+<p class="v2-p"><strong>Bug 2, the highest mark.</strong> The screen shows <code>top 0</code>. Put a breakpoint on <code>if (m &lt; best) best = m</code> and Step Over four times: <code>best</code> starts at 0 and never changes, because no mark is <em>less than</em> 0. The comparison points the wrong way. Evaluate Expression <code>70 &lt; 0</code> to see <code>false</code>. Fix: use <code>&gt;</code>.</p>
+<p class="v2-p"><strong>Bug 3, the pass count.</strong> The screen shows <code>passed 2</code>, but 50 should pass. A conditional breakpoint with condition <code>m == 50</code> stops on the second student, and Evaluate Expression <code>m &gt; 50</code> gives <code>false</code>. The operator excludes exactly 50. Fix: <code>&gt;=</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Marks.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.marks
+
+import android.util.Log
+
+private const val TAG = "MarksLogic"
+
+fun average(marks: List&lt;Int&gt;): Int {
+    if (marks.isEmpty()) return 0
+    var sum = 0
+    for (m in marks) {
+        sum += m
+    }
+    Log.d(TAG, "sum=$sum count=${marks.size}")
+    return sum / marks.size
+}
+
+fun highest(marks: List&lt;Int&gt;): Int {
+    var best = 0
+    for (m in marks) {
+        if (m &gt; best) best = m
+    }
+    return best
+}
+
+fun passCount(marks: List&lt;Int&gt;): Int {
+    var count = 0
+    for (m in marks) {
+        if (m &gt;= 50) count++
+    }
+    Log.d(TAG, "passCount=$count")
+    return count
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected screen after the fixes:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Average 62, top 85, passed 3</p>
+</blockquote>
+<p class="v2-p"><strong>Sample bug diary entry:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Bug 3. Symptom: report said 2 students passed, but three scored 50 or more. Cause: <code>&gt;</code> instead of <code>&gt;=</code>, so a mark of exactly 50 failed. Fix: changed the operator. Filter used: <code>tag:MarksLogic</code>.</p>
+</blockquote>
+<p class="v2-p"><strong>Tip for the diary:</strong> after each fix, run the original steps again. Fixing Bug 1 revealed Bugs 2 and 3, which were hidden behind the crash. This is normal: one bug often masks another.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 18 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-18-debugging-with-android-studio</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 18 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: How Bugs Hide</li><li>✅ The Practice App: Market Basket</li><li>✅ Logcat: Your App&#x27;s Diary</li><li>✅ Reading a Stack Trace</li><li>✅ The Debugger: Freezing Time</li><li>✅ Advanced Breakpoints: Conditions, Logpoints and Exception Stops</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_17.html" class="ln-btn">&#8592; Lesson 17</a><a href="lesson_19.html" class="ln-btn primary">Lesson 19 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 18 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 42: Android Views and XML Layouts — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l42">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 42 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 42</div>
+      <h1>Android Views and XML Layouts</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Class Register (Views Edition)</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 42</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Understand the classic View system: XML layouts, view binding, fragments and navigating between fragments.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Class Register (Views Edition)</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Everything you have built so far uses Jetpack Compose. But Android had a user interface toolkit for more than a decade <strong>before</strong> Compose existed, called the <strong>View system</strong>, and a huge amount of real-world code still uses it. If you take a job, join an open-source project or maintain an older app, you will meet <code>activity_main.xml</code>, <code>findViewById</code>, <code>RecyclerView</code> and <code>Fragment</code>. You need to be able to read them, fix them and gradually replace them.</p>
+<p class="v2-p">This lesson covers the <em>Android View System</em> material and the <em>Build an Android app with Views</em> work in Unit 8, Pathway 1 of the <em>Android Basics with Compose</em> programme (https://developer.android.com/courses/pathways/android-basics-compose-unit-8-pathway-1). The programme's final unit is deliberately about Views, because the next step for a working developer is a codebase that mixes both.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the <strong>View hierarchy</strong> and compare it to Compose.</li>
+<li>Write XML layouts with <code>LinearLayout</code>, <code>FrameLayout</code> and <code>ConstraintLayout</code>.</li>
+<li>Use <strong>view binding</strong> instead of <code>findViewById</code>.</li>
+<li>Show lists with <code>RecyclerView</code>, an adapter and a view holder.</li>
+<li>Explain the difference between an <strong>Activity</strong> and a <strong>Fragment</strong>, and the fragment lifecycle.</li>
+<li>Move between screens with the Jetpack <strong>Navigation component</strong> and a navigation graph.</li>
+<li>Build a small Views app, and decide when to use Views versus Compose.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> Views are <strong>imperative</strong>: you build a tree of objects and then <em>tell</em> each object how to change (<code>textView.text = "Hi"</code>). Compose is <strong>declarative</strong>: you describe what the UI looks like for the current state. Both end up drawing the same pixels.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Activities and the lifecycle</strong> (lesson 23).</li>
+<li><strong>Resources: strings, drawables, <code>R</code> class</strong> (lessons 15 and 21).</li>
+<li><strong>Kotlin classes, interfaces, lambdas</strong> (lessons 10–12).</li>
+<li><strong>Navigation concepts</strong> (lesson 26).</li>
+<li><strong>ViewModel</strong> (lesson 24). It works the same way with Views.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: The View System</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Every visible thing in a View-based app is an instance of <code>android.view.View</code>: a <code>TextView</code>, a <code>Button</code>, an <code>ImageView</code>. A <strong><code>ViewGroup</code></strong> is a View that contains other Views (<code>LinearLayout</code>, <code>ConstraintLayout</code>, <code>FrameLayout</code>). Together they form a <strong>tree</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>ConstraintLayout            &lt;- ViewGroup (root)
+ +-- TextView  (title)      &lt;- View
+ +-- EditText  (name)
+ +-- Button    (save)
+ +-- RecyclerView (list)    &lt;- ViewGroup that recycles its children</code></pre></div></div>
+<p class="v2-p">You usually <strong>describe</strong> that tree in an XML file in <code>res/layout</code>, and Android <strong>inflates</strong> (parses and creates) it into objects at runtime. Then your Kotlin finds the objects and changes them.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Views + XML</th>
+<th>Jetpack Compose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Style</td>
+<td>Imperative, mutate objects</td>
+<td>Declarative, describe state</td>
+</tr>
+<tr>
+<td>UI description</td>
+<td>XML files</td>
+<td>Kotlin functions</td>
+</tr>
+<tr>
+<td>State</td>
+<td>Stored inside views and your code</td>
+<td>Stored in state objects</td>
+</tr>
+<tr>
+<td>Lists</td>
+<td><code>RecyclerView</code> + adapter</td>
+<td><code>LazyColumn</code></td>
+</tr>
+<tr>
+<td>Theming</td>
+<td>XML themes/styles</td>
+<td><code>MaterialTheme</code></td>
+</tr>
+<tr>
+<td>Reuse</td>
+<td>Custom Views, <code>&lt;include&gt;</code></td>
+<td>Composable functions</td>
+</tr>
+<tr>
+<td>Past/present</td>
+<td>Mature, huge ecosystem</td>
+<td>Recommended for new UI</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Why still learn Views? Because <strong>many apps in production use them</strong>, because Google's own libraries (like <code>WebView</code>, <code>MapView</code>, ads, camera previews) are Views that you embed, and because incremental migration (lesson 43) means you read both languages.</p>
+<h3 class="v2-h3">Measure, layout, draw</h3>
+<p class="v2-p">Both systems use three steps: <strong>measure</strong> (how big do you want to be?), <strong>layout</strong> (where do you go?) and <strong>draw</strong>. In Views, a parent asks each child to measure itself, passing constraints, and nested <code>LinearLayout</code>s can measure children <strong>more than once</strong>, which is why deep nesting is slow. <code>ConstraintLayout</code> was built to keep the tree flat.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The View System</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step Build 1: Create a Views Project</div><div class="pc" id="chk4"></div></div><div class="pb2"><ol class="v2-ol">
+<li><strong>File → New → New Project</strong>.</li>
+<li>Choose the <strong>Empty Views Activity</strong> template (older Studio versions call it <em>Empty Activity</em> under the <em>Phone and Tablet</em> tab, with <em>Empty Views Activity</em> as a separate item; the labels change between versions, so read the template description).</li>
+<li>Name: <code>ClassRegister</code>. Package: <code>com.example.classregister</code>. Language Kotlin. Minimum SDK as in lesson 3.</li>
+</ol>
+<p class="v2-p">Look at what Studio generated:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>app/src/main/
+  AndroidManifest.xml
+  java/com/example/classregister/MainActivity.kt
+  res/layout/activity_main.xml     &lt;- the screen's XML
+  res/values/{strings,colors,themes}.xml</code></pre></div></div>
+<p class="v2-p"><code>MainActivity.kt</code> does one thing: <code>setContentView(R.layout.activity_main)</code> instead of <code>setContent { }</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The class extends <code>AppCompatActivity</code> (from the AppCompat library), not <code>ComponentActivity</code> directly, because AppCompat provides backwards-compatible theming and <code>Fragment</code> support for Views. Note: <code>AppCompatActivity</code> extends <code>ComponentActivity</code>, so everything from earlier lessons (ViewModel, <code>registerForActivityResult</code>) works.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Create a Views Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step Build 2: XML Layouts</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">The basic vocabulary</h3>
+<p class="v2-p">Open <code>res/layout/activity_main.xml</code>. A tiny layout:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">activity_main.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"&gt;
+
+    &lt;TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/class_register"
+        android:textSize="24sp"
+        android:textStyle="bold" /&gt;
+
+    &lt;EditText
+        android:id="@+id/nameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/student_name"
+        android:inputType="textPersonName" /&gt;
+
+    &lt;Button
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add" /&gt;
+&lt;/LinearLayout&gt;</code></pre></div></div>
+<p class="v2-p">Read it like this:</p>
+<ul class="v2-ul">
+<li><strong><code>xmlns:android=...</code></strong>: declares the namespace for <code>android:</code> attributes. Required on the root element.</li>
+<li><strong><code>android:layout_width</code> and <code>layout_height</code></strong> are <strong>mandatory</strong> on every View. Values: <code>match_parent</code> (fill the parent), <code>wrap_content</code> (just big enough), or a fixed size like <code>48dp</code>.</li>
+<li><strong><code>android:id="@+id/title"</code></strong>: the <code>@+id/</code> syntax <strong>creates</strong> an id named <code>title</code>, available in code as <code>R.id.title</code>.</li>
+<li><strong><code>@string/class_register</code></strong> refers to a resource in <code>res/values/strings.xml</code>, never hard-code text (Studio warns you; this also enables translation).</li>
+<li><strong><code>dp</code></strong> for sizes and <strong><code>sp</code></strong> for text, as in Compose.</li>
+</ul>
+<p class="v2-p">Add the three strings to <code>res/values/strings.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;ClassRegister&lt;/string&gt;
+    &lt;string name="class_register"&gt;Class Register&lt;/string&gt;
+    &lt;string name="student_name"&gt;Student name&lt;/string&gt;
+    &lt;string name="add"&gt;Add&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<h3 class="v2-h3">LinearLayout, FrameLayout and ConstraintLayout</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Layout</th>
+<th>Does</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LinearLayout</code></td>
+<td>Stacks children in a line (<code>orientation</code> vertical/horizontal), supports <code>layout_weight</code></td>
+<td>Simple stacks, forms</td>
+</tr>
+<tr>
+<td><code>FrameLayout</code></td>
+<td>Stacks children on top of each other</td>
+<td>One child, overlays, fragment containers</td>
+</tr>
+<tr>
+<td><code>ConstraintLayout</code></td>
+<td>Positions each child with constraints to the parent or siblings</td>
+<td>Almost everything else; flat, flexible</td>
+</tr>
+<tr>
+<td><code>RelativeLayout</code></td>
+<td>Older relative positioning</td>
+<td>Avoid in new code; replaced by <code>ConstraintLayout</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>layout_weight</code> is the equivalent of <code>Modifier.weight</code> in Compose:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"&gt;
+
+    &lt;EditText
+        android:id="@+id/nameInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:hint="@string/student_name" /&gt;
+
+    &lt;Button
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add" /&gt;
+&lt;/LinearLayout&gt;</code></pre></div></div>
+<p class="v2-p">Setting width to <code>0dp</code> with a weight tells the layout "take whatever is left after the others have measured".</p>
+<h3 class="v2-h3">ConstraintLayout</h3>
+<p class="v2-p">Each child needs at least one <strong>horizontal</strong> and one <strong>vertical</strong> constraint, otherwise it jumps to the top-left corner at run time.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">activity_main.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"&gt;
+
+    &lt;TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/class_register"
+        android:textSize="24sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" /&gt;
+
+    &lt;EditText
+        android:id="@+id/nameInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/student_name"
+        android:inputType="textPersonName"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/addButton" /&gt;
+
+    &lt;Button
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add"
+        app:layout_constraintBaseline_toBaselineOf="@id/nameInput"
+        app:layout_constraintEnd_toEndOf="parent" /&gt;
+
+    &lt;androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/studentList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/nameInput"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" /&gt;
+&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</code></pre></div></div>
+<p class="v2-p">Key points:</p>
+<ul class="v2-ul">
+<li><code>app:</code> attributes belong to a library namespace (<code>res-auto</code>), not the framework.</li>
+<li><code>0dp</code> in a ConstraintLayout means <strong>match constraints</strong>: fill the space between the two constraints.</li>
+<li>The <code>@id/...</code> syntax (no plus) <strong>refers</strong> to an existing id.</li>
+<li><code>layout_constraintBaseline_toBaselineOf</code> aligns text baselines.</li>
+</ul>
+<h3 class="v2-h3">Layout Editor</h3>
+<p class="v2-p">Studio has a visual <strong>Layout Editor</strong> with <strong>Code</strong>, <strong>Split</strong> and <strong>Design</strong> buttons at the top right of an XML file. Dragging views from the <em>Palette</em> onto the design surface adds constraints for you. It is a fast way to learn the XML, but you should always read the generated code. The <strong>Attributes</strong> panel lets you set properties; the <strong>Component Tree</strong> shows the hierarchy.</p>
+<p class="v2-p">If a layout does not draw properly, check the <strong>Warnings</strong> panel, tooltips and <strong>Tools</strong> attributes (<code>tools:text="Sample"</code> shows sample text in the editor but never in the running app).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: XML Layouts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step Build 3: View Binding</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">The old way to get a view was <code>findViewById&lt;TextView&gt;(R.id.title)</code>: every call is a chance for a typo and a null crash. <strong>View binding</strong> generates a class for each layout file that has a <strong>typed, null-safe property for every view with an id</strong>.</p>
+<p class="v2-p">Enable it in <code>app/build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    // ...existing settings...
+    buildFeatures {
+        viewBinding = true
+    }
+}</code></pre></div></div>
+<p class="v2-p">Click <strong>Sync Now</strong>. For <code>activity_main.xml</code> Gradle now generates <code>ActivityMainBinding</code> (snake case file name → PascalCase + <code>Binding</code>). The ids become properties: <code>nameInput</code>, <code>addButton</code>, <code>studentList</code>, <code>title</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.example.classregister.databinding.ActivityMainBinding
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.addButton.setOnClickListener {
+            val name = binding.nameInput.text.toString().trim()
+            if (name.isNotEmpty()) {
+                binding.title.text = "Added: $name"
+                binding.nameInput.text.clear()
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Explained line by line:</p>
+<ul class="v2-ul">
+<li><code>ActivityMainBinding.inflate(layoutInflater)</code> creates the Views from the XML and wraps them.</li>
+<li><code>binding.root</code> is the top-level View that goes into <code>setContentView</code>.</li>
+<li><code>binding.addButton.setOnClickListener { ... }</code> registers a click handler. Compare with Compose's <code>onClick = { ... }</code>.</li>
+<li><code>binding.title.text = ...</code>: this is the <strong>imperative</strong> step: <em>you</em> change the view. In Compose you would change a state variable instead.</li>
+<li><code>.text.clear()</code> empties the <code>EditText</code> (its <code>text</code> is an <code>Editable</code>).</li>
+</ul>
+<p class="v2-p">Run the app and test: type a name, press <strong>Add</strong>, and the title changes.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>View binding vs <code>findViewById</code> vs data binding.</strong> View binding is a lightweight, type-safe replacement for <code>findViewById</code>. <strong>Data binding</strong> is a heavier older library that adds expressions in XML (<code>@{user.name}</code>); you may meet it in older code but it is not needed for new work. <strong>Kotlin synthetic imports</strong> (<code>kotlinx.android.synthetic</code>) are removed; if you see them in an old tutorial, switch to view binding.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: View Binding</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step Build 4: RecyclerView</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p"><code>LinearLayout</code> inside a <code>ScrollView</code> would create every row at once. <strong><code>RecyclerView</code></strong> is the View-system equivalent of <code>LazyColumn</code>: it keeps only enough row views to fill the screen (plus a few spare) and <strong>recycles</strong> them as you scroll, rebinding new data.</p>
+<p class="v2-p">Three parts:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Part</th>
+<th>Job</th>
+<th>Compose analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RecyclerView</code></td>
+<td>Scrolling container</td>
+<td><code>LazyColumn</code></td>
+</tr>
+<tr>
+<td><code>ViewHolder</code></td>
+<td>Holds the Views of one row</td>
+<td>The row's composable</td>
+</tr>
+<tr>
+<td><code>Adapter</code></td>
+<td>Creates holders and binds data to them</td>
+<td><code>items { }</code> lambda</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Add the dependency (check for the current stable version of <code>androidx.recyclerview:recyclerview</code> in the official release notes; with a version catalog, add an entry like the one in lesson 3). Many Views templates already include it transitively through Material Components, but declare it explicitly if the import is unresolved.</p>
+<h3 class="v2-h3">The row layout</h3>
+<p class="v2-p"><code>res/layout/item_student.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">item_student.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"&gt;
+
+    &lt;TextView
+        android:id="@+id/nameText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="18sp" /&gt;
+
+    &lt;CheckBox
+        android:id="@+id/presentBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/present" /&gt;
+&lt;/LinearLayout&gt;</code></pre></div></div>
+<p class="v2-p">Add <code>&lt;string name="present"&gt;Present&lt;/string&gt;</code> to <code>strings.xml</code>. View binding generates <code>ItemStudentBinding</code> for this file too.</p>
+<h3 class="v2-h3">The adapter with ListAdapter and DiffUtil</h3>
+<p class="v2-p">The modern, efficient base class is <strong><code>ListAdapter</code></strong>. It computes differences between the old and new lists with a <code>DiffUtil.ItemCallback</code> and animates changes, so you never call <code>notifyDataSetChanged()</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentAdapter.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.example.classregister.databinding.ItemStudentBinding
+
+data class Student(val id: Int, val name: String, val present: Boolean = false)
+
+class StudentAdapter(
+    private val onPresentChanged: (Student, Boolean) -&gt; Unit
+) : ListAdapter&lt;Student, StudentAdapter.StudentViewHolder&gt;(Diff) {
+
+    class StudentViewHolder(val binding: ItemStudentBinding) : RecyclerView.ViewHolder(binding.root)
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StudentViewHolder {
+        val binding = ItemStudentBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return StudentViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: StudentViewHolder, position: Int) {
+        val student = getItem(position)
+        holder.binding.nameText.text = student.name
+
+        // Remove the old listener before changing "checked", otherwise recycled rows fire it.
+        holder.binding.presentBox.setOnCheckedChangeListener(null)
+        holder.binding.presentBox.isChecked = student.present
+        holder.binding.presentBox.setOnCheckedChangeListener { _, checked -&gt;
+            onPresentChanged(student, checked)
+        }
+    }
+
+    private object Diff : DiffUtil.ItemCallback&lt;Student&gt;() {
+        override fun areItemsTheSame(old: Student, new: Student) = old.id == new.id
+        override fun areContentsTheSame(old: Student, new: Student) = old == new
+    }
+}</code></pre></div></div>
+<p class="v2-p">Understand these three methods, the beating heart of every adapter:</p>
+<ol class="v2-ol">
+<li><code>onCreateViewHolder</code> runs <strong>only when a new row view is needed</strong>: inflate the XML (<code>false</code> means "do not attach to the parent yet").</li>
+<li><code>onBindViewHolder</code> runs <strong>every time a row is shown with new data</strong>: fill the Views. Because rows are recycled, a holder that showed "Ada" may now show "Bola". Always set <em>every</em> View's state, including checkboxes, or old values leak in.</li>
+<li><code>DiffUtil</code> uses <code>areItemsTheSame</code> (same identity? like a Compose <code>key</code>) and <code>areContentsTheSame</code> (any change to redraw?). That is the same idea as keys in lesson 39.</li>
+</ol>
+<h3 class="v2-h3">Wire it up in the Activity with a ViewModel</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+class StudentViewModel : ViewModel() {
+    private val _students = MutableStateFlow&lt;List&lt;Student&gt;&gt;(emptyList())
+    val students: StateFlow&lt;List&lt;Student&gt;&gt; = _students.asStateFlow()
+    private var nextId = 1
+
+    fun add(name: String) {
+        _students.update { it + Student(nextId++, name) }
+    }
+
+    fun setPresent(id: Int, present: Boolean) {
+        _students.update { list -&gt; list.map { if (it.id == id) it.copy(present = present) else it } }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.classregister.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: StudentViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val adapter = StudentAdapter { student, present -&gt;
+            viewModel.setPresent(student.id, present)
+        }
+        binding.studentList.layoutManager = LinearLayoutManager(this)
+        binding.studentList.adapter = adapter
+
+        binding.addButton.setOnClickListener {
+            val name = binding.nameInput.text.toString().trim()
+            if (name.isNotEmpty()) {
+                viewModel.add(name)
+                binding.nameInput.text.clear()
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.students.collect { adapter.submitList(it) }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">This is the View-system version of <code>collectAsStateWithLifecycle</code>: <code>repeatOnLifecycle(STARTED)</code> collects only while the screen is visible. <code>adapter.submitList(...)</code> hands the new list to <code>DiffUtil</code>.</p>
+<p class="v2-p"><strong>Layout managers</strong> decide how rows are arranged: <code>LinearLayoutManager</code> (list), <code>GridLayoutManager(context, 2)</code> (grid), <code>StaggeredGridLayoutManager</code> (uneven grid).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: RecyclerView</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build 5: Fragments</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">A <strong>Fragment</strong> is a reusable portion of UI with its <strong>own lifecycle</strong>, hosted inside an Activity. Originally fragments were created for tablets (a list on the left and detail on the right); today they are mostly used as <strong>screens</strong> in a single-activity app, with the Navigation component moving between them.</p>
+<h3 class="v2-h3">Activity versus Fragment</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Activity</th>
+<th>Fragment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declared in the manifest</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Can exist alone</td>
+<td>Yes</td>
+<td>Needs a host Activity</td>
+</tr>
+<tr>
+<td>Owns a window</td>
+<td>Yes</td>
+<td>Lives in the Activity's window</td>
+</tr>
+<tr>
+<td>Has a lifecycle</td>
+<td>Yes</td>
+<td>Yes (plus a separate <strong>view</strong> lifecycle)</td>
+</tr>
+<tr>
+<td>Typical role today</td>
+<td>The entry point; one per app</td>
+<td>One per screen</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">The fragment lifecycle (the part that surprises people)</h3>
+<p class="v2-p">A fragment has a lifecycle for the <strong>fragment object</strong> and a <strong>separate lifecycle for its view</strong>. The view can be destroyed and recreated (when the fragment is on the back stack) while the fragment object lives on.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>onAttach -&gt; onCreate -&gt; onCreateView -&gt; onViewCreated -&gt; onStart -&gt; onResume
+   ...running...
+onPause -&gt; onStop -&gt; onDestroyView -&gt; onDestroy -&gt; onDetach
+        ^                  ^
+        |                  +-- view destroyed: release the binding here!
+        +-- fragment may remain alive on the back stack</code></pre></div></div>
+<p class="v2-p">That is why fragment code that uses view binding follows a strict pattern:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ClassFragment.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.classregister.databinding.FragmentClassBinding
+import kotlinx.coroutines.launch
+
+class ClassFragment : Fragment() {
+
+    private var _binding: FragmentClassBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: StudentViewModel by activityViewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentClassBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val adapter = StudentAdapter { s, present -&gt; viewModel.setPresent(s.id, present) }
+        binding.studentList.layoutManager = LinearLayoutManager(requireContext())
+        binding.studentList.adapter = adapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.students.collect { adapter.submitList(it) }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}</code></pre></div></div>
+<p class="v2-p">The three rules:</p>
+<ol class="v2-ol">
+<li><strong>Inflate</strong> in <code>onCreateView</code>, use views from <code>onViewCreated</code> onwards.</li>
+<li><strong>Null the binding in <code>onDestroyView</code></strong>, otherwise the fragment holds the destroyed view tree: a memory leak.</li>
+<li>Collect flows with <strong><code>viewLifecycleOwner</code></strong>, not <code>this</code>, otherwise you collect into views that no longer exist.</li>
+</ol>
+<p class="v2-p"><code>activityViewModels()</code> shares one ViewModel between fragments of the same Activity, which is a convenient way to pass data; <code>viewModels()</code> gives each fragment its own.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Fragments</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Step-by-Step Build 6: The Navigation Component</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">You met Navigation Compose in lesson 26. The <strong>Navigation component</strong> for fragments is the original, with the same ideas: a <strong>navigation graph</strong> (an XML file listing destinations and actions), a <strong>NavHost</strong> (a container showing the current destination) and a <strong>NavController</strong>.</p>
+<p class="v2-p">Dependencies (use the latest stable of <code>androidx.navigation:navigation-fragment-ktx</code> and <code>navigation-ui-ktx</code>; check the Navigation release notes).</p>
+<p class="v2-p">Create a graph: <strong>right-click <code>res</code> → New → Android Resource File</strong>, type <em>Navigation</em>, name <code>nav_graph</code>. A simple graph with a list screen and a detail screen:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">nav_graph.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/classFragment"&gt;
+
+    &lt;fragment
+        android:id="@+id/classFragment"
+        android:name="com.example.classregister.ClassFragment"
+        android:label="Class"&gt;
+        &lt;action
+            android:id="@+id/action_class_to_detail"
+            app:destination="@id/detailFragment" /&gt;
+    &lt;/fragment&gt;
+
+    &lt;fragment
+        android:id="@+id/detailFragment"
+        android:name="com.example.classregister.DetailFragment"
+        android:label="Detail"&gt;
+        &lt;argument
+            android:name="studentId"
+            app:argType="integer" /&gt;
+    &lt;/fragment&gt;
+&lt;/navigation&gt;</code></pre></div></div>
+<p class="v2-p">The Activity's layout hosts the graph in a <strong><code>FragmentContainerView</code></strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">activity_main.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;androidx.fragment.app.FragmentContainerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_host"
+    android:name="androidx.navigation.fragment.NavHostFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:defaultNavHost="true"
+    app:navGraph="@navigation/nav_graph" /&gt;</code></pre></div></div>
+<p class="v2-p">(With this setup the list's views move into <code>fragment_class.xml</code>, which is the old <code>activity_main.xml</code> content. The Activity just hosts the container.)</p>
+<p class="v2-p">Navigate from code. The <strong>Safe Args</strong> Gradle plugin generates type-safe <code>Directions</code> classes; without it you can use the raw action id and a <code>Bundle</code>. A version without any extra plugin:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.os.Bundle
+import androidx.navigation.fragment.findNavController
+
+// inside ClassFragment, e.g. in a click handler
+val args = Bundle().apply { putInt("studentId", student.id) }
+findNavController().navigate(R.id.action_class_to_detail, args)
+
+// inside DetailFragment
+val studentId = requireArguments().getInt("studentId")</code></pre></div></div>
+<p class="v2-p">With the Safe Args plugin you instead write <code>ClassFragmentDirections.actionClassToDetail(student.id)</code> and read <code>navArgs&lt;DetailFragmentArgs&gt;()</code>, which is checked at compile time. Both approaches work; follow the Safe Args setup in the <em>Navigation</em> documentation if you want it.</p>
+<p class="v2-p">The <strong>back stack</strong> works like Compose's: <code>navigate</code> pushes, the back button pops. <code>findNavController().popBackStack()</code> goes back from code. To connect the system bar's title and back arrow to the graph, call <code>setupActionBarWithNavController(navController)</code> from <code>navigation-ui-ktx</code> in the Activity.</p>
+<p class="v2-p">This is the <em>navigating between fragments</em> part of the Unit 8 material; Compose's version of the same ideas is in lesson 26.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: The Navigation Component</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Read the XML</strong></p>
+<p class="v2-p">A colleague gives you this snippet. Describe what it displays, then fix the bug that makes the button appear in the top-left corner of the screen.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"&gt;
+
+    &lt;TextView
+        android:id="@+id/greeting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" /&gt;
+
+    &lt;Button
+        android:id="@+id/ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OK" /&gt;
+&lt;/androidx.constraintlayout.widget.ConstraintLayout&gt;</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It shows the text "Hello" at the top-left and an "OK" button. The button has <strong>no constraints</strong>, so ConstraintLayout places it at the top-left corner, over the text. Give it a horizontal and vertical constraint:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;Button
+    android:id="@+id/ok"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="OK"
+    app:layout_constraintTop_toBottomOf="@id/greeting"
+    app:layout_constraintStart_toStartOf="parent" /&gt;</code></pre></div></div>
+<p class="v2-p">Also, the hard-coded <code>"Hello"</code> and <code>"OK"</code> should be string resources.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Delete a student</strong></p>
+<p class="v2-p">Extend the Class Register: add a delete icon to each row. Tapping it removes the student from the list through the ViewModel. Explain why <code>ListAdapter</code> makes this easy and what animation you get for free.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Add an <code>ImageButton</code> (<code>@+id/deleteButton</code>) to <code>item_student.xml</code> with a <code>contentDescription</code>, pass a second lambda <code>onDelete: (Student) -&gt; Unit</code> to the adapter, and call it in <code>onBindViewHolder</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>holder.binding.deleteButton.setOnClickListener { onDelete(student) }</code></pre></div></div>
+<p class="v2-p">In the ViewModel:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun remove(id: Int) {
+    _students.update { list -&gt; list.filterNot { it.id == id } }
+}</code></pre></div></div>
+<p class="v2-p"><code>ListAdapter</code> receives the new list, <code>DiffUtil</code> sees that one item id is gone and calls <code>notifyItemRemoved</code> internally, so the row animates out and the others slide up. No manual index handling, and no <code>notifyDataSetChanged()</code> which would redraw everything without an animation.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Convert Views to Compose in your head</strong></p>
+<p class="v2-p">Write the Compose equivalent of the <code>item_student.xml</code> row (name on the left taking the remaining space, a "Present" checkbox on the right).</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun StudentRow(student: Student, onPresentChange: (Boolean) -&gt; Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(student.name, Modifier.weight(1f), fontSize = 18.sp)
+        Text("Present")
+        Checkbox(checked = student.present, onCheckedChange = onPresentChange)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>layout_weight="1"</code> with <code>0dp</code> became <code>Modifier.weight(1f)</code>; the ViewHolder, the adapter and the "remove the listener first" workaround all disappear because the row is just a function of its data.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting layout width and height.</strong> <em>Symptom:</em> the inflate crashes with "You must supply a layout_width attribute". <em>Fix:</em> every View needs both.</p>
+<p class="v2-p"><strong>Mistake #2: ConstraintLayout child with no constraints.</strong> <em>Symptom:</em> piles up top-left. <em>Fix:</em> one horizontal and one vertical constraint.</p>
+<p class="v2-p"><strong>Mistake #3: Hard-coded strings and sizes.</strong> <em>Symptom:</em> lint warnings, no translation. <em>Fix:</em> <code>@string/</code> and <code>@dimen/</code> resources, <code>dp</code> and <code>sp</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Using <code>findViewById</code> in new code.</strong> <em>Symptom:</em> null crashes, casting. <em>Fix:</em> view binding.</p>
+<p class="v2-p"><strong>Mistake #5: Not nulling the fragment binding.</strong> <em>Symptom:</em> memory leak after navigating away. <em>Fix:</em> set <code>_binding = null</code> in <code>onDestroyView</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Using <code>viewLifecycleOwner</code> incorrectly.</strong> <em>Symptom:</em> crashes touching a null binding. <em>Fix:</em> collect flows and observe LiveData with <code>viewLifecycleOwner</code>.</p>
+<p class="v2-p"><strong>Mistake #7: <code>notifyDataSetChanged()</code> for everything.</strong> <em>Symptom:</em> no animations, wasted work. <em>Fix:</em> <code>ListAdapter</code> with <code>DiffUtil</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Not resetting recycled row state.</strong> <em>Symptom:</em> checkboxes tick on the wrong rows when scrolling. <em>Fix:</em> always set every view's state in <code>onBindViewHolder</code>.</p>
+<p class="v2-p"><strong>Mistake #9: Forgetting <code>RecyclerView.layoutManager</code>.</strong> <em>Symptom:</em> blank list. <em>Fix:</em> set a <code>LayoutManager</code>, either in code or <code>app:layoutManager</code> in XML.</p>
+<p class="v2-p"><strong>Mistake #10: Putting a RecyclerView inside a ScrollView.</strong> <em>Symptom:</em> clipped or all rows created at once. <em>Fix:</em> one scrolling container; put header content in the adapter as another item type.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between a <code>View</code> and a <code>ViewGroup</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A <code>View</code> is a single UI element such as a <code>TextView</code> or <code>Button</code>. A <code>ViewGroup</code> is a View that contains other Views and decides how to lay them out, like <code>LinearLayout</code> or <code>ConstraintLayout</code>.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does view binding give you over <code>findViewById</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A generated class per layout with type-safe, null-safe properties for each view with an id, so there are no casts, no wrong-id crashes and no lookups by hand.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What are the three parts of a RecyclerView list and what does each do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The <code>RecyclerView</code> (scrolling container with a layout manager), the <code>ViewHolder</code> (holds the views of one row) and the <code>Adapter</code> (creates holders and binds data to them).</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why must you set <code>_binding = null</code> in a fragment's <code>onDestroyView</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A fragment's view can be destroyed while the fragment object survives (for example on the back stack). Keeping a reference to the binding holds the old view tree in memory and can cause leaks or crashes.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What three things make up the Navigation component for fragments?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">A navigation graph (destinations and actions), a NavHost (a container such as <code>NavHostFragment</code> in a <code>FragmentContainerView</code>) and a <code>NavController</code> that performs navigation.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-8-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 8 Pathway 1: Views</a></li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course</a></li>
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-8-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 8 Pathway 2</a></li>
+<li><a href="https://kotlinlang.org/docs/home.html" rel="noopener noreferrer">Kotlin documentation</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Class Register (Views Edition)</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build the <strong>Class Register</strong> app with the classic View system: add students, mark them present, and open a detail screen.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A Views project with <strong>view binding</strong> on and a single <code>MainActivity</code> hosting a <code>NavHostFragment</code>.</li>
+<li><code>ClassFragment</code>: an <code>EditText</code> + <strong>Add</strong> button and a <code>RecyclerView</code> (<code>ListAdapter</code> + <code>DiffUtil</code>).</li>
+<li>A shared <code>StudentViewModel</code> with a <code>StateFlow&lt;List&lt;Student&gt;&gt;</code>, collected with <code>repeatOnLifecycle</code>.</li>
+<li>Each row: name, present <code>CheckBox</code>, and tapping the name opens <code>DetailFragment</code>.</li>
+<li><code>DetailFragment</code> shows the name and attendance status, with a back button.</li>
+<li>All text in string resources, all sizes in <code>dp</code>/<code>sp</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show the count of present students in the title, and write one small Compose <code>StudentRow</code> preview of what the same row would look like in Compose, so you can compare the two approaches.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p"><code>res/layout/fragment_detail.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">fragment_detail.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"&gt;
+
+    &lt;TextView
+        android:id="@+id/detailName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textStyle="bold" /&gt;
+
+    &lt;TextView
+        android:id="@+id/detailStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp" /&gt;
+&lt;/LinearLayout&gt;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DetailFragment.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.example.classregister.databinding.FragmentDetailBinding
+import kotlinx.coroutines.launch
+
+class DetailFragment : Fragment() {
+
+    private var _binding: FragmentDetailBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel: StudentViewModel by activityViewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val id = requireArguments().getInt("studentId")
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.students.collect { list -&gt;
+                    val student = list.firstOrNull { it.id == id }
+                    if (student != null) {
+                        binding.detailName.text = student.name
+                        binding.detailStatus.text =
+                            if (student.present) getString(R.string.present) else getString(R.string.absent)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}</code></pre></div></div>
+<p class="v2-p">Add <code>&lt;string name="absent"&gt;Absent&lt;/string&gt;</code> to <code>strings.xml</code>. In <code>ClassFragment</code>, extend the adapter with a second lambda <code>onOpen: (Student) -&gt; Unit</code>, set <code>nameText.setOnClickListener { onOpen(student) }</code> in <code>onBindViewHolder</code>, and pass:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val adapter = StudentAdapter(
+    onPresentChanged = { s, present -&gt; viewModel.setPresent(s.id, present) },
+    onOpen = { s -&gt;
+        findNavController().navigate(
+            R.id.action_class_to_detail,
+            Bundle().apply { putInt("studentId", s.id) }
+        )
+    }
+)</code></pre></div></div>
+<p class="v2-p">(Import <code>android.os.Bundle</code> and <code>androidx.navigation.fragment.findNavController</code>.) <strong>Expected behaviour:</strong> adding names appends rows with animation, ticking the checkbox updates the ViewModel, tapping a name opens the detail screen showing "Present" or "Absent", and Back returns to the list with the list state intact because the ViewModel is shared through <code>activityViewModels()</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 42 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-42-android-views-and-xml-layouts</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 42 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The View System</li><li>✅ Step-by-Step Build 1: Create a Views Project</li><li>✅ Step-by-Step Build 2: XML Layouts</li><li>✅ Step-by-Step Build 3: View Binding</li><li>✅ Step-by-Step Build 4: RecyclerView</li><li>✅ Step-by-Step Build 5: Fragments</li><li>✅ Step-by-Step Build 6: The Navigation Component</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_41.html" class="ln-btn">&#8592; Lesson 41</a><a href="lesson_43.html" class="ln-btn primary">Lesson 43 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 42 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

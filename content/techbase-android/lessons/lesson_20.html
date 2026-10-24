@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 20: Automated Tests for Your App — Techbase Android</title>
+</head>
+<body data-total="10" data-key="techbase_android_l20">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 20 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 20</div>
+      <h1>Automated Tests for Your App</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Tested Grade Calculator</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 20</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Write local unit tests and Compose UI tests with JUnit to prove your tip calculator works.</p></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Tested Grade Calculator</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You have built apps that work. But <em>how do you know</em> they work? So far the answer has been "I ran it and tapped around". That is fine for a first app, and a disaster for a real one. Imagine an app with fifty screens. After every change you would need to tap through all fifty to be sure you broke nothing. Nobody does that, so bugs slip out.</p>
+<p class="v2-p"><strong>Automated tests</strong> are small programs that check your app for you, in seconds, as often as you like. In this lesson you will write your first ones for a tip calculator: <strong>local unit tests</strong> that check calculations, and <strong>Compose UI tests</strong> that check what the user sees.</p>
+<p class="v2-p">This lesson covers the <em>Write automated tests</em> codelab in Unit 2 of Google's official <strong>Android Basics with Compose</strong> course.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain why automated tests exist and what a "test" really is.</li>
+<li>Tell local tests (the <code>test</code> folder) from instrumented tests (the <code>androidTest</code> folder).</li>
+<li>Write a JUnit test using the Arrange, Act, Assert pattern.</li>
+<li>Avoid the locale trap that breaks currency tests on other people's computers.</li>
+<li>Write a Compose UI test that types into text fields and checks the screen.</li>
+<li>Run tests in Android Studio and from the command line, and read the results.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Mindset:</strong> a test is a <em>question you ask your code that has a known answer</em>. "If the bill is 10 and the tip is 20 per cent, is the tip 2?" If the code answers anything else, the test fails and tells you exactly where.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Functions with parameters and defaults</strong> (lesson 8). Our calculator is a function with default arguments.</li>
+<li><strong>State and text fields</strong> (lesson 19). The UI test types into text fields that update state.</li>
+<li><strong>Gradle dependencies</strong> (lesson 03). Tests need libraries, declared in <code>build.gradle.kts</code> and the version catalog <code>libs.versions.toml</code>.</li>
+<li><strong>Annotations</strong> such as <code>@Test</code> and <code>@Composable</code>. An annotation is a label that tells a tool how to treat the code beneath it.</li>
+</ul>
+<h3 class="v2-h3">The code under test</h3>
+<p class="v2-p">To keep this lesson self-contained, here is the calculation we will test. If you built the tip calculator in lesson 19 your function is probably very similar. Use this version so the tests below match exactly.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">TipCalculator.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import java.text.NumberFormat
+
+/**
+ * Returns the tip as formatted currency text, for example "$2.00".
+ * [tipPercent] is a percentage, so 20.0 means 20 per cent.
+ */
+fun calculateTip(
+    amount: Double,
+    tipPercent: Double = 15.0,
+    roundUp: Boolean = false
+): String {
+    var tip = tipPercent / 100 * amount
+    if (roundUp) {
+        tip = kotlin.math.ceil(tip)
+    }
+    return NumberFormat.getCurrencyInstance().format(tip)
+}</code></pre></div></div>
+<p class="v2-p">Read it once. It multiplies, optionally rounds <strong>up</strong> to the next whole currency unit with <code>ceil</code>, and formats the result for the user's locale. That last step is important for a trap we reach shortly.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Conceptual Understanding: What Testing Is</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The test pyramid</h3>
+<p class="v2-p">Different tests cost different amounts. A healthy project has <strong>many cheap tests and a few expensive ones</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>          /\
+         /UI\          few: slow, need an emulator or phone
+        /----\
+       / unit \        many: fast, run on your computer only
+      /--------\</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Kind</th>
+<th>Folder</th>
+<th>Runs on</th>
+<th>Speed</th>
+<th>Good for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Local unit test</td>
+<td><code>app/src/test</code></td>
+<td>Your computer's JVM</td>
+<td>Milliseconds</td>
+<td>Calculations, ViewModels, parsing</td>
+</tr>
+<tr>
+<td>Instrumented test</td>
+<td><code>app/src/androidTest</code></td>
+<td>Emulator or real phone</td>
+<td>Seconds</td>
+<td>Compose UI, database, anything needing Android</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Rule of thumb:</strong> if the code does not need Android, test it as a local unit test. It is faster, and you will actually run it.</p>
+<h3 class="v2-h3">Anatomy of a test: Arrange, Act, Assert</h3>
+<p class="v2-p">Every good test has three parts, and naming them makes tests easy to write and read:</p>
+<ol class="v2-ol">
+<li><strong>Arrange</strong> the situation: create inputs and expected results.</li>
+<li><strong>Act</strong>: call the code you are testing.</li>
+<li><strong>Assert</strong>: compare the actual result with the expected one.</li>
+</ol>
+<p class="v2-p">A test <strong>passes</strong> when all assertions hold and <strong>fails</strong> when one does not. A failing test is not bad news. It is the test doing its job.</p>
+<h3 class="v2-h3">Why tests are worth the effort</h3>
+<ul class="v2-ul">
+<li>They catch <strong>regressions</strong>: an old feature quietly breaking when you add a new one.</li>
+<li>They are <strong>documentation</strong>: each test is a worked example of how the function behaves.</li>
+<li>They let you <strong>refactor without fear</strong>: change the insides, run the tests, trust the green ticks.</li>
+<li>They force you to design code that is <strong>easy to test</strong>, which is usually easier to understand too.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What Testing Is</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Setting Up: Folders and Dependencies</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Switch the Project tool window to <strong>Project</strong> view (not Android view) and look inside <code>app/src</code>. You will see three folders: <code>main</code> (your app), <code>test</code> (local tests) and <code>androidTest</code> (instrumented tests). The template already created a sample test file in each of the last two.</p>
+<p class="v2-p">The <strong>Empty Activity</strong> template also adds the testing libraries. In <code>app/build.gradle.kts</code> look for lines like these in the <code>dependencies</code> block (the exact names depend on your template version):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    // ... app dependencies ...
+
+    testImplementation(libs.junit)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+}</code></pre></div></div>
+<p class="v2-p">What each line does:</p>
+<ul class="v2-ul">
+<li><code>testImplementation</code> makes a library available <strong>only to local tests</strong>. <code>junit</code> is the testing framework.</li>
+<li><code>androidTestImplementation</code> makes a library available only to instrumented tests. <code>ui-test-junit4</code> gives you <code>createComposeRule()</code> and the finders.</li>
+<li><code>debugImplementation(libs.androidx.ui.test.manifest)</code> is required for Compose UI tests: it adds a manifest entry that lets the test activity launch. If you forget it, UI tests fail with a confusing "no activity" error.</li>
+</ul>
+<p class="v2-p">The matching entries live in <code>gradle/libs.versions.toml</code>. Never type version numbers from a tutorial blindly. Use the versions the template gives you, or ask Android Studio to suggest updates.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Setting Up: Folders and Dependencies</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Step-by-Step: Your First Local Unit Tests</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Create the test file</h3>
+<ol class="v2-ol">
+<li>In the Android view, expand <code>com.example.tipcalculator (test)</code>.</li>
+<li>Right-click it, choose <strong>New &gt; Kotlin Class/File</strong>, and name it <code>TipCalculatorTests</code>.</li>
+<li>Write the test:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">TipCalculatorTests.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+import java.text.NumberFormat
+
+class TipCalculatorTests {
+
+    @Test
+    fun calculateTip_20PercentNoRoundup() {
+        // Arrange
+        val amount = 10.00
+        val tipPercent = 20.00
+        val expectedTip = NumberFormat.getCurrencyInstance().format(2)
+
+        // Act
+        val actualTip = calculateTip(amount = amount, tipPercent = tipPercent, roundUp = false)
+
+        // Assert
+        assertEquals(expectedTip, actualTip)
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Line by line</h3>
+<ul class="v2-ul">
+<li><code>@Test</code> tells JUnit "this function is a test, run it".</li>
+<li>The name <code>calculateTip_20PercentNoRoundup</code> follows the convention <em>functionName_scenario</em>. When it fails, the name alone explains what broke.</li>
+<li><code>assertEquals(expected, actual)</code> passes when both are equal. Always put the <strong>expected</strong> value first, because failure messages assume that order.</li>
+<li><code>NumberFormat.getCurrencyInstance().format(2)</code> is the <strong>locale trap solution</strong>. If you wrote the literal <code>"$2.00"</code> and a teammate in Nigeria ran the test with a Naira locale, the actual result would be <code>₦2.00</code> and the test would fail for a reason unrelated to your code. Building the expected text with the same formatter makes the test pass everywhere.</li>
+</ul>
+<h3 class="v2-h3">Run it</h3>
+<p class="v2-p">Click the green triangle beside the class name or function and choose <strong>Run 'TipCalculatorTests'</strong>. The <strong>Run</strong> window shows a green tick and a summary such as <code>1 test passed</code>. It finishes in under a second because nothing needs the emulator.</p>
+<h3 class="v2-h3">Make it fail on purpose</h3>
+<p class="v2-p">Change <code>expectedTip</code> to <code>format(3)</code> and run again. The failure message tells you something like <code>expected:&lt;$3.00&gt; but was:&lt;$2.00&gt;</code>. Learning to read these messages is half of testing. Change it back.</p>
+<h3 class="v2-h3">More tests</h3>
+<p class="v2-p">One test proves little. Add a second that exercises rounding:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>    @Test
+    fun calculateTip_15PercentWithRoundup() {
+        val expectedTip = NumberFormat.getCurrencyInstance().format(2)
+        val actualTip = calculateTip(amount = 10.00, tipPercent = 15.00, roundUp = true)
+        assertEquals(expectedTip, actualTip)
+    }
+
+    @Test
+    fun calculateTip_defaultPercentIsFifteen() {
+        val expectedTip = NumberFormat.getCurrencyInstance().format(1.5)
+        val actualTip = calculateTip(amount = 10.00)
+        assertEquals(expectedTip, actualTip)
+    }</code></pre></div></div>
+<p class="v2-p">Check the arithmetic: 15 per cent of 10 is 1.5, rounded <strong>up</strong> it is 2. And with the default of 15 per cent and no rounding, the tip is 1.5. Each test uses <em>named</em> arguments so the call explains itself.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Your First Local Unit Tests</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Step-by-Step: Your First Compose UI Test</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Local tests cannot see the screen. To test what the user sees, you write an <strong>instrumented UI test</strong> that launches your composable on a device or emulator, performs actions and checks the result.</p>
+<h3 class="v2-h3">A screen worth testing</h3>
+<p class="v2-p">Here is a minimal tip screen. It has two text fields, a Switch and a result line. Put it in <code>TipScreen.kt</code> in <code>main</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">TipScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun TipScreen(modifier: Modifier = Modifier) {
+    var amountInput by remember { mutableStateOf("") }
+    var percentInput by remember { mutableStateOf("") }
+    var roundUp by remember { mutableStateOf(false) }
+
+    val amount = amountInput.toDoubleOrNull() ?: 0.0
+    val percent = percentInput.toDoubleOrNull() ?: 0.0
+    val tip = calculateTip(amount, percent, roundUp)
+
+    Column(modifier = modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = amountInput,
+            onValueChange = { amountInput = it },
+            label = { Text("Bill Amount") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        OutlinedTextField(
+            value = percentInput,
+            onValueChange = { percentInput = it },
+            label = { Text("Tip Percentage") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        Switch(checked = roundUp, onCheckedChange = { roundUp = it })
+        Text(text = "Tip Amount: $tip")
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Write the UI test</h3>
+<p class="v2-p">Create <code>TipUiTests.kt</code> in the <strong>androidTest</strong> folder (<code>com.example.tipcalculator (androidTest)</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">TipUiTests.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
+import org.junit.Rule
+import org.junit.Test
+import java.text.NumberFormat
+
+class TipUiTests {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun calculate_20_percent_tip() {
+        composeTestRule.setContent {
+            TipScreen()
+        }
+
+        composeTestRule.onNodeWithText("Bill Amount").performTextInput("10")
+        composeTestRule.onNodeWithText("Tip Percentage").performTextInput("20")
+
+        val expectedTip = NumberFormat.getCurrencyInstance().format(2)
+        composeTestRule.onNodeWithText("Tip Amount: $expectedTip").assertExists(
+            "No node with this text was found."
+        )
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">How it works</h3>
+<ul class="v2-ul">
+<li><code>createComposeRule()</code> creates a <strong>rule</strong>: a helper JUnit runs around every test. It launches an empty activity and gives you <code>setContent</code>.</li>
+<li><code>setContent { TipScreen() }</code> shows <em>only the composable you are testing</em>, with no navigation or theme noise. Testing a composable <strong>in isolation</strong> keeps tests fast and focused.</li>
+<li><code>onNodeWithText("Bill Amount")</code> is a <strong>finder</strong>. Compose builds a <em>semantics tree</em> describing the screen for accessibility and testing, and finders search that tree. Here we find the node whose text is the label.</li>
+<li><code>performTextInput("10")</code> is an <strong>action</strong>: it types into the field.</li>
+<li><code>assertExists(...)</code> is an <strong>assertion</strong>: it fails with your message if no node matches.</li>
+</ul>
+<p class="v2-p">Start an emulator (lesson 04), then run the test with the green triangle. The emulator flashes your screen for a moment, types the numbers, and the <strong>Run</strong> window reports a pass.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Preview of lesson 45:</strong> Compose testing has much more: tags, <code>useUnmergedTree</code>, waiting for async work, and debugging flaky tests. Here you learned the shape; there you will master it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Your First Compose UI Test</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Running Tests Like a Professional</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>What</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One test</td>
+<td>Click the green triangle beside it</td>
+</tr>
+<tr>
+<td>A whole class or folder</td>
+<td>Right-click it and choose <strong>Run Tests</strong></td>
+</tr>
+<tr>
+<td>All local tests (terminal)</td>
+<td><code>./gradlew test</code> (<code>gradlew.bat test</code> on Windows)</td>
+</tr>
+<tr>
+<td>All instrumented tests (terminal)</td>
+<td><code>./gradlew connectedAndroidTest</code> with a device or emulator attached</td>
+</tr>
+<tr>
+<td>HTML report</td>
+<td><code>app/build/reports/tests/testDebugUnitTest/index.html</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Run all local tests before every commit. Because they are fast, you will not mind.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Running Tests Like a Professional</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Edge cases</strong></p>
+<p class="v2-p">Good testers think about the strange inputs. Add local unit tests for each case below and decide what the function <em>should</em> do first:</p>
+<ol class="v2-ol">
+<li>A bill of <code>0.0</code> returns a zero tip.</li>
+<li>A tip percentage of <code>0.0</code> returns a zero tip.</li>
+<li>Rounding up when the tip is already a whole number (for example a bill of 20 at 10 per cent) leaves it unchanged.</li>
+<li>A tiny bill of <code>0.01</code> at 10 per cent with rounding up returns a tip of 1.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun calculateTip_zeroBill() {
+    val expected = NumberFormat.getCurrencyInstance().format(0)
+    assertEquals(expected, calculateTip(amount = 0.0, tipPercent = 20.0))
+}
+
+@Test
+fun calculateTip_zeroPercent() {
+    val expected = NumberFormat.getCurrencyInstance().format(0)
+    assertEquals(expected, calculateTip(amount = 50.0, tipPercent = 0.0))
+}
+
+@Test
+fun calculateTip_roundUpOnWholeNumberKeepsValue() {
+    val expected = NumberFormat.getCurrencyInstance().format(2)
+    assertEquals(expected, calculateTip(amount = 20.0, tipPercent = 10.0, roundUp = true))
+}
+
+@Test
+fun calculateTip_tinyBillRoundsUpToOne() {
+    val expected = NumberFormat.getCurrencyInstance().format(1)
+    assertEquals(expected, calculateTip(amount = 0.01, tipPercent = 10.0, roundUp = true))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why the last two matter:</strong> <code>ceil(2.0)</code> is <code>2.0</code>, so a whole tip stays put, and <code>ceil(0.001)</code> is <code>1.0</code>, so any positive tip rounds up to at least one. Edge cases like these are where real bugs hide.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Test the Switch</strong></p>
+<p class="v2-p">Write a UI test that types a bill of <code>10</code> and a percentage of <code>15</code>, taps the round-up Switch, and checks that the tip text becomes the currency value for <code>2</code>. Hint: the Switch has no text, so give it a test tag with <code>Modifier.testTag("roundUp")</code> in <code>TipScreen</code>, then find it with <code>onNodeWithTag("roundUp")</code> and call <code>performClick()</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">In <code>TipScreen</code>, change the Switch to:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Switch(
+    checked = roundUp,
+    onCheckedChange = { roundUp = it },
+    modifier = Modifier.testTag("roundUp")
+)</code></pre></div></div>
+<p class="v2-p">with <code>import androidx.compose.ui.platform.testTag</code>. Then the test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+
+@Test
+fun roundUpSwitch_roundsTipUp() {
+    composeTestRule.setContent { TipScreen() }
+
+    composeTestRule.onNodeWithText("Bill Amount").performTextInput("10")
+    composeTestRule.onNodeWithText("Tip Percentage").performTextInput("15")
+    composeTestRule.onNodeWithTag("roundUp").performClick()
+
+    val expectedTip = NumberFormat.getCurrencyInstance().format(2)
+    composeTestRule.onNodeWithText("Tip Amount: $expectedTip").assertExists()
+}</code></pre></div></div>
+<p class="v2-p">A tag is the safest way to find UI that has no text. Tags are invisible to users and never read by screen readers.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Break your calculator on purpose by changing <code>ceil</code> to <code>floor</code> in <code>calculateTip</code>. Run all your tests and list which ones fail. Which failing test would have been the first to warn a teammate?</p></div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Hard-coding currency text.</strong> <em>The wrong code:</em> <code>assertEquals("$2.00", actual)</code>. <em>What happens:</em> it passes on your laptop and fails on a colleague's with a different locale. <em>The fix:</em> build the expected text with <code>NumberFormat.getCurrencyInstance()</code> or pass a fixed <code>Locale</code> into the function.</p>
+<p class="v2-p"><strong>Mistake #2: Putting plain logic tests in <code>androidTest</code>.</strong> <em>What happens:</em> they need an emulator and take ten times longer, so you stop running them. <em>The fix:</em> anything that does not need Android belongs in <code>test</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Swapping expected and actual.</strong> <em>What happens:</em> the test still passes or fails correctly, but the failure message is backwards and confusing. <em>The fix:</em> <code>assertEquals(expected, actual)</code>, always in that order.</p>
+<p class="v2-p"><strong>Mistake #4: Forgetting <code>ui-test-manifest</code>.</strong> <em>What happens:</em> UI tests crash with a message about being unable to find an activity. <em>The fix:</em> add <code>debugImplementation(libs.androidx.ui.test.manifest)</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Testing the wrong thing.</strong> <em>The wrong test:</em> checking that a private variable has a certain value. <em>The fix:</em> test <strong>behaviour the user can observe</strong>, such as the text on the screen or the return value, not internal details that may change.</p>
+<p class="v2-p"><strong>Mistake #6: One giant test.</strong> <em>What happens:</em> when it fails you do not know which part broke. <em>The fix:</em> small tests, one behaviour each, named by <em>function_scenario</em>.</p>
+<p class="v2-p"><strong>Mistake #7: Tests that depend on each other.</strong> <em>What happens:</em> they pass in one order and fail in another. <em>The fix:</em> every test builds its own inputs and never relies on leftovers from another test.</p>
+<p class="v2-p"><strong>Mistake #8: Ignoring a failing test.</strong> <em>The fix:</em> a red test means either the code or the test is wrong. Fix one of them immediately. A test suite people ignore is worse than none.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Knowledge Check</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between a local unit test and an instrumented test?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A local unit test lives in <code>src/test</code> and runs on your computer's JVM, which is fast. An instrumented test lives in <code>src/androidTest</code> and runs on an emulator or device, so it can use real Android components such as Compose UI. Prefer local tests wherever possible.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What are the three parts of a well-structured test?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Arrange (set up inputs and expected values), Act (call the code under test) and Assert (compare actual with expected).</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why is <code>assertEquals("$2.00", actual)</code> risky in a currency test?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>NumberFormat.getCurrencyInstance()</code> formats using the device or JVM locale, so the symbol and separators vary. Build the expected text with the same formatter or fix the locale.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What does <code>createComposeRule()</code> give you, and why test a composable in isolation?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It gives you a JUnit rule that launches a test activity and provides <code>setContent</code>, finders, actions and assertions. Showing only the composable under test keeps the test fast, focused and independent of navigation or theming.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> How do you find a Switch that has no text in a UI test?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Give it <code>Modifier.testTag("name")</code> and locate it with <code>onNodeWithTag("name")</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-2-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 2, Pathway 3: Interacting with UI and state</a>: the official pathway containing the <em>Write automated tests</em> codelab.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a>: all units in order.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-testing" rel="noopener noreferrer">Testing codelab for Jetpack Compose</a>: the advanced Compose testing you will study in lesson 45.</li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4" rel="noopener noreferrer">Jetpack Compose for Android developers, pathway 4: Accessibility, testing and performance</a>: where testing is explored further.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Tested Grade Calculator</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Write a small function and prove it works with automated tests, the way professionals do.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create <code>fun gradeFor(score: Int): String</code> in <code>GradeCalculator.kt</code> using these rules: 70 to 100 is <code>"A"</code>, 60 to 69 is <code>"B"</code>, 50 to 59 is <code>"C"</code>, 40 to 49 is <code>"D"</code>, 0 to 39 is <code>"F"</code>, and any score below 0 or above 100 returns <code>"Invalid"</code>.</li>
+<li>Write <strong>at least eight</strong> local unit tests, including the boundary values 70, 69, 60, 50, 40, 39, 0, 100, -1 and 101.</li>
+<li>Write one Compose UI test for a small screen that has a text field for the score and a <code>Text</code> that shows <code>Grade: X</code>.</li>
+<li>Run the whole suite from the terminal with <code>./gradlew test</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Use JUnit's <code>@Test(expected = ...)</code> or <code>assertThrows</code> after changing the function to throw an exception for invalid scores, and update the tests.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">GradeCalculator.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+fun gradeFor(score: Int): String = when (score) {
+    in 70..100 -&gt; "A"
+    in 60..69 -&gt; "B"
+    in 50..59 -&gt; "C"
+    in 40..49 -&gt; "D"
+    in 0..39 -&gt; "F"
+    else -&gt; "Invalid"
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">GradeCalculatorTests.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class GradeCalculatorTests {
+    @Test fun gradeFor_100_isA() = assertEquals("A", gradeFor(100))
+    @Test fun gradeFor_70_isA() = assertEquals("A", gradeFor(70))
+    @Test fun gradeFor_69_isB() = assertEquals("B", gradeFor(69))
+    @Test fun gradeFor_60_isB() = assertEquals("B", gradeFor(60))
+    @Test fun gradeFor_59_isC() = assertEquals("C", gradeFor(59))
+    @Test fun gradeFor_50_isC() = assertEquals("C", gradeFor(50))
+    @Test fun gradeFor_49_isD() = assertEquals("D", gradeFor(49))
+    @Test fun gradeFor_40_isD() = assertEquals("D", gradeFor(40))
+    @Test fun gradeFor_39_isF() = assertEquals("F", gradeFor(39))
+    @Test fun gradeFor_0_isF() = assertEquals("F", gradeFor(0))
+    @Test fun gradeFor_negative_isInvalid() = assertEquals("Invalid", gradeFor(-1))
+    @Test fun gradeFor_101_isInvalid() = assertEquals("Invalid", gradeFor(101))
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">GradeScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+@Composable
+fun GradeScreen() {
+    var input by remember { mutableStateOf("") }
+    val grade = input.toIntOrNull()?.let { gradeFor(it) } ?: "-"
+    Column {
+        OutlinedTextField(
+            value = input,
+            onValueChange = { input = it },
+            label = { Text("Score") }
+        )
+        Text(text = "Grade: $grade")
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">GradeUiTests.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.tipcalculator
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
+import org.junit.Rule
+import org.junit.Test
+
+class GradeUiTests {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun score_72_showsGradeA() {
+        composeTestRule.setContent { GradeScreen() }
+        composeTestRule.onNodeWithText("Score").performTextInput("72")
+        composeTestRule.onNodeWithText("Grade: A").assertExists()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Run <code>./gradlew test</code> and you should see the twelve local tests pass. Run <code>./gradlew connectedAndroidTest</code> with an emulator running to execute the UI test.</p>
+<p class="v2-p"><strong>What makes this a good suite:</strong> every grade boundary appears on <strong>both sides</strong> (70 and 69, 60 and 59, and so on). Boundaries are where off-by-one mistakes such as writing <code>&gt;</code> instead of <code>&gt;=</code> hide. If you change <code>70..100</code> to <code>71..100</code>, the test <code>gradeFor_70_isA</code> fails immediately and points at the exact bug.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 20 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-20-automated-tests-for-your-app</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 20 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What Testing Is</li><li>✅ Setting Up: Folders and Dependencies</li><li>✅ Step-by-Step: Your First Local Unit Tests</li><li>✅ Step-by-Step: Your First Compose UI Test</li><li>✅ Running Tests Like a Professional</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_19.html" class="ln-btn">&#8592; Lesson 19</a><a href="lesson_21.html" class="ln-btn primary">Lesson 21 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 20 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

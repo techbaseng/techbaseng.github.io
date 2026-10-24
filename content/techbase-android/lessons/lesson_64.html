@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 64: Build an Offline-First App — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l64">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 64 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 64</div>
+      <h1>Build an Offline-First App</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: RegisterSync: An Offline-First Attendance App</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 64</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Design for no connectivity: reads, writes, sync strategies and conflict resolution with Room and WorkManager.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ RegisterSync: An Offline-First Attendance App</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Phones lose signal in lifts, on rural roads, in school compounds with unreliable data, and during network outages. An app that shows a spinner or an error screen whenever the network drops feels broken, even when the user's own data is sitting safely on the device. An <strong>offline-first</strong> app works the other way round: it treats the <strong>local database as the source of truth</strong>, shows what it has immediately, and synchronises with the server <strong>when it can</strong>.</p>
+<p class="v2-p">This lesson is the practical capstone of the data-layer lessons in the <strong>Modern Android App Architecture</strong> programme (https://developer.android.com/courses/android-architecture). It follows the official guide <strong>Build an offline-first app</strong> (https://developer.android.com/topic/architecture/data-layer/offline-first) and uses <strong>Room</strong>, <strong>Retrofit</strong> and <strong>WorkManager</strong> (https://developer.android.com/topic/libraries/architecture/workmanager).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain <strong>offline-first</strong> and why the database is the <strong>source of truth</strong>.</li>
+<li>Choose <strong>read</strong> and <strong>write</strong> strategies, including <strong>queued writes</strong>.</li>
+<li>Design <strong>sync</strong> with <strong>WorkManager</strong>: constraints, retries, back-off and unique work.</li>
+<li>Pick a <strong>conflict resolution</strong> policy and understand its trade-offs.</li>
+<li><strong>Monitor connectivity</strong> with a <code>Flow</code>.</li>
+<li>Show <strong>sync status</strong> honestly in the UI.</li>
+<li>Test the sync logic.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> the UI never waits for the network. It reads the database, and the network is just one of the things that updates the database.</p>
+<p class="v2-p"><strong>Honesty note:</strong> version numbers are placeholders ("latest stable"). Room 3 imports are used, as in lesson 34; change them to <code>androidx.room</code> for Room 2.x. The server in this lesson is imaginary; the sync logic is real and testable with fakes.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Room, DAOs and Flow</strong> (lesson 34).</li>
+<li><strong>Repositories, data sources and error handling</strong> (lesson 62).</li>
+<li><strong>UI state production</strong> (lesson 61).</li>
+<li><strong>Retrofit</strong> (lesson 29).</li>
+<li><strong>Coroutines and Flow</strong> (lesson 33).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Offline-First</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Not just a cache</h3>
+<p class="v2-p">A <strong>cache</strong> speeds things up but the network is still in charge: if there is no cache entry, nothing shows. In an <strong>offline-first</strong> app, the database is <strong>complete enough to use on its own</strong>, and the network exists to keep it fresh and to send local changes upstream.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>        ┌───────────────┐
+        │      UI       │  reads ONLY from the repository
+        └───────┬───────┘
+                │ Flow
+        ┌───────▼───────┐
+        │  Repository   │
+        └───┬───────┬───┘
+   reads    │       │   writes (and a sync request)
+        ┌───▼───┐ ┌─▼────────────┐
+        │  DB   │ │ Sync worker  │──► Network
+        │ (SSOT)│◄┤ (WorkManager)│◄── Network
+        └───────┘ └──────────────┘</code></pre></div></div>
+<h3 class="v2-h3">Why it is worth the effort</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Works without a connection</strong></td>
+<td>Users can read <strong>and change</strong> data offline</td>
+</tr>
+<tr>
+<td><strong>Instant UI</strong></td>
+<td>Screens render from disk, not after a round trip</td>
+</tr>
+<tr>
+<td><strong>Resilient</strong></td>
+<td>Flaky networks are normal, not an error state</td>
+</tr>
+<tr>
+<td><strong>Saves data and battery</strong></td>
+<td>Fewer, batched requests</td>
+</tr>
+<tr>
+<td><strong>Simple UI code</strong></td>
+<td>The UI has a single flow to observe</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The cost is <strong>sync logic</strong>: you must reason about what happens when the server and the device disagree.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Offline-First</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: The Running Example, &quot;RegisterSync&quot;</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">A teacher records <strong>attendance</strong> for each class. Requirements:</p>
+<ul class="v2-ul">
+<li>It must work in a classroom with <strong>no network</strong>.</li>
+<li>Records are uploaded when a connection is available.</li>
+<li>The teacher can see which records are <strong>not yet uploaded</strong>.</li>
+<li>The server may also contain records entered by other teachers; they must appear.</li>
+</ul>
+<h3 class="v2-h3">Models and states</h3>
+<p class="v2-p">Each local record has a <strong>sync state</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>enum class SyncState { SYNCED, PENDING_UPLOAD, FAILED }
+
+@Entity(tableName = "attendance")
+data class AttendanceEntity(
+    @PrimaryKey val id: String,            // client-generated UUID, so records can be created offline
+    val studentName: String,
+    val date: String,                      // ISO-8601 date
+    val present: Boolean,
+    val updatedAtMillis: Long,             // used for conflict resolution
+    val syncState: SyncState
+)</code></pre></div></div>
+<p class="v2-p">Key design choices:</p>
+<ul class="v2-ul">
+<li><strong>Client-generated ids (UUIDs)</strong>: an offline device cannot ask the server for an id. A UUID lets the client create records safely, and the server accepts them.</li>
+<li><strong><code>updatedAtMillis</code></strong>: when the record was last edited, used to decide who wins in conflicts.</li>
+<li><strong><code>syncState</code></strong>: a row in <code>PENDING_UPLOAD</code> is a <strong>change the server has not seen</strong>. The enum needs a type converter in Room (store the name as a string). In Room 3 this is a <code>@ColumnTypeConverter</code>; in Room 2.x it is <code>@TypeConverter</code> (see lesson 34).</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class SyncStateConverters {
+    @ColumnTypeConverter
+    fun toString(value: SyncState): String = value.name
+
+    @ColumnTypeConverter
+    fun fromString(value: String): SyncState = SyncState.valueOf(value)
+}</code></pre></div></div>
+<p class="v2-p">(Register it with <code>@TypeConverters(SyncStateConverters::class)</code> on the database class. Check the Room 3 documentation for the exact annotation names.)</p>
+<h3 class="v2-h3">The DAO</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Dao
+interface AttendanceDao {
+
+    @Query("SELECT * FROM attendance WHERE date = :date ORDER BY studentName")
+    fun observeForDate(date: String): Flow&lt;List&lt;AttendanceEntity&gt;&gt;
+
+    @Query("SELECT * FROM attendance WHERE syncState != 'SYNCED'")
+    suspend fun pendingChanges(): List&lt;AttendanceEntity&gt;
+
+    @Query("SELECT COUNT(*) FROM attendance WHERE syncState = 'PENDING_UPLOAD'")
+    fun observePendingCount(): Flow&lt;Int&gt;
+
+    @Upsert
+    suspend fun upsert(item: AttendanceEntity)
+
+    @Upsert
+    suspend fun upsertAll(items: List&lt;AttendanceEntity&gt;)
+
+    @Query("SELECT * FROM attendance WHERE id = :id")
+    suspend fun find(id: String): AttendanceEntity?
+
+    @Query("UPDATE attendance SET syncState = 'SYNCED' WHERE id IN (:ids)")
+    suspend fun markSynced(ids: List&lt;String&gt;)
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The Running Example, &quot;RegisterSync&quot;</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Read Strategy</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">The UI reads <strong>only</strong> from the database:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface AttendanceRepository {
+    fun observeForDate(date: String): Flow&lt;List&lt;AttendanceRecord&gt;&gt;
+    fun observePendingCount(): Flow&lt;Int&gt;
+    suspend fun mark(studentName: String, date: String, present: Boolean)
+    suspend fun syncNow(): Result&lt;Unit&gt;
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class OfflineFirstAttendanceRepository(
+    private val dao: AttendanceDao,
+    private val api: AttendanceApi,
+    private val syncScheduler: SyncScheduler,
+    private val clock: () -&gt; Long = System::currentTimeMillis,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : AttendanceRepository {
+
+    override fun observeForDate(date: String): Flow&lt;List&lt;AttendanceRecord&gt;&gt; =
+        dao.observeForDate(date)
+            .map { list -&gt; list.map { it.toModel() } }
+            .flowOn(ioDispatcher)
+
+    override fun observePendingCount(): Flow&lt;Int&gt; = dao.observePendingCount()
+    // mark() and syncNow() follow
+}</code></pre></div></div>
+<p class="v2-p">No network call appears in the read path. Screens appear instantly, from disk, whether or not the device is online.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Read Strategy</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Write Strategy (Queued Writes)</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When the teacher taps "present":</p>
+<ol class="v2-ol">
+<li><strong>Write to the database immediately</strong>, marked <code>PENDING_UPLOAD</code>.</li>
+<li>The UI updates at once because it observes the database.</li>
+<li><strong>Schedule a sync</strong> that uploads pending changes when a connection exists.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>override suspend fun mark(studentName: String, date: String, present: Boolean) {
+    withContext(ioDispatcher) {
+        val id = "$date|$studentName"            // stable id for one student on one date
+        dao.upsert(
+            AttendanceEntity(
+                id = id,
+                studentName = studentName,
+                date = date,
+                present = present,
+                updatedAtMillis = clock(),
+                syncState = SyncState.PENDING_UPLOAD
+            )
+        )
+    }
+    syncScheduler.requestSync()
+}</code></pre></div></div>
+<p class="v2-p">The method returns as soon as the <strong>local</strong> write finishes, so there is no spinner, and the user cannot lose their work by walking out of coverage. The word <em>queued</em> means the database row itself is the queue: pending rows are the work to do.</p>
+<p class="v2-p">A stable id (<code>"$date|$studentName"</code>) means marking the same student twice on the same day <strong>updates one row</strong> rather than creating a duplicate. Choose ids that make your operations <strong>idempotent</strong> (safe to repeat). Idempotence is essential, because retries mean the server may see the same upload more than once.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Write Strategy (Queued Writes)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: Sync with WorkManager</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Why WorkManager</h3>
+<p class="v2-p"><strong>WorkManager</strong> runs <strong>deferrable, guaranteed</strong> background work: it survives app restarts and device reboots, respects <strong>constraints</strong> (such as network availability) and <strong>retries</strong> with back-off. It is the recommended tool for sync. Do not use a bare coroutine, a <code>Service</code> you manage by hand, or <code>GlobalScope</code>: they die with the process.</p>
+<p class="v2-p">Add the dependency (use the latest stable version; recent releases include the Kotlin extensions in the main artifact, older ones need <code>work-runtime-ktx</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+work = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "work" }</code></pre></div></div>
+<h3 class="v2-h3">The worker</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class SyncWorker(
+    appContext: Context,
+    params: WorkerParameters,
+    private val repository: AttendanceRepository
+) : CoroutineWorker(appContext, params) {
+
+    override suspend fun doWork(): Result {
+        val outcome = repository.syncNow()
+        return when {
+            outcome.isSuccess -&gt; Result.success()
+            runAttemptCount &lt; 5 -&gt; Result.retry()      // WorkManager applies back-off
+            else -&gt; Result.failure()
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>CoroutineWorker</code> gives you a <code>suspend</code> <code>doWork</code>. Returning <code>Result.retry()</code> asks WorkManager to run it again later with <strong>exponential back-off</strong>. (Inside <code>doWork</code> the name <code>Result</code> means <code>ListenableWorker.Result</code>; the repository's <code>Result&lt;Unit&gt;</code> is Kotlin's. Import carefully or alias one of them.)</p>
+<p class="v2-p"><strong>A word on constructor injection:</strong> WorkManager creates workers itself, so passing <code>repository</code> through the constructor needs a <strong><code>WorkerFactory</code></strong> (or Hilt's <code>@HiltWorker</code>, lesson 65). A simple manual factory:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class AppWorkerFactory(private val repository: AttendanceRepository) : WorkerFactory() {
+    override fun createWorker(
+        appContext: Context,
+        workerClassName: String,
+        workerParameters: WorkerParameters
+    ): ListenableWorker? = when (workerClassName) {
+        SyncWorker::class.java.name -&gt; SyncWorker(appContext, workerParameters, repository)
+        else -&gt; null
+    }
+}</code></pre></div></div>
+<p class="v2-p">Register it by implementing <code>Configuration.Provider</code> in your <code>Application</code> class and returning a <code>Configuration</code> that uses the factory (the official WorkManager documentation shows the current form).</p>
+<h3 class="v2-h3">The scheduler</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface SyncScheduler { fun requestSync() }
+
+class WorkManagerSyncScheduler(private val context: Context) : SyncScheduler {
+    override fun requestSync() {
+        val request = OneTimeWorkRequestBuilder&lt;SyncWorker&gt;()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "attendance-sync",
+            ExistingWorkPolicy.KEEP,      // if a sync is already queued, do not queue another
+            request
+        )
+    }
+}</code></pre></div></div>
+<ul class="v2-ul">
+<li><strong>Constraint:</strong> only run when the network is connected. WorkManager waits for it, even across reboots.</li>
+<li><strong>Unique work with <code>KEEP</code>:</strong> twenty quick taps cause <strong>one</strong> upload, because the sync reads all pending rows.</li>
+<li><strong>Back-off:</strong> if the server is down, retries become gradually less frequent.</li>
+</ul>
+<p class="v2-p">You can also schedule a <strong>periodic</strong> pull so that the device receives other teachers' changes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val periodic = PeriodicWorkRequestBuilder&lt;SyncWorker&gt;(1, TimeUnit.HOURS)
+    .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.UNMETERED).build())
+    .build()
+WorkManager.getInstance(context)
+    .enqueueUniquePeriodicWork("attendance-periodic", ExistingPeriodicWorkPolicy.KEEP, periodic)</code></pre></div></div>
+<p class="v2-p">(Periodic work has a minimum interval of 15 minutes. <code>UNMETERED</code> means Wi-Fi, which spares mobile data; choose what suits your users.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Sync with WorkManager</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: The Sync Algorithm</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">A robust sync is <strong>push then pull</strong>: upload local changes first, then download the server's.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>override suspend fun syncNow(): Result&lt;Unit&gt; = withContext(ioDispatcher) {
+    runCatchingNetwork {
+        // 1. PUSH: send everything pending
+        val pending = dao.pendingChanges()
+        if (pending.isNotEmpty()) {
+            api.upload(pending.map { it.toDto() })
+            dao.markSynced(pending.map { it.id })
+        }
+
+        // 2. PULL: fetch changes from the server and merge
+        val remote = api.changesSince(lastSyncToken())
+        mergeRemote(remote)
+        saveSyncToken(remote.nextToken)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Note: if the upload throws, nothing is marked as synced, so the next run <strong>re-uploads</strong> the same rows. That is why the server operation must be <strong>idempotent</strong> (upsert by id).</p>
+<p class="v2-p">A careful detail: rows edited <strong>while</strong> the upload is in flight. If the user changes a row after <code>pendingChanges()</code> reads it but before <code>markSynced</code> runs, marking it synced would hide a newer change. Fix it by marking synced <strong>only if the row has not changed since</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Query("UPDATE attendance SET syncState = 'SYNCED' WHERE id = :id AND updatedAtMillis = :version")
+suspend fun markSyncedIfUnchanged(id: String, version: Long)</code></pre></div></div>
+<p class="v2-p">and calling it for each uploaded item with its <code>updatedAtMillis</code>. Otherwise the newer edit would never upload.</p>
+<h3 class="v2-h3">Conflict resolution</h3>
+<p class="v2-p">A <strong>conflict</strong> happens when the same record was changed on the device and on the server. You must pick a policy.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Policy</th>
+<th>Rule</th>
+<th>Good for</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Server wins</strong></td>
+<td>Remote overwrites local</td>
+<td>Reference data (class lists)</td>
+<td>Lose offline edits</td>
+</tr>
+<tr>
+<td><strong>Client wins</strong></td>
+<td>Local overwrites remote</td>
+<td>Single-user personal data</td>
+<td>Lose other users' edits</td>
+</tr>
+<tr>
+<td><strong>Last write wins</strong></td>
+<td>Compare timestamps</td>
+<td>Simple collaboration</td>
+<td>Clock differences; silent loss</td>
+</tr>
+<tr>
+<td><strong>Field-level merge</strong></td>
+<td>Merge different fields</td>
+<td>Records with independent fields</td>
+<td>More code</td>
+</tr>
+<tr>
+<td><strong>Ask the user</strong></td>
+<td>Show both versions</td>
+<td>Critical data</td>
+<td>More UI</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A simple last-write-wins merge, protecting local pending edits:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>private suspend fun mergeRemote(remote: List&lt;AttendanceDto&gt;) {
+    for (dto in remote) {
+        val local = dao.find(dto.id)
+        val keepLocal = local != null &amp;&amp;
+            local.syncState == SyncState.PENDING_UPLOAD &amp;&amp;
+            local.updatedAtMillis &gt; dto.updatedAtMillis
+        if (!keepLocal) dao.upsert(dto.toEntity(SyncState.SYNCED))
+    }
+}</code></pre></div></div>
+<p class="v2-p">Be honest about the limit: device clocks can be wrong, so timestamps are a <strong>heuristic</strong>. For data where silent loss matters, use server-assigned versions (an incrementing <code>version</code> or ETag) and have the server reject stale writes, then let the client <strong>re-fetch and retry</strong> or ask the user.</p>
+<h3 class="v2-h3">Deletes</h3>
+<p class="v2-p">You cannot simply delete a row if you need to tell the server. Use a <strong>tombstone</strong>: mark the row <code>deleted = true</code>, sync it, then really remove it after the server confirms.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: The Sync Algorithm</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: Connectivity and Honest UI</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Observing connectivity</h3>
+<p class="v2-p">Connectivity is a <strong>hint</strong>, not a guarantee (a device can be "connected" to Wi-Fi with no internet). Still, it is useful for showing a banner. Observe it as a <code>Flow</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class ConnectivityObserver(context: Context) {
+    private val manager = context.getSystemService(ConnectivityManager::class.java)
+
+    val isOnline: Flow&lt;Boolean&gt; = callbackFlow {
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) { trySend(true) }
+            override fun onLost(network: Network) { trySend(false) }
+        }
+        manager.registerDefaultNetworkCallback(callback)
+        trySend(manager.activeNetwork != null)
+        awaitClose { manager.unregisterNetworkCallback(callback) }
+    }.distinctUntilChanged()
+}</code></pre></div></div>
+<p class="v2-p">(This needs the <code>ACCESS_NETWORK_STATE</code> permission in the manifest.)</p>
+<h3 class="v2-h3">Telling the user the truth</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class AttendanceUiState(
+    val records: List&lt;AttendanceRecord&gt; = emptyList(),
+    val pendingCount: Int = 0,
+    val online: Boolean = true
+)
+
+class AttendanceViewModel(
+    repository: AttendanceRepository,
+    connectivity: ConnectivityObserver,
+    private val date: String
+) : ViewModel() {
+
+    val uiState: StateFlow&lt;AttendanceUiState&gt; = combine(
+        repository.observeForDate(date),
+        repository.observePendingCount(),
+        connectivity.isOnline
+    ) { records, pending, online -&gt; AttendanceUiState(records, pending, online) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AttendanceUiState())
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun SyncBanner(pending: Int, online: Boolean) {
+    val text = when {
+        pending &gt; 0 &amp;&amp; !online -&gt; "$pending changes saved on this phone. They will upload when you are online."
+        pending &gt; 0 -&gt; "Uploading $pending changes…"
+        !online -&gt; "Offline. Showing saved data."
+        else -&gt; return
+    }
+    Surface(color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()) {
+        Text(text, Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The words matter. "Saved on this phone" reassures the teacher that nothing is lost; "Offline" without more would worry them.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Connectivity and Honest UI</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 7: Testing Sync</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Because the sync logic is in the repository and the database and API are replaceable, you can test it with fakes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class SyncTest {
+
+    private val dao = FakeAttendanceDao()
+    private val api = FakeAttendanceApi()
+    private val scheduler = object : SyncScheduler { var calls = 0; override fun requestSync() { calls++ } }
+
+    @Test
+    fun mark_saves_locally_as_pending_and_requests_sync() = runTest {
+        val repo = OfflineFirstAttendanceRepository(dao, api, scheduler, { 1_000 }, StandardTestDispatcher(testScheduler))
+
+        repo.mark("Ada", "2026-10-26", present = true)
+
+        val row = dao.find("2026-10-26|Ada")!!
+        assertEquals(SyncState.PENDING_UPLOAD, row.syncState)
+        assertEquals(1, scheduler.calls)
+    }
+
+    @Test
+    fun failed_upload_keeps_rows_pending() = runTest {
+        api.failUploads = true
+        val repo = OfflineFirstAttendanceRepository(dao, api, scheduler, { 1_000 }, StandardTestDispatcher(testScheduler))
+        repo.mark("Ada", "2026-10-26", true)
+
+        val result = repo.syncNow()
+
+        assertTrue(result.isFailure)
+        assertEquals(SyncState.PENDING_UPLOAD, dao.find("2026-10-26|Ada")!!.syncState)
+    }
+
+    @Test
+    fun newer_local_edit_survives_older_remote_copy() = runTest {
+        dao.upsert(AttendanceEntity("d|Ada", "Ada", "d", true, updatedAtMillis = 2_000, syncState = SyncState.PENDING_UPLOAD))
+        api.remote = listOf(AttendanceDto("d|Ada", "Ada", "d", present = false, updatedAtMillis = 1_000))
+        val repo = OfflineFirstAttendanceRepository(dao, api, scheduler, { 3_000 }, StandardTestDispatcher(testScheduler))
+
+        repo.syncNow()
+
+        assertTrue(dao.find("d|Ada")!!.present)
+    }
+}</code></pre></div></div>
+<p class="v2-p">To test the worker itself, the <code>androidx.work:work-testing</code> artifact provides <code>TestListenableWorkerBuilder</code>, which runs <code>doWork</code> directly and lets you assert on <code>Result.success()</code>, <code>Result.retry()</code> and <code>Result.failure()</code>. On a device, <code>adb shell cmd connectivity airplane-mode enable</code> (on supported versions) or the emulator's network controls let you try the full flow: mark attendance offline, watch the banner, turn the network on, and watch the pending count drop to zero.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Testing Sync</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Why client-generated ids?</strong></p>
+<p class="v2-p">A teammate suggests letting the server assign ids and waiting for the response before showing a new record. Give two problems with that in an offline-first app.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(1) With no connection there is no response, so the record cannot be created at all, which defeats offline-first. (2) Waiting for the network blocks the UI and makes the record appear late. Client-generated ids (UUIDs or deterministic keys) let the device create records immediately, and the server accepts them. Deterministic keys also make retries idempotent.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Pick a policy</strong></p>
+<p class="v2-p">For each, choose a conflict policy: (a) a class list maintained by the school office; (b) a teacher's personal notes on their own device and account; (c) a shared marks sheet edited by several teachers.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">(a) Server wins, because the office owns the data and devices should not overwrite it. (b) Client wins (or last write wins) since only one person edits it. (c) Field-level merge or server-assigned versions with "ask the user", because silent loss of a teacher's marks would be serious.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Find the race</strong></p>
+<p class="v2-p"><code>syncNow</code> reads pending rows, uploads them, then marks all those rows as synced. Describe a bug when the user edits a row during the upload and give the fix.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The edited row is overwritten as <code>SYNCED</code> after the upload, though the server only has the old version, so the new edit is never uploaded. Fix: mark a row synced only if its version (<code>updatedAtMillis</code> or a counter) is unchanged since it was read, using <code>UPDATE ... WHERE id = :id AND updatedAtMillis = :version</code>. Rows that changed stay <code>PENDING_UPLOAD</code> and go out in the next sync.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Reading from the network in the UI path.</strong> <em>Fix:</em> the UI reads only from the database.</p>
+<p class="v2-p"><strong>Mistake #2: Waiting for the server before showing a write.</strong> <em>Fix:</em> write locally first, then sync.</p>
+<p class="v2-p"><strong>Mistake #3: Server-assigned ids for offline-created records.</strong> <em>Fix:</em> use UUIDs or deterministic keys.</p>
+<p class="v2-p"><strong>Mistake #4: Non-idempotent uploads.</strong> <em>Fix:</em> upsert by id on the server.</p>
+<p class="v2-p"><strong>Mistake #5: Using a coroutine or service instead of WorkManager.</strong> <em>Fix:</em> use WorkManager with constraints.</p>
+<p class="v2-p"><strong>Mistake #6: Deleting local data when a refresh fails.</strong> <em>Fix:</em> change data only after success.</p>
+<p class="v2-p"><strong>Mistake #7: Marking rows synced after concurrent edits.</strong> <em>Fix:</em> compare versions.</p>
+<p class="v2-p"><strong>Mistake #8: Trusting device clocks completely.</strong> <em>Fix:</em> prefer server versions where loss matters.</p>
+<p class="v2-p"><strong>Mistake #9: Hiding sync state from users.</strong> <em>Fix:</em> show pending counts and clear wording.</p>
+<p class="v2-p"><strong>Mistake #10: Queuing a new job for every tap.</strong> <em>Fix:</em> unique work with <code>KEEP</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between a cache and an offline-first design?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A cache accelerates a network-driven app; in offline-first, the database is the complete source of truth the UI uses, and the network only syncs it.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why does <code>enqueueUniqueWork</code> with <code>KEEP</code> help?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It prevents duplicate queued syncs; one run uploads all pending rows.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is idempotence and why does sync need it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">An operation that gives the same result when repeated. Retries and re-uploads are normal, so the server must handle the same record twice safely.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Name two conflict policies and a risk of each.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Server wins (loses offline edits) and last write wins (clock errors can lose newer data); others include client wins and field-level merge.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Which WorkManager feature delays work until the network is available?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Constraints, specifically <code>setRequiredNetworkType(NetworkType.CONNECTED)</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/android-architecture" rel="noopener noreferrer">Modern Android App Architecture programme</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer/offline-first" rel="noopener noreferrer">Build an offline-first app</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer" rel="noopener noreferrer">Data layer</a></li>
+<li><a href="https://developer.android.com/topic/architecture/recommendations" rel="noopener noreferrer">Recommendations for Android architecture</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">RegisterSync: An Offline-First Attendance App</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build the attendance app from this lesson end to end, and prove it works with the network off.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Room database with <code>AttendanceEntity</code>, <code>SyncState</code> and the DAO (use Room 3 or 2.x consistently).</li>
+<li>An <code>AttendanceApi</code> (Retrofit, or a fake in-memory server with <code>delay</code>) with <code>upload</code> and <code>changesSince</code>.</li>
+<li><code>OfflineFirstAttendanceRepository</code> with <code>observeForDate</code>, <code>observePendingCount</code>, <code>mark</code> and <code>syncNow</code>.</li>
+<li>A <code>SyncWorker</code> with constraints, back-off and unique work, plus a worker factory.</li>
+<li>A last-write-wins merge that protects newer local edits, and version-checked <code>markSynced</code>.</li>
+<li>A <code>ConnectivityObserver</code> and a <code>SyncBanner</code> showing honest messages.</li>
+<li>A screen listing students for today with present/absent toggles.</li>
+<li>At least four tests: local write is pending, failed upload keeps pending, merge protects newer local edits, and concurrent edit during upload stays pending.</li>
+<li>A manual test script (written down) for airplane mode: mark five students offline, restart the app, go online, confirm the count reaches zero.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> implement tombstone deletes and show a "Retry" button for rows in <code>FAILED</code> state.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">Version-checked marking, used in <code>syncNow</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val pending = dao.pendingChanges()
+if (pending.isNotEmpty()) {
+    api.upload(pending.map { it.toDto() })
+    pending.forEach { dao.markSyncedIfUnchanged(it.id, it.updatedAtMillis) }
+}</code></pre></div></div>
+<p class="v2-p">A concurrency test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun edit_during_upload_stays_pending() = runTest {
+    val repo = OfflineFirstAttendanceRepository(dao, api, scheduler, { 1_000 }, StandardTestDispatcher(testScheduler))
+    repo.mark("Ada", "d", true)
+    api.onUpload = {
+        // simulate a new edit arriving while the upload is running
+        dao.upsert(dao.find("d|Ada")!!.copy(present = false, updatedAtMillis = 2_000, syncState = SyncState.PENDING_UPLOAD))
+    }
+
+    repo.syncNow()
+
+    val row = dao.find("d|Ada")!!
+    assertEquals(SyncState.PENDING_UPLOAD, row.syncState)
+    assertFalse(row.present)
+}</code></pre></div></div>
+<p class="v2-p">The manual airplane-mode script (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>1. Install, open, switch the phone to airplane mode.
+2. Mark 5 students present. Banner: "5 changes saved on this phone..."
+3. Force-stop and reopen the app. The 5 marks are still there.
+4. Switch airplane mode off. Banner: "Uploading 5 changes..."
+5. After a few seconds the banner disappears; pending count = 0.
+6. Check the (fake or real) server: 5 records present.</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 64 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-64-build-an-offline-first-app</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 64 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Offline-First</li><li>✅ Step-by-Step Build 1: The Running Example, &quot;RegisterSync&quot;</li><li>✅ Step-by-Step Build 2: Read Strategy</li><li>✅ Step-by-Step Build 3: Write Strategy (Queued Writes)</li><li>✅ Step-by-Step Build 4: Sync with WorkManager</li><li>✅ Step-by-Step Build 5: The Sync Algorithm</li><li>✅ Step-by-Step Build 6: Connectivity and Honest UI</li><li>✅ Step-by-Step Build 7: Testing Sync</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_63.html" class="ln-btn">&#8592; Lesson 63</a><a href="lesson_65.html" class="ln-btn primary">Lesson 65 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 64 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

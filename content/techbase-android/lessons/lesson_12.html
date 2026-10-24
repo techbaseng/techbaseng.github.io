@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 12: Function Types and Lambda Expressions — Techbase Android</title>
+</head>
+<body data-total="9" data-key="techbase_android_l12">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 12 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 12</div>
+      <h1>Function Types and Lambda Expressions</h1>
+      <div class="l-hero-sub">9 phases &nbsp;·&nbsp; Build: Fee Calculator</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 12</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Treat functions as values: function types, lambdas, trailing lambda syntax, it, and passing behaviour as an argument.</p></div><div class="wm"><span>📚 9 phases</span><span>🏗️ Fee Calculator</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 9</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome back! So far you have used functions the way most beginners do: you write one, you call it, it does its job. In this lesson we change how you <em>think</em> about functions. In Kotlin a function is not only something you call. It is also a <strong>value</strong>, a thing you can keep in a variable, hand to another function, or get back as a result. That one idea powers almost everything you will write in Jetpack Compose. Every <code>Button(onClick = { ... })</code> you will ever type is a function being passed as a value.</p>
+<p class="v2-p">Think of a market trader who sells phone credit. She does not only know <em>how</em> to sell credit. Sometimes she hands a customer a <strong>voucher</strong>: a small slip that says "when you reach the counter, do this". The voucher is not the action itself. It is the action written down so that it can be carried somewhere else and carried out later. A lambda is that voucher.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Write a <strong>function type</strong> such as <code>(Int, Int) -&gt; Int</code> and read it aloud.</li>
+<li>Store a function in a variable and call it.</li>
+<li>Write <strong>lambda expressions</strong>, including the shortcut <code>it</code> for a single parameter.</li>
+<li>Use <strong>trailing lambda syntax</strong>, the shape you see in nearly all Compose code.</li>
+<li>Write your own <strong>higher-order functions</strong> that accept or return functions.</li>
+<li>Pass an existing function by <strong>reference</strong> with <code>::</code>.</li>
+<li>Explain what a <strong>closure</strong> is and why lambdas can change outside variables.</li>
+<li>Declare <strong>nullable function types</strong> and call them safely.</li>
+<li>Solve a set of practice problems in the style of Google's <em>Practice: Kotlin Fundamentals</em>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson matches the <em>Use function types and lambda expressions in Kotlin</em> codelab and the <em>Practice: Kotlin Fundamentals</em> problem set in Unit 2, Pathway 1 of Google's official <strong>Android Basics with Compose</strong> course. We take the ideas more slowly, add more examples and write our own practice problems. The official pathway link is in the resources at the end.</p>
+</blockquote>
+<h3 class="v2-h3">Why this matters for Android</h3>
+<p class="v2-p">Open any Compose code in the next lessons and you will see things like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Button(onClick = { println("tapped") }) {
+    Text("Tap me")
+}</code></pre></div></div>
+<p class="v2-p">Two different lambdas are hiding in those four lines. If lambdas feel strange, Compose will feel like magic. If lambdas feel natural, Compose will feel like plain English. Spend the time here.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 9</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">You should be comfortable with the following. If any item feels shaky, revisit the lesson shown.</p>
+<h3 class="v2-h3">1. Functions, parameters and return types (lesson 08)</h3>
+<p class="v2-p">A function has a name, optional parameters and an optional return type:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun add(a: Int, b: Int): Int {
+    return a + b
+}</code></pre></div></div>
+<p class="v2-p">A <strong>single-expression function</strong> is the short form: <code>fun add(a: Int, b: Int) = a + b</code>. We will use both styles.</p>
+<h3 class="v2-h3">2. <code>Unit</code>: the "nothing useful" return type (lesson 08)</h3>
+<p class="v2-p">A function that does not return a useful value actually returns <code>Unit</code>. When you do not write a return type, Kotlin assumes <code>Unit</code>. You will see <code>Unit</code> inside function types in this lesson.</p>
+<h3 class="v2-h3">3. Variables, <code>val</code> and <code>var</code> (lesson 07)</h3>
+<p class="v2-p"><code>val</code> creates a label that cannot be pointed at something else. <code>var</code> creates one that can. Lambdas can capture both kinds, and we will see what that means later.</p>
+<h3 class="v2-h3">4. Conditionals with <code>if</code> and <code>when</code> (lesson 09)</h3>
+<p class="v2-p">You will use <code>if</code> as an expression and <code>when</code> with ranges in the practice set at the end. Both are covered in lesson 09.</p>
+<h3 class="v2-h3">5. Classes and objects (lesson 11)</h3>
+<p class="v2-p">The practice set contains two small classes. You need to know <code>class</code>, <code>val</code> properties and <code>open</code>/<code>override</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 9</div><div class="pt">Conceptual Understanding: Functions as Values</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The core idea</h3>
+<p class="v2-p">Look at these two lines:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val age = 24                          // a value of type Int
+val greet = { println("Hello!") }     // a value of type () -&gt; Unit</code></pre></div></div>
+<p class="v2-p">The first stores a number. The second stores <em>an action</em>. Notice that <code>println("Hello!")</code> did <strong>not</strong> run when <code>greet</code> was created. It is only written down. It runs when you ask for it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>greet()   // now it prints Hello!</code></pre></div></div>
+<p class="v2-p">Calling a function-valued variable looks exactly like calling an ordinary function: name, then parentheses.</p>
+<h3 class="v2-h3">How to read a function type</h3>
+<p class="v2-p">A <strong>function type</strong> describes the <em>shape</em> of a function: what goes in and what comes out. The pattern is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>(parameter types) -&gt; return type</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function type</th>
+<th>Read it as</th>
+<th>Example function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>() -&gt; Unit</code></td>
+<td>takes nothing, returns nothing useful</td>
+<td>prints a greeting</td>
+</tr>
+<tr>
+<td><code>(Int) -&gt; Int</code></td>
+<td>takes an Int, returns an Int</td>
+<td>doubles a number</td>
+</tr>
+<tr>
+<td><code>(Int, Int) -&gt; Int</code></td>
+<td>takes two Ints, returns an Int</td>
+<td>adds two numbers</td>
+</tr>
+<tr>
+<td><code>(String) -&gt; Boolean</code></td>
+<td>takes a String, returns true or false</td>
+<td>checks if a name is long</td>
+</tr>
+<tr>
+<td><code>(Double) -&gt; Double</code></td>
+<td>takes a Double, returns a Double</td>
+<td>converts a temperature</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The arrow <code>-&gt;</code> means "becomes". Two functions with the same type are interchangeable, the way two electric plugs of the same shape both fit the same socket. That is the whole reason function types exist: they let one piece of code say "I will accept <em>any</em> behaviour of this shape".</p>
+<h3 class="v2-h3">The three ways to produce a function value</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> 1. A lambda expression      { a: Int, b: Int -&gt; a + b }
+ 2. A function reference     ::add
+ 3. An anonymous function    fun(a: Int, b: Int): Int = a + b     (rare, you can skip it)</code></pre></div></div>
+<p class="v2-p">We will spend our time on the first two.</p>
+<h3 class="v2-h3">Anatomy of a lambda</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  {  a: Int,  b: Int  -&gt;  a + b  }
+  |  \_________/  |     \_____/  |
+  |   parameters  |      body    |
+  |               arrow          closing brace
+  opening brace</code></pre></div></div>
+<p class="v2-p">Key rules:</p>
+<ul class="v2-ul">
+<li>A lambda lives inside curly braces <code>{ }</code>.</li>
+<li>Parameters come first, separated by commas, then an arrow <code>-&gt;</code>.</li>
+<li>The <strong>last expression</strong> in the body is the lambda's result. There is no <code>return</code> keyword.</li>
+<li>If there are no parameters, you skip the arrow: <code>{ println("Hi") }</code>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Analogy:</strong> A normal function is a restaurant with a name over the door. A lambda is a street vendor with no sign: you do not need a name when you only use it once, right here.</p>
+<p class="v2-p"><strong>Think about it:</strong> If <code>{ a: Int, b: Int -&gt; a + b }</code> has the type <code>(Int, Int) -&gt; Int</code>, what do you think the type of <code>{ println("Hi") }</code> is? (It takes nothing and its last expression <code>println</code> returns <code>Unit</code>, so the type is <code>() -&gt; Unit</code>.)</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Functions as Values</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 9</div><div class="pt">Worked Examples: Function Types and Lambdas</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Run these in the Kotlin Playground at <code>play.kotlinlang.org</code> or in a scratch file in Android Studio (see lesson 06 for how).</p>
+<h3 class="v2-h3">Example 1: Storing a lambda in a variable</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val greet: () -&gt; Unit = { println("Welcome to Techbase!") }
+
+    greet()
+    greet()
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Welcome to Techbase!<br/>Welcome to Techbase!</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The variable <code>greet</code> has the declared type <code>() -&gt; Unit</code>. Writing the lambda did nothing visible. Each <code>greet()</code> ran the stored action once, so we see two lines.</p>
+<h3 class="v2-h3">Example 2: Parameters and a result</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val add: (Int, Int) -&gt; Int = { a, b -&gt; a + b }
+    val multiply = { a: Int, b: Int -&gt; a * b }
+
+    println(add(3, 4))
+    println(multiply(3, 4))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">7<br/>12</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> There are two ways to tell Kotlin the parameter types. In <code>add</code>, the variable has a declared type, so the lambda can leave out <code>Int</code> on <code>a</code> and <code>b</code> because Kotlin already knows them. In <code>multiply</code>, the variable has no declared type, so the lambda must name the parameter types itself. You need the type in <strong>one</strong> of the two places, never neither.</p>
+<h3 class="v2-h3">Example 3: The shortcut <code>it</code></h3>
+<p class="v2-p">When a lambda has <strong>exactly one parameter</strong>, you may leave out the parameter list and arrow and call the parameter <code>it</code>.</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val double: (Int) -&gt; Int = { it * 2 }
+    val isLong: (String) -&gt; Boolean = { it.length &gt; 5 }
+
+    println(double(21))
+    println(isLong("Ibadan"))
+    println(isLong("Lagos"))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">42<br/>true<br/>false</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>"Ibadan"</code> has six characters, which is more than five, so <code>true</code>. <code>"Lagos"</code> has five, which is not more than five, so <code>false</code>. Use <code>it</code> for short lambdas. If the body is long or confusing, give the parameter a proper name instead (<code>{ name -&gt; ... }</code>) so the reader knows what it is.</p>
+<h3 class="v2-h3">Example 4: A higher-order function</h3>
+<p class="v2-p">A <strong>higher-order function</strong> is a function that takes another function as a parameter, or returns one. Here is one that runs any "operation" on two numbers:</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun calculate(a: Int, b: Int, operation: (Int, Int) -&gt; Int): Int {
+    return operation(a, b)
+}
+
+fun main() {
+    val sum = calculate(10, 5, { x, y -&gt; x + y })
+    val difference = calculate(10, 5, { x, y -&gt; x - y })
+    println("Sum: $sum")
+    println("Difference: $difference")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Sum: 15<br/>Difference: 5</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>calculate</code> does not know whether it will add, subtract or do something else. The caller supplies the behaviour. This is the voucher idea: <code>calculate</code> is the counter, and each lambda is a different voucher presented there.</p>
+<h3 class="v2-h3">Example 5: Trailing lambda syntax</h3>
+<p class="v2-p">Kotlin has a rule that makes lambdas look much cleaner: <strong>if the last parameter of a function is a function, you may write the lambda outside the parentheses.</strong></p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun calculate(a: Int, b: Int, operation: (Int, Int) -&gt; Int): Int {
+    return operation(a, b)
+}
+
+fun main() {
+    val product = calculate(6, 7) { x, y -&gt; x * y }
+    println("Product: $product")
+
+    repeat(3) { round -&gt;
+        println("Round ${round + 1}")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Product: 42<br/>Round 1<br/>Round 2<br/>Round 3</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>calculate(6, 7) { x, y -&gt; x * y }</code> is exactly the same call as <code>calculate(6, 7, { x, y -&gt; x * y })</code>. The second form is the one you will see in all real code. <code>repeat</code> is a standard Kotlin function whose last parameter is a function; it runs that function the given number of times and passes in the counter, which starts at zero. If a function has <strong>only</strong> a lambda parameter, you may drop the parentheses completely: <code>run { println("Hi") }</code>.</p>
+<h3 class="v2-h3">Example 6: Function references with <code>::</code></h3>
+<p class="v2-p">If a normal named function already has the right shape, you do not need to wrap it in a lambda. Put <code>::</code> in front of its name.</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun isEven(n: Int): Boolean = n % 2 == 0
+
+fun countMatching(from: Int, to: Int, test: (Int) -&gt; Boolean): Int {
+    var count = 0
+    for (n in from..to) {
+        if (test(n)) count++
+    }
+    return count
+}
+
+fun main() {
+    println(countMatching(1, 10, ::isEven))
+    println(countMatching(1, 10) { it % 3 == 0 })
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">5<br/>3</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The numbers from 1 to 10 that are even are 2, 4, 6, 8 and 10, so five. The numbers divisible by 3 are 3, 6 and 9, so three. The first call passes a function <em>reference</em>, the second passes a lambda, and <code>countMatching</code> treats them identically.</p>
+<h3 class="v2-h3">Example 7: A function that returns a function</h3>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun makeMultiplier(factor: Int): (Int) -&gt; Int {
+    return { number -&gt; number * factor }
+}
+
+fun main() {
+    val triple = makeMultiplier(3)
+    val tenTimes = makeMultiplier(10)
+
+    println(triple(5))
+    println(tenTimes(5))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">15<br/>50</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>makeMultiplier(3)</code> hands back a brand-new function that remembers <code>factor</code> is 3. Think of a machine that builds custom calculators on demand.</p>
+<h3 class="v2-h3">Example 8: Closures: lambdas remember and change outside variables</h3>
+<p class="v2-p">A lambda can use variables from the code around it, even after that code has finished. This is called a <strong>closure</strong>.</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun makeCounter(): () -&gt; Int {
+    var count = 0
+    return {
+        count++
+        count
+    }
+}
+
+fun main() {
+    val counterA = makeCounter()
+    val counterB = makeCounter()
+
+    println(counterA())
+    println(counterA())
+    println(counterA())
+    println(counterB())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">1<br/>2<br/>3<br/>1</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Each call to <code>makeCounter()</code> creates its <strong>own</strong> <code>count</code> variable and a lambda that carries it along. <code>counterA</code> and <code>counterB</code> therefore count separately. The lambda's last expression is <code>count</code>, so that is what it returns. This idea matters in Compose: a click lambda often reads or changes a variable that lives outside it (lesson 17).</p>
+<h3 class="v2-h3">Example 9: Nullable function types</h3>
+<p class="v2-p">Sometimes a function parameter is optional, such as "what to do when the user taps, if anything". Wrap the type in parentheses and add <code>?</code>:</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun downloadFile(name: String, onFinished: (() -&gt; Unit)? = null) {
+    println("Downloading $name...")
+    onFinished?.invoke()
+}
+
+fun main() {
+    downloadFile("notes.pdf")
+    downloadFile("photo.jpg") { println("Saved to gallery!") }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Downloading notes.pdf...<br/>Downloading photo.jpg...<br/>Saved to gallery!</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The parentheses matter. <code>(() -&gt; Unit)?</code> means "maybe a function". Without the outer parentheses, <code>() -&gt; Unit?</code> would mean "a function that returns a nullable Unit", which is something else. To call a nullable function use <code>?.invoke()</code>: it calls the function if there is one and does nothing if there is not. The default value <code>null</code> lets callers skip the argument entirely.</p>
+<h3 class="v2-h3">Example 10: Returning from a lambda</h3>
+<p class="v2-p">A lambda has no <code>return</code> of its own. Its last expression is its result. If you need to leave early, use a <strong>labelled return</strong>, naming the function the lambda was passed to:</p>
+<p class="v2-p"><strong>Input (code):</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    repeat(5) { n -&gt;
+        if (n == 2) return@repeat   // skips the rest of THIS round only
+        println("n is $n")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">n is 0<br/>n is 1<br/>n is 3<br/>n is 4</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>return@repeat</code> ends only the current run of the lambda, a bit like <code>continue</code> in a loop. A bare <code>return</code> here would be a different thing (it would leave the whole <code>main</code>), so prefer the labelled form inside lambdas.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Function Types and Lambdas</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 9</div><div class="pt">Reading Lambdas in Real Compose Code</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">You have not built a Compose screen yet (lessons 15 to 17 do that), but you can already read this, and that is worth a moment:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun SaveButton(onSave: () -&gt; Unit) {
+    Button(onClick = onSave) {
+        Text("Save")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Read it like this:</p>
+<ul class="v2-ul">
+<li><code>onSave: () -&gt; Unit</code> is a parameter whose type is a function that takes nothing and returns nothing. The <em>caller</em> decides what saving means.</li>
+<li><code>Button(onClick = onSave)</code> hands that voucher to the button. The button does not know what saving is. It only knows to run the voucher when tapped.</li>
+<li>The block <code>{ Text("Save") }</code> after the parentheses is a <strong>trailing lambda</strong> too. It describes the button's content.</li>
+</ul>
+<p class="v2-p">Notice the naming habit: parameters that receive behaviour are usually named <code>onSomething</code> (<code>onClick</code>, <code>onSave</code>, <code>onFinished</code>). Follow it and your code will look like everyone else's.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading Lambdas in Real Compose Code</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 9</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk6"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: A discount machine</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Write a higher-order function and call it with a lambda.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Write <code>fun applyDiscount(price: Int, rule: (Int) -&gt; Int): Int</code> that returns <code>price - rule(price)</code>.</li>
+<li>In <code>main</code>, call it with a lambda that gives 10 percent off (the rule returns a tenth of the price).</li>
+<li>Call it again using trailing lambda syntax with a rule that always takes off a flat 200.</li>
+<li>Print both results with string templates for a price of 3000.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun applyDiscount(price: Int, rule: (Int) -&gt; Int): Int {
+    return price - rule(price)
+}
+
+fun main() {
+    val tenPercentOff = applyDiscount(3000, { it / 10 })
+    val flatOff = applyDiscount(3000) { 200 }
+
+    println("After 10% off: ₦$tenPercentOff")
+    println("After ₦200 off: ₦$flatOff")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">After 10% off: ₦2700<br/>After ₦200 off: ₦2800</p>
+</blockquote>
+<p class="v2-p"><strong>Why it works:</strong> <code>3000 / 10</code> is <code>300</code>, so <code>3000 - 300 = 2700</code>. The second lambda ignores its input and returns <code>200</code>. A lambda with one parameter that never uses <code>it</code> is allowed.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Build a function factory</strong></p>
+<p class="v2-p">Write <code>fun makeGreeter(greeting: String): (String) -&gt; String</code> that returns a function. The returned function takes a name and gives back the greeting followed by a comma, a space and the name. Create a Yoruba greeter with <code>"Bawo ni"</code> and an English one with <code>"Good morning"</code>, and call each with <code>"Ade"</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun makeGreeter(greeting: String): (String) -&gt; String {
+    return { name -&gt; "$greeting, $name" }
+}
+
+fun main() {
+    val yoruba = makeGreeter("Bawo ni")
+    val english = makeGreeter("Good morning")
+
+    println(yoruba("Ade"))
+    println(english("Ade"))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Bawo ni, Ade<br/>Good morning, Ade</p>
+</blockquote>
+<p class="v2-p">The returned lambda remembers <code>greeting</code> (a closure), so each greeter keeps its own greeting.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Run a callback only when it exists</strong></p>
+<p class="v2-p">Write <code>fun login(user: String, onSuccess: ((String) -&gt; Unit)? = null)</code>. It prints <code>Checking user...</code>, then, if a callback was given, calls it with the user's name. Call it once without a callback and once with a lambda that prints <code>Welcome back,</code> followed by the name.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun login(user: String, onSuccess: ((String) -&gt; Unit)? = null) {
+    println("Checking $user...")
+    onSuccess?.invoke(user)
+}
+
+fun main() {
+    login("tunde")
+    login("amaka") { name -&gt; println("Welcome back, $name") }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Checking tunde...<br/>Checking amaka...<br/>Welcome back, amaka</p>
+</blockquote>
+<p class="v2-p">The nullable function type is wrapped in parentheses, and <code>?.invoke(user)</code> safely does nothing when the callback is <code>null</code>.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">In the Playground, write a function <code>fun timeIt(label: String, action: () -&gt; Unit)</code> that prints <code>Starting &lt;label&gt;</code>, runs <code>action()</code>, then prints <code>Finished &lt;label&gt;</code>. Call it with a trailing lambda that prints three lines of your choice. Predict the exact output before you run it.</p></div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 9</div><div class="pt">Practice: Kotlin Fundamentals</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Google's official pathway closes with a practice set called <em>Practice: Kotlin Fundamentals</em>, where you solve small problems from scratch with no hand-holding. Below is our own set in the same spirit, covering conditionals, <code>when</code>, function types, classes, nullability and inheritance. Try each problem <strong>before</strong> revealing the solution. Struggling for ten minutes teaches more than reading the answer.</p>
+<h3 class="v2-h3">Problem 1: Notification summary</h3>
+<p class="v2-p">Write <code>fun printNotificationSummary(numberOfMessages: Int)</code>. If there are fewer than 100 messages, print <code>You have 12 notifications.</code> (with the real number). Otherwise print <code>Your phone is blowing up! You have 99+ notifications.</code> Call it with <code>0</code>, <code>7</code>, <code>99</code> and <code>100</code>.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun printNotificationSummary(numberOfMessages: Int) {
+    if (numberOfMessages &lt; 100) {
+        println("You have $numberOfMessages notifications.")
+    } else {
+        println("Your phone is blowing up! You have 99+ notifications.")
+    }
+}
+
+fun main() {
+    printNotificationSummary(0)
+    printNotificationSummary(7)
+    printNotificationSummary(99)
+    printNotificationSummary(100)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">You have 0 notifications.<br/>You have 7 notifications.<br/>You have 99 notifications.<br/>Your phone is blowing up! You have 99+ notifications.</p>
+</blockquote>
+<p class="v2-p">The boundary matters: <code>99 &lt; 100</code> is true, <code>100 &lt; 100</code> is false.</p></div>
+<h3 class="v2-h3">Problem 2: Cinema ticket price</h3>
+<p class="v2-p">Write <code>fun ticketPrice(age: Int, isMonday: Boolean): Int</code>. Rules: ages 0 to 12 pay 15; ages 13 to 60 pay 30, except on Monday when they pay 25; ages 61 to 100 pay 20; any other age is invalid and returns <code>-1</code>. Use <code>when</code> with ranges. Test with <code>(10, false)</code>, <code>(30, true)</code>, <code>(30, false)</code>, <code>(70, false)</code> and <code>(120, true)</code>.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun ticketPrice(age: Int, isMonday: Boolean): Int {
+    return when (age) {
+        in 0..12 -&gt; 15
+        in 13..60 -&gt; if (isMonday) 25 else 30
+        in 61..100 -&gt; 20
+        else -&gt; -1
+    }
+}
+
+fun main() {
+    println(ticketPrice(10, false))
+    println(ticketPrice(30, true))
+    println(ticketPrice(30, false))
+    println(ticketPrice(70, false))
+    println(ticketPrice(120, true))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">15<br/>25<br/>30<br/>20<br/>-1</p>
+</blockquote>
+<p class="v2-p"><code>if</code> is an expression here, so it produces the value for that branch of <code>when</code>.</p></div>
+<h3 class="v2-h3">Problem 3: Temperature converter (function types)</h3>
+<p class="v2-p">Create two function values: <code>celsiusToFahrenheit</code> of type <code>(Double) -&gt; Double</code> (multiply by 9, divide by 5, add 32) and <code>fahrenheitToCelsius</code> (subtract 32, multiply by 5, divide by 9). Write <code>fun show(label: String, value: Double, converter: (Double) -&gt; Double)</code> that prints the label, an equals sign and the converted value. Convert <code>0.0</code> and <code>100.0</code> from Celsius, and <code>50.0</code> from Fahrenheit.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun show(label: String, value: Double, converter: (Double) -&gt; Double) {
+    println("$label $value = ${converter(value)}")
+}
+
+fun main() {
+    val celsiusToFahrenheit: (Double) -&gt; Double = { it * 9 / 5 + 32 }
+    val fahrenheitToCelsius: (Double) -&gt; Double = { (it - 32) * 5 / 9 }
+
+    show("C to F:", 0.0, celsiusToFahrenheit)
+    show("C to F:", 100.0, celsiusToFahrenheit)
+    show("F to C:", 50.0, fahrenheitToCelsius)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">C to F: 0.0 = 32.0<br/>C to F: 100.0 = 212.0<br/>F to C: 50.0 = 10.0</p>
+</blockquote>
+<p class="v2-p">Working it out: <code>100 * 9 / 5 + 32 = 900 / 5 + 32 = 180 + 32 = 212</code>. And <code>(50 - 32) * 5 / 9 = 90 / 9 = 10</code>. These values divide exactly, so there are no long decimals.</p></div>
+<h3 class="v2-h3">Problem 4: Song class</h3>
+<p class="v2-p">Create a class <code>Song</code> with properties <code>title</code>, <code>artist</code>, <code>yearPublished</code> and <code>playCount</code>. Add a computed property <code>isPopular</code> that is <code>true</code> when <code>playCount</code> is 1000 or more, and a function <code>description()</code> returning <code>"&lt;title&gt;, performed by &lt;artist&gt;, was released in &lt;year&gt;."</code>. Make a song and print whether it is popular and its description.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 4 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Song(
+    val title: String,
+    val artist: String,
+    val yearPublished: Int,
+    val playCount: Int
+) {
+    val isPopular: Boolean
+        get() = playCount &gt;= 1000
+
+    fun description(): String {
+        return "$title, performed by $artist, was released in $yearPublished."
+    }
+}
+
+fun main() {
+    val song = Song("Ojuelegba", "Wizkid", 2014, 5000)
+    println("Popular: ${song.isPopular}")
+    println(song.description())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Popular: true<br/>Ojuelegba, performed by Wizkid, was released in 2014.</p>
+</blockquote>
+<p class="v2-p"><code>isPopular</code> has a custom getter, so it is recalculated every time you read it and always matches <code>playCount</code>.</p></div>
+<h3 class="v2-h3">Problem 5: Profile with nullable values</h3>
+<p class="v2-p">Create a class <code>Person(val name: String, val age: Int, val hobby: String?, val referrer: Person?)</code>. Add <code>fun showProfile()</code> that prints the name and age, then either <code>Likes to &lt;hobby&gt;.</code> or <code>Doesn't have a hobby.</code>, then either <code>Has a referrer named &lt;name&gt;.</code> or <code>Doesn't have a referrer.</code> Create one person with no referrer and a second whose referrer is the first.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 5 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Person(
+    val name: String,
+    val age: Int,
+    val hobby: String?,
+    val referrer: Person?
+) {
+    fun showProfile() {
+        println("Name: $name")
+        println("Age: $age")
+        if (hobby != null) {
+            println("Likes to $hobby.")
+        } else {
+            println("Doesn't have a hobby.")
+        }
+        if (referrer != null) {
+            println("Has a referrer named ${referrer.name}.")
+        } else {
+            println("Doesn't have a referrer.")
+        }
+    }
+}
+
+fun main() {
+    val amaka = Person("Amaka", 28, "football", null)
+    val tunde = Person("Tunde", 21, null, amaka)
+
+    amaka.showProfile()
+    println("---")
+    tunde.showProfile()
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Name: Amaka<br/>Age: 28<br/>Likes to football.<br/>Doesn't have a referrer.</p>
+<hr class="v2-hr"/>
+<p class="v2-p">Name: Tunde<br/>Age: 21<br/>Doesn't have a hobby.<br/>Has a referrer named Amaka.</p>
+</blockquote>
+<p class="v2-p">Because <code>hobby</code> and <code>referrer</code> are <code>val</code> properties declared in the same module, Kotlin can smart-cast them to non-null inside the <code>if</code> branches (lesson 10).</p></div>
+<h3 class="v2-h3">Problem 6: Foldable phone (inheritance)</h3>
+<p class="v2-p">Create <code>open class Phone(var isScreenLightOn: Boolean = false)</code> with <code>open fun switchOn()</code>, <code>fun switchOff()</code> and <code>fun checkPhoneScreenLight()</code> that prints <code>The phone screen's light is on.</code> or <code>...is off.</code>. Then create <code>class FoldablePhone(var isFolded: Boolean = true) : Phone()</code> that overrides <code>switchOn()</code> so the screen only lights up when the phone is <strong>not</strong> folded, and has <code>fold()</code> and <code>unfold()</code>. Test: switch on while folded, check, unfold, switch on, check.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 6 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>open class Phone(var isScreenLightOn: Boolean = false) {
+    open fun switchOn() {
+        isScreenLightOn = true
+    }
+
+    fun switchOff() {
+        isScreenLightOn = false
+    }
+
+    fun checkPhoneScreenLight() {
+        val state = if (isScreenLightOn) "on" else "off"
+        println("The phone screen's light is $state.")
+    }
+}
+
+class FoldablePhone(var isFolded: Boolean = true) : Phone() {
+    override fun switchOn() {
+        if (!isFolded) {
+            isScreenLightOn = true
+        }
+    }
+
+    fun fold() {
+        isFolded = true
+    }
+
+    fun unfold() {
+        isFolded = false
+    }
+}
+
+fun main() {
+    val phone = FoldablePhone()
+    phone.switchOn()
+    phone.checkPhoneScreenLight()
+    phone.unfold()
+    phone.switchOn()
+    phone.checkPhoneScreenLight()
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">The phone screen's light is off.<br/>The phone screen's light is on.</p>
+</blockquote>
+<p class="v2-p">A new <code>FoldablePhone</code> starts folded, so the first <code>switchOn()</code> does nothing. After <code>unfold()</code> the override lets the light turn on.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Practice: Kotlin Fundamentals</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 9</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting the parentheses when calling a stored function.</strong> <em>The wrong code:</em> <code>val greet = { println("Hi") }</code> then <code>greet</code>. <em>The problem:</em> this only mentions the variable, so nothing runs (Android Studio may even warn that the expression is unused). <em>The fix:</em> <code>greet()</code>.</p>
+<p class="v2-p"><strong>Mistake #2: No type anywhere in a lambda.</strong> <em>The wrong code:</em> <code>val add = { a, b -&gt; a + b }</code>. <em>The problem:</em> Kotlin cannot work out what <code>a</code> and <code>b</code> are. <em>The fix:</em> give types in the lambda, <code>{ a: Int, b: Int -&gt; a + b }</code>, or on the variable, <code>val add: (Int, Int) -&gt; Int = { a, b -&gt; a + b }</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Missing parentheses around a nullable function type.</strong> <em>The wrong code:</em> <code>onDone: () -&gt; Unit? = null</code>. <em>The problem:</em> that is a function that returns <code>Unit?</code>, not an optional function, and <code>null</code> is not a legal default. <em>The fix:</em> <code>onDone: (() -&gt; Unit)? = null</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Using <code>it</code> when there are two or more parameters.</strong> <em>The wrong code:</em> <code>calculate(1, 2) { it + it }</code> for a <code>(Int, Int) -&gt; Int</code> function. <em>The fix:</em> <code>it</code> exists only for a single parameter. Name both: <code>{ a, b -&gt; a + b }</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Writing <code>return</code> inside a lambda.</strong> <em>The wrong code:</em> <code>val double: (Int) -&gt; Int = { return it * 2 }</code>. <em>The problem:</em> this is a compile error because a bare <code>return</code> is not allowed there. <em>The fix:</em> just write <code>{ it * 2 }</code>, or use a label like <code>return@repeat</code> when leaving early from a lambda passed to a function.</p>
+<p class="v2-p"><strong>Mistake #6: Expecting a lambda's body to run when it is created.</strong> <em>The wrong code:</em> <code>val timer = { println("Started") }</code> and expecting output. <em>The fix:</em> a lambda is a stored action. Nothing runs until you call it.</p>
+<p class="v2-p"><strong>Mistake #7: A trailing lambda placed before other arguments.</strong> <em>The wrong code:</em> <code>calculate { x, y -&gt; x + y }(4, 5)</code>. <em>The fix:</em> the lambda goes last: <code>calculate(4, 5) { x, y -&gt; x + y }</code>. Only the <em>final</em> parameter can be moved outside the parentheses.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 9</div><div class="pt">Knowledge Check</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What does the type <code>(String, Int) -&gt; Boolean</code> describe?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A function that takes a <code>String</code> and an <code>Int</code> and returns a <code>Boolean</code>.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is a higher-order function?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A function that accepts another function as a parameter, returns a function, or both. Examples in this lesson: <code>calculate</code>, <code>countMatching</code> and <code>makeMultiplier</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the value of <code>val f = { n: Int -&gt; n + 1 }</code> then <code>f(f(5))</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>7</code>. The inner call gives <code>6</code>, and the outer call adds one more.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Rewrite <code>calculate(2, 3, { a, b -&gt; a + b })</code> using trailing lambda syntax.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>calculate(2, 3) { a, b -&gt; a + b }</code>. Because the lambda is the last parameter, it can sit outside the parentheses.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why do we write <code>onClick?.invoke()</code> instead of <code>onClick()</code> when <code>onClick</code> is of type <code>(() -&gt; Unit)?</code></p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Because the function might be <code>null</code>. <code>?.invoke()</code> calls it only when it exists and safely does nothing otherwise. A plain <code>onClick()</code> on a nullable type would not compile.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-2-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 2, Pathway 1: Kotlin fundamentals</a>: the official pathway this lesson is based on.</li>
+<li><a href="https://kotlinlang.org/docs/lambdas.html" rel="noopener noreferrer">Kotlin docs: Higher-order functions and lambdas</a>: the complete reference, including function references and closures.</li>
+<li><a href="https://kotlinlang.org/docs/functions.html" rel="noopener noreferrer">Kotlin docs: Functions</a>: a refresher on parameters, defaults and named arguments.</li>
+<li><a href="https://play.kotlinlang.org/" rel="noopener noreferrer">Kotlin Playground</a>: run every example in this lesson in your browser.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Fee Calculator</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Mobile money services charge fees in different ways: a flat fee, a percentage, or tiers based on the amount. Build a small Kotlin program that treats each fee rule as a <em>function value</em> and compares them for different transfer amounts. This is a real use of higher-order functions: one printing function, many interchangeable rules.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create three function values of type <code>(Int) -&gt; Int</code> (amount in naira in, fee out): a <strong>flat</strong> rule that always charges 50; a <strong>percent</strong> rule that charges 2 percent of the amount; and a <strong>tiered</strong> rule using <code>when</code> (amounts up to 5000 pay 10, amounts up to 50000 pay 25, anything larger pays 50).</li>
+<li>Write <code>fun printQuote(label: String, amount: Int, rule: (Int) -&gt; Int)</code> that prints <code>&lt;label&gt;: fee ₦&lt;fee&gt;, total ₦&lt;amount + fee&gt;</code>.</li>
+<li>Print quotes for transfers of 20000 and 100000 using each of the three rules.</li>
+<li>Write <code>fun capped(limit: Int, rule: (Int) -&gt; Int): (Int) -&gt; Int</code> that returns a new rule whose fee never exceeds <code>limit</code>.</li>
+<li>Print quotes for both amounts using <code>capped(100, percent)</code>.</li>
+<li>Add a comment at the top naming the program.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add an optional parameter <code>onExpensive: ((Int) -&gt; Unit)? = null</code> to <code>printQuote</code> that is called with the fee whenever the fee is above 1000. Pass a lambda that prints a warning.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Main.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Fee Calculator: comparing transfer fee rules as function values
+
+fun printQuote(
+    label: String,
+    amount: Int,
+    rule: (Int) -&gt; Int,
+    onExpensive: ((Int) -&gt; Unit)? = null
+) {
+    val fee = rule(amount)
+    println("$label: fee ₦$fee, total ₦${amount + fee}")
+    if (fee &gt; 1000) {
+        onExpensive?.invoke(fee)
+    }
+}
+
+fun capped(limit: Int, rule: (Int) -&gt; Int): (Int) -&gt; Int {
+    return { amount -&gt; minOf(limit, rule(amount)) }
+}
+
+fun main() {
+    val flat: (Int) -&gt; Int = { 50 }
+    val percent: (Int) -&gt; Int = { amount -&gt; amount * 2 / 100 }
+    val tiered: (Int) -&gt; Int = { amount -&gt;
+        when {
+            amount &lt;= 5000 -&gt; 10
+            amount &lt;= 50000 -&gt; 25
+            else -&gt; 50
+        }
+    }
+
+    val warn: (Int) -&gt; Unit = { fee -&gt; println("  Warning: a fee of ₦$fee is high!") }
+
+    for (amount in listOf(20000, 100000)) {
+        println("Transfer of ₦$amount")
+        printQuote("Flat", amount, flat)
+        printQuote("Percent", amount, percent, warn)
+        printQuote("Tiered", amount, tiered)
+        printQuote("Capped percent", amount, capped(100, percent))
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Transfer of ₦20000<br/>Flat: fee ₦50, total ₦20050<br/>Percent: fee ₦400, total ₦20400<br/>Tiered: fee ₦25, total ₦20025<br/>Capped percent: fee ₦100, total ₦20100<br/>Transfer of ₦100000<br/>Flat: fee ₦50, total ₦100050<br/>Percent: fee ₦2000, total ₦102000<br/>  Warning: a fee of ₦2000 is high!<br/>Tiered: fee ₦50, total ₦100050<br/>Capped percent: fee ₦100, total ₦100100</p>
+</blockquote>
+<p class="v2-p"><strong>How it works:</strong> <code>20000 * 2 / 100</code> is <code>400</code>, which is below the warning threshold of 1000, so no warning appears for the first transfer. For <code>100000</code> the percent fee is <code>2000</code>, so the warning fires after that quote. The <code>for</code> loop over <code>listOf(...)</code> is a small preview of collections, which lesson 14 covers properly. <code>capped</code> returns a brand-new rule that remembers <code>limit</code> and the original <code>rule</code>, a closure at work.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 12 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-12-function-types-and-lambda-expressions</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 12 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Functions as Values</li><li>✅ Worked Examples: Function Types and Lambdas</li><li>✅ Reading Lambdas in Real Compose Code</li><li>✅ Guided Practice Exercises</li><li>✅ Practice: Kotlin Fundamentals</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_11.html" class="ln-btn">&#8592; Lesson 11</a><a href="lesson_13.html" class="ln-btn primary">Lesson 13 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 12 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

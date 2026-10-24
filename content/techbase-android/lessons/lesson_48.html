@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 48: Testing and Troubleshooting Accessibility — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l48">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 48 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 48</div>
+      <h1>Testing and Troubleshooting Accessibility</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Accessibility Test Pack</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 48</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Test with TalkBack, Accessibility Scanner, automated checks and lint, then review your app from your users&#x27; perspective.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Accessibility Test Pack</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You can follow every rule in lesson 47 and still ship a barrier. A description can be present but meaningless, a reading order can be technically valid but confusing, and a contrast ratio can pass while the screen is still tiring to read. <strong>Accessibility has to be tested</strong>, with a mix of manual checks by a human and automated checks that catch the mechanical mistakes every time you build.</p>
+<p class="v2-p">This lesson covers <em>Test your app's accessibility</em>, <em>Testing for Accessibility</em> and the <em>Make your Android app accessible</em> quiz of the pathway (https://developer.android.com/courses/pathways/make-your-android-app-accessible), together with the accessibility-testing guidance at https://developer.android.com/guide/topics/ui/accessibility/testing.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Run a structured <strong>manual test</strong> with TalkBack, Switch Access, Voice Access, large text and grayscale.</li>
+<li>Use <strong>Accessibility Scanner</strong> and read its suggestions.</li>
+<li>Add <strong>automated accessibility checks</strong> to UI tests (for Views with Espresso, and for Compose).</li>
+<li>Use <strong>lint</strong> and Studio inspections to catch issues early.</li>
+<li>Write <strong>accessibility test cases</strong> with Compose test APIs: labels, roles, states, sizes.</li>
+<li><strong>Review your app from your users' perspective</strong>, and plan user testing with people with disabilities.</li>
+<li>Build an accessibility checklist for your team, and answer the pathway's quiz questions.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> automated tools find roughly the mechanical problems (a missing label, a small target, low contrast). Humans find the problems that matter most: a confusing order, a useless description, a task that takes 40 swipes. You need both.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Accessibility fundamentals and common problems</strong> (lesson 46).</li>
+<li><strong>Compose accessibility features</strong> (lesson 47).</li>
+<li><strong>Compose UI testing</strong> (lesson 45) and <strong>Espresso basics</strong> (lesson 20 for test folders).</li>
+<li><strong>Android Studio tools</strong> (lesson 44).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: A Layered Testing Strategy</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>   MANUAL (humans)                          AUTOMATED (machines)
+ +-------------------------------+      +--------------------------------------+
+ | 5. User testing with people   |      | 1. Lint + IDE inspections (build time)|
+ |    who use assistive tech     |      | 2. Unit tests: contrast, strings      |
+ | 4. Screen reader walkthrough  |      | 3. UI tests with accessibility checks |
+ | 3. Large text / display size  |      | 4. Accessibility Scanner (semi-auto)  |
+ +-------------------------------+      +--------------------------------------+
+        slow, rich, subjective                fast, repeatable, shallow</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Finds</th>
+<th>Misses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lint</td>
+<td>Missing <code>contentDescription</code> in XML, hard-coded text, small <code>minHeight</code></td>
+<td>Anything dynamic</td>
+</tr>
+<tr>
+<td>Unit tests</td>
+<td>Contrast of colour pairs, string quality</td>
+<td>Layout</td>
+</tr>
+<tr>
+<td>UI tests with checks</td>
+<td>Missing labels, small targets, low contrast on real rendered UI</td>
+<td>Meaning, order, usability</td>
+</tr>
+<tr>
+<td>Accessibility Scanner</td>
+<td>Similar to above on a running app, with screenshots</td>
+<td>Same limits</td>
+</tr>
+<tr>
+<td>TalkBack walkthrough</td>
+<td>Poor order, bad descriptions, missing announcements, focus traps</td>
+<td>Not repeatable at scale</td>
+</tr>
+<tr>
+<td>User testing</td>
+<td>Whether real people can complete real tasks</td>
+<td>Needs time and participants</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A common figure quoted in the industry is that automated tools can catch only a <strong>minority</strong> of possible accessibility issues, so never treat a green automated check as proof of accessibility.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: A Layered Testing Strategy</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: A Manual TalkBack Test Script</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">A good manual test is a <strong>script</strong>, not a feeling. For each main task in your app (say, "add an item to the order and pay"), do this:</p>
+<ol class="v2-ol">
+<li><strong>Set up:</strong> a real device or an emulator image with Play Services and TalkBack (from the Android Accessibility Suite). Turn TalkBack on, and set speech rate to a speed you can follow. Start from the first screen with the screen <strong>dimmed or turned off</strong> if possible (some devices have a <em>screen curtain</em> option in TalkBack settings so you cannot rely on sight).</li>
+<li><strong>Linear navigation:</strong> swipe right repeatedly from the top to the end of the screen. Listen to each stop. Ask:
+   - Does every stop make sense on its own? ("Button" alone is a failure.)
+   - Is the <strong>order</strong> logical? Does it match the visual order?
+   - Is anything missing that you can see? Is anything announced that you cannot see?
+   - Are there <strong>too many stops</strong> (every word in a card is its own stop)?</li>
+<li><strong>Explore by touch:</strong> drag a finger over the screen. Does the element under your finger match what you hear?</li>
+<li><strong>Activate</strong> each control with a double tap. Does the result get announced (focus moves sensibly, a message is spoken)?</li>
+<li><strong>Forms:</strong> is each field announced with its label, hint and error? After a validation error, is the error announced and is focus placed on the problem field?</li>
+<li><strong>Dialogs, menus, bottom sheets:</strong> does focus move <em>into</em> them, stay inside while open, and return to the trigger on close?</li>
+<li><strong>Dynamic content:</strong> a toast, snackbar or loading finishing: does the user learn about it?</li>
+<li><strong>Headings and landmarks:</strong> use TalkBack's <strong>headings</strong> navigation mode (or reading controls) to jump between headings. If it says "no headings", mark them.</li>
+<li><strong>Lists:</strong> are item positions announced ("item 3 of 20")? Does a long list let you move quickly?</li>
+<li><strong>Time:</strong> is any step timed with no way to extend?</li>
+</ol>
+<p class="v2-p">Then repeat a lighter test with:</p>
+<ul class="v2-ul">
+<li><strong>Switch Access</strong> (or a keyboard connected over USB or Bluetooth: Tab and arrow keys should move focus, Enter activates): can you reach and operate everything? Is the focus indicator visible?</li>
+<li><strong>Voice Access</strong>: say "Show labels" or "Show numbers", then try to tap controls by name. Controls whose visible text and accessible name differ ("Pay now" shown, "Submit" announced) are hard to say; keep them the same.</li>
+<li><strong>Largest font and display size</strong>: any clipping, overlap or hidden buttons? Landscape too.</li>
+<li><strong>Grayscale and high-contrast text</strong>: can you still tell states apart?</li>
+<li><strong>Remove animations</strong>: does everything still work?</li>
+</ul>
+<p class="v2-p">Record every issue as a bug with: screen, step, expected, actual, assistive technology used and severity. Use the blocker/major/minor scale from lesson 46.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: A Manual TalkBack Test Script</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Accessibility Scanner</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><strong>Accessibility Scanner</strong> is a free app from Google (install it from the Play Store, then enable it in Settings → Accessibility). Once enabled, a floating <strong>check-mark button</strong> appears over every app.</p>
+<ol class="v2-ol">
+<li>Open your app on the screen you want to check.</li>
+<li>Tap the floating button, then the tick. The scanner takes a snapshot.</li>
+<li>It highlights elements and lists <strong>suggestions</strong>, typically:
+   - <strong>Touch target size</strong>: "Item's height is 32dp. Consider making the clickable area at least 48dp."
+   - <strong>Text contrast</strong>: "Increase the contrast ratio to at least 4.5:1."
+   - <strong>Item label</strong>: "This item may not have a label readable by screen readers."
+   - <strong>Image contrast</strong>, <strong>Item type</strong> and others such as editable items and duplicated clickable bounds, depending on the version.</li>
+<li>Each suggestion has a <strong>Learn more</strong> link and the element's details.</li>
+<li>Fix, rebuild, rescan.</li>
+</ol>
+<p class="v2-p">Limits: it checks what is <strong>on screen</strong> at the moment of the scan (so scan every state: empty, loading, error, filled), and it cannot judge whether a label is <em>good</em>. Save the scan results as part of the bug report.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Accessibility Scanner</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Automated Checks in Compose Tests</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Compose UI tests (lesson 45) can run <strong>accessibility checks</strong> over the rendered semantics and UI. The API for this has been evolving, and some functions carry an <code>@ExperimentalTestApi</code> annotation, so check the <em>Testing your Compose layout</em> and accessibility testing pages for the exact names in your Compose version. The general shape is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+
+class OrderScreenA11yTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    @OptIn(ExperimentalTestApi::class)
+    @Before
+    fun enableChecks() {
+        rule.enableAccessibilityChecks()   // runs the Accessibility Test Framework on each action
+    }
+
+    @Test
+    fun orderScreenHasNoCheckFailures() {
+        rule.setContent { OrderScreen() }
+        // Any action or assertion that triggers a check will fail the test with a clear message
+        rule.onRoot().assertExists()
+    }
+}</code></pre></div></div>
+<p class="v2-p">When checks are enabled, the framework runs Google's <strong>Accessibility Test Framework (ATF)</strong> checks (touch target size, label presence, contrast of text where measurable, duplicated clickable bounds, and more) against the real rendered tree and fails the test if a check is violated. If an API in this form is not available in your version, you can still write your own explicit tests, as in the next sections.</p>
+<h3 class="v2-h3">Write your own explicit accessibility assertions</h3>
+<p class="v2-p">Explicit tests encode <strong>decisions</strong> your team made, and they work on any Compose version.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.unit.dp
+import org.junit.Rule
+import org.junit.Test
+
+class OrderScreenSemanticsTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    @Test
+    fun deleteButtonIsLabelledAndBigEnough() {
+        rule.setContent { OrderScreen() }
+
+        rule.onNodeWithContentDescription("Delete Zobo")
+            .assertHasClickAction()
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+    }
+
+    @Test
+    fun payIsAButton() {
+        rule.setContent { OrderScreen() }
+
+        rule.onNodeWithText("Pay now").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>assertWidthIsAtLeast</code> and <code>assertHeightIsAtLeast</code> measure the node's size in dp: this is how you check the 48 dp rule in a test. <code>SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)</code> checks the role. Define small helper matchers when you repeat a check often:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+
+fun hasHeading() = SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading)
+fun hasLiveRegion() = SemanticsMatcher.keyIsDefined(SemanticsProperties.LiveRegion)
+fun hasStateDescription(text: String) =
+    SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, text)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun titleIsAHeading() {
+    rule.setContent { OrderScreen() }
+    rule.onNode(hasText("Your order") and hasHeading()).assertExists()
+}</code></pre></div></div>
+<h3 class="v2-h3">Test all the font sizes</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.Density
+import androidx.compose.material3.MaterialTheme
+import org.junit.Test
+
+@Test
+fun payButtonStillVisibleAtLargestFont() {
+    rule.setContent {
+        val base = LocalDensity.current
+        CompositionLocalProvider(LocalDensity provides Density(base.density, fontScale = 2f)) {
+            MaterialTheme { OrderScreen() }
+        }
+    }
+    rule.onNodeWithText("Pay now").assertIsDisplayed()
+}</code></pre></div></div>
+<h3 class="v2-h3">Unit-test your contrast</h3>
+<p class="v2-p">In lesson 47 you wrote <code>contrastRatio</code>. Put every custom colour pair of your design system into <strong>one test</strong>, so a designer's palette change that breaks accessibility fails the build:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ThemeContrastTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.accessdemo
+
+import androidx.compose.ui.graphics.Color
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class ThemeContrastTest {
+
+    private val pairs = mapOf(
+        "primary on primaryContainer" to (Color(0xFF00210D) to Color(0xFFA8F5B7)),
+        "onSurface on surface" to (Color(0xFF1A1C19) to Color(0xFFFCFDF7)),
+        "onError on error" to (Color(0xFFFFFFFF) to Color(0xFFBA1A1A))
+    )
+
+    @Test
+    fun allTextPairsMeetAA() {
+        pairs.forEach { (name, colours) -&gt;
+            val ratio = contrastRatio(colours.first, colours.second)
+            assertTrue("$name has contrast $ratio, needs 4.5", ratio &gt;= 4.5f)
+        }
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Automated Checks in Compose Tests</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: Automated Checks for Views and Espresso</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">If your app still has View screens (lesson 42), Espresso can run the same ATF checks. Add the dependency <code>androidx.test.espresso:espresso-accessibility</code> as <code>androidTestImplementation</code> (use the version that matches your Espresso version) and enable checks once:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AccessibilityChecksSetup.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import androidx.test.espresso.accessibility.AccessibilityChecks
+import org.junit.BeforeClass
+
+class AccessibleScreenTest {
+    companion object {
+        @JvmStatic
+        @BeforeClass
+        fun enableAccessibilityChecks() {
+            AccessibilityChecks.enable().setRunChecksFromRootView(true)
+        }
+    }
+    // Every ViewAction (click, typeText ...) now runs the checks on the views involved.
+}</code></pre></div></div>
+<p class="v2-p">With <code>setRunChecksFromRootView(true)</code> the checks run against the <strong>whole screen</strong>, not just the view you touched. When a check fails, the exception message names the view, the check and the problem. You can suppress a known issue deliberately with <code>setSuppressingResultMatcher</code>, but record why, and fix it later.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Automated Checks for Views and Espresso</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: Lint and Inspections</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Lint checks run on your source without launching the app:</p>
+<ul class="v2-ul">
+<li><strong>Run:</strong> <strong>Analyze → Inspect Code</strong> in Studio, or in a terminal: <code>./gradlew lint</code> (the HTML report is in <code>app/build/reports/lint-results-debug.html</code>).</li>
+<li>For <strong>Views</strong>, lint flags <code>ImageView</code> and <code>ImageButton</code> without <code>contentDescription</code> (<code>ContentDescription</code>), touch targets smaller than 48 dp (<code>TouchTargetSizeCheck</code>), editable text without labels (<code>LabelFor</code>), colour contrast issues (<code>TextContrastCheck</code>), and hard-coded strings.</li>
+<li>For <strong>Compose</strong>, lint has checks for common mistakes in modifiers and state, and some accessibility-related rules; the available checks vary by library version.</li>
+<li>Treat accessibility warnings as errors in CI by adding a lint configuration:</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    lint {
+        warningsAsErrors = false
+        error += setOf("ContentDescription", "LabelFor")
+        abortOnError = true
+    }
+}</code></pre></div></div>
+<p class="v2-p">The <code>error += setOf(...)</code> line raises the severity of those two checks so the build fails if they appear. Be careful with <code>warningsAsErrors = true</code>: it can fail builds on unrelated warnings.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Lint and Inspections</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: Review from Your Users&#x27; Perspective</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Tools check rules. People check <strong>reality</strong>. A practical review has four steps.</p>
+<h3 class="v2-h3">1. Write user stories with assistive technology</h3>
+<p class="v2-p">"As a blind student, I want to add my order and pay using TalkBack alone so that I do not need someone to help me." Write one per major task and per kind of need (screen reader, switch, voice, low vision, motor, hearing, cognitive).</p>
+<h3 class="v2-h3">2. Walk the stories</h3>
+<p class="v2-p">Do each task with only the assistive tech in question. Time it. If a sighted person needs 5 taps and a TalkBack user needs 40 swipes, the design needs <strong>shortcuts</strong> (headings, grouped items, fewer stops).</p>
+<h3 class="v2-h3">3. Check the content, not only the controls</h3>
+<ul class="v2-ul">
+<li><strong>Plain language.</strong> Short sentences, no jargon, one idea per instruction.</li>
+<li><strong>Errors that help:</strong> "Phone number must have 11 digits" is better than "Invalid input".</li>
+<li><strong>Consistency:</strong> the same icon and word always mean the same thing; navigation stays in the same place.</li>
+<li><strong>Forgiveness:</strong> confirmation before destructive actions; an undo.</li>
+<li><strong>No time pressure</strong> without a way to extend it.</li>
+<li><strong>No flashing</strong> more than three times per second.</li>
+<li><strong>Not only sound</strong> and not only colour.</li>
+</ul>
+<h3 class="v2-h3">4. Involve real users</h3>
+<p class="v2-p">Nothing replaces testing with people who use assistive technology daily. Reach out to local disability organisations, schools for the blind and deaf, or university disability services; offer fair payment or a clear benefit; explain what you will record; let them use their own device and settings; <strong>observe, do not coach</strong>; and treat every difficulty as a bug in the app, not a problem with the person. Always get consent and protect their privacy.</p>
+<p class="v2-p">Even without participants, you can invite team members to use a <strong>"day without a screen"</strong> or one-handed constraints for an hour, as a start (but this builds empathy and does not replace real user research).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Review from Your Users&#x27; Perspective</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 7: Troubleshooting Cookbook</div><div class="pc" id="chk10"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TalkBack says "Unlabelled" or just "Button"</td>
+<td>No <code>contentDescription</code> / text</td>
+<td>Add a purposeful description (lesson 47)</td>
+</tr>
+<tr>
+<td>TalkBack reads text twice</td>
+<td>Description and visible text both on same control</td>
+<td><code>contentDescription = null</code> on the icon</td>
+</tr>
+<tr>
+<td>Row requires 4 swipes</td>
+<td>Children not merged</td>
+<td><code>mergeDescendants = true</code></td>
+</tr>
+<tr>
+<td>A custom control not announced as button</td>
+<td>No role</td>
+<td><code>role = Role.Button</code> or standard component</td>
+</tr>
+<tr>
+<td>Switch announces nothing about state</td>
+<td>No <code>toggleable</code></td>
+<td><code>toggleable(role = Role.Switch)</code></td>
+</tr>
+<tr>
+<td>Error is never spoken</td>
+<td>Not a live region</td>
+<td><code>liveRegion = Polite</code></td>
+</tr>
+<tr>
+<td>Swipe-to-dismiss unusable</td>
+<td>Gesture-only</td>
+<td><code>customActions</code></td>
+</tr>
+<tr>
+<td>Text clipped at 200%</td>
+<td>Fixed height / <code>maxLines</code></td>
+<td><code>heightIn(min)</code>; allow wrap</td>
+</tr>
+<tr>
+<td>Tapping near an icon misses</td>
+<td>Touch area under 48 dp</td>
+<td><code>minimumInteractiveComponentSize()</code></td>
+</tr>
+<tr>
+<td>Focus jumps to the wrong place after closing a dialog</td>
+<td>Focus not restored</td>
+<td>Return focus to the trigger; use the standard dialog</td>
+</tr>
+<tr>
+<td>Order is wrong</td>
+<td>Overlays or floating elements</td>
+<td><code>isTraversalGroup</code>, <code>traversalIndex</code></td>
+</tr>
+<tr>
+<td>Colours fail in dark mode only</td>
+<td>Hard-coded or unpaired colours</td>
+<td>Role pairs, contrast unit test</td>
+</tr>
+<tr>
+<td>ATF check fails on a decorative element</td>
+<td>Decorative item clickable or described</td>
+<td>Remove click/description or use <code>invisibleToUser()</code></td>
+</tr>
+<tr>
+<td>Voice Access cannot select "Pay now"</td>
+<td>Spoken name differs from visible</td>
+<td>Make <code>contentDescription</code> match visible text</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Troubleshooting Cookbook</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Write a TalkBack test script</strong></p>
+<p class="v2-p">Write a short test script (ten steps) for the task "register a student" in the Class Register app. Include at least two checks on forms and two on dynamic announcements.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A model script: (1) Turn on TalkBack, open the app, swipe to the title and confirm it is announced as a heading. (2) Swipe to "Student name": confirm the label, its type (edit box) and hint are announced. (3) Double-tap, type "A", and check the keyboard works and characters are echoed. (4) Swipe away: confirm the validation error "At least 2 letters" is announced without needing to find it. (5) Fix the name; confirm the Save button changes from disabled ("dimmed") to enabled. (6) Double-tap Save. (7) Confirm that a confirmation is announced (snackbar or live region). (8) Confirm that the new student appears in the list and that its row is read as one item with name and present state. (9) Use the actions menu on the row; confirm "Delete" exists. (10) Repeat the flow at 200% font, and with Switch Access or a keyboard. Record device, TalkBack version and any deviations.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Turn a bug into a test</strong></p>
+<p class="v2-p">A bug report says "the Pay button is too small for some users". Write a Compose test that fails now and passes when fixed, and describe the fix.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun payButtonMeetsMinimumTouchTarget() {
+    rule.setContent { MaterialTheme { OrderScreen() } }
+    rule.onNodeWithText("Pay now")
+        .assertWidthIsAtLeast(48.dp)
+        .assertHeightIsAtLeast(48.dp)
+}</code></pre></div></div>
+<p class="v2-p">If the button was built as <code>Box(Modifier.size(40.dp).clickable { })</code> the test fails. The fix is to use a Material <code>Button</code> (which already respects <code>minimumInteractiveComponentSize</code>) or to apply <code>Modifier.minimumInteractiveComponentSize()</code> or <code>defaultMinSize(minHeight = 48.dp)</code> to the custom control. The test stays in the suite to stop a regression.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Choose the method</strong></p>
+<p class="v2-p">For each issue say which method finds it best: automated check, Accessibility Scanner, manual TalkBack, or user testing. (a) Missing <code>contentDescription</code> on an icon. (b) A label that says "Image" on every product. (c) Contrast failure on hint text. (d) A flow that takes 40 swipes. (e) Whether a person with a tremor can use the swipe-to-delete safely.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(a) Automated check, lint, or Scanner (mechanical). (b) Manual TalkBack: the label exists but is useless, which tools cannot judge. (c) Scanner or an automated contrast unit test. (d) Manual TalkBack walkthrough (and later user testing). (e) User testing with real participants, since it depends on individual motor ability and the design of the gesture.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Relying only on Accessibility Scanner.</strong> <em>Fix:</em> add a TalkBack script and automated tests.</p>
+<p class="v2-p"><strong>Mistake #2: Testing only one state.</strong> <em>Fix:</em> scan empty, loading, error and filled states.</p>
+<p class="v2-p"><strong>Mistake #3: Suppressing checks without a note.</strong> <em>Fix:</em> record the reason and a ticket to fix it.</p>
+<p class="v2-p"><strong>Mistake #4: Running TalkBack only in English with default speed.</strong> <em>Fix:</em> also test with your users' languages and a realistic speed.</p>
+<p class="v2-p"><strong>Mistake #5: Letting designers change colours without contrast tests.</strong> <em>Fix:</em> a palette unit test.</p>
+<p class="v2-p"><strong>Mistake #6: Testing with the developer's own phone settings only.</strong> <em>Fix:</em> test with large display size and font on a mid-range device.</p>
+<p class="v2-p"><strong>Mistake #7: "Fixed" without re-testing in assistive tech.</strong> <em>Fix:</em> re-run the script after each fix.</p>
+<p class="v2-p"><strong>Mistake #8: Recruiting no real users and calling it done.</strong> <em>Fix:</em> plan a session with real users before major releases.</p>
+<p class="v2-p"><strong>Mistake #9: Treating accessibility bugs as low priority polish.</strong> <em>Fix:</em> triage by who is blocked.</p>
+<p class="v2-p"><strong>Mistake #10: Not including accessibility in the definition of done.</strong> <em>Fix:</em> add the checklist to every feature.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p">These five questions mirror the style of the pathway's final quiz.</p>
+<p class="v2-p"><strong>Question 1.</strong> Which tool can scan a running app and suggest fixes for touch target size and contrast?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Accessibility Scanner.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why can automated checks not guarantee that an app is accessible?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">They test mechanical rules (a label exists, a target is big enough) but cannot judge whether labels are meaningful, whether the reading order makes sense, or whether real people can complete tasks. Manual and user testing are required.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> How can a Compose test check the 48 dp touch target rule?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">With <code>assertWidthIsAtLeast(48.dp)</code> and <code>assertHeightIsAtLeast(48.dp)</code> on the node, or with the built-in accessibility checks of the test rule.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What should you do after finding an accessibility bug with TalkBack?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Record the screen, steps, expected and actual behaviour, the assistive technology and severity; fix it; add an automated test where possible; and re-run the manual script.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why test with real users who use assistive technology?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Because they reveal usability barriers that rules and tools cannot, such as slow or confusing flows, unhelpful wording and gestures that are hard to perform, and they use the technology with skills and settings a developer lacks.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/make-your-android-app-accessible" rel="noopener noreferrer">Make your Android app accessible pathway</a></li>
+<li><a href="https://developer.android.com/guide/topics/ui/accessibility/testing" rel="noopener noreferrer">Testing your app's accessibility</a></li>
+<li><a href="https://developer.android.com/codelabs/starting-android-accessibility" rel="noopener noreferrer">Starting with Android accessibility codelab</a></li>
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-3-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 3 (accessibility content)</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Accessibility Test Pack</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Create a reusable <strong>accessibility test pack</strong> for the <code>OrderScreen</code> of lesson 47: a manual script, automated tests and a checklist you could hand to a team.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <strong>manual TalkBack script</strong> (a Markdown file) of at least ten steps for "change the quantity and pay".</li>
+<li>A Compose test class with at least <strong>six</strong> tests: label present and unique, 48 dp targets, role of Pay, heading present, error live region present when the limit is reached, and layout at font scale 2.0.</li>
+<li>A <strong>contrast test</strong> for every custom colour pair in your theme.</li>
+<li>Lint configured to treat <code>ContentDescription</code> as an error.</li>
+<li>A one-page <strong>checklist</strong> for your team's definition of done.</li>
+<li>An Accessibility Scanner run recorded in a short report: two findings you fixed.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> enable automated accessibility checks in your test rule (if your Compose version supports it), and make the build fail when an accessibility check fails.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">OrderScreenA11yPackTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.accessdemo
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNode
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+
+class OrderScreenA11yPackTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    private fun hasHeading() = SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading)
+    private fun hasLiveRegion() = SemanticsMatcher.keyIsDefined(SemanticsProperties.LiveRegion)
+
+    @Test
+    fun deleteLabelsAreUnique() {
+        rule.setContent { MaterialTheme { OrderScreen() } }
+        rule.onNodeWithContentDescription("Delete Zobo").assertExists()
+        rule.onNodeWithContentDescription("Delete Akara").assertExists()
+        assertEquals(1, rule.onAllNodesWithContentDescription("Delete Zobo").fetchSemanticsNodes().size)
+    }
+
+    @Test
+    fun deleteTargetsAre48dp() {
+        rule.setContent { MaterialTheme { OrderScreen() } }
+        rule.onNodeWithContentDescription("Delete Zobo")
+            .assertHasClickAction()
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+    }
+
+    @Test
+    fun payIsAButton() {
+        rule.setContent { MaterialTheme { OrderScreen() } }
+        rule.onNodeWithText("Pay now").assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
+        )
+    }
+
+    @Test
+    fun titleIsAHeading() {
+        rule.setContent { MaterialTheme { OrderScreen() } }
+        rule.onNode(hasText("Your order") and hasHeading()).assertExists()
+    }
+
+    @Test
+    fun limitErrorIsALiveRegion() {
+        rule.setContent { MaterialTheme { OrderScreen() } }   // Suya starts at the limit of 5
+        rule.onNode(hasText("Error: maximum 5 of one item") and hasLiveRegion()).assertExists()
+    }
+
+    @Test
+    fun payVisibleAtLargestFont() {
+        rule.setContent {
+            val base = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(base.density, fontScale = 2f)) {
+                MaterialTheme { OrderScreen() }
+            }
+        }
+        rule.onNodeWithText("Pay now").assertIsDisplayed()
+    }
+}</code></pre></div></div>
+<p class="v2-p">The manual script (<code>A11Y_SCRIPT.md</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># TalkBack script: change quantity and pay
+1. TalkBack on; open Order screen. Expect: "Your order, heading".
+2. Swipe right: first row. Expect a single stop: "Zobo, 1 x 250 naira, 1 of 5 allowed".
+3. Open TalkBack actions menu. Expect: Increase quantity, Decrease quantity.
+4. Choose Increase quantity. Expect updated state announced.
+5. Swipe to the delete button. Expect: "Delete Zobo, button".
+6. Raise Suya to 5. Expect the error to be announced politely, without moving focus.
+7. Swipe to Gift wrap. Expect "Gift wrap, switch, off"; double-tap; expect "on".
+8. Swipe to Pay now. Expect "Pay now, button". Double-tap.
+9. Repeat at font 200% and display size largest; nothing clipped.
+10. Repeat with a Bluetooth keyboard (Tab/Enter): focus visible and every action reachable.</code></pre></div></div>
+<p class="v2-p">The lint block:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    lint {
+        error += setOf("ContentDescription", "LabelFor", "TouchTargetSizeCheck")
+        abortOnError = true
+    }
+}</code></pre></div></div>
+<p class="v2-p">The team <strong>definition of done</strong> (checklist):</p>
+<ul class="v2-ul">
+<li>Labels: every informative image/icon has a purposeful, unique description; decorative ones are <code>null</code>.</li>
+<li>Targets: all interactive elements at least 48 dp.</li>
+<li>Contrast: 4.5:1 text, 3:1 large text and icons, tested in light and dark.</li>
+<li>Not by colour alone; no sound-only or flash-only information.</li>
+<li>Roles, states and headings correct; groups merged sensibly.</li>
+<li>Gestures have alternatives (visible control or custom actions).</li>
+<li>Large text (200%) and display size verified; scrolls, no clipping.</li>
+<li>TalkBack script run on every changed screen; Switch/keyboard pass for navigation changes.</li>
+<li>Automated tests and lint green; Accessibility Scanner clean for new screens.</li>
+<li>Real-user feedback gathered before major releases.</li>
+</ul><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 48 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-48-testing-and-troubleshooting-accessibility</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 48 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: A Layered Testing Strategy</li><li>✅ Step-by-Step Build 1: A Manual TalkBack Test Script</li><li>✅ Step-by-Step Build 2: Accessibility Scanner</li><li>✅ Step-by-Step Build 3: Automated Checks in Compose Tests</li><li>✅ Step-by-Step Build 4: Automated Checks for Views and Espresso</li><li>✅ Step-by-Step Build 5: Lint and Inspections</li><li>✅ Step-by-Step Build 6: Review from Your Users&#x27; Perspective</li><li>✅ Step-by-Step Build 7: Troubleshooting Cookbook</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_47.html" class="ln-btn">&#8592; Lesson 47</a><a href="lesson_49.html" class="ln-btn primary">Lesson 49 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 48 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

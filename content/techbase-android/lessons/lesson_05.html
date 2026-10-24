@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 05: Run on a Real Phone and Connect Your Devices — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l05">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 05 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 05</div>
+      <h1>Run on a Real Phone and Connect Your Devices</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Device Connection Journal</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 05</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Enable USB and wireless debugging, use adb, mirror your device and read your first Logcat messages.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Device Connection Journal</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">An emulator is a wonderful classroom, but your users do not hold emulators. They hold real phones with real cameras, real fingers, real batteries and real, unpredictable networks. Today you connect your own Android phone to Android Studio, run your app on it, learn the command-line tool that makes all of this possible (<code>adb</code>), and read your first messages in <strong>Logcat</strong>, the live diary your app writes while it runs.</p>
+<p class="v2-p">There is also a practical reason to love this lesson. A real phone uses almost none of your computer's RAM, so if your laptop struggles with the emulator from lesson 04, a phone plugged into a USB port is the best development device you can have. Many working Android developers in Lagos, Ibadan and Nairobi build most of their apps exactly this way.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Turn on <strong>Developer options</strong> and <strong>USB debugging</strong> on a phone.</li>
+<li>Connect a phone by USB and run your app on it from Android Studio.</li>
+<li>Pair and connect a phone over <strong>Wi-Fi</strong> using <strong>Wireless debugging</strong>.</li>
+<li>Explain what <code>adb</code> is, and use <code>adb devices</code>, <code>adb install</code>, <code>adb shell</code>, <code>adb push</code>, <code>adb pull</code> and <code>adb logcat</code>.</li>
+<li>Read what <code>device</code>, <code>offline</code> and <code>unauthorized</code> mean in <code>adb devices</code>.</li>
+<li>Mirror and control a physical phone from the <strong>Running Devices</strong> window.</li>
+<li>Write your own messages with <code>Log.d</code>, <code>Log.i</code>, <code>Log.w</code> and <code>Log.e</code>, and find them in <strong>Logcat</strong> with filters.</li>
+<li>Troubleshoot "my phone is not detected" step by step.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson covers the last codelab of Unit 1's <em>Set up Android Studio</em> pathway in Google's official <strong>Android Basics with Compose</strong> course, together with the emulator-connection ideas that go with it. Your course outline lists it as <em>How to connect your Android Emulator</em>; on the official pathway page at the time of writing the item is titled <em>How to connect your Android device</em> (item titles shift between releases, so match by content). We cover both ideas: how Studio connects to an emulator, and how it connects to a real phone. The pathway link is at the end.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. A buildable project and Android Studio's Run button</h3>
+<p class="v2-p">From lesson 03 you have a project that builds, and from lesson 04 you know that pressing <strong>Run</strong> builds, installs and launches the app on whichever device is selected in the toolbar's <strong>target device menu</strong>.</p>
+<h3 class="v2-h3">2. What a "debug" connection is</h3>
+<p class="v2-p">Normally a phone treats your computer as a stranger and refuses to accept apps or commands from it. <strong>USB debugging</strong> is a switch that says: "I trust computers I have approved to install apps on me and to read my app's diary." Because that is a lot of trust, the switch is hidden and off by default.</p>
+<h3 class="v2-h3">3. What <code>adb</code> is (and its three parts)</h3>
+<p class="v2-p"><strong>adb</strong> (Android Debug Bridge) is the tool Android Studio uses behind the scenes. It has three parts working together:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> YOUR COMPUTER                                         YOUR PHONE
+ +---------------------------+                  +--------------------+
+ |  adb client  (you type    |                  |   adbd  (daemon)   |
+ |  "adb devices")           |                  |   runs on device   |
+ |        |                  |                  +---------^----------+
+ |        v                  |   USB cable or Wi-Fi       |
+ |  adb server  (background) +----------------------------+
+ |  listens on TCP port 5037 |
+ +---------------------------+</code></pre></div></div>
+<ul class="v2-ul">
+<li>The <strong>client</strong> is the command you type (and the IDE uses).</li>
+<li>The <strong>server</strong> runs in the background on your computer and manages all device connections. The official documentation says it listens on TCP port 5037.</li>
+<li>The <strong>daemon</strong> (<code>adbd</code>) runs on each phone or emulator and does the work.</li>
+</ul>
+<p class="v2-p">If <code>adb</code> ever "gets stuck", restarting the server fixes most problems (<code>adb kill-server</code>, then <code>adb start-server</code>).</p>
+<h3 class="v2-h3">4. Where <code>adb</code> lives</h3>
+<p class="v2-p"><code>adb</code> is part of <strong>Android SDK Platform-Tools</strong>, which you installed through the SDK Manager in lesson 02. It sits in the SDK's <code>platform-tools</code> folder. You can find the SDK path in Android Studio under the SDK settings (<strong>Languages &amp; Frameworks &gt; Android SDK</strong>). Add that folder to your PATH, or run <code>adb</code> using its full path.</p>
+<h3 class="v2-h3">5. Your phone and a good cable</h3>
+<p class="v2-p">You need an Android phone and a USB cable that <strong>carries data</strong>. Some cheap cables only charge. If you have no phone to spare, you can still do the Logcat half of this lesson on the emulator, since Logcat works the same way on both.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: Emulator Versus Real Device</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Question</th>
+<th>Emulator</th>
+<th>Real phone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Computer RAM and disk</td>
+<td>Heavy</td>
+<td>Almost none</td>
+</tr>
+<tr>
+<td>Setup</td>
+<td>Create an AVD, download images</td>
+<td>Enable Developer options, plug in</td>
+</tr>
+<tr>
+<td>Realistic speed, touch, battery, camera</td>
+<td>Approximate</td>
+<td>Exact</td>
+</tr>
+<tr>
+<td>Different screen sizes and Android versions</td>
+<td>Easy: create more AVDs</td>
+<td>Limited to what you own</td>
+</tr>
+<tr>
+<td>Fake GPS, battery, calls</td>
+<td>Built in (lesson 04)</td>
+<td>Not available the same way</td>
+</tr>
+<tr>
+<td>Network behaviour</td>
+<td>Uses your computer's connection</td>
+<td>Real mobile and Wi-Fi networks</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Free</td>
+<td>You need a phone</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Professional developers use <strong>both</strong>: emulators for breadth (many screen sizes and Android versions) and real phones for truth.</p>
+<h3 class="v2-h3">How Studio sees every device the same way</h3>
+<p class="v2-p">Both an emulator and a phone appear to Android Studio as entries in the <strong>target device menu</strong>, because both are devices known to the <code>adb</code> server. In <code>adb devices</code> an emulator is named <code>emulator-5554</code> (the number is a port), and a phone shows a serial number. This is what "connecting your Android Emulator" really means: the emulator announces itself to the same adb server, and Studio picks it up from there.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>$ adb devices
+List of devices attached
+emulator-5554    device
+R58N1234ABC      device</code></pre></div></div>
+<p class="v2-p">Two devices at once is fine. Studio lets you pick which one receives the app, and when you use <code>adb</code> by hand you choose with <code>-e</code>, <code>-d</code> or <code>-s serial</code> (shown later).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Emulator Versus Real Device</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step: Prepare Your Phone</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Menu names on phones differ by maker and Android version. The official documentation says "on some devices, the screen may be named or located differently," so use the paths below as a guide and use the Settings search box if you cannot find an item.</p>
+<h3 class="v2-h3">Step 1: Turn on Developer options</h3>
+<ol class="v2-ol">
+<li>Open <strong>Settings</strong> and find <strong>About phone</strong>.</li>
+<li>Find <strong>Build number</strong>. On a Google Pixel it is under <strong>Settings &gt; About phone &gt; Build number</strong>. On recent Samsung Galaxy phones it is under <strong>Settings &gt; About phone &gt; Software information &gt; Build number</strong>. On other brands, search the About screen.</li>
+<li>Tap <strong>Build number</strong> seven times. You may be asked for your screen lock. The phone shows a message such as "You are now a developer!"</li>
+<li>Go back one screen. <strong>Developer options</strong> now appears in Settings (on recent Android versions it is usually under <strong>Settings &gt; System</strong>).</li>
+</ol>
+<h3 class="v2-h3">Step 2: Turn on USB debugging</h3>
+<p class="v2-p">Open <strong>Developer options</strong>, make sure the main switch at the top is on, and turn on <strong>USB debugging</strong>. According to the official guide, on Android 9 and above the path is <strong>Settings &gt; System &gt; Advanced &gt; Developer options &gt; USB debugging</strong>; some phones place it elsewhere.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Safety note:</strong> Developer options contain powerful switches. Only change the ones this lesson tells you to. When you are not developing, you can turn <strong>USB debugging</strong> off again. Never leave your phone connected to computers you do not trust.</p>
+</blockquote>
+<h3 class="v2-h3">Step 3: Prepare your computer</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Your computer</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>macOS or ChromeOS</strong></td>
+<td>Nothing extra.</td>
+</tr>
+<tr>
+<td><strong>Windows</strong></td>
+<td>Install an <strong>OEM USB driver</strong> for your phone's brand if the phone is not detected. The phone maker's website or Google's <em>Install OEM USB drivers</em> page links to them. Pixel phones use Google's driver. Many other phones work with Windows' built-in driver once USB debugging is on.</td>
+</tr>
+<tr>
+<td><strong>Ubuntu or other Linux</strong></td>
+<td>Add your user to the <code>plugdev</code> group (<code>sudo usermod -aG plugdev $LOGNAME</code>), log out and back in, and install the community udev rules package (<code>apt-get install android-sdk-platform-tools-common</code>).</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">On Linux, after logging back in, run <code>id</code> to confirm <code>plugdev</code> appears in your groups.</p>
+<h3 class="v2-h3">Step 4: Connect with USB</h3>
+<ol class="v2-ol">
+<li>Plug the phone into the computer with a data cable.</li>
+<li>Unlock the phone. On the phone, choose a USB mode if asked (file transfer is usually the safest choice; the exact wording varies).</li>
+<li>A prompt appears on the phone: <strong>Allow USB debugging?</strong> showing your computer's RSA key fingerprint. Tick <strong>Always allow from this computer</strong> (only on your own computer) and tap <strong>Allow</strong>.</li>
+</ol>
+<p class="v2-p">Debugging commands do not work until you unlock the phone and accept this prompt. This is the security check that stops strangers' computers from using your phone.</p>
+<h3 class="v2-h3">Step 5: Check that your computer sees it</h3>
+<p class="v2-p">Open the <strong>Terminal</strong> tool window in Android Studio (or any terminal in the <code>platform-tools</code> folder) and run:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb devices -l</code></pre></div></div>
+<p class="v2-p">A working result looks like this (serial and model differ):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">List of devices attached<br/>R58N1234ABC    device usb:1-2 product:a14 model:SM_A145F device:a14 transport_id:1</p>
+</blockquote>
+<p class="v2-p">The words after the serial number are the <strong>state</strong>. These are the ones you will meet:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>device</code></td>
+<td>Connected and ready. (It may still be booting.)</td>
+<td>You are ready to run.</td>
+</tr>
+<tr>
+<td><code>unauthorized</code></td>
+<td>The phone has not accepted this computer's key.</td>
+<td>Unlock the phone and tap <strong>Allow</strong> on the prompt. If none appears, unplug and replug, or revoke USB debugging authorisations in Developer options and try again.</td>
+</tr>
+<tr>
+<td><code>offline</code></td>
+<td>Listed but not responding.</td>
+<td>Unplug and replug, <code>adb kill-server</code>, check the cable and the phone's screen.</td>
+</tr>
+<tr>
+<td><em>(nothing listed)</em></td>
+<td>The computer does not see the phone at all.</td>
+<td>See troubleshooting below: cable, driver, USB mode, USB debugging.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Step 6: Run your app on the phone</h3>
+<p class="v2-p">Back in Android Studio, open the <strong>target device menu</strong> in the toolbar. Your phone appears with its model name. Select it and click <strong>Run</strong>. Android Studio builds the app, copies the APK to the phone through <code>adb</code>, installs it and launches it. Your app's icon is also now in the phone's app list.</p>
+<p class="v2-p">You should see the same screen as on the emulator, but on real glass. If your app needs a higher Android version than the phone has (its <code>minSdk</code> from lesson 03), the install fails with a message about the version; either lower <code>minSdk</code> carefully or use a newer device.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Prepare Your Phone</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Wireless Debugging Over Wi-Fi</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">No cable? Android 11 and higher can debug over Wi-Fi. Per the official guide you need: the computer and the phone on the <strong>same network</strong>, Android 11 or higher on the phone, and a recent Android Studio and Platform-Tools.</p>
+<h3 class="v2-h3">Pairing with Android Studio (the easy way)</h3>
+<ol class="v2-ol">
+<li>On the phone, open <strong>Developer options</strong> and turn on <strong>Wireless debugging</strong>. On recent versions this appears under <strong>Developer options &gt; Wireless debugging</strong> (the path varies by maker). You may be asked to allow it on this network.</li>
+<li>In Android Studio, choose <strong>Pair Devices Using Wi-Fi</strong> from the target device menu (or the pairing option in the <strong>Device Manager</strong>).</li>
+<li>Choose to pair with a <strong>QR code</strong> or with a <strong>six-digit pairing code</strong>. For the QR option, on the phone tap <strong>Wireless debugging &gt; Pair device with QR code</strong> and scan the code shown in Studio. For the code option, tap <strong>Pair device with pairing code</strong> on the phone and type the numbers into Studio.</li>
+<li>Once paired, the phone appears in the target device menu and you can run apps wirelessly.</li>
+</ol>
+<p class="v2-p">You pair only once per computer. Afterwards the device reconnects when both are on the same network.</p>
+<h3 class="v2-h3">Pairing with the command line</h3>
+<p class="v2-p">On the phone, open <strong>Wireless debugging</strong>, then <strong>Pair device with pairing code</strong>. Note the IP address, port and code shown. On the computer:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb pair 192.168.1.23:37215</code></pre></div></div>
+<p class="v2-p">(Use the address and port from your phone.) When asked, type the six-digit code. Success prints a message about successful pairing. Then check the connection:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb devices</code></pre></div></div>
+<p class="v2-p">The device may show a name such as <code>adb-R58N1234ABC-xxxxxx._adb-tls-connect._tcp</code> or an IP and port; the state should be <code>device</code>. If it is not listed, the phone's main Wireless debugging screen shows a different IP and port for <em>connecting</em> (not the pairing port). Run:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb connect 192.168.1.23:41567</code></pre></div></div>
+<p class="v2-p">with the connect address from that screen.</p>
+<h3 class="v2-h3">The older way (Android 10 and lower)</h3>
+<p class="v2-p">Start over USB first:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb tcpip 5555
+adb connect 192.168.1.23:5555
+adb devices</code></pre></div></div>
+<p class="v2-p">Find the phone's IP address in its Wi-Fi settings. After <code>adb tcpip</code> you may unplug the cable. If the connection drops, run <code>adb connect</code> again, or <code>adb kill-server</code> and start over.</p>
+<h3 class="v2-h3">Wireless cautions</h3>
+<ul class="v2-ul">
+<li><strong>Same network:</strong> many public and school Wi-Fi networks isolate devices from each other, which blocks pairing. A phone hotspot or a home router normally works.</li>
+<li><strong>Security:</strong> only use wireless debugging on networks you trust, and turn it off afterwards. To forget a computer, use <strong>Forget</strong> under paired devices in the phone's Wireless debugging screen, or use <strong>Revoke USB debugging authorizations</strong> in Developer options.</li>
+<li><strong>Data use:</strong> installing a debug APK over Wi-Fi uses your local network, not mobile data, but the phone may also be on mobile data. Prefer a local network.</li>
+<li>Official troubleshooting notes for newer versions mention checking <code>adb server-status</code> and mDNS settings when pairing does not discover the phone. If auto-discovery fails, the manual <code>adb pair</code> and <code>adb connect</code> commands above are the reliable fallback.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Wireless Debugging Over Wi-Fi</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Device Mirroring: Controlling the Phone from Your Screen</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Android Studio can show your phone's screen inside the <strong>Running Devices</strong> window, and you can click it with your mouse as if it were an emulator. According to the official guide, this lets you interact with the app, rotate the screen, fold or unfold a foldable phone and adjust volume from Studio. You can start or stop mirroring from <strong>Running Devices</strong> or from <strong>Device Manager</strong>, and configure it in the <strong>Device Mirroring</strong> settings (under <strong>Settings &gt; Tools</strong>). There is also an option to send the phone's audio to your computer.</p>
+<p class="v2-p">Why use it?</p>
+<ul class="v2-ul">
+<li>Present your app on a projector or in a screen share without pointing a camera at your phone.</li>
+<li>Type with your computer keyboard.</li>
+<li>Take screenshots and screen recordings straight into your computer.</li>
+</ul>
+<p class="v2-p">Cautions from the official documentation:</p>
+<ul class="v2-ul">
+<li>Some phones need an extra setting turned on (for example a second <strong>USB debugging (Security settings)</strong> switch on certain Xiaomi-family devices), then a restart.</li>
+<li>Some phones cannot encode video fast enough, which produces warnings such as too many video encoder errors in the logs.</li>
+<li><strong>Privacy:</strong> mirroring over <code>adb tcpip</code> and the channel between Studio and the adb server are not encrypted, so on an untrusted network the content could be intercepted. Do not mirror sensitive screens (banking, passwords) on public Wi-Fi.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Device Mirroring: Controlling the Phone from Your Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Troubleshooting: &quot;My Phone Is Not Detected&quot;</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Android Studio has a helper for this. Choose <strong>Tools &gt; Troubleshoot Device Connections</strong> (the name can move between versions). The <strong>Connection Assistant</strong> walks you through the steps and has a <strong>Restart ADB server</strong> button. If you prefer to do it yourself, follow this checklist in order:</p>
+<ol class="v2-ol">
+<li><strong>Cable.</strong> Try a different cable, ideally the one that came with the phone. Charge-only cables are the number one cause.</li>
+<li><strong>Port.</strong> Use a different USB port; avoid unpowered hubs.</li>
+<li><strong>Phone unlocked</strong> and showing the <strong>Allow USB debugging?</strong> prompt.</li>
+<li><strong>USB debugging</strong> is really on, and the main Developer options switch is on.</li>
+<li><strong>USB mode.</strong> Some phones need a file-transfer mode, not "charge only".</li>
+<li><strong>Driver (Windows).</strong> Install the maker's USB driver. Check <strong>Device Manager</strong> in Windows for an unknown device.</li>
+<li><strong>Linux permissions.</strong> Check <code>plugdev</code> and the udev rules, as shown above.</li>
+<li><strong>Restart adb:</strong></li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb kill-server
+adb start-server
+adb devices</code></pre></div></div>
+<ol class="v2-ol" start="9">
+<li><strong>Update</strong> Platform-Tools in the SDK Manager. The official guide suggests checking whether Studio can run an emulator; if it cannot, updating the SDK Platform-Tools is the first step.</li>
+<li><strong>Try a second device</strong> to find out whether the problem is the cable or the phone.</li>
+<li><strong>Revoke authorisations</strong> in Developer options and plug in again to get a fresh RSA prompt.</li>
+</ol><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Troubleshooting: &quot;My Phone Is Not Detected&quot;</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">The adb Toolbox</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">You do not need many adb commands, but these few are worth knowing.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb devices -l                      # list devices with details
+adb -d shell                        # open a shell on the only USB-connected phone
+adb -e shell                        # open a shell on the only emulator
+adb -s R58N1234ABC shell            # open a shell on a specific serial
+adb install app/build/outputs/apk/debug/app-debug.apk   # install an APK
+adb shell pm list packages | grep techbase              # find your app's package (macOS/Linux)
+adb shell pm uninstall com.techbase.hellotechbase       # uninstall your app
+adb push notes.txt /sdcard/notes.txt                    # copy a file to the phone
+adb pull /sdcard/notes.txt                              # copy a file from the phone</code></pre></div></div>
+<p class="v2-p">Notes:</p>
+<ul class="v2-ul">
+<li>When more than one device is connected, a plain command fails with <code>adb: more than one device/emulator</code>. Add <code>-d</code> (the only real device), <code>-e</code> (the only emulator) or <code>-s serial</code>.</li>
+<li>Inside <code>adb shell</code> you are inside the phone's small Linux-like command line. Type <code>exit</code> or press Ctrl+D to leave.</li>
+<li>On Windows <code>grep</code> is not available in the default command prompt; use <code>findstr techbase</code> instead, or use PowerShell's <code>Select-String</code>.</li>
+<li>You normally do not need <code>adb install</code>; Android Studio does it when you press <strong>Run</strong>. It is useful for sharing an APK with a tester, or for installing without Studio.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Sharing your app with a friend:</strong> the file at <code>app/build/outputs/apk/debug/app-debug.apk</code> (lesson 03) can be sent to a friend. They must allow installing from an unknown source on their phone. A debug APK is fine for testing, but it is not what you publish (lesson 49).</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The adb Toolbox</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Logcat: Your App&#x27;s Diary</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Android keeps a running system log. Everything that happens, from your own messages to system events to crashes, goes into it. <strong>Logcat</strong> is the tool that reads it. In Android Studio it is a window; on the command line it is <code>adb logcat</code>.</p>
+<p class="v2-p">Logcat is the single most useful tool for finding out why something does not work, which is why lesson 18 (Debugging with Android Studio) and lesson 44 (Android Studio Power Tools) return to it. Today is your first look.</p>
+<h3 class="v2-h3">Open Logcat</h3>
+<p class="v2-p">Run your app on the emulator or phone, then choose <strong>View &gt; Tool Windows &gt; Logcat</strong>. Messages scroll by quickly. Scrolling up pauses the automatic scrolling; the <strong>Scroll to the End</strong> button resumes it. The toolbar also has buttons to clear, pause and restart the log.</p>
+<h3 class="v2-h3">Anatomy of one log line</h3>
+<p class="v2-p">A line looks like this (columns can be turned on or off in the view settings):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>2026-10-18 10:15:32.123  4120-4120  LogLab   com.techbase.hellotechbase   D  Button tapped, count = 1</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>2026-10-18 10:15:32.123</code></td>
+<td>Date and time.</td>
+</tr>
+<tr>
+<td><code>4120-4120</code></td>
+<td>Process ID and thread ID.</td>
+</tr>
+<tr>
+<td><code>LogLab</code></td>
+<td>The <strong>tag</strong>: a label you choose, to find your own messages.</td>
+</tr>
+<tr>
+<td><code>com.techbase.hellotechbase</code></td>
+<td>The app's package name.</td>
+</tr>
+<tr>
+<td><code>D</code></td>
+<td>The <strong>priority</strong> (level).</td>
+</tr>
+<tr>
+<td><code>Button tapped...</code></td>
+<td>The <strong>message</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Priorities</h3>
+<p class="v2-p">From least to most serious:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Letter</th>
+<th>Level</th>
+<th><code>Log</code> method</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V</td>
+<td>Verbose</td>
+<td><code>Log.v</code></td>
+<td>Very detailed notes, usually removed later.</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Debug</td>
+<td><code>Log.d</code></td>
+<td>Normal development messages.</td>
+</tr>
+<tr>
+<td>I</td>
+<td>Info</td>
+<td><code>Log.i</code></td>
+<td>Things worth noting, such as "user signed in".</td>
+</tr>
+<tr>
+<td>W</td>
+<td>Warning</td>
+<td><code>Log.w</code></td>
+<td>Something unexpected but survivable.</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Error</td>
+<td><code>Log.e</code></td>
+<td>Something went wrong.</td>
+</tr>
+<tr>
+<td>A / F</td>
+<td>Assert / Fatal</td>
+<td><code>Log.wtf</code></td>
+<td>A "should never happen" situation.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A filter on a level shows that level <strong>and everything more severe</strong>.</p>
+<h3 class="v2-h3">Write your own messages</h3>
+<p class="v2-p">The <code>Log</code> class lives in <code>android.util</code>. Here is a complete screen that writes to Logcat each time you tap a button:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.hellotechbase
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+private const val TAG = "LogLab"
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate called")
+        setContent {
+            MaterialTheme {
+                CounterScreen()
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.i(TAG, "Screen is now visible")
+    }
+}
+
+@Composable
+fun CounterScreen(modifier: Modifier = Modifier) {
+    var count by remember { mutableIntStateOf(0) }
+
+    Column(
+        modifier = modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "Taps: $count")
+        Button(onClick = {
+            count++
+            Log.d(TAG, "Button tapped, count = $count")
+            if (count == 5) {
+                Log.w(TAG, "That is a lot of taps")
+            }
+        }) {
+            Text("Tap me")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Run it, then tap the button six times. This is what to look for in Logcat (timestamps and IDs vary, and extra system lines appear in between):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">D/LogLab: onCreate called<br/>I/LogLab: Screen is now visible<br/>D/LogLab: Button tapped, count = 1<br/>D/LogLab: Button tapped, count = 2<br/>D/LogLab: Button tapped, count = 3<br/>D/LogLab: Button tapped, count = 4<br/>D/LogLab: Button tapped, count = 5<br/>W/LogLab: That is a lot of taps<br/>D/LogLab: Button tapped, count = 6</p>
+</blockquote>
+<p class="v2-p">Compose details (<code>remember</code>, <code>mutableIntStateOf</code>, <code>by</code>) are explained in lesson 17 and lesson 19; today the point is the <code>Log</code> calls. The activity functions <code>onCreate</code> and <code>onStart</code> are part of the lifecycle taught in lesson 23.</p>
+<p class="v2-p">The <code>private const val TAG</code> at the top is a good habit: one tag per file means you can filter easily. The tag should be a short stable name; very long tags are shortened by older Android versions.</p>
+<h3 class="v2-h3">Filter Logcat so you can see your messages</h3>
+<p class="v2-p">The unfiltered log has thousands of lines. The Logcat window has a query box at the top. Official queries use <code>key:value</code> pairs. Press <strong>Ctrl + Space</strong> in the box to see suggestions.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Query</th>
+<th>Shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tag:LogLab</code></td>
+<td>Only messages with the tag <code>LogLab</code>.</td>
+</tr>
+<tr>
+<td><code>package:mine</code></td>
+<td>Only messages from the app(s) in your open project.</td>
+</tr>
+<tr>
+<td><code>level:WARN</code></td>
+<td>Warnings and anything more severe.</td>
+</tr>
+<tr>
+<td><code>message:tapped</code></td>
+<td>Messages containing the word.</td>
+</tr>
+<tr>
+<td><code>age:5m</code></td>
+<td>Entries from the last five minutes (judged by your computer's clock).</td>
+</tr>
+<tr>
+<td><code>-tag:chatty</code></td>
+<td>Excludes a tag (the minus is negation).</td>
+</tr>
+<tr>
+<td><code>is:crash</code></td>
+<td>App crashes.</td>
+</tr>
+<tr>
+<td><code>package:mine level:ERROR</code></td>
+<td>Errors from your app. Two terms are combined as AND.</td>
+</tr>
+<tr>
+<td><code>tag:LogLab tag:Other</code></td>
+<td>OR: two non-negated terms with the same key are combined as OR.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">You can save and star favourite queries from the <strong>Show history</strong> button. If two apps are running or your phone is chatty, <code>package:mine</code> is the quickest way to cut noise.</p>
+<h3 class="v2-h3">Logcat on the command line</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb logcat                           # stream everything (Ctrl+C to stop)
+adb logcat -d                        # dump what is in the log now, then exit
+adb logcat -c                        # clear the log
+adb logcat LogLab:D *:S              # show tag LogLab at Debug and above, silence all others
+adb logcat *:W                       # all tags, Warning and above
+adb logcat -v time LogLab:D *:S      # include date and time
+adb logcat -d &gt; mylog.txt            # save the current log to a file</code></pre></div></div>
+<p class="v2-p">The filter form is <code>tag:priority</code>. The special <code>*:S</code> means "silence everything else", so only the tags you list appear. When you attach a bug report to an email or a forum post, <code>adb logcat -d &gt; mylog.txt</code> is exactly what people ask for. Remember that logs can contain private information, so look through them before sharing.</p>
+<h3 class="v2-h3">Reading a crash</h3>
+<p class="v2-p">When an app crashes, Logcat shows the cause in red. Add this to your button code temporarily to see it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>if (count == 3) {
+    error("Practice crash")
+}</code></pre></div></div>
+<p class="v2-p">(<code>error(...)</code> is a standard Kotlin function that throws an <code>IllegalStateException</code>.) When you tap three times the app closes, and Logcat shows something like:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">E/AndroidRuntime: FATAL EXCEPTION: main<br/>E/AndroidRuntime: Process: com.techbase.hellotechbase, PID: 4120<br/>E/AndroidRuntime: java.lang.IllegalStateException: Practice crash<br/>E/AndroidRuntime:     at com.techbase.hellotechbase.MainActivityKt.CounterScreen$lambda$...(MainActivity.kt:55)</p>
+</blockquote>
+<p class="v2-p">Read it like a detective:</p>
+<ol class="v2-ol">
+<li>Find the line <code>FATAL EXCEPTION</code>. That is the start of the crash.</li>
+<li>The next lines name the <strong>exception type</strong> (<code>IllegalStateException</code>) and <strong>message</strong> (<code>Practice crash</code>).</li>
+<li>The indented <code>at</code> lines are the <strong>stack trace</strong>: where the code was. Find the first line that names <em>your</em> file and line number. In Android Studio it is a blue link you can click to jump to the exact line.</li>
+<li>A <code>Caused by:</code> line further down is often the real root cause.</li>
+</ol>
+<p class="v2-p">You can also filter with <code>is:crash</code>. When the app process restarts, Logcat prints <code>PROCESS ENDED</code> and <code>PROCESS STARTED</code> markers. Remove the crash line when you finish experimenting.</p>
+<h3 class="v2-h3">Logging cautions</h3>
+<ul class="v2-ul">
+<li><strong>Never log secrets.</strong> Passwords, tokens and personal details written to Logcat can be read by anyone who connects to the phone with debugging on.</li>
+<li><strong>Do not leave noisy logs in released apps.</strong> They cost battery and clutter the log. Many teams use a logging library or remove debug logs for release builds.</li>
+<li><strong>Logcat is not permanent.</strong> The log buffer is small and old lines disappear. Save important output with <code>adb logcat -d &gt; file.txt</code> soon after the problem.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Logcat: Your App&#x27;s Diary</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Run on a device and prove it</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Run the lesson 04 <code>DeviceFacts</code> or <code>LabScreen</code> app on a real phone (or a second emulator if you have no phone), and compare.</p>
+<ol class="v2-ol">
+<li>Enable Developer options and USB debugging, connect the phone, and confirm <code>adb devices</code> shows <code>device</code>.</li>
+<li>Select the phone in the target device menu and run the app.</li>
+<li>Record the model, API level and ABI shown on the phone.</li>
+<li>How does the ABI differ from the emulator's? Why?</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>adb devices -l</code> should list your phone with the state <code>device</code>. The app shows your phone's real model name (for example a Samsung or Tecno model number), its real API level and typically <code>arm64-v8a</code> listed first for a modern phone.</p>
+<p class="v2-p">On an Intel or AMD computer the emulator listed <code>x86_64</code> first, because you chose an image matching your computer's CPU (lesson 04). The phone has an ARM CPU. The same APK runs on both because Kotlin code is compiled to DEX, which is independent of the CPU; only native C or C++ libraries would need separate builds for each ABI.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Filter your own messages</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Use Logcat queries.</p>
+<ol class="v2-ol">
+<li>Add the <code>CounterScreen</code> code from this lesson and run it.</li>
+<li>Tap the button six times.</li>
+<li>In Logcat, write a query that shows only your app's messages with tag <code>LogLab</code>.</li>
+<li>Change it so only the Warning appears.</li>
+<li>Write the equivalent <code>adb logcat</code> command for step 3.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Step 3: <code>package:mine tag:LogLab</code> (or simply <code>tag:LogLab</code>).</p>
+<p class="v2-p">Step 4: <code>tag:LogLab level:WARN</code>. Because <code>level</code> matches the level and anything more severe, and your only message at or above Warning from that tag is the "That is a lot of taps" line, only that line remains.</p>
+<p class="v2-p">Step 5, command line:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb logcat LogLab:D *:S</code></pre></div></div>
+<p class="v2-p">For a one-off dump that exits afterwards, add <code>-d</code>: <code>adb logcat -d LogLab:D *:S</code>.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Connect wirelessly and with two devices</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Practise device targeting.</p>
+<ol class="v2-ol">
+<li>Pair your phone over Wi-Fi (or start two emulators if your phone is not Android 11 or newer).</li>
+<li>Run <code>adb devices</code>.</li>
+<li>Install your debug APK on <strong>only the phone</strong> using the command line, from the project root.</li>
+<li>What happens if you run <code>adb install</code> without <code>-d</code>, <code>-e</code> or <code>-s</code>? Why?</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">After pairing, <code>adb devices</code> lists two entries, for example <code>emulator-5554 device</code> and a wireless phone entry.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb -d install app/build/outputs/apk/debug/app-debug.apk</code></pre></div></div>
+<p class="v2-p">works if the phone is the only hardware device (<code>-d</code>). If you have two emulators, use <code>adb -s emulator-5556 install ...</code> with the serial from <code>adb devices</code>.</p>
+<p class="v2-p">Without a target flag, adb refuses with <code>adb: more than one device/emulator</code> because it cannot guess which one you mean.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Write one paragraph, in your own words, explaining the three parts of adb (client, server, daemon), then draw (on paper) how a command travels from your computer to your phone. Then run <code>adb kill-server</code> followed by <code>adb devices</code> and notice that the server restarts automatically.</p></div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Using a charge-only cable.</strong> <em>The symptom:</em> the phone charges but <code>adb devices</code> shows nothing. <em>The fix:</em> try another cable, preferably the original one.</p>
+<p class="v2-p"><strong>Mistake #2: Never accepting the RSA prompt.</strong> <em>The symptom:</em> the state is <code>unauthorized</code>. <em>The fix:</em> unlock the phone, replug, and tap <strong>Allow</strong> on the dialog. If it never appears, revoke USB debugging authorisations in Developer options and reconnect.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting to turn on the main Developer options switch.</strong> <em>The problem:</em> the official docs warn that when the top-level toggle is off, most options are disabled. <em>The fix:</em> switch it on.</p>
+<p class="v2-p"><strong>Mistake #4: Skipping the Windows driver.</strong> <em>The symptom:</em> the phone is not detected on Windows although everything else is right. <em>The fix:</em> install the phone maker's USB driver, then replug.</p>
+<p class="v2-p"><strong>Mistake #5: Wireless pairing on a network that isolates devices.</strong> <em>The symptom:</em> the phone never shows up. <em>The fix:</em> use a home router or your own phone's hotspot, and make sure both devices are on the same network.</p>
+<p class="v2-p"><strong>Mistake #6: Using a pairing port where a connect port is needed.</strong> <em>The problem:</em> <code>adb pair</code> uses the address shown on the pairing dialog; <code>adb connect</code> uses the different address on the main Wireless debugging screen. <em>The fix:</em> use each address for its own command.</p>
+<p class="v2-p"><strong>Mistake #7: Typing "adb" and getting "command not found".</strong> <em>The fix:</em> <code>adb</code> lives in the SDK's <code>platform-tools</code> folder. Add it to your PATH or run it with its full path. Android Studio's Terminal tool window is a quick place to try.</p>
+<p class="v2-p"><strong>Mistake #8: Hunting through unfiltered Logcat.</strong> <em>The symptom:</em> thousands of lines and no clue. <em>The fix:</em> use <code>package:mine</code>, <code>tag:</code>, and <code>level:</code> queries, and give your own messages a clear tag.</p>
+<p class="v2-p"><strong>Mistake #9: Logging passwords and personal data.</strong> <em>The fix:</em> never log secrets. Anyone with debugging access can read the log.</p>
+<p class="v2-p"><strong>Mistake #10: Ignoring the first line of a crash.</strong> <em>The fix:</em> start at <code>FATAL EXCEPTION</code>, read the exception type and message, and click the first stack-trace line that points to your own file.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> How do you make Developer options appear on a phone?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Open <strong>Settings &gt; About phone</strong> (on some brands inside a Software information screen), find <strong>Build number</strong> and tap it seven times. Developer options then appear in Settings.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What are the three parts of adb, and which runs on the phone?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The client (the command you run), the server (a background process on your computer that manages connections, using TCP port 5037) and the daemon <code>adbd</code>, which runs on each phone or emulator.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> <code>adb devices</code> shows <code>unauthorized</code> for your phone. What does it mean and how do you fix it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The phone has not accepted this computer's RSA key. Unlock the phone and tap <strong>Allow</strong> on the "Allow USB debugging?" prompt, replugging if it does not appear, or revoke authorisations in Developer options and try again.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Write a Logcat query that shows only errors from your own app, and name the priority letter that Log.w uses.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>package:mine level:ERROR</code>. <code>Log.w</code> uses the Warning priority, shown as <code>W</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why might <code>adb install app-debug.apk</code> fail when you have a phone and an emulator connected, and what are three ways to fix it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">adb cannot tell which device you mean and reports <code>more than one device/emulator</code>. Fix it with <code>-d</code> (the only real device), <code>-e</code> (the only emulator) or <code>-s serial</code> using the serial from <code>adb devices</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-1-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 1: Set up Android Studio</a>: the official pathway this lesson is based on.</li>
+<li><a href="https://developer.android.com/studio/run/device" rel="noopener noreferrer">Run apps on a hardware device</a>: USB and Wi-Fi connection, device mirroring and troubleshooting.</li>
+<li><a href="https://developer.android.com/studio/debug/dev-options" rel="noopener noreferrer">Configure on-device developer options</a>: enabling Developer options and USB debugging.</li>
+<li><a href="https://developer.android.com/tools/adb" rel="noopener noreferrer">Android Debug Bridge (adb)</a>: every adb command, including wireless debugging.</li>
+<li><a href="https://developer.android.com/studio/debug/logcat" rel="noopener noreferrer">View and write logs with Logcat</a>: the Logcat window and its query syntax.</li>
+<li><a href="https://developer.android.com/tools/logcat" rel="noopener noreferrer">Logcat command-line tool</a>: <code>adb logcat</code> options and filters.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Device Connection Journal</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Create a small app that logs interesting facts to Logcat, run it on every device you can connect, and keep a connection journal that shows you can set up, target and debug devices like a professional.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Build a screen with three buttons: <strong>Info</strong>, <strong>Warn</strong> and <strong>Error</strong>. Each writes a message with the matching priority (<code>Log.i</code>, <code>Log.w</code>, <code>Log.e</code>) using the tag <code>Journal</code>.</li>
+<li>On start (<code>onCreate</code>), log the device model and API level at Debug priority.</li>
+<li>Show the number of taps on screen.</li>
+<li>Run the app on at least one device (a real phone or an emulator), and optionally on a second.</li>
+<li>Capture the Logcat lines for tag <code>Journal</code> using a query, and copy them into your journal.</li>
+<li>Run <code>adb devices -l</code> and copy the result into your journal.</li>
+<li>Write a four-line journal entry: how you connected, what went wrong (if anything), how you fixed it, and which query you used.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Save the same log to a file with <code>adb logcat -d</code> and a tag filter, and attach the file to your portfolio repository (after checking it contains no private data).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p"><code>MainActivity.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.hellotechbase
+
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+private const val TAG = "Journal"
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "Started on ${Build.MODEL}, API ${Build.VERSION.SDK_INT}")
+        setContent {
+            MaterialTheme {
+                JournalScreen()
+            }
+        }
+    }
+}
+
+@Composable
+fun JournalScreen(modifier: Modifier = Modifier) {
+    var taps by remember { mutableIntStateOf(0) }
+
+    Column(
+        modifier = modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Taps so far: $taps")
+        Button(onClick = {
+            taps++
+            Log.i(TAG, "Info button, taps = $taps")
+        }) { Text("Info") }
+        Button(onClick = {
+            taps++
+            Log.w(TAG, "Warn button, taps = $taps")
+        }) { Text("Warn") }
+        Button(onClick = {
+            taps++
+            Log.e(TAG, "Error button, taps = $taps")
+        }) { Text("Error") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">After starting the app and tapping Info, Warn and Error once each, the Logcat query <code>tag:Journal</code> shows lines like (device values differ):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">D/Journal: Started on SM-A145F, API 34<br/>I/Journal: Info button, taps = 1<br/>W/Journal: Warn button, taps = 2<br/>E/Journal: Error button, taps = 3</p>
+</blockquote>
+<p class="v2-p">The query <code>tag:Journal level:WARN</code> shows only the last two lines.</p>
+<p class="v2-p">Command line equivalents:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb devices -l
+adb logcat -d Journal:D *:S &gt; journal-log.txt</code></pre></div></div>
+<p class="v2-p">A sample journal entry:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>JOURNAL, 18 October 2026
+Connected: USB cable to a Samsung phone; enabled Developer options (7 taps on
+Build number) and USB debugging, accepted the RSA prompt.
+Problem: first cable was charge-only; adb devices showed nothing.
+Fix: switched to the original cable; state changed to "device".
+Query used: tag:Journal level:WARN to show only the warning and error.</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 05 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-05-run-on-a-real-phone-and-connect-your-devic</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 05 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Emulator Versus Real Device</li><li>✅ Step-by-Step: Prepare Your Phone</li><li>✅ Wireless Debugging Over Wi-Fi</li><li>✅ Device Mirroring: Controlling the Phone from Your Screen</li><li>✅ Troubleshooting: &quot;My Phone Is Not Detected&quot;</li><li>✅ The adb Toolbox</li><li>✅ Logcat: Your App&#x27;s Diary</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_04.html" class="ln-btn">&#8592; Lesson 04</a><a href="lesson_06.html" class="ln-btn primary">Lesson 06 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 05 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>
