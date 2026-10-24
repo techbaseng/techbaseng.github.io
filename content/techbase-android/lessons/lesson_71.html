@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 71: Capstone Project: A Complete Android App — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l71">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 71 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 71</div>
+      <h1>Capstone Project: A Complete Android App</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Phase 10: Self-Review Rubric and Final Delivery</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 71</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Bring everything together: plan, architect, build, test, make accessible and prepare to publish a complete multi-screen app.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Phase 10: Self-Review Rubric and Final Delivery</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You have now met nearly everything the official Android programmes cover: Kotlin, Compose, state, navigation, data, architecture, testing, accessibility, performance, release and sharing code. The final step is to <strong>use it all together</strong> in one complete app that you can put in a portfolio, show to an employer, or publish.</p>
+<p class="v2-p">This capstone follows the shape of the official programmes' final projects (for example <em>My City</em> and the architecture pathway's offline-first app) but the app itself is <strong>original</strong>. You will plan it, build it layer by layer, test it, review its accessibility, and prepare it for release. Pointers back to the lessons that taught each skill are given throughout, so you can revisit anything that feels rusty. The official pathways remain the reference: https://developer.android.com/courses.</p>
+<p class="v2-p">By the end you will have:</p>
+<ul class="v2-ul">
+<li>A <strong>plan</strong> with user stories, screens and a data model.</li>
+<li>An <strong>architecture</strong> with UI, domain and data layers, built on <strong>Room</strong>, a <strong>repository</strong>, <strong>ViewModels</strong>, <strong>Compose</strong> and <strong>type-safe Navigation</strong>.</li>
+<li>An <strong>offline-first</strong> feature using the database as the source of truth.</li>
+<li><strong>Unit and UI tests</strong> that guard the important behaviour.</li>
+<li>An <strong>accessibility review</strong> and a <strong>release checklist</strong>.</li>
+<li>A <strong>portfolio README</strong> for the project.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a capstone is not about the number of features. It is about <strong>finishing a small thing well</strong> and being able to explain every decision.</p>
+<p class="v2-p"><strong>Honesty note:</strong> the code in this lesson is written for Compose with Material 3, Room 3 (<code>androidx.room3</code>, lesson 34) and Hilt (lesson 65). I could not compile it in my environment, so type it in, read compiler messages carefully, and check imports against the official setup pages. Version numbers are placeholders ("latest stable").</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">This lesson draws on all phases. Specifically: composables and state (lessons 15 to 19), lists and navigation (lessons 21 and 26), ViewModel and Flow (lessons 25 and 33), Room (lesson 34), Retrofit if you add a network source (lesson 29), testing (lessons 20 and 45), accessibility (lessons 46 to 48), release (lessons 49 to 53), architecture and Hilt (lessons 60 to 65).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Phase 1: Choose and Plan the App</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The app: <strong>MarketMate</strong></h3>
+<p class="v2-p"><strong>Problem.</strong> Traders and households in Ibadan see prices of foodstuff change from market to market and from week to week (garri, rice, tomatoes, beans). People rely on memory or phone calls. <strong>MarketMate</strong> lets a user <strong>record prices</strong> they see at markets, <strong>browse and search</strong> them, see the <strong>price history of an item</strong>, and <strong>find the cheapest recent price</strong>. It works <strong>offline</strong>, because market stalls often have poor signal.</p>
+<p class="v2-p">(You may choose a different original app, such as a school fee helper or a church-event planner. Keep the same shape: a list, a detail screen, a form, a database and a few rules.)</p>
+<h3 class="v2-h3">User stories</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>#</th>
+<th>As a...</th>
+<th>I want to...</th>
+<th>So that...</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>shopper</td>
+<td>add a price (item, market, amount, date)</td>
+<td>I remember what I saw</td>
+</tr>
+<tr>
+<td>2</td>
+<td>shopper</td>
+<td>see recent prices in a list and search by item</td>
+<td>I can find what I need</td>
+</tr>
+<tr>
+<td>3</td>
+<td>shopper</td>
+<td>open an item and see all its prices by market</td>
+<td>I can compare</td>
+</tr>
+<tr>
+<td>4</td>
+<td>shopper</td>
+<td>see which market is cheapest in the last 30 days</td>
+<td>I know where to buy</td>
+</tr>
+<tr>
+<td>5</td>
+<td>shopper</td>
+<td>delete a mistaken entry</td>
+<td>my data stays correct</td>
+</tr>
+<tr>
+<td>6</td>
+<td>any user</td>
+<td>use the app without internet</td>
+<td>I can record in the market</td>
+</tr>
+<tr>
+<td>7</td>
+<td>user with a screen reader or large text</td>
+<td>use every feature</td>
+<td>the app is inclusive</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Screens</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[Prices list] --(tap item)--&gt; [Item detail: history + cheapest market]
+     |
+     +--(FAB)--&gt; [Add price form]</code></pre></div></div>
+<h3 class="v2-h3">Data model</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>PriceEntry
+  id            Long (auto)
+  itemName      String        "Garri (white, 1 paint bucket)"
+  marketName    String        "Bodija"
+  amountKobo    Long          money as whole kobo, never Double
+  recordedAtMs  Long          epoch millis</code></pre></div></div>
+<h3 class="v2-h3">Rules (the domain)</h3>
+<ul class="v2-ul">
+<li>Amount must be <strong>greater than zero</strong>.</li>
+<li>Item and market names are <strong>trimmed</strong> and must not be blank.</li>
+<li>"Cheapest market" = the market with the <strong>lowest average price</strong> for the item in the <strong>last 30 days</strong>; ties are broken alphabetically.</li>
+</ul>
+<h3 class="v2-h3">Non-functional requirements</h3>
+<p class="v2-p">Works offline; no network needed in version 1; supports dark mode and font scaling; every control has at least a 48dp touch target; every icon has a content description or is decorative.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Checkpoint (lessons 60 to 63):</strong> which parts are UI, domain and data? UI: three screens and ViewModels. Domain: validation and the cheapest-market rule. Data: Room and the repository.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 1: Choose and Plan the App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Phase 2: Project Setup and Architecture</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a project <strong>MarketMate</strong> (package <code>com.example.marketmate</code>, minimum SDK 24) using the Empty Activity template (lesson 3). Add dependencies through the version catalog (lessons 3 and 34): Compose BOM, Material 3, Navigation Compose, kotlinx.serialization, Lifecycle (ViewModel Compose and runtime Compose), Room 3 with KSP, Hilt with KSP, and test libraries. Use "latest stable" for each.</p>
+<p class="v2-p">Package layout:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>com.example.marketmate
+ ├─ MarketMateApp.kt             @HiltAndroidApp
+ ├─ MainActivity.kt
+ ├─ data/                         Room entity, DAO, database, repository
+ ├─ domain/                       models, use cases, validation
+ ├─ ui/
+ │   ├─ theme/
+ │   ├─ list/   (ListScreen, ListViewModel)
+ │   ├─ detail/ (DetailScreen, DetailViewModel)
+ │   ├─ add/    (AddScreen, AddViewModel)
+ │   └─ navigation/ (routes, NavHost)
+ └─ di/                           Hilt modules</code></pre></div></div>
+<p class="v2-p">The <strong>dependency rule</strong> (lesson 60): <code>ui → domain → data</code>; nothing points upwards. One module is enough for this size (lesson 65 explained when to split).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 2: Project Setup and Architecture</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Phase 3: The Data Layer</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Entity, DAO and database</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// data/PriceEntry.kt
+@Entity(tableName = "price_entries")
+data class PriceEntryEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val itemName: String,
+    val marketName: String,
+    val amountKobo: Long,
+    val recordedAtMs: Long
+)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// data/PriceDao.kt
+@Dao
+interface PriceDao {
+
+    @Query("SELECT * FROM price_entries ORDER BY recordedAtMs DESC")
+    fun observeAll(): Flow&lt;List&lt;PriceEntryEntity&gt;&gt;
+
+    @Query("SELECT * FROM price_entries WHERE itemName = :item ORDER BY recordedAtMs DESC")
+    fun observeForItem(item: String): Flow&lt;List&lt;PriceEntryEntity&gt;&gt;
+
+    @Insert
+    suspend fun insert(entry: PriceEntryEntity)
+
+    @Query("DELETE FROM price_entries WHERE id = :id")
+    suspend fun delete(id: Long)
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// data/MarketDatabase.kt
+@Database(entities = [PriceEntryEntity::class], version = 1, exportSchema = true)
+abstract class MarketDatabase : RoomDatabase() {
+    abstract fun priceDao(): PriceDao
+}</code></pre></div></div>
+<p class="v2-p">(Imports: <code>androidx.room3.*</code>; for Room 2.x change to <code>androidx.room.*</code> as in lesson 34.)</p>
+<h3 class="v2-h3">Domain model and mapper</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// domain/PriceEntry.kt
+data class PriceEntry(
+    val id: Long,
+    val itemName: String,
+    val marketName: String,
+    val amountNaira: Double,        // for display only; computed from kobo
+    val amountKobo: Long,
+    val recordedAt: Instant
+)
+
+fun PriceEntryEntity.toModel() = PriceEntry(
+    id = id,
+    itemName = itemName,
+    marketName = marketName,
+    amountNaira = amountKobo / 100.0,
+    amountKobo = amountKobo,
+    recordedAt = Instant.ofEpochMilli(recordedAtMs)
+)</code></pre></div></div>
+<p class="v2-p">Money is stored as whole kobo (lesson 62); the <code>Double</code> here is <strong>only</strong> for display.</p>
+<h3 class="v2-h3">Repository</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// data/PriceRepository.kt
+interface PriceRepository {
+    fun observeAll(): Flow&lt;List&lt;PriceEntry&gt;&gt;
+    fun observeForItem(item: String): Flow&lt;List&lt;PriceEntry&gt;&gt;
+    suspend fun add(item: String, market: String, amountKobo: Long, recordedAtMs: Long)
+    suspend fun delete(id: Long)
+}
+
+class OfflinePriceRepository @Inject constructor(
+    private val dao: PriceDao,
+    @IoDispatcher private val io: CoroutineDispatcher
+) : PriceRepository {
+
+    override fun observeAll() = dao.observeAll()
+        .map { list -&gt; list.map { it.toModel() } }
+        .flowOn(io)
+
+    override fun observeForItem(item: String) = dao.observeForItem(item)
+        .map { list -&gt; list.map { it.toModel() } }
+        .flowOn(io)
+
+    override suspend fun add(item: String, market: String, amountKobo: Long, recordedAtMs: Long) =
+        withContext(io) {
+            dao.insert(PriceEntryEntity(itemName = item, marketName = market,
+                amountKobo = amountKobo, recordedAtMs = recordedAtMs))
+        }
+
+    override suspend fun delete(id: Long) = withContext(io) { dao.delete(id) }
+}</code></pre></div></div>
+<h3 class="v2-h3">Hilt modules (lesson 65)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@InstallIn(SingletonComponent::class)
+object DataModule {
+    @Provides @Singleton
+    fun provideDb(@ApplicationContext context: Context): MarketDatabase =
+        Room.databaseBuilder&lt;MarketDatabase&gt;(context, "marketmate.db")
+            .setDriver(AndroidSQLiteDriver())
+            .build()
+
+    @Provides fun provideDao(db: MarketDatabase): PriceDao = db.priceDao()
+
+    @Provides @IoDispatcher fun provideIo(): CoroutineDispatcher = Dispatchers.IO
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+    @Binds @Singleton abstract fun bindRepo(impl: OfflinePriceRepository): PriceRepository
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Checkpoint:</strong> run the app (it still shows the template screen). Add a temporary insert in a test to confirm the database works before building any UI. Building on top of unverified layers is how bugs hide.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 3: The Data Layer</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Phase 4: The Domain Layer</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Validation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// domain/ValidatePrice.kt
+sealed interface ValidationResult {
+    data class Valid(val item: String, val market: String, val amountKobo: Long) : ValidationResult
+    data class Invalid(val itemError: String? = null, val marketError: String? = null, val amountError: String? = null) : ValidationResult
+}
+
+class ValidatePriceUseCase @Inject constructor() {
+    operator fun invoke(item: String, market: String, amountText: String): ValidationResult {
+        val cleanItem = item.trim()
+        val cleanMarket = market.trim()
+        val naira = amountText.trim().toDoubleOrNull()
+
+        val itemError = if (cleanItem.isEmpty()) "Enter the item" else null
+        val marketError = if (cleanMarket.isEmpty()) "Enter the market" else null
+        val amountError = when {
+            naira == null -&gt; "Enter a number"
+            naira &lt;= 0.0 -&gt; "Amount must be more than zero"
+            else -&gt; null
+        }
+
+        return if (itemError == null &amp;&amp; marketError == null &amp;&amp; amountError == null) {
+            ValidationResult.Valid(cleanItem, cleanMarket, Math.round(naira!! * 100))
+        } else {
+            ValidationResult.Invalid(itemError, marketError, amountError)
+        }
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">The cheapest-market rule</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// domain/CheapestMarket.kt
+data class MarketAverage(val market: String, val averageKobo: Long, val samples: Int)
+
+class FindCheapestMarketUseCase @Inject constructor() {
+    operator fun invoke(entries: List&lt;PriceEntry&gt;, now: Instant, days: Long = 30): MarketAverage? {
+        val cutoff = now.minus(days, ChronoUnit.DAYS)
+        return entries
+            .filter { it.recordedAt &gt;= cutoff }
+            .groupBy { it.marketName }
+            .map { (market, list) -&gt;
+                MarketAverage(market, list.sumOf { it.amountKobo } / list.size, list.size)
+            }
+            .minWithOrNull(compareBy&lt;MarketAverage&gt; { it.averageKobo }.thenBy { it.market })
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>now</code> is a <strong>parameter</strong>, not <code>Instant.now()</code>, so the rule can be tested with fixed dates (lesson 63).</p>
+<h3 class="v2-h3">Tests for the rules</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FindCheapestMarketUseCaseTest {
+    private val now = Instant.parse("2026-10-24T10:00:00Z")
+    private fun entry(market: String, kobo: Long, daysAgo: Long) = PriceEntry(
+        id = 0, itemName = "Garri", marketName = market,
+        amountNaira = kobo / 100.0, amountKobo = kobo, recordedAt = now.minus(daysAgo, ChronoUnit.DAYS)
+    )
+
+    @Test
+    fun picks_lowest_average_in_window() {
+        val entries = listOf(
+            entry("Bodija", 200_000, 2), entry("Bodija", 220_000, 5),
+            entry("Dugbe", 190_000, 3)
+        )
+        assertEquals("Dugbe", FindCheapestMarketUseCase()(entries, now)?.market)
+    }
+
+    @Test
+    fun ignores_entries_older_than_30_days() {
+        val entries = listOf(entry("Dugbe", 100_000, 45), entry("Bodija", 200_000, 1))
+        assertEquals("Bodija", FindCheapestMarketUseCase()(entries, now)?.market)
+    }
+
+    @Test
+    fun returns_null_when_no_recent_entries() {
+        assertNull(FindCheapestMarketUseCase()(listOf(entry("Dugbe", 1, 60)), now))
+    }
+}
+
+class ValidatePriceUseCaseTest {
+    @Test
+    fun rejects_zero_and_blank() {
+        val result = ValidatePriceUseCase()("  ", "Bodija", "0") as ValidationResult.Invalid
+        assertNotNull(result.itemError)
+        assertNotNull(result.amountError)
+    }
+
+    @Test
+    fun converts_naira_to_kobo() {
+        val result = ValidatePriceUseCase()("Garri", "Bodija", "2500") as ValidationResult.Valid
+        assertEquals(250_000L, result.amountKobo)
+    }
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Checkpoint:</strong> run <code>./gradlew test</code>. All rule tests must pass before you write a single composable.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 4: The Domain Layer</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Phase 5: The UI Layer: List and Detail</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Type-safe routes (lesson 55)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Serializable object ListRoute
+@Serializable data class DetailRoute(val itemName: String)
+@Serializable object AddRoute</code></pre></div></div>
+<h3 class="v2-h3">List ViewModel and state (lesson 61)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class ListUiState(
+    val query: String = "",
+    val entries: List&lt;PriceEntry&gt; = emptyList(),
+    val loading: Boolean = true
+)
+
+@HiltViewModel
+class ListViewModel @Inject constructor(
+    private val repository: PriceRepository,
+    private val savedState: SavedStateHandle
+) : ViewModel() {
+
+    private val query = savedState.getStateFlow("query", "")
+
+    val uiState: StateFlow&lt;ListUiState&gt; =
+        combine(repository.observeAll(), query) { entries, q -&gt;
+            ListUiState(
+                query = q,
+                entries = entries.filter { it.itemName.contains(q, ignoreCase = true) },
+                loading = false
+            )
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ListUiState())
+
+    fun onQueryChange(value: String) { savedState["query"] = value }
+    fun delete(id: Long) { viewModelScope.launch { repository.delete(id) } }
+}</code></pre></div></div>
+<h3 class="v2-h3">The list screen</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ListScreen(
+    onOpenItem: (String) -&gt; Unit,
+    onAdd: () -&gt; Unit,
+    viewModel: ListViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("MarketMate") }) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAdd) {
+                Icon(Icons.Default.Add, contentDescription = "Add a price")
+            }
+        }
+    ) { padding -&gt;
+        Column(Modifier.padding(padding)) {
+            OutlinedTextField(
+                value = state.query,
+                onValueChange = viewModel::onQueryChange,
+                label = { Text("Search items") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+            when {
+                state.loading -&gt; Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
+                state.entries.isEmpty() -&gt; EmptyState("No prices yet. Tap + to add the first one.")
+                else -&gt; LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) {
+                    items(state.entries, key = { it.id }) { entry -&gt;
+                        PriceRow(
+                            entry = entry,
+                            onClick = { onOpenItem(entry.itemName) },
+                            onDelete = { viewModel.delete(entry.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PriceRow(entry: PriceEntry, onClick: () -&gt; Unit, onDelete: () -&gt; Unit) {
+    val price = formatNaira(entry.amountKobo)
+    ListItem(
+        headlineContent = { Text(entry.itemName) },
+        supportingContent = { Text("${entry.marketName} · ${formatDate(entry.recordedAt)}") },
+        trailingContent = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(price, style = MaterialTheme.typography.titleMedium)
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete ${entry.itemName} at $price")
+                }
+            }
+        },
+        modifier = Modifier.clickable(onClick = onClick, onClickLabel = "Open ${entry.itemName}")
+    )
+}
+
+fun formatNaira(kobo: Long): String =
+    NumberFormat.getCurrencyInstance(Locale("en", "NG")).format(kobo / 100.0)
+
+fun formatDate(instant: Instant): String =
+    DateTimeFormatter.ofPattern("d MMM yyyy").withZone(ZoneId.systemDefault()).format(instant)
+
+@Composable
+fun EmptyState(message: String) {
+    Box(Modifier.fillMaxSize().padding(32.dp), Alignment.Center) {
+        Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Detail ViewModel and screen</h3>
+<p class="v2-p">The detail screen reads the item name from the route (via <code>SavedStateHandle</code>, lesson 55):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class DetailUiState(
+    val itemName: String = "",
+    val entries: List&lt;PriceEntry&gt; = emptyList(),
+    val cheapest: MarketAverage? = null
+)
+
+@HiltViewModel
+class DetailViewModel @Inject constructor(
+    savedState: SavedStateHandle,
+    repository: PriceRepository,
+    findCheapest: FindCheapestMarketUseCase
+) : ViewModel() {
+
+    private val itemName = savedState.toRoute&lt;DetailRoute&gt;().itemName
+
+    val uiState: StateFlow&lt;DetailUiState&gt; = repository.observeForItem(itemName)
+        .map { entries -&gt; DetailUiState(itemName, entries, findCheapest(entries, Instant.now())) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DetailUiState(itemName))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DetailScreen(onBack: () -&gt; Unit, viewModel: DetailViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(state.itemName) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding -&gt;
+        LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(16.dp)) {
+            item {
+                state.cheapest?.let {
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp)) {
+                            Text("Cheapest in the last 30 days", style = MaterialTheme.typography.labelLarge)
+                            Text("${it.market}: ${formatNaira(it.averageKobo)} (${it.samples} entries)",
+                                style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
+                } ?: Text("Not enough recent prices to compare markets.")
+                Spacer(Modifier.height(16.dp))
+                Text("History", style = MaterialTheme.typography.titleLarge)
+            }
+            items(state.entries, key = { it.id }) { entry -&gt;
+                ListItem(
+                    headlineContent = { Text(formatNaira(entry.amountKobo)) },
+                    supportingContent = { Text("${entry.marketName} · ${formatDate(entry.recordedAt)}") }
+                )
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>savedState.toRoute&lt;DetailRoute&gt;()</code> comes from Navigation's type-safe API; check the import against the current Navigation release.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 5: The UI Layer: List and Detail</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Phase 6: The Add Form</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">State and ViewModel</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class AddUiState(
+    val item: String = "",
+    val market: String = "",
+    val amount: String = "",
+    val errors: ValidationResult.Invalid? = null,
+    val saved: Boolean = false
+)
+
+@HiltViewModel
+class AddViewModel @Inject constructor(
+    private val repository: PriceRepository,
+    private val validate: ValidatePriceUseCase
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(AddUiState())
+    val state: StateFlow&lt;AddUiState&gt; = _state.asStateFlow()
+
+    fun onItem(v: String) = _state.update { it.copy(item = v, errors = null) }
+    fun onMarket(v: String) = _state.update { it.copy(market = v, errors = null) }
+    fun onAmount(v: String) = _state.update { it.copy(amount = v, errors = null) }
+
+    fun save() {
+        val s = _state.value
+        when (val result = validate(s.item, s.market, s.amount)) {
+            is ValidationResult.Invalid -&gt; _state.update { it.copy(errors = result) }
+            is ValidationResult.Valid -&gt; viewModelScope.launch {
+                repository.add(result.item, result.market, result.amountKobo, System.currentTimeMillis())
+                _state.update { it.copy(saved = true) }
+            }
+        }
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">The form screen</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddScreen(onDone: () -&gt; Unit, viewModel: AddViewModel = hiltViewModel()) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.saved) { if (state.saved) onDone() }
+
+    Scaffold(topBar = {
+        TopAppBar(
+            title = { Text("Add a price") },
+            navigationIcon = { IconButton(onClick = onDone) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Cancel") } }
+        )
+    }) { padding -&gt;
+        Column(
+            Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            FormField("Item (for example, Garri, 1 paint bucket)", state.item, viewModel::onItem, state.errors?.itemError)
+            FormField("Market", state.market, viewModel::onMarket, state.errors?.marketError)
+            FormField(
+                "Price in naira", state.amount, viewModel::onAmount, state.errors?.amountError,
+                keyboardType = KeyboardType.Decimal
+            )
+            Button(onClick = viewModel::save, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                Text("Save price")
+            }
+        }
+    }
+}
+
+@Composable
+fun FormField(
+    label: String, value: String, onChange: (String) -&gt; Unit, error: String?,
+    keyboardType: KeyboardType = KeyboardType.Text
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(label) },
+        isError = error != null,
+        supportingText = { error?.let { Text(it) } },
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth()
+    )
+}</code></pre></div></div>
+<h3 class="v2-h3">Navigation host and activity</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun MarketMateNavHost() {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = ListRoute) {
+        composable&lt;ListRoute&gt; {
+            ListScreen(
+                onOpenItem = { navController.navigate(DetailRoute(it)) },
+                onAdd = { navController.navigate(AddRoute) }
+            )
+        }
+        composable&lt;DetailRoute&gt; { DetailScreen(onBack = { navController.popBackStack() }) }
+        composable&lt;AddRoute&gt; { AddScreen(onDone = { navController.popBackStack() }) }
+    }
+}
+
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent { MarketMateTheme { MarketMateNavHost() } }
+    }
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Checkpoint:</strong> run the app. Add three prices for the same item at two markets. Confirm the list, search, detail history and cheapest market. Rotate the phone and kill the app; the data must remain.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 6: The Add Form</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Phase 7: Tests, Accessibility and Performance Review</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">A ViewModel test</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class AddViewModelTest {
+    @get:Rule val mainRule = MainDispatcherRule()
+
+    @Test
+    fun invalid_input_sets_errors_and_does_not_save() = runTest {
+        val repo = FakePriceRepository()
+        val vm = AddViewModel(repo, ValidatePriceUseCase())
+
+        vm.save()
+
+        assertNotNull(vm.state.value.errors)
+        assertTrue(repo.added.isEmpty())
+    }
+
+    @Test
+    fun valid_input_saves_and_marks_saved() = runTest {
+        val repo = FakePriceRepository()
+        val vm = AddViewModel(repo, ValidatePriceUseCase())
+        vm.onItem("Garri"); vm.onMarket("Bodija"); vm.onAmount("2500")
+
+        vm.save()
+        advanceUntilIdle()
+
+        assertEquals(1, repo.added.size)
+        assertTrue(vm.state.value.saved)
+    }
+}
+
+class FakePriceRepository : PriceRepository {
+    val added = mutableListOf&lt;Triple&lt;String, String, Long&gt;&gt;()
+    private val all = MutableStateFlow&lt;List&lt;PriceEntry&gt;&gt;(emptyList())
+    override fun observeAll() = all
+    override fun observeForItem(item: String) = all.map { list -&gt; list.filter { it.itemName == item } }
+    override suspend fun add(item: String, market: String, amountKobo: Long, recordedAtMs: Long) {
+        added += Triple(item, market, amountKobo)
+    }
+    override suspend fun delete(id: Long) {}
+}</code></pre></div></div>
+<h3 class="v2-h3">A Compose UI test</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class AddScreenTest {
+    @get:Rule val rule = createComposeRule()
+
+    @Test
+    fun shows_error_when_amount_missing() {
+        rule.setContent { MarketMateTheme { AddScreenPreviewHost() } }   // hosts AddScreen with a fake ViewModel
+        rule.onNodeWithText("Save price").performClick()
+        rule.onNodeWithText("Enter a number").assertExists()
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Accessibility review (lessons 46 to 48)</h3>
+<p class="v2-p">Run through this checklist and fix everything you find:</p>
+<ol class="v2-ol">
+<li><strong>TalkBack:</strong> every action reachable; announcements are meaningful ("Delete Garri at ₦2,500", not "button").</li>
+<li><strong>Touch targets:</strong> at least 48dp (the delete icon button is; check custom controls).</li>
+<li><strong>Font scale 200%:</strong> nothing truncated or overlapping; the list rows grow.</li>
+<li><strong>Colour contrast:</strong> text and error states meet contrast guidance, in light and dark themes.</li>
+<li><strong>Not colour alone:</strong> errors show text, not only red.</li>
+<li><strong>Focus order and keyboard:</strong> Tab moves in reading order; IME action "Next" moves between fields.</li>
+<li><strong>Accessibility Scanner</strong> and Compose accessibility checks in tests (lesson 48): zero warnings, or each one explained.</li>
+</ol>
+<h3 class="v2-h3">Performance review (lesson 57)</h3>
+<p class="v2-p">List uses <code>key = { it.id }</code>; no heavy work in composables (formatting is cheap; if lists grow, <code>remember</code> formatted strings or format in the ViewModel); build a release variant and scroll a 1,000-row list on a low-end device or emulator; add a Baseline Profile if start-up matters.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 7: Tests, Accessibility and Performance Review</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Phase 8: Release Checklist and Portfolio</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">Release checklist (lessons 49 to 53)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[ ] applicationId and versionName/versionCode set; package name is yours
+[ ] Release build: minify on (R8), shrink resources; test the release build, not just debug
+[ ] Keep rules checked (Room, Hilt, kotlinx.serialization) - app does not crash on release
+[ ] Signing: upload key created; Play App Signing enabled; keystore backed up safely
+[ ] Target API meets the current Google Play requirement (check Play Console help)
+[ ] App icon (adaptive) and screenshots (phone, and tablet if supported)
+[ ] Store listing: title, short and full description, privacy policy URL
+[ ] Data safety form: this version collects no data and has no network
+[ ] Content rating questionnaire completed
+[ ] Internal test track install on a real device; then closed test if your account type requires one
+[ ] Crash-free and ANR-free in testing; accessibility review done</code></pre></div></div>
+<h3 class="v2-h3">The portfolio README</h3>
+<p class="v2-p">A good README is part of the product:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">markdown</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># MarketMate
+
+Record and compare foodstuff prices across Ibadan markets. Works offline.
+
+## Features
+- Add, search and delete price entries
+- Item history and "cheapest market in the last 30 days"
+- Works with no internet; data stored on the device
+
+## Tech
+Kotlin, Jetpack Compose (Material 3), Navigation (type-safe routes), Room, Hilt, Coroutines/Flow
+
+## Architecture
+UI (Compose + ViewModel) -&gt; Domain (use cases) -&gt; Data (Room repository). Unidirectional data flow.
+[diagram]
+
+## Testing
+Unit tests for domain rules and ViewModels; Compose UI tests; accessibility review notes in /docs.
+
+## What I learned / next steps
+...</code></pre></div></div>
+<p class="v2-p">Add two or three screenshots and, if you published it, the Play Store link.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 8: Release Checklist and Portfolio</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Explain Your Decisions</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">A capstone is only valuable if you can <strong>defend it</strong>. Before you call the project finished, imagine an interviewer or a teammate reading your repository for the first time, and prepare short, honest answers to the questions below. Writing them down also becomes the "Architecture" section of your README.</p>
+<p class="v2-p"><strong>Why is the database the source of truth?</strong> Because the app must work with no signal in the market. The UI reads only from Room through a <code>Flow</code>, so a new entry appears instantly, and there is no second copy of the data that can disagree with the first (lesson 60).</p>
+<p class="v2-p"><strong>Why does money use whole kobo?</strong> Floating-point numbers cannot represent many decimal amounts exactly, so repeated arithmetic drifts. Whole units are exact. The <code>Double</code> in the domain model exists only for display, and is derived, never stored.</p>
+<p class="v2-p"><strong>Why are there use cases for such small rules?</strong> Validation and the cheapest-market rule are the parts most likely to change and most worth testing. Moving them out of the ViewModel means they are plain Kotlin that runs in milliseconds, and the ViewModel stays short (lesson 63). If a rule is trivial, you may decide a use case is overkill; the skill is making that call deliberately.</p>
+<p class="v2-p"><strong>Why <code>SavedStateHandle</code> for the search query?</strong> The ViewModel survives rotation but not process death. The query is small and cheap to save, so it survives both, while the big data is reloaded from the database (lesson 61).</p>
+<p class="v2-p"><strong>Why type-safe routes?</strong> A route is a Kotlin type, so the compiler checks the arguments, and a typo in a string cannot send the app to a missing screen (lesson 55).</p>
+<p class="v2-p"><strong>What would you do differently with a server?</strong> Keep the database as the source of truth, add a remote data source, and a sync worker with WorkManager, as in lesson 64. The UI and domain layers would not change, which is the evidence that the layering worked.</p>
+<p class="v2-p"><strong>What are the limits of this app?</strong> There is no cloud backup, no user accounts, no price validation against outliers, and no unit conversion between "paint bucket" and "kilogram". Naming limits honestly shows maturity. Choose one limit and write how you would address it.</p>
+<p class="v2-p">If you cannot answer one of these questions, return to the lesson named in brackets, change the code or your understanding, and then continue.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Explain Your Decisions</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Phase 9: Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Add an edit feature</strong></p>
+<p class="v2-p">Allow editing an existing entry's amount. List the files you must change in each layer, and the new tests you would write.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Data: add <code>@Update</code> or a query to the DAO and an <code>update</code> method on the repository. Domain: reuse <code>ValidatePriceUseCase</code>. UI: an edit route or reuse the Add screen with an optional id; the ViewModel loads the entry into state. Tests: repository fake supports update; ViewModel test for loading and saving an edit; rule tests already cover validation; a UI test that editing changes the displayed amount.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Handle a new rule</strong></p>
+<p class="v2-p">The shop owner says prices from more than 90 days ago must show a "may be out of date" label. Where does the rule go and how do you test it?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The rule ("is stale") is business logic: put it in the domain layer as a small function or use case taking <code>now</code> as a parameter, for example <code>fun PriceEntry.isStale(now: Instant) = recordedAt &lt; now.minus(90, ChronoUnit.DAYS)</code>. The composable only shows the label if <code>isStale</code> is true. Test with fixed dates on both sides of the 90-day boundary.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Prepare for a tablet</strong></p>
+<p class="v2-p">Apply lesson 58 to the app. Describe what you would change.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Use a window size class: on compact, keep the current list-to-detail navigation; on medium and expanded, show list and detail side by side (list-detail scaffold or a <code>Row</code>), and use a navigation rail if more top-level destinations appear. Keep selection state in the ViewModel (<code>selectedItem</code>) so unfolding or rotating preserves it, and cap form width with <code>widthIn</code>.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Phase 9: Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Starting with the UI before the data and rules are tested.</strong> <em>Fix:</em> build and test bottom-up, as in Phases 3 and 4.</p>
+<p class="v2-p"><strong>Mistake #2: A bigger scope than you can finish.</strong> <em>Fix:</em> cut features, not quality.</p>
+<p class="v2-p"><strong>Mistake #3: Money in <code>Double</code>.</strong> <em>Fix:</em> whole kobo, with <code>Double</code> only for display.</p>
+<p class="v2-p"><strong>Mistake #4: Calling <code>Instant.now()</code> inside rules.</strong> <em>Fix:</em> pass <code>now</code> in.</p>
+<p class="v2-p"><strong>Mistake #5: Logic in composables.</strong> <em>Fix:</em> move it to use cases and ViewModels.</p>
+<p class="v2-p"><strong>Mistake #6: Testing only the happy path.</strong> <em>Fix:</em> test blank, zero, boundaries.</p>
+<p class="v2-p"><strong>Mistake #7: Leaving accessibility to the end.</strong> <em>Fix:</em> review each screen as you finish it.</p>
+<p class="v2-p"><strong>Mistake #8: Testing only debug builds.</strong> <em>Fix:</em> run the release build before publishing.</p>
+<p class="v2-p"><strong>Mistake #9: No README or screenshots.</strong> <em>Fix:</em> treat presentation as part of the work.</p>
+<p class="v2-p"><strong>Mistake #10: Copying code you do not understand.</strong> <em>Fix:</em> explain each layer in your own words (the "Explain Your Decisions" phase).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why is <code>now</code> passed as a parameter to the cheapest-market use case?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">So the rule is deterministic and can be tested with fixed dates.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Where does validation belong?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">In the domain layer as a use case, with the ViewModel showing the resulting errors.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why does the list screen read from Room via Flow rather than refresh manually?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Room re-emits when the table changes, so the UI updates automatically from a single source of truth.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Name two accessibility checks for the form screen.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Errors shown as text (not colour alone), labelled fields, 48dp touch targets, TalkBack announcements, and correct behaviour at large font sizes.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What should you test before publishing?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">The minified release build on a real device, including database operations and navigation.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses" rel="noopener noreferrer">Android courses and pathways</a></li>
+<li><a href="https://developer.android.com/topic/architecture" rel="noopener noreferrer">Guide to app architecture</a></li>
+<li><a href="https://developer.android.com/distribute/best-practices/launch" rel="noopener noreferrer">Publish your app (Play Console)</a></li>
+<li><a href="https://github.com/android/nowinandroid" rel="noopener noreferrer">Now in Android sample</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Phase 10: Self-Review Rubric and Final Delivery</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Finish MarketMate (or your chosen original app), review it honestly against a rubric, and deliver it.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Complete Phases 1 to 8 for MarketMate or an original app of similar size.</li>
+<li>Add <strong>one feature of your own</strong> (for example, edit, export to CSV with the share sheet, a per-market filter, or a weekly price chart using Canvas from lesson 56).</li>
+<li>At least <strong>ten automated tests</strong> across domain, ViewModel, repository (with Room in-memory) and one UI test.</li>
+<li>Complete the accessibility checklist and record findings and fixes.</li>
+<li>Produce a release build, test it on a real device, and store the signed bundle safely.</li>
+<li>Write the portfolio README with screenshots.</li>
+<li>Fill in the rubric below honestly and write a half-page reflection.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> make the app adaptive (lesson 58), add a Baseline Profile (lesson 57), or move the domain and data layers into a Kotlin Multiplatform module (lessons 66 to 70).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The self-review rubric (score each 0 to 3: 0 = missing, 1 = partly, 2 = good, 3 = excellent):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Area                         What a "3" looks like
+Planning                     User stories, screens, data model, rules written before coding
+Architecture                 Clear UI/domain/data layers; dependencies point one way
+State and UI                 Immutable UI state; state hoisting; no logic in composables
+Data                         Room as source of truth; money in kobo; repository interface
+Rules and tests              Boundary tests; fakes not mocks; tests run in seconds
+Navigation                   Type-safe routes; back behaviour correct; state survives rotation
+Accessibility                TalkBack, 200% font, contrast, 48dp targets all checked and fixed
+Performance                  Keys on lists; release build tested; no obvious jank
+Release readiness            Signed release build tested; listing and data safety answers drafted
+Presentation                 README, screenshots, honest "what I learned"
+Total: __ / 30   (24+ = portfolio ready; 18-23 = strong, polish; below 18 = revisit the lessons)</code></pre></div></div>
+<p class="v2-p">A sample reflection:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>What went well: building bottom-up made the UI easy; the pure rules caught two boundary bugs early.
+What I would change: I put date formatting in the composable; I would move it to a small formatter and test it.
+What was hardest: type-safe navigation arguments and the SavedStateHandle for the detail screen.
+Next: add editing, then an adaptive layout for tablets, then publish to an internal test track.</code></pre></div></div>
+<p class="v2-p">An in-memory repository test completes the data coverage:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class OfflinePriceRepositoryTest {
+    private lateinit var db: MarketDatabase
+
+    @Before fun setUp() {
+        db = Room.inMemoryDatabaseBuilder&lt;MarketDatabase&gt;(ApplicationProvider.getApplicationContext())
+            .setDriver(AndroidSQLiteDriver())
+            .build()
+    }
+    @After fun tearDown() = db.close()
+
+    @Test
+    fun add_then_observe_returns_the_entry() = runTest {
+        val repo = OfflinePriceRepository(db.priceDao(), StandardTestDispatcher(testScheduler))
+        repo.add("Garri", "Bodija", 250_000, 1_000)
+        val all = repo.observeAll().first()
+        assertEquals("Garri", all.single().itemName)
+        assertEquals(250_000, all.single().amountKobo)
+    }
+}</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 71 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-71-capstone-project-a-complete-android-app</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 71 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Phase 1: Choose and Plan the App</li><li>✅ Phase 2: Project Setup and Architecture</li><li>✅ Phase 3: The Data Layer</li><li>✅ Phase 4: The Domain Layer</li><li>✅ Phase 5: The UI Layer: List and Detail</li><li>✅ Phase 6: The Add Form</li><li>✅ Phase 7: Tests, Accessibility and Performance Review</li><li>✅ Phase 8: Release Checklist and Portfolio</li><li>✅ Explain Your Decisions</li><li>✅ Phase 9: Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_70.html" class="ln-btn">&#8592; Lesson 70</a><a href="lesson_72.html" class="ln-btn primary">Lesson 72 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 71 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

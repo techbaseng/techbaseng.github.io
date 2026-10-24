@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 16: Images, Layouts and Modifiers: The Business Card App — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l16">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 16 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 16</div>
+      <h1>Images, Layouts and Modifiers: The Business Card App</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Market Stall Card</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 16</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Add images and arrange UI with Row, Column, Box and Modifier. Build the business card app from scratch.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Market Stall Card</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome back! In lesson 15 you made text appear on the screen. Text alone makes for a plain app, though. In this lesson you will add <strong>pictures</strong>, learn how to <strong>arrange</strong> things on the screen with <code>Row</code>, <code>Column</code> and <code>Box</code>, and learn how to <strong>style and size</strong> them with the <code>Modifier</code> chain. At the end you will put all of it together in the classic beginner project: a <strong>digital business card</strong> that you could proudly show a client.</p>
+<p class="v2-p">Think of arranging a shop window. You have items (a phone, a price tag, a poster). You must decide what goes on top of what, what sits beside what, how much space each one gets, and whether it has a frame around it. Compose layouts work the same way: composables are the items, <code>Row</code>, <code>Column</code> and <code>Box</code> are the shelves, and modifiers are the frames, padding and price stickers.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Add an image to your project and display it with <code>Image</code> and <code>painterResource</code>.</li>
+<li>Write a proper <code>contentDescription</code> (and know when to use <code>null</code>).</li>
+<li>Choose between <code>ContentScale</code> options such as <code>Crop</code>, <code>Fit</code> and <code>FillBounds</code>.</li>
+<li>Arrange composables with <code>Row</code>, <code>Column</code> and <code>Box</code>.</li>
+<li>Control spacing and position with <code>Arrangement</code> and <code>Alignment</code>.</li>
+<li>Chain modifiers (<code>padding</code>, <code>size</code>, <code>fillMaxSize</code>, <code>background</code>, <code>clip</code>, <code>weight</code>) and explain why their <strong>order</strong> matters.</li>
+<li>Use <code>Icon</code> for small symbols from the built-in icon set.</li>
+<li>Build and run a complete business card app from scratch.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson covers three items from Unit 1, Pathway 3 (<em>Build a basic layout</em>) of Google's <strong>Android Basics with Compose</strong> course: the <em>Add images to your Android app</em> codelab, the <em>Practice: Compose Basics</em> codelab, and the <em>Project: Create a business card app</em> codelab. We follow the same topics in the same order, but with our own explanations, our own code and our own card design. The pathway link is in the resources at the end.</p>
+</blockquote>
+<h3 class="v2-h3">What you need</h3>
+<ul class="v2-ul">
+<li>Android Studio set up as in lessons 02 and 03, with an emulator or a real phone.</li>
+<li>The ideas from lesson 15: <code>@Composable</code>, <code>Text</code>, <code>@Preview</code> and <code>setContent</code>.</li>
+<li>About 45 minutes for the worked build and another 30 for the practice and project.</li>
+<li>A low-end laptop is fine for this lesson. If the emulator is slow, the Compose <strong>Preview</strong> panel shows your card without running anything.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. Composable functions (lesson 15)</h3>
+<p class="v2-p">A composable function is a normal Kotlin function marked with <code>@Composable</code> that <em>describes</em> a piece of UI. You call composables inside other composables, which builds a tree of UI pieces. <code>setContent { ... }</code> in <code>MainActivity</code> is where the tree starts.</p>
+<h3 class="v2-h3">2. <code>dp</code> and <code>sp</code> (lesson 15)</h3>
+<p class="v2-p"><code>dp</code> (density-independent pixels) measures sizes and spacing: <code>16.dp</code>. <code>sp</code> (scalable pixels) measures text size: <code>20.sp</code>. Both look the same physical size on different phone screens, and <code>sp</code> also respects the user's font-size setting.</p>
+<h3 class="v2-h3">3. Named arguments and lambdas (lessons 08 and 12)</h3>
+<p class="v2-p">Compose code is full of named arguments like <code>Text(text = "Hi", fontSize = 20.sp)</code> and trailing lambdas like <code>Column { ... }</code>. You should be able to read both without effort.</p>
+<h3 class="v2-h3">4. Resources in Android (a quick tour)</h3>
+<p class="v2-p">An Android project keeps non-code material in the <code>res</code> folder. You will touch two parts of it today:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Folder</th>
+<th>Holds</th>
+<th>How code refers to it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>res/values/strings.xml</code></td>
+<td>text used by the app</td>
+<td><code>R.string.full_name</code></td>
+</tr>
+<tr>
+<td><code>res/drawable</code></td>
+<td>images and vector icons</td>
+<td><code>R.drawable.profile</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The generated class <code>R</code> is a list of IDs for everything in <code>res</code>. Writing <code>R.drawable.profile</code> means "the drawable resource named <code>profile</code>". The IDs are created at build time, which is why a typo is a compile error, not a crash.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: Images in Compose</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Two kinds of picture</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Kind</th>
+<th>Examples</th>
+<th>Good for</th>
+<th>Watch out for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bitmap</strong></td>
+<td><code>.png</code>, <code>.jpg</code>, <code>.webp</code></td>
+<td>photographs</td>
+<td>large files use lots of memory</td>
+</tr>
+<tr>
+<td><strong>Vector</strong></td>
+<td>an XML drawable</td>
+<td>icons, logos, simple shapes</td>
+<td>not suitable for photos</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A vector is a set of drawing instructions ("draw a curve from here to here"), so it stays sharp at any size and the file is tiny. A bitmap is a grid of coloured dots. A photo from a modern phone camera can be 12 megapixels. When Android decodes a picture it needs roughly four bytes per pixel, so such a photo needs about 48 MB of memory just to display, which is a lot on a modest phone. For a profile picture shown at 120 dp, resize the photo down first (a width of about 500 to 1000 pixels is plenty). Lesson 31 shows how libraries load big pictures from the internet efficiently.</p>
+<h3 class="v2-h3">The <code>Image</code> composable</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Image(
+      painter            = WHAT to draw        (painterResource(R.drawable.profile))
+      contentDescription = WORDS for screen readers
+      modifier           = size, shape, padding...
+      contentScale       = HOW to fit it in the space
+  )</code></pre></div></div>
+<p class="v2-p"><code>painterResource</code> turns a drawable ID into a <code>Painter</code>, the object that knows how to draw the picture. The <code>Image</code> composable draws that painter inside whatever space the modifier gives it.</p>
+<h3 class="v2-h3"><code>contentDescription</code>: pictures for people who cannot see them</h3>
+<p class="v2-p">People who are blind or have low vision use a screen reader called <strong>TalkBack</strong> (lessons 46 to 48). When TalkBack reaches an image it reads the <code>contentDescription</code> aloud. So:</p>
+<ul class="v2-ul">
+<li><strong>Meaningful image</strong> (a photo of the person, a product photo): describe it briefly, for example <code>"Photo of Ade smiling"</code>. Keep descriptions in <code>strings.xml</code> so they can be translated.</li>
+<li><strong>Decorative image</strong> (a swirl, a divider, or an icon sitting next to text that already says the same thing): pass <code>contentDescription = null</code>. Then TalkBack skips it instead of reading noise.</li>
+<li><strong>Never</strong> leave the parameter out. It is required, which forces you to make a choice.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Rule of thumb:</strong> Ask "if this picture vanished, would a blind user miss any information?" If yes, describe it. If no, use <code>null</code>.</p>
+</blockquote>
+<h3 class="v2-h3"><code>ContentScale</code>: fitting a picture into a space</h3>
+<p class="v2-p">When the picture's shape differs from the box you give it (a wide photo in a square box), you must decide what happens. <code>ContentScale</code> is that decision:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th><code>ContentScale</code></th>
+<th>What it does</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Fit</code> (the default)</td>
+<td>Scales the picture uniformly so all of it is visible; may leave empty space</td>
+<td>showing a whole logo</td>
+</tr>
+<tr>
+<td><code>Crop</code></td>
+<td>Scales uniformly to fill the whole space and cuts off what overflows (centred)</td>
+<td>profile photos, banners</td>
+</tr>
+<tr>
+<td><code>FillWidth</code></td>
+<td>Scales uniformly until the width matches</td>
+<td>full-width banners</td>
+</tr>
+<tr>
+<td><code>FillHeight</code></td>
+<td>Scales uniformly until the height matches</td>
+<td>tall hero images</td>
+</tr>
+<tr>
+<td><code>FillBounds</code></td>
+<td>Stretches both ways to fill the space, <strong>distorting</strong> the picture</td>
+<td>almost never</td>
+</tr>
+<tr>
+<td><code>Inside</code></td>
+<td>Like <code>Fit</code>, but never scales up a small picture</td>
+<td>small icons</td>
+</tr>
+<tr>
+<td><code>None</code></td>
+<td>No scaling at all</td>
+<td>pixel-perfect assets</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Wide photo in a square box
+
+  Fit            Crop           FillBounds
+  +-------+      +-------+      +-------+
+  |       |      |#######|      |~~~~~~~|   &lt;- squashed
+  |#######|      |#######|      |~~~~~~~|
+  |       |      |#######|      |~~~~~~~|
+  +-------+      +-------+      +-------+
+  whole photo    sides cut      distorted</code></pre></div></div>
+<p class="v2-p">If you remember one thing: <strong><code>Crop</code> for photos that must fill a shape, <code>Fit</code> for things you must see completely.</strong></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Images in Compose</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Worked Examples: Adding an Image</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">Step 1: Add a drawable to the project</h3>
+<p class="v2-p">You have three easy routes. Menu names move between Android Studio versions, so look for the nearest match if something is not exactly where we say.</p>
+<p class="v2-p"><strong>Route A: import a picture file (PNG, JPG or WebP).</strong></p>
+<ol class="v2-ol">
+<li>Open the <strong>Resource Manager</strong> tool window (usually a tab on the left edge, or <strong>View &gt; Tool Windows &gt; Resource Manager</strong>).</li>
+<li>Click the <strong>+</strong> button and choose <strong>Import Drawables</strong>.</li>
+<li>Pick your file. The file name must use only <strong>lowercase letters, digits and underscores</strong>, and must not start with a digit. <code>profile.png</code> is fine; <code>My Photo.PNG</code> is not. Android Studio will usually offer to rename it.</li>
+<li>Click <strong>Next</strong> and then <strong>Import</strong>. The file lands in <code>res/drawable</code>.</li>
+</ol>
+<p class="v2-p"><strong>Route B: create a vector icon with Vector Asset.</strong></p>
+<ol class="v2-ol">
+<li>Right-click the <code>res</code> folder and choose <strong>New &gt; Vector Asset</strong>.</li>
+<li>Leave <strong>Asset Type</strong> on <strong>Clip Art</strong>, click the icon button, search for <code>person</code>, and select one.</li>
+<li>Change the <strong>Name</strong> to <code>profile</code> and click <strong>Next</strong>, then <strong>Finish</strong>. This creates <code>res/drawable/profile.xml</code>.</li>
+</ol>
+<p class="v2-p">Route B needs no photo and no download, which makes it ideal on a slow connection. We use it in the worked build.</p>
+<p class="v2-p"><strong>Route C: drag a file into the <code>res/drawable</code> folder</strong> in the Project panel (in the <strong>Android</strong> view). This works too, but Route A checks the name for you.</p>
+<h3 class="v2-h3">Step 2: Show it with <code>Image</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Image
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+
+@Composable
+fun ProfilePicture() {
+    Image(
+        painter = painterResource(id = R.drawable.profile),
+        contentDescription = stringResource(id = R.string.profile_photo_description)
+    )
+}</code></pre></div></div>
+<p class="v2-p">Add the matching line in <code>res/values/strings.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;string name="profile_photo_description"&gt;Profile picture of Ade&lt;/string&gt;</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> your picture at its natural size in the top-left corner of the screen, since we have given no modifier yet. Your project must have <code>R</code> imported. In a project whose package is <code>com.example.businesscard</code>, Android Studio normally generates the import <code>com.example.businesscard.R</code> automatically (or you need none if your file is in that same package). Do not accept <code>android.R</code>: that is a different class.</p>
+<h3 class="v2-h3">Step 3: Size it, crop it, shape it</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ProfilePicture() {
+    Image(
+        painter = painterResource(id = R.drawable.profile),
+        contentDescription = stringResource(id = R.string.profile_photo_description),
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(120.dp)
+            .clip(CircleShape)
+    )
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> the picture cropped to fill a 120 dp square, then clipped to a circle. The order is important: <code>size</code> makes the space, <code>clip</code> cuts the shape out of it, and <code>ContentScale.Crop</code> fills it. You will use this recipe for nearly every avatar you ever build.</p>
+<h3 class="v2-h3">A note on <code>Icon</code></h3>
+<p class="v2-p">For small symbols, such as a phone or an email envelope, Compose Material 3 has <code>Icon</code>, which draws a symbol in a single colour (the "tint"). Material's basic icon set ships with the standard Compose Material 3 dependency, so you can write:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+
+@Composable
+fun PhoneSymbol() {
+    Icon(
+        imageVector = Icons.Default.Phone,
+        contentDescription = null
+    )
+}</code></pre></div></div>
+<p class="v2-p">Here <code>contentDescription = null</code> is correct <em>when the icon sits beside text that already says the same thing</em> (a phone icon next to a phone number). A lone icon button must have a description.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Adding an Image</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Conceptual Understanding: Row, Column and Box</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Almost every screen you will ever see is built from three layout composables. Learn these well and you can build most layouts.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Column                Row                       Box
+  (top to bottom)       (left to right)           (stacked, back to front)
+
+  +---------+           +-----+-----+-----+       +-------------+
+  |  one    |           | one | two | 3   |       | back        |
+  |  two    |           +-----+-----+-----+       |   +------+  |
+  |  three  |                                     |   |front |  |
+  +---------+                                     +---+------+--+</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Layout</th>
+<th>Places children</th>
+<th>Think of it as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td>one under another</td>
+<td>a stack of plates, or a danfo bus aisle seen from the front</td>
+</tr>
+<tr>
+<td><code>Row</code></td>
+<td>side by side</td>
+<td>seats along a bench</td>
+</tr>
+<tr>
+<td><code>Box</code></td>
+<td>on top of each other</td>
+<td>sheets of paper piled up, last one on top</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">The two axes: main axis and cross axis</h3>
+<p class="v2-p">Each layout has a direction it lays things out in (the <strong>main axis</strong>) and a direction at right angles to it (the <strong>cross axis</strong>). You control each with a different parameter. This is the part beginners mix up, so study the table:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Main axis</th>
+<th>Cross axis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Column</strong></td>
+<td>vertical, controlled by <code>verticalArrangement</code></td>
+<td>horizontal, controlled by <code>horizontalAlignment</code></td>
+</tr>
+<tr>
+<td><strong>Row</strong></td>
+<td>horizontal, controlled by <code>horizontalArrangement</code></td>
+<td>vertical, controlled by <code>verticalAlignment</code></td>
+</tr>
+<tr>
+<td><strong>Box</strong></td>
+<td>(no axis)</td>
+<td><code>contentAlignment</code> places children in a 2D spot</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Arrangement</strong> decides how children are spread along the main axis. <strong>Alignment</strong> decides where they sit across the cross axis.</p>
+<h3 class="v2-h3">Arrangement options</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Column(verticalArrangement = ...) on a tall space
+
+  Top (default)   Center        Bottom        SpaceBetween   SpaceEvenly
+  [A]             .             .             [A]            .
+  [B]             [A]           .                            [A]
+  [C]             [B]           .             [B]            .
+  .               [C]           [A]                          [B]
+  .               .             [B]           [C]            .
+  .               .             [C]                          [C]
+                                                             .</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Arrangement</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Arrangement.Top</code> / <code>Start</code></td>
+<td>pack at the beginning (default)</td>
+</tr>
+<tr>
+<td><code>Arrangement.Center</code></td>
+<td>pack in the middle</td>
+</tr>
+<tr>
+<td><code>Arrangement.Bottom</code> / <code>End</code></td>
+<td>pack at the end</td>
+</tr>
+<tr>
+<td><code>Arrangement.SpaceBetween</code></td>
+<td>first at the start, last at the end, equal gaps between</td>
+</tr>
+<tr>
+<td><code>Arrangement.SpaceAround</code></td>
+<td>equal gaps, with half-size gaps at the edges</td>
+</tr>
+<tr>
+<td><code>Arrangement.SpaceEvenly</code></td>
+<td>all gaps equal, including at the edges</td>
+</tr>
+<tr>
+<td><code>Arrangement.spacedBy(8.dp)</code></td>
+<td>a fixed gap between children, packed at the start</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Alignment options</h3>
+<p class="v2-p">For a <code>Column</code> you choose a horizontal alignment: <code>Alignment.Start</code>, <code>Alignment.CenterHorizontally</code> or <code>Alignment.End</code>. For a <code>Row</code> you choose a vertical one: <code>Alignment.Top</code>, <code>Alignment.CenterVertically</code> or <code>Alignment.Bottom</code>. For a <code>Box</code> you choose a combined position: <code>Alignment.TopStart</code>, <code>Alignment.Center</code>, <code>Alignment.BottomEnd</code> and so on.</p>
+<h3 class="v2-h3">Layouts only take as much space as they need</h3>
+<p class="v2-p">A <code>Column</code> with no modifier is exactly as big as its children. If you ask it to centre its children vertically, nothing will seem to happen, because there is no spare room to centre them in. That is why you will so often see <code>Modifier.fillMaxSize()</code> or <code>fillMaxWidth()</code> next to an <code>Arrangement</code> or <code>Alignment</code>: they create the spare room.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Row, Column and Box</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Worked Examples: Layouts</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Each example below is a complete composable. Paste it into a file in your project and add a <code>@Preview</code> (shown once below), or drop it into <code>setContent</code>. All imports are listed so the code compiles as shown.</p>
+<h3 class="v2-h3">The preview you will keep reusing</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(showBackground = true)
+@Composable
+fun LayoutPreview() {
+    ColumnDemo()   // change this name to preview a different example
+}</code></pre></div></div>
+<h3 class="v2-h3">Example 1: A centred Column</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+
+@Composable
+fun ColumnDemo() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Techbase Academy")
+        Text("Ibadan, Nigeria")
+        Text("Learn. Build. Ship.")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> three lines of text stacked, exactly in the middle of the screen both ways. <code>fillMaxSize</code> made the Column as big as the screen; <code>verticalArrangement = Center</code> pushed the stack to the vertical middle; <code>horizontalAlignment = CenterHorizontally</code> put each line in the horizontal middle.</p>
+<h3 class="v2-h3">Example 2: A Row with an icon and text</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun EmailRow() {
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = Icons.Default.Email, contentDescription = null)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(text = "ade@example.com")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> a small envelope icon, a 12 dp gap, then the address, all on one line with the icon and text lined up through their vertical centres. <code>Spacer</code> is an invisible composable whose only job is to take up room. Without <code>verticalAlignment</code>, the icon would sit at the top and look slightly off.</p>
+<h3 class="v2-h3">Example 3: Weighted Row (splitting the space)</h3>
+<p class="v2-p"><code>Modifier.weight</code> hands out the leftover space in a Row or Column in proportion.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun PriceRow() {
+    Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Text(text = "Jollof rice", modifier = Modifier.weight(1f))
+        Text(text = "₦1200", fontWeight = FontWeight.Bold)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> "Jollof rice" at the left edge and "₦1200" pushed to the right edge. The price takes only the width it needs, and the dish name (weight <code>1f</code>) takes <em>all</em> the rest. If you gave two siblings <code>weight(1f)</code> and <code>weight(2f)</code>, the second would get twice the room of the first.</p>
+<h3 class="v2-h3">Example 4: A Box that overlaps things</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun BadgeDemo() {
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .background(Color(0xFF0B3D2E))
+    ) {
+        Text(
+            text = "NEW",
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+        )
+        Text(
+            text = "Fresh catch",
+            color = Color.White,
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> a dark green 200 dp square with "Fresh catch" in the centre and "NEW" in the top-right corner. Children of a <code>Box</code> are drawn in the order written, so a later child covers an earlier one. <code>Modifier.align</code> places one child; <code>contentAlignment</code> on the Box places <em>all</em> of them.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Layouts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Conceptual Understanding: The Modifier Chain and Why Order Matters</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">A <strong>modifier</strong> changes how a composable looks or behaves: its size, spacing, background, shape, click behaviour and more. You attach them by chaining with dots:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Modifier
+    .padding(16.dp)
+    .background(Color.Yellow)
+    .size(100.dp)</code></pre></div></div>
+<p class="v2-p">Each modifier wraps the result of the ones before it, like wrapping a gift: paper first, then ribbon, then a bow. Changing the order changes the gift. Compare:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Modifier.background(Yellow).padding(16.dp)     Modifier.padding(16.dp).background(Yellow)
+
+  +---------------------+                            (16 dp of nothing)
+  |YYYYYYYYYYYYYYYYYYYYY|                          +---------------------+
+  |YY  +-----------+  YY|                          |   +-------------+   |
+  |YY  |  content  |  YY|                          |   |YYYYYYYYYYYYY|   |
+  |YY  +-----------+  YY|                          |   |YY content YY|   |
+  |YYYYYYYYYYYYYYYYYYYYY|                          |   |YYYYYYYYYYYYY|   |
+  +---------------------+                          |   +-------------+   |
+  padding is INSIDE the colour                      +---------------------+
+                                                    padding is OUTSIDE the colour
+                                                    (acts like a margin)</code></pre></div></div>
+<p class="v2-p">Read the chain <strong>top to bottom as outside to inside</strong>. Padding written before <code>background</code> creates space outside the colour (like a margin). Padding written after <code>background</code> creates space inside the coloured area.</p>
+<h3 class="v2-h3">The modifiers you need today</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Modifier</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>padding(16.dp)</code></td>
+<td>space around the content (also <code>padding(horizontal = 8.dp, vertical = 4.dp)</code>, or per-side <code>padding(top = 8.dp)</code>)</td>
+</tr>
+<tr>
+<td><code>size(120.dp)</code></td>
+<td>fixed width and height (also <code>width(...)</code>, <code>height(...)</code>)</td>
+</tr>
+<tr>
+<td><code>fillMaxSize()</code></td>
+<td>take all the available width and height</td>
+</tr>
+<tr>
+<td><code>fillMaxWidth()</code> / <code>fillMaxHeight()</code></td>
+<td>take all the available width or height</td>
+</tr>
+<tr>
+<td><code>background(Color)</code></td>
+<td>a solid colour behind the content</td>
+</tr>
+<tr>
+<td><code>clip(CircleShape)</code></td>
+<td>cut the content to a shape (also <code>RoundedCornerShape(16.dp)</code>)</td>
+</tr>
+<tr>
+<td><code>weight(1f)</code></td>
+<td>take a share of the leftover space inside a Row or Column</td>
+</tr>
+<tr>
+<td><code>alpha(0.5f)</code></td>
+<td>make the content half transparent</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Android Studio can import each one for you: type the name, press <code>Alt + Enter</code> (<code>Option + Return</code> on a Mac) and accept the suggested import. Take care to choose the one from <code>androidx.compose...</code>.</p>
+<h3 class="v2-h3">Pass a <code>modifier</code> parameter in your own composables</h3>
+<p class="v2-p">A good habit that you will see in all official code: give every composable you write a <code>modifier: Modifier = Modifier</code> parameter and pass it to the outermost layout inside. This lets whoever <em>calls</em> your composable decide its size and position. We do this in the build below.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Modifier Chain and Why Order Matters</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build: The Business Card App</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Now we build a complete screen: a dark green card with a round picture, a name, a job title, and three contact lines at the bottom. The finished screen is laid out like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  +---------------------------+
+  |                           |
+  |         (  o  )           |   &lt;- round profile picture
+  |                           |
+  |          Ade Bello        |   &lt;- name (large, bold)
+  |   Android Developer       |   &lt;- title (smaller, accent colour)
+  |                           |
+  |                           |   &lt;- this middle section grows
+  |   [phone] +234 800 000 0000
+  |   [share] @ade_builds     |
+  |   [email] ade@example.com |
+  +---------------------------+</code></pre></div></div>
+<p class="v2-p">The picture, name and title live in the top section and are centred in the room it has. The contacts sit in a bottom section. A <code>Modifier.weight(1f)</code> on the top section pushes the contacts to the bottom.</p>
+<h3 class="v2-h3">Step 1: Create the project</h3>
+<ol class="v2-ol">
+<li>In Android Studio choose <strong>New Project</strong> and pick <strong>Empty Activity</strong> (the Compose one; see lesson 03).</li>
+<li>Name it <code>Business Card</code>, keep the package as <code>com.example.businesscard</code>, pick a <strong>Minimum SDK</strong> that the wizard recommends, and finish.</li>
+<li>Wait for the Gradle sync. The first sync downloads dependencies and can take several minutes on a slow connection, so be patient.</li>
+</ol>
+<h3 class="v2-h3">Step 2: Add the picture and the text resources</h3>
+<p class="v2-p">Create the vector picture with <strong>Route B</strong> from earlier: <strong>New &gt; Vector Asset</strong>, clip art <code>person</code>, name it <code>profile</code>.</p>
+<p class="v2-p">Now open <code>res/values/strings.xml</code> and make it look like this (keep the <code>app_name</code> the wizard created):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Business Card&lt;/string&gt;
+    &lt;string name="full_name"&gt;Ade Bello&lt;/string&gt;
+    &lt;string name="job_title"&gt;Android Developer&lt;/string&gt;
+    &lt;string name="phone_number"&gt;+234 800 000 0000&lt;/string&gt;
+    &lt;string name="social_handle"&gt;@ade_builds&lt;/string&gt;
+    &lt;string name="email_address"&gt;ade@example.com&lt;/string&gt;
+    &lt;string name="profile_photo_description"&gt;Profile picture of Ade Bello&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p">Using string resources instead of typing text inside the code makes it easy to translate the app later. The contact details above are made-up placeholders. Put your own in your own version.</p>
+<h3 class="v2-h3">Step 3: Write the card</h3>
+<p class="v2-p">Open <code>MainActivity.kt</code> and replace its contents with the following. The wizard's template changes slightly between versions (it may or may not include the <code>enableEdgeToEdge()</code> line or a <code>Scaffold</code>), so keep your own <code>Theme</code> import and <code>package</code> line if they differ. We name the theme <code>BusinessCardTheme</code>, which is what the wizard generates for a project called <em>Business Card</em>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.businesscard
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.businesscard.ui.theme.BusinessCardTheme
+
+private val CardBackground = Color(0xFF0B3D2E)
+private val Accent = Color(0xFFFFC857)
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            BusinessCardTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -&gt;
+                    BusinessCard(modifier = Modifier.padding(innerPadding))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BusinessCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(CardBackground),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        IdentitySection(modifier = Modifier.weight(1f))
+        ContactSection(modifier = Modifier.padding(bottom = 32.dp))
+    }
+}
+
+@Composable
+private fun IdentitySection(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.profile),
+            contentDescription = stringResource(id = R.string.profile_photo_description),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+        )
+        Text(
+            text = stringResource(id = R.string.full_name),
+            color = Color.White,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+        Text(
+            text = stringResource(id = R.string.job_title),
+            color = Accent,
+            fontSize = 18.sp,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun ContactSection(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        ContactRow(Icons.Default.Phone, stringResource(id = R.string.phone_number))
+        ContactRow(Icons.Default.Share, stringResource(id = R.string.social_handle))
+        ContactRow(Icons.Default.Email, stringResource(id = R.string.email_address))
+    }
+}
+
+@Composable
+private fun ContactRow(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Accent
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = text, color = Color.White, fontSize = 16.sp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BusinessCardPreview() {
+    BusinessCardTheme {
+        BusinessCard()
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Step 4: Preview and run</h3>
+<ol class="v2-ol">
+<li>Open the <strong>Split</strong> or <strong>Design</strong> view of the editor (buttons at the top right of the editor) and click <strong>Build &amp; Refresh</strong> if the preview is blank. The preview needs a successful build first.</li>
+<li>To run on a device, choose your emulator or phone in the toolbar and click the green <strong>Run</strong> button.</li>
+</ol>
+<p class="v2-p"><strong>What the screen shows:</strong> a full-screen dark green background. In the upper part, a white circle holding the person icon, with <em>Ade Bello</em> in large white bold letters and <em>Android Developer</em> in golden yellow underneath. The three contact lines sit near the bottom, each with a golden icon on the left and white text beside it, and the three icons line up in one column.</p>
+<h3 class="v2-h3">Step 5: Read the code block by block</h3>
+<ul class="v2-ul">
+<li><strong><code>private val CardBackground</code> and <code>Accent</code></strong>: named colours at the top of the file. <code>Color(0xFF0B3D2E)</code> is Alpha-Red-Green-Blue in hexadecimal: <code>FF</code> means fully opaque, then <code>0B</code>, <code>3D</code>, <code>2E</code> for the red, green and blue amounts. Naming colours means you change them in one place.</li>
+<li><strong><code>MainActivity</code></strong>: wires the card into the app. <code>Scaffold</code> gives us <code>innerPadding</code>, the space the system bars use. We pass it into the card so the text is not hidden under the status bar.</li>
+<li><strong><code>BusinessCard</code></strong>: an outer <code>Column</code> that fills the screen, paints it green and centres its children horizontally. It holds two children: the identity part and the contact part.</li>
+<li><strong><code>IdentitySection(modifier = Modifier.weight(1f))</code></strong>: because of <code>weight(1f)</code>, this section takes all the vertical space the contacts do not need. Inside, its own <code>Column</code> uses <code>verticalArrangement = Center</code> to centre the picture and names in that large space.</li>
+<li><strong>The picture's modifier chain</strong>: <code>size</code> first, then <code>clip</code>, then <code>background</code>. The white background is drawn inside the circular clip, so the transparent areas of the vector icon show white, not green.</li>
+<li><strong><code>ContactRow</code></strong>: a <code>Row</code> with an icon, a <code>Spacer</code> and some text, centred vertically. It is reused three times with different data, which is the main benefit of splitting the UI into small composables.</li>
+<li><strong><code>contentDescription = null</code></strong> on the icons: each icon sits beside text that says the same thing, so the icon is decorative.</li>
+</ul>
+<h3 class="v2-h3">Step 6: Experiment</h3>
+<p class="v2-p">Change one thing at a time and watch the preview: set <code>verticalArrangement</code> to <code>Arrangement.Top</code>; change <code>ContentScale.Crop</code> to <code>ContentScale.Fit</code>; move <code>.background(Color.White)</code> before <code>.clip(CircleShape)</code> and notice the white square corners appear; swap <code>weight(1f)</code> for nothing and see where the contacts go. Experiments are how layout intuition grows.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: The Business Card App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Practice: Compose Basics</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">The official pathway includes a <em>Practice: Compose Basics</em> codelab where you apply your skills to problems with less guidance. Here is our own set in the same spirit. Try each one in the Preview before looking at the answer.</p>
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Practice 1: A greeting stack</strong></p>
+<p class="v2-p">Build a composable <code>GreetingStack</code> that fills the screen with a light grey background (<code>Color(0xFFEEEEEE)</code>). Inside, centre three <code>Text</code>s horizontally and vertically: "Welcome" (36 sp, bold), "to Techbase" (24 sp), and "Tap below to begin" (16 sp). Leave 12 dp between the lines using a single parameter on the Column, not three paddings.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun GreetingStack() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFEEEEEE)),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Welcome", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text("to Techbase", fontSize = 24.sp, color = Color.Black)
+        Text("Tap below to begin", fontSize = 16.sp, color = Color.Black)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The second argument, <code>Alignment.CenterVertically</code>, tells <code>spacedBy</code> to centre the whole group instead of packing it at the top. We set <code>color = Color.Black</code> explicitly so the text stays readable if the phone is in dark mode.</p>
+<p class="v2-p"><strong>What it shows:</strong> a light grey screen with the three lines in the middle, 12 dp apart.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Practice 2: A profile row</strong></p>
+<p class="v2-p">Build <code>ProfileRow</code> that shows a 56 dp circular icon (use <code>Icons.Default.Person</code> inside an <code>Icon</code> with a <code>Modifier.size(56.dp)</code>), then 16 dp of space, then a Column holding a bold name ("Chioma Okafor") and a grey role ("Student, Ibadan"). The whole Row should have 16 dp of padding and all items should line up through the vertical centre.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun ProfileRow() {
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = null,
+            modifier = Modifier.size(56.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text("Chioma Okafor", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text("Student, Ibadan", fontSize = 14.sp, color = Color.Gray)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What it shows:</strong> a person icon on the left, and two lines of text to its right, with the icon centred against the pair of lines. The icon has a null description because the name beside it already identifies the person.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Practice 3: A badge on a picture</strong></p>
+<p class="v2-p">Build <code>BadgedImage</code>: a 160 dp <code>Box</code> containing your <code>profile</code> drawable cropped to fill it, clipped to a rounded rectangle with 24 dp corners, with a small red circle (20 dp, <code>Color.Red</code>) overlapping the top-right corner. Use <code>Modifier.align(Alignment.TopEnd)</code> for the red circle.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun BadgedImage() {
+    Box(modifier = Modifier.size(160.dp)) {
+        Image(
+            painter = painterResource(id = R.drawable.profile),
+            contentDescription = "Profile picture",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(160.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color.LightGray)
+        )
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(Color.Red)
+                .align(Alignment.TopEnd)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What it shows:</strong> a light grey rounded square holding your picture, with a small red dot sitting in its top-right corner. The red dot comes second in the Box, so it is drawn on top. (For a real app, put that description in <code>strings.xml</code>. We typed it inline to keep the example short.)</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Open your Business Card app and make three changes, previewing after each: (1) change the accent colour, (2) add a fourth contact line using <code>Icons.Default.LocationOn</code> with your town, and (3) change the picture's shape from a circle to <code>RoundedCornerShape(24.dp)</code>. Add <code>import androidx.compose.material.icons.filled.LocationOn</code> for the icon.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Predict the layout</strong></p>
+<p class="v2-p">Without running it, decide where the two texts appear on the screen.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Box(modifier = Modifier.fillMaxSize()) {
+    Text("A", modifier = Modifier.align(Alignment.BottomStart))
+    Text("B", modifier = Modifier.align(Alignment.BottomEnd))
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">"A" sits in the bottom-left corner of the screen and "B" sits in the bottom-right corner. The Box fills the screen, and each <code>align</code> picks a spot inside it. They do not overlap, because the two spots are on opposite sides.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix the modifier order</strong></p>
+<p class="v2-p">A student wants a yellow rounded label with 16 dp of space <em>inside</em> the yellow, but gets a label with the text squeezed against the edge. Find the bug and fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Text(
+    text = "Open now",
+    modifier = Modifier
+        .padding(16.dp)
+        .background(Color.Yellow, RoundedCornerShape(12.dp))
+)</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Padding written <em>before</em> <code>background</code> is outside the colour, so the yellow hugs the text and the 16 dp is an invisible margin. Swap them so the background is applied first and the padding sits inside it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Text(
+    text = "Open now",
+    modifier = Modifier
+        .background(Color.Yellow, RoundedCornerShape(12.dp))
+        .padding(16.dp)
+)</code></pre></div></div>
+<p class="v2-p">Now the yellow rounded shape is drawn around the text <em>and</em> the 16 dp of padding. (The <code>background</code> function accepts an optional shape as its second parameter. It needs <code>import androidx.compose.foundation.background</code> and <code>import androidx.compose.foundation.shape.RoundedCornerShape</code>.)</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: A simple product card</strong></p>
+<p class="v2-p">Build a <code>ProductCard</code> composable inside a <code>Column</code> with <code>padding(16.dp)</code>: a 200 dp-wide, 120 dp-high image area (use your <code>profile</code> drawable with <code>ContentScale.Crop</code>), then the product name "Ankara fabric" in bold, then a <code>Row</code> with the text "₦8500" taking the leftover width via <code>weight(1f)</code> and the word "In stock" at the right end.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ProductCard() {
+    Column(modifier = Modifier.padding(16.dp).width(200.dp)) {
+        Image(
+            painter = painterResource(id = R.drawable.profile),
+            contentDescription = "Ankara fabric",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.width(200.dp).height(120.dp)
+        )
+        Text(text = "Ankara fabric", fontWeight = FontWeight.Bold)
+        Row {
+            Text(text = "₦8500", modifier = Modifier.weight(1f))
+            Text(text = "In stock")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The Column is limited to 200 dp wide, so the Row inside also gets 200 dp: the price takes everything the label does not need, which pushes "In stock" to the right edge.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: A bad file name for an image.</strong> <em>The wrong name:</em> <code>My Photo.PNG</code> or <code>2024-pic.png</code>. <em>The problem:</em> resource names may only contain lowercase letters, digits and underscores, and cannot start with a digit. Otherwise the build fails with an invalid resource name error. <em>The fix:</em> rename to <code>my_photo.png</code> and <code>pic_2024.png</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Importing the wrong <code>R</code>.</strong> <em>The wrong code:</em> <code>import android.R</code> at the top of the file, then <code>R.drawable.profile</code> shows red. <em>The problem:</em> <code>android.R</code> is the platform's own resource list, not your app's. <em>The fix:</em> delete that import, and use your project's <code>R</code> (it is in your package, <code>com.example.businesscard.R</code>, so a file in that package needs no import at all).</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting <code>contentDescription</code>.</strong> <em>The wrong code:</em> <code>Image(painter = painterResource(R.drawable.profile))</code>. <em>The problem:</em> the parameter is required, so the code does not compile. <em>The fix:</em> give a description for meaningful images, <code>null</code> for decorative ones.</p>
+<p class="v2-p"><strong>Mistake #4: Putting a description on a decorative icon.</strong> <em>The wrong code:</em> an icon with <code>contentDescription = "phone"</code> right next to the number. <em>The problem:</em> TalkBack reads "phone, plus two three four..." and the learner hears it twice. <em>The fix:</em> use <code>null</code> when text beside the icon already says it.</p>
+<p class="v2-p"><strong>Mistake #5: Mixing up Arrangement and Alignment.</strong> <em>The wrong code:</em> <code>Column(horizontalArrangement = Arrangement.Center)</code>. <em>The problem:</em> a <code>Column</code> has no <code>horizontalArrangement</code> parameter; its horizontal control is <code>horizontalAlignment</code>. <em>The fix:</em> <code>Column(horizontalAlignment = Alignment.CenterHorizontally)</code>. For a <code>Row</code>, it is the other way round.</p>
+<p class="v2-p"><strong>Mistake #6: Centring inside a layout with no spare room.</strong> <em>The wrong code:</em> <code>Column(verticalArrangement = Arrangement.Center) { ... }</code> with no size modifier. <em>The problem:</em> the Column is only as tall as its children, so there is nothing to centre. <em>The fix:</em> add <code>Modifier.fillMaxSize()</code> (or a height).</p>
+<p class="v2-p"><strong>Mistake #7: Modifier order surprises.</strong> <em>The wrong code:</em> <code>Modifier.padding(16.dp).background(Color.Red)</code> when you wanted the padding inside the red. <em>The fix:</em> background first, padding second. Read modifiers as outside to inside.</p>
+<p class="v2-p"><strong>Mistake #8: Distorted pictures.</strong> <em>The wrong code:</em> <code>contentScale = ContentScale.FillBounds</code> on a photo in a mismatched box. <em>The problem:</em> faces get stretched. <em>The fix:</em> use <code>Crop</code> (fill the space) or <code>Fit</code> (show everything).</p>
+<p class="v2-p"><strong>Mistake #9: Huge photos.</strong> <em>The problem:</em> adding a 6 MB camera photo for a 120 dp avatar slows the app and can run a modest phone out of memory. <em>The fix:</em> shrink the picture to a sensible size before adding it.</p>
+<p class="v2-p"><strong>Mistake #10: Hard-coded text everywhere.</strong> <em>The problem:</em> text typed directly in code cannot be translated. <em>The fix:</em> use <code>stringResource(R.string.something)</code> for visible text.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer. These cover the topics the pathway quiz tests: images, layouts and modifiers.</p>
+<p class="v2-p"><strong>Question 1.</strong> In which folder do you put an image so that you can refer to it as <code>R.drawable.something</code>, and what rules apply to the file name?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">In <code>res/drawable</code>. The file name must use only lowercase letters, digits and underscores, and must not start with a digit.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> When should <code>contentDescription</code> be <code>null</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">When the image or icon is purely decorative, or when text right beside it already conveys the same information. Meaningful images need a short description so screen readers can speak it.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> You need a wide photo to fill a square avatar without stretching it. Which <code>ContentScale</code> do you pick?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>ContentScale.Crop</code>. It scales uniformly until the space is filled and cuts off the overflow. <code>FillBounds</code> would distort it and <code>Fit</code> would leave empty space.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> In a <code>Row</code>, which parameter spreads children along the horizontal direction, and which one aligns them vertically?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>horizontalArrangement</code> spreads them horizontally (the main axis of a Row) and <code>verticalAlignment</code> aligns them vertically (the cross axis).</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What is the difference between <code>Modifier.padding(16.dp).background(Color.Red)</code> and <code>Modifier.background(Color.Red).padding(16.dp)</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">In the first, the padding is applied first, so it lies outside the red (like a margin) and the red only covers the content. In the second, the red is drawn first and the padding is inside it, so the red area includes the 16 dp border around the content.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-1-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 1, Pathway 3: Build a basic layout</a>: the official pathway this lesson is based on, with the three codelabs and the quiz.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-basics" rel="noopener noreferrer">Jetpack Compose basics codelab</a>: a longer official walkthrough of the same fundamentals.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-layouts" rel="noopener noreferrer">Jetpack Compose layouts codelab</a>: deeper coverage of layouts and modifiers (lesson 38 builds on it).</li>
+<li><a href="https://developer.android.com/develop/ui/compose/graphics/images/customize" rel="noopener noreferrer">Customise images in Compose</a>: <code>ContentScale</code>, clipping and other image options.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Market Stall Card</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Create a second kind of card: a screen for a market stall with a name header and a small price list. The business card in the lesson stacks things in a Column; this card focuses on <code>Row</code>, <code>weight</code> and padding order, and on a card sitting on a coloured background.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a new composable <code>StallCard(modifier: Modifier = Modifier)</code>. Its outermost layout is a <code>Box</code> that fills the screen, has a soft orange background <code>Color(0xFFFFF3E0)</code> and centres its content.</li>
+<li>Inside, a <code>Column</code> that fills the width, has 24 dp of outer margin, a white background with rounded corners (16 dp) and 20 dp of inner padding. Mind the modifier order: margin, then clip and background, then inner padding.</li>
+<li>At the top of the card, a <code>Row</code> with a 48 dp orange <code>Icons.Default.Home</code> icon, a 12 dp gap, and a small Column with the stall name (bold, 22 sp) and opening hours (grey, 14 sp). All vertically centred.</li>
+<li>A thin divider made from a <code>Box</code> that is 1 dp high, fills the width and is light grey, with space above and below it.</li>
+<li>Three menu rows made by one reusable private composable <code>MenuRow(dish: String, price: String)</code>. The dish text takes the leftover width using <code>weight(1f)</code>; the price is bold at the right.</li>
+<li>Add a <code>@Preview</code>. Use explicit text colours so the card also looks right in dark mode.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a fourth row at the bottom with an <code>Icons.Default.Phone</code> icon (description <code>null</code>) and a phone number, styled like the <code>ContactRow</code> in the lesson.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.businesscard
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+private val Orange = Color(0xFFE65100)
+private val TextDark = Color(0xFF212121)
+
+@Composable
+fun StallCard(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color(0xFFFFF3E0)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White)
+                .padding(20.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Home,
+                    contentDescription = null,
+                    tint = Orange,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = "Mama Put Kitchen",
+                        color = TextDark,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(text = "Open 8am to 6pm", color = Color.Gray, fontSize = 14.sp)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color.LightGray)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MenuRow(dish = "Jollof rice", price = "₦1200")
+            MenuRow(dish = "Fried plantain", price = "₦400")
+            MenuRow(dish = "Pepper soup", price = "₦1500")
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = null,
+                    tint = Orange
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = "+234 800 000 0001", color = TextDark, fontSize = 16.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun MenuRow(dish: String, price: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    ) {
+        Text(
+            text = dish,
+            color = TextDark,
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = price,
+            color = TextDark,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun StallCardPreview() {
+    StallCard()
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> a pale orange background with a white rounded card floating in the middle. The card has an orange house icon beside "Mama Put Kitchen" and "Open 8am to 6pm", a thin grey line, three menu lines with the dish at the left and a bold price at the right edge, and a phone line at the bottom.</p>
+<p class="v2-p"><strong>Why the modifier order is right:</strong> the first <code>padding(24.dp)</code> comes before <code>clip</code> and <code>background</code>, so it is an outer margin that leaves the orange showing around the card. The second <code>padding(20.dp)</code> comes after, so it is inside the white. To display it in the app, call <code>StallCard(modifier = Modifier.padding(innerPadding))</code> inside <code>setContent</code> in place of <code>BusinessCard</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 16 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-16-images-layouts-and-modifiers-the-business</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 16 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Images in Compose</li><li>✅ Worked Examples: Adding an Image</li><li>✅ Conceptual Understanding: Row, Column and Box</li><li>✅ Worked Examples: Layouts</li><li>✅ Conceptual Understanding: The Modifier Chain and Why Order Matters</li><li>✅ Step-by-Step Build: The Business Card App</li><li>✅ Practice: Compose Basics</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_15.html" class="ln-btn">&#8592; Lesson 15</a><a href="lesson_17.html" class="ln-btn primary">Lesson 17 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 16 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

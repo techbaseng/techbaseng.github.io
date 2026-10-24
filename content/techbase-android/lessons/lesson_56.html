@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 56: Custom Layouts and Graphics — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l56">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 56 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 56</div>
+      <h1>Custom Layouts and Graphics</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Dashboard Widgets from Scratch</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 56</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Build your own layouts with the Layout composable and draw custom graphics with Canvas, DrawScope and graphicsLayer.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Dashboard Widgets from Scratch</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p"><code>Row</code>, <code>Column</code>, <code>Box</code> and <code>LazyColumn</code> cover most screens. Sooner or later you meet a design they cannot express: tags that wrap onto new lines, a circular menu, a staggered timeline, a chart, a progress ring, a ticket shape with notches. Compose lets you build those yourself, with just a few concepts: <strong><code>Layout</code></strong> to decide where children go, and <strong><code>Canvas</code></strong> / <strong><code>DrawScope</code></strong> to draw shapes, paths and text.</p>
+<p class="v2-p">This lesson covers <em>Introduction to drawing in Compose</em> and <em>Custom layouts and graphics</em> from Pathway 2 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2), and follows the ideas of the <em>Custom layouts in Jetpack Compose</em> and <em>Graphics in Compose</em> documentation, with our own examples.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the three phases again, now from the layout author's point of view: <strong>constraints in, size out, placement</strong>.</li>
+<li>Write a <strong>custom layout</strong> with the <code>Layout</code> composable and with <code>Modifier.layout</code>.</li>
+<li>Use <strong>parent data</strong>, <strong>intrinsics</strong> and <strong>alignment lines</strong> at a basic level.</li>
+<li>Draw with <strong><code>Canvas</code></strong>, <strong><code>DrawScope</code></strong>, <code>drawBehind</code> and <code>drawWithContent</code>.</li>
+<li>Use <strong><code>Path</code></strong>, <strong><code>Brush</code></strong>, <strong><code>Stroke</code></strong>, <strong><code>BlendMode</code></strong> and <strong>clipping</strong>.</li>
+<li>Draw <strong>text</strong> on a canvas, and handle <strong>touch</strong> on custom drawing.</li>
+<li>Use <strong><code>graphicsLayer</code></strong> for transformations, and <code>drawWithCache</code> for expensive objects.</li>
+<li>Build a <strong>bar chart</strong>, a <strong>progress ring</strong> and a <strong>flow layout</strong> of tags.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a layout is a function from <strong>constraints</strong> to <strong>a size and a set of positions</strong>. A drawing is a function from <strong>a size</strong> to <strong>draw commands</strong>. Neither knows anything about Material, state or business logic.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>The three phases: composition, layout, drawing</strong> (lesson 37).</li>
+<li><strong>Modifiers, constraints and modifier order</strong> (lesson 38).</li>
+<li><strong>State and animation</strong> (lessons 17 and 41).</li>
+<li><strong>Basic geometry</strong>: coordinates, radius, angle. In Compose the origin <code>(0, 0)</code> is the <strong>top-left</strong>; x grows rightward and y grows <strong>downward</strong>.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: How a Layout Works</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">When a parent places a child, this conversation happens:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Parent  -&gt;  Child:  "You may be between 0 and 300 px wide and between 0 and 600 px tall."   (constraints)
+Child   -&gt;  Parent: "Then I need 120 x 80 px."                                              (measure)
+Parent  -&gt;  Child:  "Place yourself at x = 40, y = 100."                                    (place)</code></pre></div></div>
+<p class="v2-p">In code:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Concept</th>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Constraints</strong></td>
+<td><code>Constraints(minWidth, maxWidth, minHeight, maxHeight)</code></td>
+<td>The allowed size range from the parent (in pixels)</td>
+</tr>
+<tr>
+<td><strong>Measurable</strong></td>
+<td><code>Measurable</code></td>
+<td>A child that has <strong>not</strong> been measured yet</td>
+</tr>
+<tr>
+<td><strong>Placeable</strong></td>
+<td><code>Placeable</code></td>
+<td>A child <strong>after</strong> measuring; has <code>width</code>, <code>height</code>, and <code>place(x, y)</code></td>
+</tr>
+<tr>
+<td><strong>MeasureResult</strong></td>
+<td>from <code>layout(width, height) { ... }</code></td>
+<td>The layout's own size plus the placement block</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Compose's golden rule:</strong> each child is <strong>measured only once</strong> per layout pass. Trying to measure a child twice throws an exception. This is why Compose layouts nest deeply without the performance penalty that nested View layouts had. If you need information from children <em>before</em> measuring (for example, "what is your natural minimum width?"), use <strong>intrinsic measurements</strong> (below).</p>
+<h3 class="v2-h3">Pixels or dp?</h3>
+<p class="v2-p">Layout code works in <strong>pixels</strong>, not <code>dp</code>. Convert with <code>Density</code>: <code>4.dp.roundToPx()</code> inside a <code>MeasureScope</code>, or <code>with(LocalDensity.current) { 4.dp.toPx() }</code> elsewhere.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: How a Layout Works</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Step-by-Step Build 1: Modifier.layout, a Custom Modifier</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Start small. <code>Modifier.layout { measurable, constraints -&gt; ... }</code> changes how a <strong>single</strong> composable is measured and placed. Example: a <code>firstBaselineToTop</code> modifier that sets the distance from the top of a <code>Text</code> to its first baseline (the kind of precise typographic control Material uses).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">FirstBaseline.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.custom
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+fun Modifier.firstBaselineToTop(firstBaselineToTop: Dp) = this.layout { measurable, constraints -&gt;
+    val placeable = measurable.measure(constraints)
+
+    // Safe: the Text composable provides a FirstBaseline alignment line
+    val firstBaseline = placeable[FirstBaseline]
+    val placeableY = firstBaselineToTop.roundToPx() - firstBaseline
+    val height = placeable.height + placeableY
+
+    layout(placeable.width, height) {
+        placeable.placeRelative(0, placeableY)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BaselinePreview() {
+    Text("Hi there!", Modifier.firstBaselineToTop(32.dp))
+}</code></pre></div></div>
+<p class="v2-p">Walk through:</p>
+<ol class="v2-ol">
+<li><strong><code>measurable.measure(constraints)</code></strong> asks the child to measure itself within the same constraints, giving a <code>Placeable</code>.</li>
+<li><strong><code>placeable[FirstBaseline]</code></strong> reads an <strong>alignment line</strong>: the vertical position of the first text baseline, provided by <code>Text</code>.</li>
+<li>We compute the <strong>extra vertical offset</strong> needed so the baseline sits at the requested distance.</li>
+<li><strong><code>layout(width, height) { placeable.placeRelative(0, y) }</code></strong> reports <strong>our</strong> size and places the child. <code>placeRelative</code> respects right-to-left layouts; <code>place</code> does not.</li>
+</ol>
+<p class="v2-p">Use <code>Modifier.layout</code> for one-child tweaks (offsets, aspect ratios, baseline alignment, custom padding). For several children, use <code>Layout</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Modifier.layout, a Custom Modifier</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Step-by-Step Build 2: The Layout Composable</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><code>Layout</code> is the primitive under <code>Row</code>, <code>Column</code> and <code>Box</code>. Our first custom layout is a <strong>simple column</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MyColumn.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.custom
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+
+@Composable
+fun MyColumn(
+    modifier: Modifier = Modifier,
+    content: @Composable () -&gt; Unit
+) {
+    Layout(
+        modifier = modifier,
+        content = content
+    ) { measurables, constraints -&gt;
+        // 1. Measure every child. Children may be any height, but no wider than we allow.
+        val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeables = measurables.map { it.measure(childConstraints) }
+
+        // 2. Decide our own size.
+        val width = placeables.maxOfOrNull { it.width } ?: constraints.minWidth
+        val height = placeables.sumOf { it.height }
+
+        // 3. Report the size and place the children.
+        layout(
+            width.coerceIn(constraints.minWidth, constraints.maxWidth),
+            height.coerceIn(constraints.minHeight, constraints.maxHeight)
+        ) {
+            var y = 0
+            placeables.forEach { p -&gt;
+                p.placeRelative(x = 0, y = y)
+                y += p.height
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Use it like any composable:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>MyColumn(Modifier.padding(8.dp)) {
+    Text("First")
+    Text("Second item")
+    Text("Third")
+}</code></pre></div></div>
+<p class="v2-p">Three steps in every <code>Layout</code>: <strong>measure</strong> all children (<code>measurables.map { it.measure(...) }</code>), <strong>compute your size</strong>, then <strong>place</strong> them in the <code>layout(width, height) { ... }</code> block. Always make sure your size respects <code>constraints</code> (<code>coerceIn</code>), or the parent will throw an exception. Notice that <code>Layout</code> has <strong>no <code>Modifier</code> on children</strong> (<code>Modifier</code> on a child is applied by the child's own layout), but you can read per-child <strong>parent data</strong> (below).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Layout Composable</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Step-by-Step Build 3: A Flow Layout for Tags</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Tags (chips) that fill a row and wrap onto the next line, like text wrapping. Compose now ships <code>FlowRow</code> and <code>FlowColumn</code>, which you should use in production, but building one yourself teaches the whole mechanism.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">SimpleFlowRow.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.custom
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SimpleFlowRow(
+    modifier: Modifier = Modifier,
+    horizontalSpacing: Dp = 8.dp,
+    verticalSpacing: Dp = 8.dp,
+    content: @Composable () -&gt; Unit
+) {
+    Layout(content = content, modifier = modifier) { measurables, constraints -&gt;
+        val hGap = horizontalSpacing.roundToPx()
+        val vGap = verticalSpacing.roundToPx()
+        val maxWidth = constraints.maxWidth
+
+        val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeables = measurables.map { it.measure(childConstraints) }
+
+        // Split children into rows
+        val rows = mutableListOf&lt;List&lt;Placeable&gt;&gt;()
+        var current = mutableListOf&lt;Placeable&gt;()
+        var currentWidth = 0
+        for (p in placeables) {
+            val needed = if (current.isEmpty()) p.width else currentWidth + hGap + p.width
+            if (needed &gt; maxWidth &amp;&amp; current.isNotEmpty()) {
+                rows += current
+                current = mutableListOf()
+                currentWidth = 0
+            }
+            currentWidth = if (current.isEmpty()) p.width else currentWidth + hGap + p.width
+            current += p
+        }
+        if (current.isNotEmpty()) rows += current
+
+        val rowHeights = rows.map { row -&gt; row.maxOf { it.height } }
+        val totalHeight = rowHeights.sum() + vGap * (rows.size - 1).coerceAtLeast(0)
+        val widest = rows.maxOfOrNull { row -&gt; row.sumOf { it.width } + hGap * (row.size - 1) } ?: 0
+
+        layout(
+            width = widest.coerceIn(constraints.minWidth, constraints.maxWidth),
+            height = totalHeight.coerceIn(constraints.minHeight, constraints.maxHeight)
+        ) {
+            var y = 0
+            rows.forEachIndexed { i, row -&gt;
+                var x = 0
+                row.forEach { p -&gt;
+                    p.placeRelative(x, y + (rowHeights[i] - p.height) / 2)  // centre vertically in the row
+                    x += p.width + hGap
+                }
+                y += rowHeights[i] + vGap
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Try it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SimpleFlowRow(Modifier.padding(16.dp)) {
+    listOf("Kotlin", "Compose", "Room", "Coroutines", "Navigation", "Hilt", "Testing").forEach { tag -&gt;
+        AssistChip(onClick = {}, label = { Text(tag) })
+    }
+}</code></pre></div></div>
+<p class="v2-p">On a narrow phone the chips wrap to a second and third line. Our algorithm is a <strong>greedy</strong> line-breaker: add children to the current row until the next one will not fit. Rotate the device and watch it relayout.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: A Flow Layout for Tags</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Step-by-Step Build 4: Parent Data, Intrinsics and Alignment Lines</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Parent data: per-child instructions</h3>
+<p class="v2-p">A custom modifier can attach data that the parent layout reads. Example: a "weight" for our column.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.layout.ParentDataModifier
+import androidx.compose.ui.unit.Density
+
+private class MyWeightData(val weight: Float) : androidx.compose.ui.layout.ParentDataModifier {
+    override fun Density.modifyParentData(parentData: Any?): Any? = this@MyWeightData
+}
+
+fun Modifier.myWeight(weight: Float): Modifier = this.then(MyWeightData(weight))
+
+// In the Layout block:
+// val w = (measurable.parentData as? MyWeightData)?.weight ?: 0f</code></pre></div></div>
+<p class="v2-p">This is exactly how <code>Modifier.weight()</code> in <code>Row</code> works. Most apps never need it, but it explains why some modifiers only work inside particular parents (<code>weight</code> needs <code>RowScope</code>/<code>ColumnScope</code>).</p>
+<h3 class="v2-h3">Intrinsic measurements</h3>
+<p class="v2-p">Sometimes a parent needs to know its children's sizes <strong>before</strong> measuring them, for instance to draw a divider as tall as the tallest sibling. Compose forbids measuring twice, but offers <strong>intrinsics</strong>: questions like "what is your minimum intrinsic height for this width?" The usual use is <code>Modifier.height(IntrinsicSize.Min)</code> on a <code>Row</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun TwoColumnsWithDivider() {
+    Row(Modifier.height(IntrinsicSize.Min)) {          // Row is as tall as its tallest child
+        Text("Short", Modifier.weight(1f))
+        VerticalDivider(Modifier.fillMaxHeight())     // divider fills that height
+        Text("A much longer second text that wraps onto several lines", Modifier.weight(1f))
+    }
+}</code></pre></div></div>
+<p class="v2-p">Intrinsics have a cost (extra measurement queries), so use them for small subtrees only, and never inside lists with hundreds of items.</p>
+<h3 class="v2-h3">Alignment lines</h3>
+<p class="v2-p">An <strong>alignment line</strong> is a named position inside a child (like the text baseline) that parents can align to. <code>Text</code> publishes <code>FirstBaseline</code> and <code>LastBaseline</code>. <code>Row(verticalAlignment = Alignment.CenterVertically)</code> aligns by centre, but <code>Modifier.alignByBaseline()</code> aligns by baseline, which is what you want when mixing text of different sizes ("₦" small and "1,500" large):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Row {
+    Text("₦", fontSize = 16.sp, modifier = Modifier.alignByBaseline())
+    Text("1,500", fontSize = 40.sp, modifier = Modifier.alignByBaseline())
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Parent Data, Intrinsics and Alignment Lines</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Step-by-Step Build 5: Drawing with Canvas and DrawScope</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Layout decides <strong>where</strong>. <strong>Drawing</strong> decides <strong>what pixels</strong>. The entry point is <code>Canvas</code>, a composable that gives you a <code>DrawScope</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ProgressRing.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.custom
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ProgressRing(progress: Float, modifier: Modifier = Modifier) {
+    val track = MaterialTheme.colorScheme.surfaceVariant
+    val bar = MaterialTheme.colorScheme.primary
+
+    Canvas(modifier.size(120.dp)) {
+        val strokeWidth = 12.dp.toPx()
+        val diameter = size.minDimension - strokeWidth
+        val topLeft = Offset(
+            (size.width - diameter) / 2f,
+            (size.height - diameter) / 2f
+        )
+        val arcSize = Size(diameter, diameter)
+
+        // 1. The full circle track
+        drawArc(
+            color = track,
+            startAngle = 0f,
+            sweepAngle = 360f,
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth)
+        )
+        // 2. The progress arc, starting at 12 o'clock
+        drawArc(
+            color = bar,
+            startAngle = -90f,
+            sweepAngle = 360f * progress.coerceIn(0f, 1f),
+            useCenter = false,
+            topLeft = topLeft,
+            size = arcSize,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">Key facts about <code>DrawScope</code>:</p>
+<ul class="v2-ul">
+<li><strong><code>size</code></strong> is the canvas size in pixels (<code>size.width</code>, <code>size.height</code>, <code>size.minDimension</code>, <code>size.center</code>).</li>
+<li><strong>Colours must be read before the <code>Canvas</code> lambda</strong> (like <code>MaterialTheme.colorScheme.primary</code> here), because the draw lambda is <strong>not</strong> a composable context.</li>
+<li><strong><code>Dp.toPx()</code></strong> converts inside <code>DrawScope</code> (it implements <code>Density</code>).</li>
+<li><strong>Angles</strong> are in degrees; <code>0f</code> is 3 o'clock, positive is <strong>clockwise</strong>; <code>-90f</code> starts at 12 o'clock.</li>
+<li><strong><code>Stroke</code></strong> draws outlines; omit <code>style</code> (default <code>Fill</code>) for filled shapes.</li>
+</ul>
+<h3 class="v2-h3">The drawing functions</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Draws</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>drawRect</code>, <code>drawRoundRect</code></td>
+<td>Rectangles</td>
+</tr>
+<tr>
+<td><code>drawCircle</code>, <code>drawOval</code>, <code>drawArc</code></td>
+<td>Circles, ovals, arcs</td>
+</tr>
+<tr>
+<td><code>drawLine</code>, <code>drawPoints</code></td>
+<td>Lines, points</td>
+</tr>
+<tr>
+<td><code>drawPath</code></td>
+<td>Any shape built with <code>Path</code></td>
+</tr>
+<tr>
+<td><code>drawImage</code></td>
+<td>An <code>ImageBitmap</code></td>
+</tr>
+<tr>
+<td><code>drawText</code></td>
+<td>Text with a <code>TextMeasurer</code> (below)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Transformations inside DrawScope</h3>
+<p class="v2-p"><code>rotate(degrees, pivot) { ... }</code>, <code>translate(left, top) { ... }</code>, <code>scale(...)</code>, <code>inset(...)</code>, <code>clipRect(...)</code>, <code>clipPath(...)</code> and <code>withTransform { ... }</code> temporarily change the coordinate system for the drawing calls inside:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.graphics.drawscope.rotate
+
+// inside a DrawScope: draw 12 tick marks of a clock face
+repeat(12) { i -&gt;
+    rotate(degrees = i * 30f, pivot = center) {
+        drawLine(
+            color = tickColor,
+            start = Offset(center.x, 8.dp.toPx()),
+            end = Offset(center.x, 20.dp.toPx()),
+            strokeWidth = 3.dp.toPx()
+        )
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Drawing with Canvas and DrawScope</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Step-by-Step Build 6: Paths, Brushes and Blend Modes</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Path: any shape</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SparkLine(values: List&lt;Float&gt;, modifier: Modifier = Modifier) {
+    Canvas(modifier.fillMaxWidth().height(80.dp)) {
+        if (values.size &lt; 2) return@Canvas
+        val max = values.max()
+        val min = values.min()
+        val range = (max - min).takeIf { it != 0f } ?: 1f
+        val stepX = size.width / (values.size - 1)
+
+        val line = Path().apply {
+            values.forEachIndexed { i, v -&gt;
+                val x = i * stepX
+                val y = size.height - (v - min) / range * size.height
+                if (i == 0) moveTo(x, y) else lineTo(x, y)
+            }
+        }
+        // the area under the line
+        val area = Path().apply {
+            addPath(line)
+            lineTo(size.width, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+        drawPath(
+            area,
+            brush = Brush.verticalGradient(listOf(Color(0x551B6B3A), Color.Transparent))
+        )
+        drawPath(line, color = Color(0xFF1B6B3A), style = Stroke(width = 3.dp.toPx()))
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>Path</code> commands: <code>moveTo</code>, <code>lineTo</code>, <code>quadraticTo</code>, <code>cubicTo</code> (curves), <code>arcTo</code>, <code>addRect</code>, <code>addOval</code>, <code>addRoundRect</code>, <code>close</code>. Compose has <code>Path.op(...)</code> to combine shapes (union, difference) when you need cut-outs such as a ticket with notched sides.</p>
+<h3 class="v2-h3">Brush: gradients and patterns</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Brush</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Brush.linearGradient(colors)</code></td>
+<td>Diagonal gradient</td>
+</tr>
+<tr>
+<td><code>Brush.horizontalGradient</code>, <code>verticalGradient</code></td>
+<td>Straight gradients</td>
+</tr>
+<tr>
+<td><code>Brush.radialGradient</code>, <code>sweepGradient</code></td>
+<td>Circular and angular gradients</td>
+</tr>
+<tr>
+<td><code>SolidColor(color)</code></td>
+<td>Plain colour as a brush</td>
+</tr>
+<tr>
+<td><code>ShaderBrush</code></td>
+<td>A custom shader (advanced, including AGSL on Android 13+)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A brush can be used for fills, strokes and <strong>text</strong>.</p>
+<h3 class="v2-h3">Blend modes and layers</h3>
+<p class="v2-p"><code>BlendMode</code> controls how a drawing combines with what is already there: <code>SrcOver</code> (normal), <code>Clear</code>, <code>SrcIn</code>, <code>DstOut</code>, <code>Multiply</code>, <code>Screen</code>, and more. Blend modes that need to <strong>erase</strong> or <strong>mask</strong> only work properly in an offscreen layer: add <code>Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)</code>. Example: cut a circular hole in a coloured overlay (a spotlight):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+
+@Composable
+fun SpotlightOverlay(centre: Offset, radius: Float) {
+    Canvas(
+        Modifier
+            .fillMaxSize()
+            .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+    ) {
+        drawRect(Color(0xCC000000))                              // dark overlay
+        drawCircle(Color.Black, radius, centre, blendMode = BlendMode.Clear)   // punch a hole
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Paths, Brushes and Blend Modes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Step-by-Step Build 7: drawBehind, drawWithContent and drawWithCache</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">You do not always need a <code>Canvas</code>. Draw <strong>behind or in front of an existing composable</strong> with modifiers:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun BadgeText(text: String) {
+    Text(
+        text,
+        Modifier
+            .drawBehind {                                  // behind the text
+                drawRoundRect(Color(0xFFFFE082), cornerRadius = CornerRadius(12.dp.toPx()))
+            }
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+    )
+}
+
+@Composable
+fun StrikeText(text: String) {
+    Text(
+        text,
+        Modifier.drawWithContent {
+            drawContent()                                  // draw the text first, then...
+            drawLine(Color.Red, start = center.copy(x = 0f), end = center.copy(x = size.width), strokeWidth = 3f)
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p"><code>drawWithContent</code> gives you control of <strong>when</strong> the original content is drawn (<code>drawContent()</code>), so you can draw under, over, or skip it.</p>
+<h3 class="v2-h3">drawWithCache: reuse expensive objects</h3>
+<p class="v2-p">Creating a <code>Path</code> or <code>Brush</code> in every draw call wastes time. <code>Modifier.drawWithCache</code> runs its outer block only when <strong>size or read state changes</strong>, and the inner <code>onDrawBehind</code>/<code>onDrawWithContent</code> block every frame:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+
+Modifier
+    .size(200.dp)
+    .drawWithCache {
+        val brush = Brush.linearGradient(listOf(Color.Red, Color.Blue), end = Offset(size.width, size.height))
+        onDrawBehind { drawRect(brush) }
+    }</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: drawBehind, drawWithContent and drawWithCache</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Step-by-Step Build 8: Text on Canvas, Touch, and graphicsLayer</div><div class="pc" id="chk11"></div></div><div class="pb2"><h3 class="v2-h3">Drawing text</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Canvas
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+
+@Composable
+fun LabelledPoint() {
+    val measurer = rememberTextMeasurer()
+    val style = MaterialTheme.typography.labelMedium
+    val colour = MaterialTheme.colorScheme.onSurface
+    Canvas(Modifier.size(200.dp)) {
+        drawCircle(colour, radius = 6.dp.toPx(), center = center)
+        drawText(
+            textMeasurer = measurer,
+            text = "Ibadan",
+            topLeft = Offset(center.x + 10.dp.toPx(), center.y - 8.dp.toPx()),
+            style = style.copy(color = colour)
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>TextMeasurer</code> handles fonts, wrapping and scaling. Remember: text drawn on a canvas is <strong>not accessible</strong> by default. Add <code>Modifier.semantics { contentDescription = ... }</code> to describe the chart (lesson 47).</p>
+<h3 class="v2-h3">Touch on a canvas</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+
+var tapped by remember { mutableStateOf&lt;Offset?&gt;(null) }
+Canvas(
+    Modifier
+        .fillMaxSize()
+        .pointerInput(Unit) { detectTapGestures { offset -&gt; tapped = offset } }
+) {
+    tapped?.let { drawCircle(Color.Red, radius = 20.dp.toPx(), center = it) }
+}</code></pre></div></div>
+<p class="v2-p">For charts, convert the tap position into a data index (for a bar chart: <code>(offset.x / barWidth).toInt()</code>), then show a tooltip or highlight.</p>
+<h3 class="v2-h3">graphicsLayer: transform without relayout</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Modifier.graphicsLayer {
+    rotationZ = angle
+    scaleX = scale
+    scaleY = scale
+    alpha = fade
+    translationX = shift
+    transformOrigin = TransformOrigin.Center
+    shadowElevation = 8.dp.toPx()
+    clip = true
+    shape = CircleShape
+}</code></pre></div></div>
+<p class="v2-p">Transformations in <code>graphicsLayer</code> happen in the <strong>draw phase</strong>, so animating them does not trigger recomposition or relayout (lesson 41). They also <strong>do not change layout size</strong>: a scaled-up composable still occupies its original space.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: Text on Canvas, Touch, and graphicsLayer</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: A bar chart</strong></p>
+<p class="v2-p">Draw a bar chart from <code>List&lt;Pair&lt;String, Float&gt;&gt;</code> (for example weekly attendance 0–100) with <code>Canvas</code>: bars with rounded top corners, a baseline, and the label under each bar drawn with <code>TextMeasurer</code>. Add a content description summarising the data for TalkBack.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun BarChart(data: List&lt;Pair&lt;String, Float&gt;&gt;, modifier: Modifier = Modifier) {
+    val measurer = rememberTextMeasurer()
+    val barColour = MaterialTheme.colorScheme.primary
+    val axisColour = MaterialTheme.colorScheme.outline
+    val textStyle = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurface)
+    val summary = data.joinToString { "${it.first} ${it.second.toInt()} percent" }
+
+    Canvas(
+        modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .semantics { contentDescription = "Bar chart. $summary" }
+    ) {
+        val labelSpace = 24.dp.toPx()
+        val chartHeight = size.height - labelSpace
+        val slot = size.width / data.size
+        val barWidth = slot * 0.6f
+        val max = 100f
+
+        drawLine(axisColour, Offset(0f, chartHeight), Offset(size.width, chartHeight), 2.dp.toPx())
+
+        data.forEachIndexed { i, (label, value) -&gt;
+            val h = chartHeight * (value / max)
+            val left = i * slot + (slot - barWidth) / 2
+            drawRoundRect(
+                color = barColour,
+                topLeft = Offset(left, chartHeight - h),
+                size = Size(barWidth, h),
+                cornerRadius = CornerRadius(6.dp.toPx())
+            )
+            val layout = measurer.measure(label, textStyle)
+            drawText(
+                layout,
+                topLeft = Offset(left + (barWidth - layout.size.width) / 2, chartHeight + 4.dp.toPx())
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The bars' bottom corners are also rounded in this simple version; to round only the tops, build a <code>Path</code> with <code>addRoundRect(RoundRect(rect, topLeft = ..., topRight = ...))</code> and <code>drawPath</code>. The <code>semantics</code> summary makes the chart usable with TalkBack.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: A centred layout</strong></p>
+<p class="v2-p">Write a <code>Layout</code> called <code>CenterStack</code> that places all children centred over each other (like a <code>Box</code> with <code>contentAlignment = Center</code>), and sizes itself to the largest child. Explain why you must pass <code>constraints</code> through.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+
+@Composable
+fun CenterStack(modifier: Modifier = Modifier, content: @Composable () -&gt; Unit) {
+    Layout(content, modifier) { measurables, constraints -&gt;
+        val loose = constraints.copy(minWidth = 0, minHeight = 0)
+        val placeables = measurables.map { it.measure(loose) }
+        val w = (placeables.maxOfOrNull { it.width } ?: 0).coerceIn(constraints.minWidth, constraints.maxWidth)
+        val h = (placeables.maxOfOrNull { it.height } ?: 0).coerceIn(constraints.minHeight, constraints.maxHeight)
+        layout(w, h) {
+            placeables.forEach { p -&gt;
+                p.placeRelative((w - p.width) / 2, (h - p.height) / 2)
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Children must be measured within the parent's constraints (relaxed minimums) or they could be larger than allowed; and the layout's own size must respect the parent's constraints, or Compose throws an exception.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Find the bug</strong></p>
+<p class="v2-p">This ring never shows the theme colour and crashes with "@Composable invocations can only happen from the context of a @Composable function". Fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Canvas(Modifier.size(100.dp)) {
+    drawCircle(MaterialTheme.colorScheme.primary)
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>DrawScope</code> lambdas are not composable. Read the colour <strong>outside</strong> the lambda: <code>val c = MaterialTheme.colorScheme.primary</code> then <code>Canvas(Modifier.size(100.dp)) { drawCircle(c) }</code>. The same applies to <code>LocalDensity.current</code>, <code>stringResource</code> and any <code>@Composable</code> call.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Measuring a child twice.</strong> <em>Symptom:</em> <code>IllegalStateException</code>. <em>Fix:</em> measure once; use intrinsics if you need early size information.</p>
+<p class="v2-p"><strong>Mistake #2: Ignoring parent constraints.</strong> <em>Symptom:</em> crash or clipped layout. <em>Fix:</em> <code>coerceIn(minWidth, maxWidth)</code>.</p>
+<p class="v2-p"><strong>Mistake #3: <code>place</code> instead of <code>placeRelative</code>.</strong> <em>Symptom:</em> wrong in RTL languages. <em>Fix:</em> <code>placeRelative</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Mixing dp and px.</strong> <em>Symptom:</em> tiny or huge drawing. <em>Fix:</em> convert with <code>toPx()</code> / <code>roundToPx()</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Composable calls in <code>DrawScope</code>.</strong> <em>Symptom:</em> compile error. <em>Fix:</em> read first.</p>
+<p class="v2-p"><strong>Mistake #6: Creating <code>Path</code> or <code>Brush</code> every frame.</strong> <em>Symptom:</em> jank. <em>Fix:</em> <code>drawWithCache</code> or <code>remember</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Blend modes without an offscreen layer.</strong> <em>Symptom:</em> black rectangles. <em>Fix:</em> <code>CompositingStrategy.Offscreen</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Drawing text and forgetting accessibility.</strong> <em>Fix:</em> semantics description.</p>
+<p class="v2-p"><strong>Mistake #9: Reading animated state during composition for a canvas.</strong> <em>Symptom:</em> heavy recomposition. <em>Fix:</em> read inside the draw lambda.</p>
+<p class="v2-p"><strong>Mistake #10: Rebuilding what exists.</strong> <em>Fix:</em> use <code>FlowRow</code>, <code>Box</code>, <code>ConstraintLayout</code>, charts libraries when they fit; build custom only when necessary.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What are the three things a custom <code>Layout</code> must do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Measure its children (each once, within constraints), decide its own size (respecting constraints), and place the children in the <code>layout(width, height) { ... }</code> block.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why do you read theme colours outside the <code>Canvas</code> lambda?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The draw lambda is not a composable context, so composable reads such as <code>MaterialTheme.colorScheme.primary</code> are not allowed inside it.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>drawBehind</code> and <code>drawWithContent</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>drawBehind</code> draws behind the composable's content. <code>drawWithContent</code> lets you call <code>drawContent()</code> yourself, so you decide whether to draw before, after or instead of the original content.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is <code>graphicsLayer</code> efficient for animations?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It applies transformations in the draw phase, so animating rotation, scale or alpha does not trigger recomposition or relayout.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> When should you use <code>drawWithCache</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">When drawing needs objects that are expensive to create (a <code>Path</code>, <code>Brush</code>, shader) that depend only on size or state, so they are created once and reused until those change.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 2</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-layouts" rel="noopener noreferrer">Jetpack Compose layouts codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-basics" rel="noopener noreferrer">Jetpack Compose basics codelab</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Dashboard Widgets from Scratch</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build three reusable custom widgets for a <strong>school dashboard</strong>, with no charting library: a <strong>donut chart</strong>, a <strong>flow layout of subject tags</strong>, and an <strong>animated progress ring</strong>.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li><code>DonutChart(slices: List&lt;Slice&gt;)</code> using <code>drawArc</code>, with a legend as a custom <code>Layout</code> or <code>SimpleFlowRow</code>.</li>
+<li><code>SubjectTags</code> using your own flow layout, wrapping at any width.</li>
+<li><code>ProgressRing(progress)</code> animated with <code>animateFloatAsState</code>, reading the animated value <strong>inside the draw lambda</strong>.</li>
+<li>Each widget has a <code>contentDescription</code> summary and a preview in light and dark.</li>
+<li>A <strong>tap on a donut slice</strong> highlights it (use <code>pointerInput</code> and angle maths).</li>
+<li>Pass colours from <code>MaterialTheme</code>, not hard-coded.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add an <code>animateFloatAsState</code> entrance sweep to the donut, and respect reduced motion (lesson 41).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Widgets.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.custom
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import kotlin.math.atan2
+import kotlin.math.hypot
+
+data class Slice(val label: String, val value: Float, val color: Color)
+
+@Composable
+fun DonutChart(slices: List&lt;Slice&gt;, modifier: Modifier = Modifier) {
+    var selected by remember { mutableIntStateOf(-1) }
+    val total = slices.sumOf { it.value.toDouble() }.toFloat()
+    val summary = slices.joinToString { "${it.label} ${(it.value / total * 100).toInt()} percent" }
+
+    Canvas(
+        modifier
+            .size(200.dp)
+            .semantics { contentDescription = "Donut chart. $summary" }
+            .pointerInput(slices) {
+                detectTapGestures { tap -&gt;
+                    val c = Offset(size.width / 2f, size.height / 2f)
+                    val dx = tap.x - c.x
+                    val dy = tap.y - c.y
+                    var angle = Math.toDegrees(atan2(dy, dx).toDouble()).toFloat() + 90f   // 0 at 12 o'clock
+                    if (angle &lt; 0f) angle += 360f
+                    var start = 0f
+                    selected = -1
+                    slices.forEachIndexed { i, s -&gt;
+                        val sweep = s.value / total * 360f
+                        if (angle in start..(start + sweep) &amp;&amp; hypot(dx, dy) &gt; size.width * 0.2f) selected = i
+                        start += sweep
+                    }
+                }
+            }
+    ) {
+        val stroke = 36.dp.toPx()
+        val diameter = size.minDimension - stroke
+        val topLeft = Offset((size.width - diameter) / 2, (size.height - diameter) / 2)
+        var start = -90f
+        slices.forEachIndexed { i, s -&gt;
+            val sweep = s.value / total * 360f
+            val width = if (i == selected) stroke * 1.25f else stroke
+            drawArc(
+                color = s.color,
+                startAngle = start,
+                sweepAngle = sweep - 1f,                    // 1 degree gap
+                useCenter = false,
+                topLeft = topLeft,
+                size = Size(diameter, diameter),
+                style = Stroke(width, cap = StrokeCap.Butt)
+            )
+            start += sweep
+        }
+    }
+}
+
+@Composable
+fun AnimatedRing(progress: Float, modifier: Modifier = Modifier) {
+    val animated by animateFloatAsState(progress, label = "ring")
+    val track = MaterialTheme.colorScheme.surfaceVariant
+    val bar = MaterialTheme.colorScheme.primary
+    Canvas(
+        modifier
+            .size(120.dp)
+            .semantics { contentDescription = "Progress ${(progress * 100).toInt()} percent" }
+    ) {
+        val sw = 12.dp.toPx()
+        val d = size.minDimension - sw
+        val tl = Offset((size.width - d) / 2, (size.height - d) / 2)
+        drawArc(track, 0f, 360f, false, tl, Size(d, d), style = Stroke(sw))
+        drawArc(bar, -90f, 360f * animated, false, tl, Size(d, d), style = Stroke(sw, cap = StrokeCap.Round))
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>SubjectTags</code> is <code>SimpleFlowRow</code> from Build 3 with a <code>SuggestionChip</code> per subject. The animated value (<code>animated</code>) is read <strong>inside</strong> the <code>Canvas</code> draw lambda, so the ring redraws each frame without recomposing the parent. Verify with the Layout Inspector's recomposition counts (lesson 44) that the widgets do not recompose while animating.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 56 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-56-custom-layouts-and-graphics</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 56 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: How a Layout Works</li><li>✅ Step-by-Step Build 1: Modifier.layout, a Custom Modifier</li><li>✅ Step-by-Step Build 2: The Layout Composable</li><li>✅ Step-by-Step Build 3: A Flow Layout for Tags</li><li>✅ Step-by-Step Build 4: Parent Data, Intrinsics and Alignment Lines</li><li>✅ Step-by-Step Build 5: Drawing with Canvas and DrawScope</li><li>✅ Step-by-Step Build 6: Paths, Brushes and Blend Modes</li><li>✅ Step-by-Step Build 7: drawBehind, drawWithContent and drawWithCache</li><li>✅ Step-by-Step Build 8: Text on Canvas, Touch, and graphicsLayer</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_55.html" class="ln-btn">&#8592; Lesson 55</a><a href="lesson_57.html" class="ln-btn primary">Lesson 57 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 56 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

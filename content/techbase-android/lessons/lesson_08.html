@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 08: Create and Use Functions in Kotlin — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l08">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 08 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 08</div>
+      <h1>Create and Use Functions in Kotlin</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Shop Receipt Printer</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 08</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Write reusable functions with parameters, default and named arguments, return values and single-expression syntax.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Shop Receipt Printer</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to one of the most important lessons in the whole course. Up to now your programs have been one long list of statements inside <code>main</code>. That works for ten lines. It does not work for ten thousand. Real apps are built from many small pieces, each doing one job and each having a name. Those pieces are <strong>functions</strong>.</p>
+<p class="v2-p">Picture a busy kitchen at a wedding. The head cook does not shout out every tiny step each time ("pick up the knife, peel the onion, slice the onion..."). She says "chop onions" and a trained helper knows what to do. A function is that helper: a named recipe you write once and ask for as many times as you like, with different ingredients each time.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain why functions exist and when to create one.</li>
+<li>Write functions with parameters and call them with arguments.</li>
+<li>Return a value, and understand what <code>Unit</code> means when you return nothing.</li>
+<li>Use default parameter values and named arguments.</li>
+<li>Write short functions in single-expression form.</li>
+<li>Return more than one value using <code>Pair</code>.</li>
+<li>Understand scope: which variables can be seen where.</li>
+<li>Use local functions and <code>vararg</code> parameters.</li>
+<li>Solve a set of practice problems in the style of the official <em>Practice: Kotlin Basics</em> material.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson covers the <em>Create and use functions in Kotlin</em> codelab and the <em>Practice: Kotlin Basics</em> problems from Unit 1, Pathway 1 of <strong>Android Basics with Compose</strong>. In Jetpack Compose every piece of screen you build is itself a function, so everything here carries straight into lesson 15.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. <code>main</code> is already a function</h3>
+<p class="v2-p">You have written <code>fun main() { ... }</code> since lesson 06. <code>main</code> is just a function with a special job: it is where Kotlin starts. Today you learn to write your own.</p>
+<h3 class="v2-h3">2. Variables and types (lesson 07)</h3>
+<p class="v2-p">You need <code>val</code>, <code>var</code>, <code>Int</code>, <code>Double</code>, <code>String</code> and <code>Boolean</code>, plus string templates like <code>"Total: ${a + b}"</code>. If any of these feel shaky, revisit lesson 07 first.</p>
+<h3 class="v2-h3">3. Statements versus expressions</h3>
+<p class="v2-p">A <strong>statement</strong> does something (<code>println("hi")</code>). An <strong>expression</strong> produces a value (<code>3 + 4</code> produces <code>7</code>). A great deal of Kotlin is expressions, including function calls that return values. Keep this idea in mind. It makes single-expression functions natural.</p>
+<h3 class="v2-h3">4. The idea of "don't repeat yourself"</h3>
+<p class="v2-p">If you copy and paste the same five lines in three places, and later find a bug, you must fix it in three places. Programmers call this the <strong>DRY</strong> principle: <em>Don't Repeat Yourself</em>. Functions are the main tool for obeying it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: What a Function Is</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A function has a <strong>name</strong>, optional <strong>inputs</strong> (called <em>parameters</em>), a <strong>body</strong> of statements, and optionally an <strong>output</strong> (the <em>return value</em>).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>   inputs                     the function                 output
+ (arguments)                                             (return value)
+ +---------+      +---------------------------+       +-------------+
+ | 1200, 3 | ---&gt; |  lineTotal(price, qty)    | ---&gt;  |    3600     |
+ +---------+      |  multiplies the two       |       +-------------+
+                  +---------------------------+</code></pre></div></div>
+<p class="v2-p">Think of a vending machine: you put in money and press a button (inputs), the machine does its work (body), and a drink drops out (output). You do not need to know how the machine works inside. You only need to know what it expects and what it gives back. That separation is what makes big programs manageable.</p>
+<h3 class="v2-h3">The anatomy of a function</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun addNumbers(first: Int, second: Int): Int {
+    val sum = first + second
+    return sum
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fun</code></td>
+<td>Keyword meaning "define a function".</td>
+</tr>
+<tr>
+<td><code>addNumbers</code></td>
+<td>The name. Use camelCase, and start with a verb: <code>calculateTotal</code>, <code>printReceipt</code>, <code>isValid</code>.</td>
+</tr>
+<tr>
+<td><code>(first: Int, second: Int)</code></td>
+<td>The <strong>parameter list</strong>. Each parameter has a name, a colon and a type. Separate parameters with commas.</td>
+</tr>
+<tr>
+<td><code>: Int</code></td>
+<td>The <strong>return type</strong>: what kind of value comes out.</td>
+</tr>
+<tr>
+<td><code>{ ... }</code></td>
+<td>The <strong>body</strong>.</td>
+</tr>
+<tr>
+<td><code>return sum</code></td>
+<td>Sends the value back to whoever called the function and ends the function.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Parameters versus arguments</h3>
+<p class="v2-p">These two words get mixed up constantly:</p>
+<ul class="v2-ul">
+<li>A <strong>parameter</strong> is the <em>label in the definition</em>: <code>first</code> and <code>second</code> above.</li>
+<li>An <strong>argument</strong> is the <em>actual value you pass when calling</em>: in <code>addNumbers(5, 7)</code> the arguments are <code>5</code> and <code>7</code>.</li>
+</ul>
+<p class="v2-p">Inside the function, every parameter behaves like a <code>val</code>. You cannot reassign it. If you need a changed copy, make a new local variable.</p>
+<h3 class="v2-h3">Defining versus calling</h3>
+<p class="v2-p">Writing <code>fun addNumbers...</code> only <em>defines</em> the recipe. Nothing happens until you <strong>call</strong> it by writing its name with parentheses:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun addNumbers(first: Int, second: Int): Int {
+    return first + second
+}
+
+fun main() {
+    val result = addNumbers(5, 7)
+    println("5 + 7 = $result")
+    println("Direct call: ${addNumbers(20, 22)}")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">5 + 7 = 12<br/>Direct call: 42</p>
+</blockquote>
+<p class="v2-p">The order of definition does not matter in Kotlin. <code>main</code> can sit above the functions it calls.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What a Function Is</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Worked Examples</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Run each example in the Playground. For each one, predict the output before you press Run.</p>
+<h3 class="v2-h3">Example 1: A function with no parameters and no result</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun printWelcome() {
+    println("Welcome to Techbase Academy")
+    println("Let's learn Android")
+}
+
+fun main() {
+    printWelcome()
+    println("---")
+    printWelcome()
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Welcome to Techbase Academy<br/>Let's learn Android</p>
+<hr class="v2-hr"/>
+<p class="v2-p">Welcome to Techbase Academy<br/>Let's learn Android</p>
+</blockquote>
+<p class="v2-p">We wrote two lines once and used them twice. If we change the greeting, both places update.</p>
+<h3 class="v2-h3">Example 2: A function with a parameter</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun greet(name: String) {
+    println("Hello, $name! Good to see you.")
+}
+
+fun main() {
+    greet("Ada")
+    greet("Tunde")
+    greet("Chioma")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Hello, Ada! Good to see you.<br/>Hello, Tunde! Good to see you.<br/>Hello, Chioma! Good to see you.</p>
+</blockquote>
+<h3 class="v2-h3">Example 3: Returning a value</h3>
+<p class="v2-p">The return type goes after the parameter list. If a function declares a return type, <strong>every path through it must return a value</strong> of that type.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun lineTotal(price: Int, quantity: Int): Int {
+    return price * quantity
+}
+
+fun main() {
+    val rice = lineTotal(1200, 3)
+    val beans = lineTotal(800, 2)
+    println("Rice: ₦$rice")
+    println("Beans: ₦$beans")
+    println("Together: ₦${rice + beans}")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Rice: ₦3600<br/>Beans: ₦1600<br/>Together: ₦5200</p>
+</blockquote>
+<p class="v2-p">Notice how a returned value can be stored, printed, or used straight inside another expression.</p>
+<h3 class="v2-h3">Example 4: What <code>Unit</code> means</h3>
+<p class="v2-p"><code>printWelcome</code> and <code>greet</code> did not declare a return type. In Kotlin that means they return <code>Unit</code>, a special type meaning "nothing useful". Writing <code>: Unit</code> is allowed but nobody does it. You can see it if you capture the result:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun greet(name: String) {
+    println("Hi $name")
+}
+
+fun main() {
+    val result = greet("Bola")
+    println(result)
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Hi Bola<br/>kotlin.Unit</p>
+</blockquote>
+<p class="v2-p">You will almost never do this. The point is that every function returns <em>something</em>, and <code>Unit</code> is the "nothing interesting" something. Other languages call this <code>void</code>.</p>
+<h3 class="v2-h3">Example 5: Single-expression functions</h3>
+<p class="v2-p">When the body is just one expression, you can skip the braces and <code>return</code> and write <code>=</code> instead:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun lineTotal(price: Int, quantity: Int): Int = price * quantity
+
+fun square(n: Int) = n * n
+
+fun isEven(n: Int) = n % 2 == 0
+
+fun main() {
+    println(lineTotal(500, 4))
+    println(square(9))
+    println(isEven(10))
+    println(isEven(7))
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">2000<br/>81<br/>true<br/>false</p>
+</blockquote>
+<p class="v2-p">With <code>=</code>, Kotlin can often work out the return type, so you may leave it off (<code>square</code> and <code>isEven</code> above). Keep the explicit type when it helps readers, especially in code others will use. You will see this single-expression style all over Compose projects.</p>
+<h3 class="v2-h3">Example 6: Default parameter values</h3>
+<p class="v2-p">A parameter can have a <strong>default</strong> value, used when the caller leaves the argument out:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun calculateTip(amount: Double, tipPercent: Double = 15.0): Double {
+    return amount * tipPercent / 100
+}
+
+fun main() {
+    println(calculateTip(20000.0))        // uses the default 15.0
+    println(calculateTip(8000.0))         // default again
+    println(calculateTip(8000.0, 10.0))   // overrides the default
+}</code></pre></div></div>
+<p class="v2-p">Reasoning: 20000.0 times 15.0 is 300000.0, divided by 100 is 3000.0. Next, 8000.0 times 15.0 is 120000.0 over 100 gives 1200.0. With 10.0, 80000.0 over 100 gives 800.0.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">3000.0<br/>1200.0<br/>800.0</p>
+</blockquote>
+<p class="v2-p">Defaults replace the old habit of writing several nearly identical functions. Parameters with defaults are conventionally placed <strong>after</strong> those without.</p>
+<h3 class="v2-h3">Example 7: Named arguments</h3>
+<p class="v2-p">When a function has several parameters, a bare list like <code>describe("Ada", 19, "Ibadan")</code> is hard to read. <strong>Named arguments</strong> put the parameter name beside the value. You can even change the order:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun describe(name: String, age: Int, city: String = "Ibadan"): String {
+    return "$name is $age and lives in $city"
+}
+
+fun main() {
+    println(describe("Ada", 19))
+    println(describe(name = "Tunde", age = 24, city = "Lagos"))
+    println(describe(age = 30, name = "Chioma"))
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Ada is 19 and lives in Ibadan<br/>Tunde is 24 and lives in Lagos<br/>Chioma is 30 and lives in Ibadan</p>
+</blockquote>
+<p class="v2-p">Named arguments appear everywhere in Jetpack Compose. A line like <code>Text(text = "Hi", fontSize = 24.sp)</code> is just a function call with named arguments. Mastering them now makes lesson 15 feel familiar.</p>
+<h3 class="v2-h3">Example 8: Returning more than one value with <code>Pair</code></h3>
+<p class="v2-p">A function returns <strong>one</strong> value, but that value can be a bundle. <code>Pair</code> holds two values, which you can split apart with <strong>destructuring</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun splitMinutes(totalMinutes: Int): Pair&lt;Int, Int&gt; {
+    val hours = totalMinutes / 60
+    val minutes = totalMinutes % 60
+    return Pair(hours, minutes)
+}
+
+fun main() {
+    val (h, m) = splitMinutes(400)
+    println("$h hours and $m minutes")
+
+    val whole = splitMinutes(95)
+    println("first = ${whole.first}, second = ${whole.second}")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">6 hours and 40 minutes<br/>first = 1, second = 35</p>
+</blockquote>
+<p class="v2-p"><code>Pair&lt;Int, Int&gt;</code> means "a pair of two Ints". When you need to return many named things, a <code>data class</code> is better (lesson 11).</p>
+<h3 class="v2-h3">Example 9: Variable number of arguments with <code>vararg</code></h3>
+<p class="v2-p">Sometimes you want to accept any number of values. Mark the parameter <code>vararg</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun sumAll(vararg numbers: Int): Int {
+    var total = 0
+    for (n in numbers) {
+        total += n
+    }
+    return total
+}
+
+fun main() {
+    println(sumAll(1, 2, 3))
+    println(sumAll(10, 20, 30, 40, 50))
+    println(sumAll())
+}</code></pre></div></div>
+<p class="v2-p">Inside the function, <code>numbers</code> behaves like a collection of <code>Int</code>. We used a <code>for</code> loop here as a sneak preview. Lesson 09 teaches loops fully. An empty call gives 0 because the loop does nothing.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">6<br/>150<br/>0</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Scope: Who Can See What</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><strong>Scope</strong> is the area of code where a name can be used. A variable created inside a function lives only inside that function. When the function ends, the variable disappears.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun calculateTotal(): Int {
+    val subtotal = 5000     // local to calculateTotal
+    return subtotal + 250
+}
+
+fun main() {
+    println(calculateTotal())
+    // println(subtotal)    // ERROR: unresolved reference, subtotal is not visible here
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">5250</p>
+</blockquote>
+<p class="v2-p">Think of each function as a closed room. What happens inside the room stays inside the room, unless it is passed out through <code>return</code>. This is a <em>feature</em>: two functions can both use a variable called <code>total</code> without interfering.</p>
+<p class="v2-p">A variable declared at the <strong>top level</strong> of the file (outside every function) can be seen by all functions in that file. Use that sparingly. Prefer passing values in as parameters and getting results back with <code>return</code>. Functions that depend only on their inputs are far easier to test and understand.</p>
+<h3 class="v2-h3">Local functions</h3>
+<p class="v2-p">You can define a function <strong>inside</strong> another function. It can only be called from there:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun printReceiptLine(item: String, price: Int, quantity: Int) {
+    fun formatNaira(amount: Int) = "₦$amount"   // local helper
+
+    val total = price * quantity
+    println("$item x$quantity = ${formatNaira(total)}")
+}
+
+fun main() {
+    printReceiptLine("Rice", 1200, 3)
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Rice x3 = ₦3600</p>
+</blockquote>
+<p class="v2-p">Local functions are helpful for tiny helpers that nobody else needs.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Scope: Who Can See What</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Seeing the Call Stack</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When one function calls another, the computer remembers where to come back to. Follow this program line by line:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun double(n: Int) = n * 2
+
+fun addDoubles(a: Int, b: Int): Int {
+    return double(a) + double(b)
+}
+
+fun main() {
+    println(addDoubles(3, 4))
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>main() starts
+  calls addDoubles(3, 4)
+    calls double(3)  -&gt; returns 6
+    calls double(4)  -&gt; returns 8
+    6 + 8 = 14       -&gt; addDoubles returns 14
+  println prints 14
+main() ends</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">14</p>
+</blockquote>
+<p class="v2-p">Functions calling functions is how large programs are assembled. Each function stays small and has one clear job. A good guideline: <strong>if you cannot describe what a function does in one short sentence, it probably does too much.</strong></p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Seeing the Call Stack</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Functions in Android Studio</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Functions in an Android app look exactly like this. Here is a tiny preview of what Jetpack Compose will look like in lesson 15, with a function that returns nothing (<code>Unit</code>) and takes a named parameter:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun Greeting(name: String) {
+    Text(text = "Hello $name!")
+}</code></pre></div></div>
+<p class="v2-p"><code>@Composable</code> is an <em>annotation</em> that tells the Compose tooling "this function describes a piece of screen". Composable functions by convention start with a capital letter, an exception to the camelCase rule. Do not worry about the details now. Notice only that it is a normal function with a normal parameter.</p>
+<p class="v2-p">To practise pure Kotlin functions in Android Studio, use a scratch file (<strong>File &gt; New &gt; Scratch File &gt; Kotlin</strong>) or the Kotlin library module from lesson 06. Menu names move a little between versions, so look for the nearest equivalent if yours differs.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Functions in Android Studio</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Practice: Kotlin Basics (Functions Set)</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The official course ends this pathway with a set of practice problems. Here are original problems at the same level, so you can test yourself. Try each one <strong>before</strong> opening the answer. Every problem has a complete worked solution.</p>
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Problem 1: Rectangle toolkit</strong></p>
+<p class="v2-p">Write two single-expression functions, <code>area(width: Int, height: Int)</code> and <code>perimeter(width: Int, height: Int)</code>. In <code>main</code>, print the area and perimeter of a rectangle that is 8 by 5.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun area(width: Int, height: Int) = width * height
+
+fun perimeter(width: Int, height: Int) = 2 * (width + height)
+
+fun main() {
+    println("Area: ${area(8, 5)}")
+    println("Perimeter: ${perimeter(8, 5)}")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Area: 40<br/>Perimeter: 26</p>
+</blockquote>
+<p class="v2-p">The area is 8 times 5, and the perimeter is twice the sum of the two sides, 2 times 13.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Problem 2: Temperature both ways</strong></p>
+<p class="v2-p">Write <code>celsiusToFahrenheit(c: Double): Double</code> and <code>fahrenheitToCelsius(f: Double): Double</code>. Use them to print: 25 degrees Celsius in Fahrenheit, -40 degrees Celsius in Fahrenheit, and 212 degrees Fahrenheit in Celsius.</p>
+<p class="v2-p"><em>Formulas:</em> F = C x 9 / 5 + 32 and C = (F - 32) x 5 / 9.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun celsiusToFahrenheit(c: Double): Double = c * 9 / 5 + 32
+
+fun fahrenheitToCelsius(f: Double): Double = (f - 32) * 5 / 9
+
+fun main() {
+    println("25 C = ${celsiusToFahrenheit(25.0)} F")
+    println("-40 C = ${celsiusToFahrenheit(-40.0)} F")
+    println("212 F = ${fahrenheitToCelsius(212.0)} C")
+}</code></pre></div></div>
+<p class="v2-p">Working: 25.0 times 9 is 225.0, over 5 is 45.0, plus 32 is 77.0. Then -40.0 times 9 is -360.0, over 5 is -72.0, plus 32 is -40.0 (the famous point where both scales agree). Finally 212 minus 32 is 180.0, times 5 is 900.0, over 9 is 100.0.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">25 C = 77.0 F<br/>-40 C = -40.0 F<br/>212 F = 100.0 C</p>
+</blockquote></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Problem 3: Average of three scores</strong></p>
+<p class="v2-p">Write <code>average(a: Int, b: Int, c: Int): Double</code>. It must give a decimal answer, not a rounded-down whole number. Print the average of 80, 90 and 85, and of 70, 71 and 72, and of 1, 2 and 2.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun average(a: Int, b: Int, c: Int): Double = (a + b + c) / 3.0
+
+fun main() {
+    println(average(80, 90, 85))
+    println(average(70, 71, 72))
+    println(average(1, 2, 2))
+}</code></pre></div></div>
+<p class="v2-p">The trick is dividing by <code>3.0</code>, a <code>Double</code>, so Kotlin does not use integer division. The sums are 255, 213 and 5, so the averages are 85.0, 71.0 and about 1.6666666666666667.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">85.0<br/>71.0<br/>1.6666666666666667</p>
+</blockquote></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Problem 4: A report card line (default and named arguments)</strong></p>
+<p class="v2-p">Write <code>reportLine(student: String, subject: String, score: Int, outOf: Int = 100): String</code> that returns text like <code>Ada | Maths | 78/100</code>. Call it once using the default, once with <code>outOf = 50</code>, and once with all arguments named in a different order.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 4 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun reportLine(student: String, subject: String, score: Int, outOf: Int = 100): String {
+    return "$student | $subject | $score/$outOf"
+}
+
+fun main() {
+    println(reportLine("Ada", "Maths", 78))
+    println(reportLine("Tunde", "English", 41, 50))
+    println(reportLine(subject = "Biology", score = 66, student = "Chioma", outOf = 80))
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Ada | Maths | 78/100<br/>Tunde | English | 41/50<br/>Chioma | Biology | 66/80</p>
+</blockquote></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Problem 5: Fix the broken functions</strong></p>
+<p class="v2-p">Each function below has a mistake. Find and fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun add(a: Int, b: Int) {
+    return a + b
+}
+
+fun greet(name: String = "friend", age: Int) {
+    println("Hello $name, you are age")
+}
+
+fun main() {
+    println(add(2))
+    greet(age = 20)
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Solution 5 👁️</button><div class="reveal-content"><p class="v2-p">There are three real problems and one style point:</p>
+<ol class="v2-ol">
+<li><code>add</code> has a block body that uses <code>return a + b</code>, but no return type is declared, so it returns <code>Unit</code>. Add <code>: Int</code>.</li>
+<li><code>println(add(2))</code> supplies only one of the two required arguments. Pass both: <code>add(2, 3)</code>.</li>
+<li>The template <code>"... you are age"</code> is missing the <code>$</code>, so it prints the word <code>age</code>. Write <code>$age</code>.</li>
+<li>Style point: <code>greet</code> itself is legal: since <code>age</code> is given by name, the default for <code>name</code> can be used. (Putting a defaulted parameter first is legal, but when you call it positionally you must name the later argument, so most people put defaults last.)</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun add(a: Int, b: Int): Int {
+    return a + b
+}
+
+fun greet(age: Int, name: String = "friend") {
+    println("Hello $name, you are $age")
+}
+
+fun main() {
+    println(add(2, 3))
+    greet(age = 20)
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">5<br/>Hello friend, you are 20</p>
+</blockquote></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Practice: Kotlin Basics (Functions Set)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Scenario:</strong> You are helping at a school canteen and want small reusable functions for prices.</p>
+<p class="v2-p"><strong>Exercise 1: Canteen helpers</strong></p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Write <code>fun totalPrice(unitPrice: Int, count: Int): Int</code> as a single-expression function.</li>
+<li>Write <code>fun applyDiscount(amount: Int, percent: Int): Int</code> that returns the amount <strong>after</strong> the percentage discount (use integer arithmetic: <code>amount * (100 - percent) / 100</code>).</li>
+<li>Write <code>fun printLine(label: String, amount: Int)</code> that prints <code>label: ₦amount</code>.</li>
+<li>In <code>main</code>, buy 5 meat pies at ₦350 each, apply a 10 percent discount, and print both the full price and the final price.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun totalPrice(unitPrice: Int, count: Int): Int = unitPrice * count
+
+fun applyDiscount(amount: Int, percent: Int): Int = amount * (100 - percent) / 100
+
+fun printLine(label: String, amount: Int) {
+    println("$label: ₦$amount")
+}
+
+fun main() {
+    val full = totalPrice(350, 5)
+    val discounted = applyDiscount(full, 10)
+    printLine("Full price", full)
+    printLine("After discount", discounted)
+}</code></pre></div></div>
+<p class="v2-p">Working: 350 times 5 is 1750. Then 1750 times 90 is 157500, divided by 100 is 1575.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Full price: ₦1750<br/>After discount: ₦1575</p>
+</blockquote></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Returning two values</strong></p>
+<p class="v2-p">Write <code>divideWithRemainder(a: Int, b: Int): Pair&lt;Int, Int&gt;</code> and use destructuring to print <code>17 divided by 5 is 3 remainder 2</code>. Then use the same function to work out how many full buses of 14 passengers are needed for 100 people, and how many are left standing.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun divideWithRemainder(a: Int, b: Int): Pair&lt;Int, Int&gt; = Pair(a / b, a % b)
+
+fun main() {
+    val (q, r) = divideWithRemainder(17, 5)
+    println("17 divided by 5 is $q remainder $r")
+
+    val (buses, standing) = divideWithRemainder(100, 14)
+    println("$buses full buses, $standing people left over")
+}</code></pre></div></div>
+<p class="v2-p">Working: 100 divided by 14 is 7 (7 times 14 is 98), leaving 2.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">17 divided by 5 is 3 remainder 2<br/>7 full buses, 2 people left over</p>
+</blockquote></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Choose three lines you have repeated in earlier lessons' practice (a border line, a total calculation, a greeting). Turn each into a function and call it twice with different arguments. Then write a one-sentence description of each function. If you cannot do it in one sentence, split the function.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Declaring a return type but forgetting <code>return</code>.</strong> <em>The wrong code:</em> <code>fun double(n: Int): Int { n * 2 }</code>. <em>The error:</em> a <code>return</code> is missing, so the compiler complains. <em>The fix:</em> write <code>return n * 2</code>, or use the single-expression form <code>fun double(n: Int) = n * 2</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Using <code>return</code> in a block body without a return type.</strong> <em>The wrong code:</em> <code>fun add(a: Int, b: Int) { return a + b }</code>. <em>The problem:</em> with a block body, no declared return type means <code>Unit</code>. <em>The fix:</em> add <code>: Int</code>. (Only single-expression functions with <code>=</code> can infer the type.)</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting to call the function.</strong> <em>The wrong code:</em> <code>printWelcome</code> without parentheses. <em>The problem:</em> nothing prints, or you get an error. <em>The fix:</em> a call needs parentheses: <code>printWelcome()</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Ignoring the returned value.</strong> <em>The wrong code:</em> <code>lineTotal(1200, 3)</code> on a line by itself. <em>The problem:</em> it computes <code>3600</code> and throws it away. <em>The fix:</em> store it (<code>val t = lineTotal(1200, 3)</code>) or print it.</p>
+<p class="v2-p"><strong>Mistake #5: Reassigning a parameter.</strong> <em>The wrong code:</em> <code>fun addVat(price: Int): Int { price = price + 75; return price }</code>. <em>The error:</em> <code>Val cannot be reassigned</code>. <em>The fix:</em> <code>val withVat = price + 75</code> and return that.</p>
+<p class="v2-p"><strong>Mistake #6: Using a local variable outside its function.</strong> <em>The wrong code:</em> creating <code>val total</code> inside <code>calculate()</code> and printing <code>total</code> in <code>main</code>. <em>The error:</em> unresolved reference. <em>The fix:</em> return the value from the function and store it in <code>main</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Wrong argument order.</strong> <em>The wrong code:</em> <code>describe(19, "Ada")</code> for <code>describe(name: String, age: Int)</code>. <em>The error:</em> type mismatch. <em>The fix:</em> match the order, or use named arguments, which make order irrelevant and the code self-explaining.</p>
+<p class="v2-p"><strong>Mistake #8: Functions that do too much.</strong> <em>The wrong code:</em> one function that reads data, calculates, formats and prints. <em>The fix:</em> split it. A calculating function should return a value, and a separate function should print it. This makes each easy to test and reuse.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between a parameter and an argument?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A parameter is the named placeholder in the function definition (<code>fun greet(name: String)</code>). An argument is the actual value supplied in a call (<code>greet("Ada")</code>).</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does a function with no declared return type return?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It returns <code>Unit</code>, Kotlin's way of saying "no meaningful value". It is similar to <code>void</code> in other languages, but <code>Unit</code> is a real type with exactly one value.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Rewrite this as a single-expression function: <code>fun triple(n: Int): Int { return n * 3 }</code></p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>fun triple(n: Int) = n * 3</code> (or with the explicit type: <code>fun triple(n: Int): Int = n * 3</code>).</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Given <code>fun order(item: String, qty: Int = 1, note: String = "")</code>, which calls are valid: <code>order("Rice")</code>, <code>order("Rice", 3)</code>, <code>order(item = "Rice", note = "no pepper")</code>, <code>order(3, "Rice")</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The first three are valid. The first uses both defaults, the second overrides <code>qty</code>, and the third uses named arguments to skip <code>qty</code> and set <code>note</code>. The fourth is invalid because the arguments are in the wrong order and types.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why can <code>main</code> not read a variable that was declared inside another function?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Because of scope. A local variable exists only inside the function (or block) where it was declared. To share a result, the function must return it and the caller stores it.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-1-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 1, Pathway 1</a>: the official pathway containing the functions codelab and practice.</li>
+<li><a href="https://kotlinlang.org/docs/functions.html" rel="noopener noreferrer">Kotlin docs: Functions</a>: default arguments, named arguments, varargs, local functions and more.</li>
+<li><a href="https://play.kotlinlang.org/" rel="noopener noreferrer">Kotlin Playground</a>: run every example in the browser.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Shop Receipt Printer</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a tidy receipt printer made of small functions, each with one job. This models how real apps are organised.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Write <code>lineTotal(price: Int, quantity: Int): Int</code> as a single-expression function.</li>
+<li>Write <code>applyDiscount(total: Int, percent: Int = 0): Int</code> returning the total after discount. The default must mean no discount.</li>
+<li>Write <code>formatNaira(amount: Int): String</code> returning text like <code>₦5200</code>.</li>
+<li>Write <code>printItem(name: String, price: Int, quantity: Int)</code> that prints one line: <code>Rice x3 @ ₦1200 = ₦3600</code>.</li>
+<li>In <code>main</code>, record two items (rice at ₦1200 x3, beans at ₦800 x2), print both lines, then print the subtotal, a 10 percent discount using a <strong>named argument</strong>, and the final total.</li>
+<li>Use <code>val</code> throughout.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Write <code>splitBill(total: Int, people: Int): Pair&lt;Int, Int&gt;</code> that returns the share each person pays and the leftover naira, and print the result for 4 people.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Main.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun lineTotal(price: Int, quantity: Int): Int = price * quantity
+
+fun applyDiscount(total: Int, percent: Int = 0): Int = total * (100 - percent) / 100
+
+fun formatNaira(amount: Int): String = "₦$amount"
+
+fun printItem(name: String, price: Int, quantity: Int) {
+    val total = lineTotal(price, quantity)
+    println("$name x$quantity @ ${formatNaira(price)} = ${formatNaira(total)}")
+}
+
+fun splitBill(total: Int, people: Int): Pair&lt;Int, Int&gt; = Pair(total / people, total % people)
+
+fun main() {
+    println("===== RECEIPT =====")
+    printItem("Rice", 1200, 3)
+    printItem("Beans", 800, 2)
+
+    val subtotal = lineTotal(1200, 3) + lineTotal(800, 2)
+    val finalTotal = applyDiscount(subtotal, percent = 10)
+
+    println("-------------------")
+    println("Subtotal: ${formatNaira(subtotal)}")
+    println("Total after 10% discount: ${formatNaira(finalTotal)}")
+
+    val (share, leftover) = splitBill(finalTotal, 4)
+    println("Split 4 ways: ${formatNaira(share)} each, ${formatNaira(leftover)} left over")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Reasoning through the output:</strong> rice is 1200 times 3, which is 3600. Beans is 800 times 2, which is 1600. The subtotal is 5200. With 10 percent off, 5200 times 90 is 468000, divided by 100 is 4680. Splitting 4680 between 4 people gives 1170 each with nothing left over.</p>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">===== RECEIPT =====<br/>Rice x3 @ ₦1200 = ₦3600<br/>Beans x2 @ ₦800 = ₦1600</p>
+<hr class="v2-hr"/>
+<p class="v2-p">Subtotal: ₦5200<br/>Total after 10% discount: ₦4680<br/>Split 4 ways: ₦1170 each, ₦0 left over</p>
+</blockquote><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 08 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-08-create-and-use-functions-in-kotlin</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 08 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What a Function Is</li><li>✅ Worked Examples</li><li>✅ Scope: Who Can See What</li><li>✅ Seeing the Call Stack</li><li>✅ Functions in Android Studio</li><li>✅ Practice: Kotlin Basics (Functions Set)</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_07.html" class="ln-btn">&#8592; Lesson 07</a><a href="lesson_09.html" class="ln-btn primary">Lesson 09 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 08 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

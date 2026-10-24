@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 04: Run Your App on the Android Emulator — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l04">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 04 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 04</div>
+      <h1>Run Your App on the Android Emulator</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Emulator Test Lab</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 04</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Create virtual devices, run your app, and master emulator controls, snapshots and troubleshooting.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Emulator Test Lab</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You built an app in lesson 03. Today it comes alive. You will create a <strong>virtual phone</strong> inside your computer, install your app on it, tap it with your mouse, and learn the controls that make the <strong>Android Emulator</strong> a serious development tool: rotating the screen, faking a GPS location, draining the battery, taking snapshots and more.</p>
+<p class="v2-p">An emulator is like a flight simulator for apps. A pilot trainee does not crash a real aeroplane to learn; they crash a simulator. You can test your app on a tiny old phone, a huge tablet and a foldable without owning any of them. The price you pay is computer resources, and many learners in Nigeria and elsewhere work on modest laptops, so this lesson is honest about RAM, storage and the alternatives when an emulator is too heavy.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what an <strong>AVD</strong> (Android Virtual Device) is and what a <strong>system image</strong> is.</li>
+<li>Explain <strong>ABI</strong>, <strong>x86_64</strong> and <strong>arm64-v8a</strong>, and choose the right system image for your computer.</li>
+<li>Create an AVD in the <strong>Device Manager</strong> and run your app on it.</li>
+<li>Use the emulator toolbar and the <strong>Extended controls</strong> (location, battery, cellular, sensors and more).</li>
+<li>Understand <strong>Quick Boot</strong>, <strong>cold boot</strong> and <strong>snapshots</strong>.</li>
+<li>Check that <strong>hardware acceleration</strong> works on Windows, macOS or Linux.</li>
+<li>Start emulators from the command line and confirm them with <code>adb devices</code>.</li>
+<li>Choose low-RAM alternatives when your computer is struggling.</li>
+<li>Diagnose the most common emulator problems.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson matches the <em>Run your first app on the Android Emulator</em> codelab in Unit 1 (the <em>Set up Android Studio</em> pathway) of Google's official <strong>Android Basics with Compose</strong> course. The codelab shows the basic clicks. We add the reasons behind the choices and the controls and troubleshooting you will need every week. The official pathway link is at the end.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. A project that builds</h3>
+<p class="v2-p">You need a project from lesson 03 (for example <code>Hello Techbase</code>) that syncs and builds. If your Gradle sync is failing, fix that first.</p>
+<h3 class="v2-h3">2. What a CPU architecture is</h3>
+<p class="v2-p">A processor understands a fixed set of instructions called its <strong>instruction set</strong>. Two families matter to Android developers:</p>
+<ul class="v2-ul">
+<li><strong>x86 family</strong> (Intel and AMD processors in most Windows and Linux laptops, and older Macs).</li>
+<li><strong>ARM family</strong> (almost every phone, Apple Silicon Macs, and some Windows laptops).</li>
+</ul>
+<p class="v2-p">A program built for one family cannot run directly on the other. The name for "which instruction set a piece of machine code targets" is the <strong>ABI</strong> (application binary interface). You will see this word in system image names.</p>
+<h3 class="v2-h3">3. What a virtual machine is</h3>
+<p class="v2-p">A <strong>virtual machine</strong> is a pretend computer running as a program inside your real computer. The emulator runs a full Android operating system inside one. If the pretend computer and the real computer use the <em>same</em> instruction set, the processor can run Android's instructions almost directly, which is fast. If they differ, every instruction must be translated one at a time, which is painfully slow.</p>
+<h3 class="v2-h3">4. What <code>adb</code> is</h3>
+<p class="v2-p"><code>adb</code> (Android Debug Bridge) is a command-line tool that talks to devices and emulators. Android Studio uses it behind the scenes to install and start your app. You will use it yourself in lesson 05.</p>
+<h3 class="v2-h3">5. Your computer's RAM and disk</h3>
+<p class="v2-p">Look up how much memory your computer has before you start (on Windows: <strong>Task Manager &gt; Performance</strong>; macOS: <strong>Apple menu &gt; About This Mac</strong>; Linux: <code>free -h</code>). Google's emulator guidance lists <strong>16 GB of RAM</strong> and about <strong>16 GB of free disk space</strong> as system requirements, and warns that newer Android versions and large-screen devices may need more. Many people succeed with less by using the tips in this lesson, but you should know your numbers.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Emulator, AVD and System Image</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Three words get mixed up constantly. Here is the difference.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Android Emulator</strong></td>
+<td>The program that pretends to be a phone's hardware. Installed through the SDK Manager (lesson 02).</td>
+<td>The simulator machine itself.</td>
+</tr>
+<tr>
+<td><strong>System image</strong></td>
+<td>A downloadable copy of an Android version (with or without Google apps) built for one CPU architecture.</td>
+<td>The "software disc" that goes into the simulator.</td>
+</tr>
+<tr>
+<td><strong>AVD</strong> (Android Virtual Device)</td>
+<td>A saved configuration: a hardware profile plus a system image plus settings such as RAM and screen size.</td>
+<td>One saved game: "Pixel-like phone running Android version N".</td>
+</tr>
+<tr>
+<td><strong>Hardware profile</strong></td>
+<td>The description of a device as it leaves the factory: screen size, resolution, RAM, sensors, cameras.</td>
+<td>The spec sheet on the box.</td>
+</tr>
+<tr>
+<td><strong>Skin</strong></td>
+<td>How the emulator window looks (bezel, buttons).</td>
+<td>The phone case.</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>          Hardware profile  +  System image  +  Settings
+          (screen, sensors)    (Android N, ABI)  (RAM, graphics)
+                    \              |               /
+                     `-------&gt; AVD (saved config) &lt;-----'
+                                   |
+                                   v
+                          Android Emulator (runs it)
+                                   |
+                                   v
+                       Your app installed via adb</code></pre></div></div>
+<h3 class="v2-h3">The three flavours of system image</h3>
+<p class="v2-p">When you pick a system image, the official documentation explains three flavours:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Flavour</th>
+<th>Includes</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Google Play</strong> (Play Store image)</td>
+<td>Google apps, Play Store and Google Play services. Signed with a release key, so you cannot get root.</td>
+<td>Testing the experience real users have, apps that sign in with Google, and Play features.</td>
+</tr>
+<tr>
+<td><strong>Google APIs</strong></td>
+<td>Google Play services but no Play Store app.</td>
+<td>Apps that use Google services such as Maps.</td>
+</tr>
+<tr>
+<td><strong>AOSP</strong> (no Google apps)</td>
+<td>A plain Android with no Google apps. Allows root access with <code>adb root</code>.</td>
+<td>Low-level debugging and a lighter footprint.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Pick the Google APIs or Google Play type for most Compose apps in this course. Only profiles marked with the Play Store logo in the hardware list can use Play Store images.</p>
+<h3 class="v2-h3">ABIs: x86_64 versus arm64-v8a</h3>
+<p class="v2-p">An <strong>ABI</strong> names the CPU family and word size. The two that matter to you today:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>ABI</th>
+<th>Instruction set</th>
+<th>Where you will see it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>x86_64</strong></td>
+<td>64-bit Intel/AMD</td>
+<td>Emulator images for PCs with Intel or AMD processors.</td>
+</tr>
+<tr>
+<td><strong>arm64-v8a</strong></td>
+<td>64-bit ARM</td>
+<td>Almost every modern phone, and emulator images for Apple Silicon Macs and other ARM64 hosts.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The golden rule from the official hardware-acceleration guide:</p>
+<ul class="v2-ul">
+<li>On an <strong>x86_64 computer</strong> (most Windows and Linux PCs and older Macs), use <strong>x86 or x86_64</strong> system images. ARM images work but cannot use hardware virtualisation and are very slow.</li>
+<li>On an <strong>ARM64 computer</strong> (Apple Silicon Macs and similar), use <strong>arm64-v8a</strong> images.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Rule of thumb:</strong> <em>Match the system image to your computer's CPU, not to the phone you imagine.</em> Your app will still run on ARM phones in real life, because Kotlin code compiled to DEX is the same on every CPU. Only apps that include native C/C++ code need separate builds per ABI.</p>
+</blockquote>
+<p class="v2-p">If you are unsure which CPU you have: on Windows, <strong>Settings &gt; System &gt; About</strong> shows the processor name; on macOS, <strong>About This Mac</strong> says "Apple M…" or "Intel"; on Linux run <code>uname -m</code> (x86_64 means Intel/AMD, aarch64 means ARM64).</p>
+<h3 class="v2-h3">API levels in system images</h3>
+<p class="v2-p">Each system image is tied to an <strong>API level</strong>, the number that identifies an Android version (lesson 01). An app cannot run on an image whose API level is below its <code>minSdk</code> (lesson 03). Official advice is to test on images covering the range your app supports, but today you need only one: a recent stable image.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Emulator, AVD and System Image</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step: Create Your First AVD</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Menu names move between versions, so match by meaning. Official documentation opens the Device Manager through the Welcome screen (<strong>More Actions &gt; Virtual Device Manager</strong>) or, when a project is open, <strong>View &gt; Tool Windows &gt; Device Manager</strong>.</p>
+<h3 class="v2-h3">Step 1: Open the Device Manager</h3>
+<p class="v2-p">Open your <code>Hello Techbase</code> project and choose <strong>View &gt; Tool Windows &gt; Device Manager</strong>. It lists devices, with a <strong>Virtual</strong> tab for emulators and a <strong>Physical</strong> tab for real phones. If you installed a default emulator image with Android Studio you may already see one.</p>
+<h3 class="v2-h3">Step 2: Create a device</h3>
+<p class="v2-p">Click <strong>Create Device</strong> (the plus icon).</p>
+<ol class="v2-ol">
+<li><strong>Select Hardware.</strong> Choose a phone profile. A <strong>Pixel</strong> profile with a Play Store icon is a good, common choice. Predefined profiles cannot be edited, but you can clone one and change the copy (the <strong>Clone Device</strong> button), or define your own with <strong>New Hardware Profile</strong>. Click <strong>Next</strong>.</li>
+<li><strong>System Image.</strong> The tabs show recommended images, other releases, and the <strong>x86 Images</strong> or <strong>ARM Images</strong> list depending on your computer. Pick a recent stable API level that matches your computer's architecture. An entry with a <strong>Download</strong> icon is not installed; click it and accept the licence. The download can be a gigabyte or more, so use Wi-Fi if you are on a limited data plan. Click <strong>Next</strong>.</li>
+<li><strong>Verify Configuration</strong> (sometimes called Android Virtual Device). Give the AVD a clear name such as <code>Pixel_Phone_API_Recent</code>. Click <strong>Show Advanced Settings</strong> to see more options (we explain them below). Click <strong>Finish</strong>.</li>
+</ol>
+<h3 class="v2-h3">The advanced settings that matter</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Setting</th>
+<th>What it does</th>
+<th>Advice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RAM</strong></td>
+<td>Memory given to the virtual phone.</td>
+<td>Do not push it high on a small laptop. A few gigabytes is plenty for learning. The setting is separate from your computer's RAM, but the emulator uses real RAM equal to roughly this amount plus overhead.</td>
+</tr>
+<tr>
+<td><strong>Internal storage</strong></td>
+<td>Disk space the virtual phone sees.</td>
+<td>The file is created on your disk and can use real space. Keep it modest.</td>
+</tr>
+<tr>
+<td><strong>Graphics</strong></td>
+<td><strong>Hardware</strong> (uses your graphics card), <strong>Software</strong> (uses the CPU, slower but safest) or <strong>Automatic</strong>.</td>
+<td>Leave on <strong>Automatic</strong>. Use <strong>Software</strong> if you see a black screen or rendering glitches.</td>
+</tr>
+<tr>
+<td><strong>Boot option</strong></td>
+<td><strong>Quick boot</strong> (resume from a saved snapshot) or <strong>Cold boot</strong> (start from power-off every time).</td>
+<td>Quick boot for speed. Use cold boot if the emulator behaves strangely.</td>
+</tr>
+<tr>
+<td><strong>Multi-core CPU</strong></td>
+<td>How many of your CPU cores the virtual phone may use.</td>
+<td>More cores are faster but make your computer busier.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Click <strong>Finish</strong>. Your AVD appears in the <strong>Virtual</strong> tab.</p>
+<h3 class="v2-h3">Step 3: Run your app</h3>
+<p class="v2-p">In the toolbar at the top of Android Studio you will see a <strong>target device menu</strong> (it may say "No Devices" at first) and a green <strong>Run</strong> button. Choose your new AVD from the menu and click <strong>Run</strong>. Android Studio will:</p>
+<ol class="v2-ol">
+<li>Build the app (as in lesson 03).</li>
+<li>Start the emulator if it is not already running. The <strong>first start is always a cold boot</strong> and can take a minute or more on a modest laptop.</li>
+<li>Install the APK on the virtual phone through <code>adb</code>.</li>
+<li>Launch your <code>MainActivity</code>.</li>
+</ol>
+<p class="v2-p">When it works, the emulator shows Android's home screen and then your app with the text from lesson 03.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Where does the emulator appear?</strong> In recent Android Studio versions the emulator appears inside the IDE in the <strong>Running Devices</strong> tool window. In older settings it opens as a separate floating window. A setting under <strong>Settings &gt; Tools &gt; Emulator</strong> (the label has been something like <em>Launch in the Running Devices tool window</em>) chooses between them. Some emulator features are only available in the standalone window, according to the official extended-controls guide.</p>
+</blockquote>
+<h3 class="v2-h3">Make the app tell us where it runs</h3>
+<p class="v2-p">To prove to yourself what the emulator really is, change the greeting so it prints facts from the virtual device. Replace the <code>Greeting</code> composable in <code>MainActivity.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.os.Build
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun DeviceFacts(modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text("Model: ${Build.MODEL}")
+        Text("Android API level: ${Build.VERSION.SDK_INT}")
+        Text("Supported ABIs: ${Build.SUPPORTED_ABIS.joinToString()}")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Then call <code>DeviceFacts(modifier = Modifier.padding(innerPadding))</code> inside the <code>Scaffold</code> in <code>setContent</code> instead of <code>Greeting</code>. The <code>Build</code> class is part of the Android SDK and reports information about the device it runs on. Run the app on the emulator. You will see something like this (your values depend on your AVD):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Model: sdk_gphone64_x86_64<br/>Android API level: 35<br/>Supported ABIs: x86_64, arm64-v8a</p>
+</blockquote>
+<p class="v2-p">Notice that the emulator may list more than one ABI because newer x86_64 images include a translation layer so that some ARM-only native apps can still run. Your own screen will show the ABI of the image you chose.</p>
+<h3 class="v2-h3">Stopping and restarting</h3>
+<ul class="v2-ul">
+<li>Click the <strong>Stop</strong> square in the toolbar to stop the <em>app</em>.</li>
+<li>To close the emulator, close its window or use <strong>Stop</strong> from the AVD's row in the Device Manager. When you close it, a <strong>Quick Boot snapshot</strong> is normally saved so that next time it starts quickly (see below).</li>
+<li>Leaving the emulator running between runs is a big time saver. Pressing <strong>Run</strong> again on a running emulator only reinstalls your app.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Create Your First AVD</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Using the Emulator: Toolbar, Gestures and Keyboard</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">The emulator has a narrow toolbar. The icons differ by version, but the common ones are:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Control</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Power</strong></td>
+<td>Turn the screen on and off. A long press shows a power menu.</td>
+</tr>
+<tr>
+<td><strong>Volume up and down</strong></td>
+<td>Hardware volume buttons.</td>
+</tr>
+<tr>
+<td><strong>Rotate left and right</strong></td>
+<td>Change between portrait and landscape. Lesson 23 shows why rotation matters to your app.</td>
+</tr>
+<tr>
+<td><strong>Take screenshot</strong></td>
+<td>Saves a picture of the screen to your computer.</td>
+</tr>
+<tr>
+<td><strong>Back, Home, Overview</strong></td>
+<td>The navigation actions (shown as buttons or gestures, depending on the Android version).</td>
+</tr>
+<tr>
+<td><strong>Zoom and fold controls</strong></td>
+<td>Appear on foldable profiles.</td>
+</tr>
+<tr>
+<td><strong>More (three dots)</strong></td>
+<td>Opens <strong>Extended controls</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Useful mouse and keyboard behaviours:</p>
+<ul class="v2-ul">
+<li>Click is a tap. Click-and-drag is a swipe. Hold <strong>Ctrl</strong> (or <strong>Cmd</strong> on macOS) and drag to simulate a pinch in many versions.</li>
+<li>The keyboard types into text fields.</li>
+<li>Press <strong>F1</strong> (<strong>Command + /</strong> on macOS) in the standalone emulator to open the Help pane with the list of keyboard shortcuts. The shortcuts work when the <strong>Send keyboard shortcuts to</strong> setting is on <strong>Emulator controls</strong>, which is the default.</li>
+</ul>
+<h3 class="v2-h3">Extended controls</h3>
+<p class="v2-p">Open <strong>More</strong> (the three dots at the bottom of the emulator toolbar). The extended controls window has many panes. The official guide lists these, and your version may add or rename some:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Pane</th>
+<th>Use it to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Location</strong></td>
+<td>Set a single GPS point or play a route, and import GPX or KML files. Perfect for testing a map or delivery app without leaving your desk.</td>
+</tr>
+<tr>
+<td><strong>Cellular</strong></td>
+<td>Simulate network types and signal strength, for example to see how your app behaves on a weak connection.</td>
+</tr>
+<tr>
+<td><strong>Battery</strong></td>
+<td>Set charge level, charging state and health.</td>
+</tr>
+<tr>
+<td><strong>Camera</strong></td>
+<td>Choose the pictures the virtual camera "sees".</td>
+</tr>
+<tr>
+<td><strong>Phone</strong></td>
+<td>Simulate an incoming call or SMS.</td>
+</tr>
+<tr>
+<td><strong>Virtual sensors</strong></td>
+<td>Rotate and move the device to test the accelerometer, and set light, proximity and other sensors.</td>
+</tr>
+<tr>
+<td><strong>Fingerprint</strong></td>
+<td>Simulate fingerprint touches for apps that use biometrics.</td>
+</tr>
+<tr>
+<td><strong>Displays</strong></td>
+<td>Add secondary displays.</td>
+</tr>
+<tr>
+<td><strong>Microphone</strong></td>
+<td>Connect the host microphone, simulate a headset.</td>
+</tr>
+<tr>
+<td><strong>Settings and Help</strong></td>
+<td>Screenshots location, proxy, graphics, shortcuts and an About page with the adb port and serial number.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Try this: open <strong>Location</strong>, search for a place or click on the map, press <strong>Set location</strong>, then open a map app in the emulator (if your image has one) and watch the blue dot move to Ibadan or wherever you chose.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Using the Emulator: Toolbar, Gestures and Keyboard</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Snapshots, Quick Boot and Cold Boot</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Booting Android from nothing takes a long time. A <strong>snapshot</strong> saves the <em>entire state</em> of the virtual phone (memory, settings, app data) so that it can resume where it left off, like waking a sleeping phone instead of switching it on.</p>
+<p class="v2-p">From the official snapshots documentation:</p>
+<ul class="v2-ul">
+<li>Each AVD has <strong>one Quick Boot snapshot</strong> and any number of <strong>general snapshots</strong>.</li>
+<li>By default the emulator <strong>saves the Quick Boot snapshot when you close it and loads it when you start</strong>. The first start is always a cold boot. The documentation says Quick Boot can start an AVD up to ten times faster than a cold boot.</li>
+<li>To take your own named snapshot, open the <strong>Snapshots</strong> pane (in the emulator toolbar in Android Studio, or in Extended controls in the standalone window) and click <strong>Take snapshot</strong>. You can later select a snapshot and load it, rename it, or delete it.</li>
+<li><strong>Cold Boot</strong> can be requested once from the AVD's menu in the Device Manager, or turned on permanently in the AVD's advanced settings (<strong>Emulated Performance &gt; Boot option</strong>).</li>
+<li>Holding <strong>Shift</strong> while closing the emulator skips the Quick Boot save for that session.</li>
+</ul>
+<h3 class="v2-h3">When snapshots become invalid</h3>
+<p class="v2-p">A snapshot belongs to the exact combination of system image, AVD configuration and emulator version that saved it. If you edit the AVD or update the emulator or system image, the snapshots become invalid and the next start is a cold boot. This is normal.</p>
+<h3 class="v2-h3">Snapshot cautions</h3>
+<ul class="v2-ul">
+<li>Saving and loading snapshots needs memory. With little free RAM the process can crawl, so close heavy programs first.</li>
+<li>The official guide notes that snapshots are unreliable with <strong>software</strong> graphics, so keep graphics on <strong>Hardware</strong> or <strong>Automatic</strong> if you rely on them.</li>
+<li>If an emulator fails to start from a snapshot, use <strong>Cold Boot</strong> from the AVD menu.</li>
+<li>Snapshots use real disk space. If your disk fills up, delete snapshots you do not need, or use <strong>Wipe Data</strong> from the AVD menu to reset a virtual phone to a clean state.</li>
+</ul>
+<h3 class="v2-h3">A useful testing trick</h3>
+<p class="v2-p">Take a snapshot called <code>clean-install</code> right after you install and sign in to the apps you need. Whenever your test data gets messy, load that snapshot and you are back at a known state within seconds.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Snapshots, Quick Boot and Cold Boot</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Hardware Acceleration</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Emulator speed depends mostly on <strong>hardware acceleration</strong>, in two parts:</p>
+<ul class="v2-ul">
+<li><strong>VM acceleration:</strong> the CPU runs the virtual phone's instructions directly through a hypervisor (this requires matching architectures and virtualisation turned on).</li>
+<li><strong>Graphics acceleration:</strong> the graphics card draws the virtual screen.</li>
+</ul>
+<p class="v2-p">Without VM acceleration the emulator is extremely slow, which is the main reason people say "the emulator is unusable".</p>
+<h3 class="v2-h3">Step 1: Enable virtualisation in firmware</h3>
+<p class="v2-p">Intel computers call it <strong>VT-x</strong>, AMD computers call it <strong>AMD-V</strong> or <strong>SVM</strong>. Many computers ship with it disabled. If acceleration fails you may need to restart, enter the BIOS or UEFI setup (usually by pressing F2, F10, Del or Esc during startup; this varies by maker) and enable it. Do not change other firmware settings you do not understand.</p>
+<h3 class="v2-h3">Step 2: The operating-system layer</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Operating system</th>
+<th>What the emulator uses</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Windows</strong></td>
+<td><strong>Windows Hypervisor Platform (WHPX)</strong>, the recommended option.</td>
+<td>Turn on <strong>Windows Hypervisor Platform</strong> in <strong>Turn Windows features on or off</strong>, then restart.</td>
+</tr>
+<tr>
+<td><strong>macOS</strong></td>
+<td>Apple's built-in <strong>Hypervisor.framework</strong>.</td>
+<td>Nothing to install.</td>
+</tr>
+<tr>
+<td><strong>Linux</strong></td>
+<td><strong>KVM</strong></td>
+<td>Install KVM packages for your distribution and make sure your user has permission to use <code>/dev/kvm</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The official guide has more to say, which is worth knowing: on Windows there used to be an Intel HAXM driver, but it is deprecated and should not be used on current versions, and an alternative driver (the Android Emulator hypervisor driver, <strong>AEHD</strong>) is documented as scheduled for removal at the end of 2026, so WHPX is the choice to learn. Also, you cannot run a hardware-accelerated emulator inside another virtual machine such as VirtualBox or VMware.</p>
+<h3 class="v2-h3">Step 3: Check that it works</h3>
+<p class="v2-p">The emulator has a built-in checker. From the SDK's <code>emulator</code> folder, run it in a terminal. (Android Studio's <strong>Settings &gt; Languages &amp; Frameworks &gt; Android SDK</strong> shows your SDK path.)</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># macOS or Linux
+~/Android/Sdk/emulator/emulator -accel-check
+
+# Windows (PowerShell), adjust the path to your SDK location
+&amp; "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -accel-check</code></pre></div></div>
+<p class="v2-p">The official guide shows outputs like these (details differ by machine):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">WHPX(10.0.22631) is installed and usable.<br/>Hypervisor.Framework OS X Version 13.2<br/>KVM (version 12) is installed and usable.</p>
+</blockquote>
+<p class="v2-p">On Linux, two extra checks help:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>egrep -c '(vmx|svm)' /proc/cpuinfo     # 1 or more means the CPU supports virtualisation
+sudo kvm-ok                            # from the cpu-checker package</code></pre></div></div>
+<p class="v2-p">If you see a message that no hypervisor is available, re-check the firmware setting, the Windows feature, the Linux KVM permissions, or whether an incompatible tool (other virtualisation software, some anti-cheat or antivirus tools) is interfering.</p>
+<h3 class="v2-h3">Graphics settings</h3>
+<p class="v2-p">If the emulator shows a black screen, crashes or has glitches, edit the AVD and change <strong>Graphics</strong> from Automatic to <strong>Software</strong> as a test. On the command line the flag <code>-gpu</code> selects a mode. Official documentation warns that forcing a mode your computer does not support can cause crashes or wrong images, so use <strong>Automatic</strong> when you can.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Hardware Acceleration</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Low-RAM and Low-Power Alternatives</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Not everyone has a 16 GB machine. Here is an honest ladder of options, from lightest to heaviest.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Option</th>
+<th>RAM / cost</th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compose Preview</strong> (in the editor)</td>
+<td>Lightest. No emulator.</td>
+<td>Instant view of a composable. Cannot test navigation, real input or device features.</td>
+</tr>
+<tr>
+<td><strong>A real phone over USB</strong></td>
+<td>Almost no extra RAM on your computer.</td>
+<td>The most realistic test. Lesson 05 shows how. The official emulator guide itself suggests a physical device when your computer cannot meet the emulator's requirements.</td>
+</tr>
+<tr>
+<td><strong>A smaller AVD</strong></td>
+<td>Moderate.</td>
+<td>Choose a small-screen profile, a lower API level image, and less RAM and storage in the advanced settings.</td>
+</tr>
+<tr>
+<td><strong>An AOSP or Google APIs image instead of Play Store</strong></td>
+<td>Slightly lighter.</td>
+<td>Fewer apps and services running inside.</td>
+</tr>
+<tr>
+<td><strong>Quick Boot on, other programs closed</strong></td>
+<td>Free.</td>
+<td>Faster starts and less swapping.</td>
+</tr>
+<tr>
+<td><strong>A full-size modern tablet or foldable AVD</strong></td>
+<td>Heavy.</td>
+<td>Use only when you specifically need to test large screens (lessons 27 and 58).</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Practical habits that make a real difference on a modest computer:</p>
+<ol class="v2-ol">
+<li>Close your browser tabs and other heavy applications while the emulator runs.</li>
+<li>Keep one emulator open all day instead of restarting it.</li>
+<li>Do UI work in the <strong>Preview</strong>, then confirm on the emulator or a phone.</li>
+<li>Do not leave several AVDs running at once.</li>
+<li>Keep at least some GBs of free disk space; a full disk makes everything crash.</li>
+<li>Increase the memory available to Android Studio only if you have spare RAM (see lesson 02); do not starve the emulator.</li>
+<li>Reboot your computer if it has been running for days. This genuinely helps.</li>
+</ol>
+<p class="v2-p">If you cannot run an emulator at all, you can still complete almost every lesson in this course using Previews plus a real phone. The official advice is the same.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Low-RAM and Low-Power Alternatives</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Command-Line Emulator and adb</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Android Studio starts the emulator for you, but it is useful to know the tools underneath. Commands below assume the SDK's <code>emulator</code> and <code>platform-tools</code> folders are on your PATH; if not, run them from inside those folders using their full paths.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>emulator -list-avds              # names of AVDs you have created
+emulator -avd Pixel_Phone_API_Recent        # start one by name
+emulator -avd Pixel_Phone_API_Recent -no-snapshot-load   # start with a cold boot, one time
+emulator -avd Pixel_Phone_API_Recent -wipe-data          # reset it to a fresh state</code></pre></div></div>
+<p class="v2-p">While an emulator is running, check it from another terminal:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb devices</code></pre></div></div>
+<p class="v2-p">You should see something like this (the serial is <code>emulator-</code> plus a port number):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">List of devices attached<br/>emulator-5554 device</p>
+</blockquote>
+<p class="v2-p">The state <code>device</code> means ready. If it says <code>offline</code>, the emulator is still booting or <code>adb</code> lost it; wait, or restart the adb server with <code>adb kill-server</code> and then <code>adb start-server</code>. The official adb guide warns that an adb server started before the emulator can sometimes hide it, so starting the server after the emulator avoids the problem.</p>
+<p class="v2-p">With one emulator and one real phone connected, a plain <code>adb install</code> fails with "more than one device". Choose a target with <code>-e</code> (the only emulator), <code>-d</code> (the only real device) or <code>-s serial</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb -e install app/build/outputs/apk/debug/app-debug.apk</code></pre></div></div>
+<p class="v2-p">Lesson 05 covers more adb commands.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Command-Line Emulator and adb</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Troubleshooting the Emulator</div><div class="pc" id="chk10"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"VT-x is disabled" or no hypervisor found</td>
+<td>Virtualisation off in firmware, or Windows feature off</td>
+<td>Enable VT-x/AMD-V in BIOS or UEFI; on Windows enable <strong>Windows Hypervisor Platform</strong>; run <code>emulator -accel-check</code>.</td>
+</tr>
+<tr>
+<td>Emulator extremely slow</td>
+<td>Wrong ABI image (ARM image on an x86 PC), no acceleration, too little RAM</td>
+<td>Use an x86_64 image on Intel/AMD computers; check acceleration; close other programs.</td>
+</tr>
+<tr>
+<td>Black or blank emulator screen</td>
+<td>Graphics driver issue</td>
+<td>Edit the AVD: set <strong>Graphics</strong> to <strong>Software</strong>; update your graphics driver.</td>
+</tr>
+<tr>
+<td>Emulator window stays on "Android" boot logo</td>
+<td>Corrupt snapshot or slow first boot</td>
+<td>Wait a few minutes, then use <strong>Cold Boot</strong> or <strong>Wipe Data</strong> from the AVD menu.</td>
+</tr>
+<tr>
+<td>"Installation failed" or app does not update</td>
+<td>Old copy conflicts, low storage inside the AVD</td>
+<td>Uninstall the app on the emulator, or use <strong>Wipe Data</strong>; check the AVD's internal storage.</td>
+</tr>
+<tr>
+<td>Emulator not listed in the target menu</td>
+<td>adb lost it</td>
+<td>Run <code>adb devices</code>; try <code>adb kill-server</code> then <code>adb start-server</code>; restart the emulator.</td>
+</tr>
+<tr>
+<td>App crashes on start</td>
+<td>A bug in your code</td>
+<td>Read Logcat (lesson 05 and lesson 18).</td>
+</tr>
+<tr>
+<td>Emulator does not start after an update</td>
+<td>Snapshots invalid or system image mismatch</td>
+<td>Cold boot; re-download the system image from the SDK Manager.</td>
+</tr>
+<tr>
+<td>Out of disk space</td>
+<td>Large AVD images and snapshots</td>
+<td>Delete unused AVDs and snapshots, or move the SDK location.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Where is the AVD stored? By default in a hidden <code>.android/avd</code> folder in your user directory. <strong>View Details</strong> and <strong>Show on Disk</strong> in the AVD menu help you find it. When you delete an AVD from the Device Manager, the files go too, which frees space.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Troubleshooting the Emulator</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Create, run and identify</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Create an AVD from scratch and prove which image you are running.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Create an AVD named <code>Practice_Phone</code> using a Pixel-style hardware profile and a recent stable system image that matches your computer's CPU.</li>
+<li>Run the <code>DeviceFacts</code> app from this lesson on it.</li>
+<li>Write down the three values shown on screen.</li>
+<li>Say whether the ABI matches what you expected for your computer, and why.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Steps in the <strong>Device Manager</strong>: <strong>Create Device</strong>, choose the Pixel profile, pick a system image with an API level you downloaded (x86_64 on an Intel/AMD PC, arm64-v8a on an Apple Silicon Mac), name it <code>Practice_Phone</code>, <strong>Finish</strong>, then select it in the target device menu and press <strong>Run</strong>.</p>
+<p class="v2-p">Example result on an Intel or AMD PC:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Model: sdk_gphone64_x86_64<br/>Android API level: 35<br/>Supported ABIs: x86_64, arm64-v8a</p>
+</blockquote>
+<p class="v2-p">On an Apple Silicon Mac the first ABI would be <code>arm64-v8a</code>. The first ABI listed matches the CPU family of your computer because the image was chosen to match it, which is what allows hardware acceleration. Your API level will match the image you chose.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fake a location and a battery warning</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Use Extended controls.</p>
+<ol class="v2-ol">
+<li>Open <strong>Extended controls</strong> and use <strong>Location</strong> to set a point in Ibadan, Nigeria.</li>
+<li>Use <strong>Battery</strong> to set the charge level to a low value and the charger to disconnected.</li>
+<li>In the emulator, open the quick settings shade. What do you observe?</li>
+<li>Explain in one sentence why a developer would want these two controls.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">After pressing <strong>Set location</strong> and lowering the battery, the quick settings and status bar show a low battery, and a map app (if present) shows the chosen place.</p>
+<p class="v2-p">A developer wants these controls to test things that are hard to trigger on a real phone at a desk: a delivery or map app responding to different places, or an app that should reduce work (for example pause a sync) when the battery is low. You get repeatable tests without walking around Ibadan with a half-flat phone.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Snapshot and restore</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Use snapshots to save and restore a state.</p>
+<ol class="v2-ol">
+<li>In the emulator, change something visible: set a different wallpaper or install your app and tap around it.</li>
+<li>Open the <strong>Snapshots</strong> pane and take a snapshot named <code>before-change</code>.</li>
+<li>Change the state again (uninstall your app, or change the screen orientation).</li>
+<li>Load <code>before-change</code>. What should you see?</li>
+<li>Which two actions would invalidate your snapshots?</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">After loading the <code>before-change</code> snapshot the emulator returns to the exact state saved: the earlier wallpaper or app state, as if you had paused and resumed. The snapshot restores memory, app state and data.</p>
+<p class="v2-p">Actions that invalidate snapshots, from the official documentation: editing the AVD's configuration, and updating the emulator or the system image. After either, the next start is a cold boot and you need to take a fresh snapshot.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Run <code>emulator -accel-check</code> and note the result. Then run <code>adb devices</code> while your emulator is running. Write down the exact serial number shown. If you cannot find the <code>emulator</code> command, find your SDK path in Android Studio settings and run it using the full path.</p></div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Choosing an ARM system image on an Intel or AMD computer.</strong> <em>The symptom:</em> the emulator takes many minutes to boot and every tap lags. <em>The problem:</em> the CPU must translate each instruction because it cannot virtualise a different architecture. <em>The fix:</em> create a new AVD with an <strong>x86_64</strong> image. Apple Silicon users do the opposite and choose <strong>arm64-v8a</strong>.</p>
+<p class="v2-p"><strong>Mistake #2: Skipping hardware acceleration setup.</strong> <em>The symptom:</em> "emulator: ERROR: x86 emulation currently requires hardware acceleration". <em>The fix:</em> enable VT-x/AMD-V in the BIOS, turn on <strong>Windows Hypervisor Platform</strong> on Windows (or ensure KVM permissions on Linux), then run <code>emulator -accel-check</code> until it reports a usable hypervisor.</p>
+<p class="v2-p"><strong>Mistake #3: Closing the emulator after every run.</strong> <em>The problem:</em> each start is slow and uses RAM and disk for the boot. <em>The fix:</em> leave it running while you code. Pressing <strong>Run</strong> on an open emulator just reinstalls the app.</p>
+<p class="v2-p"><strong>Mistake #4: Running several emulators at once on a small laptop.</strong> <em>The symptom:</em> freezing and swapping. <em>The fix:</em> run one, and use Previews for most UI work.</p>
+<p class="v2-p"><strong>Mistake #5: Giving the AVD huge RAM and storage "to be fast".</strong> <em>The problem:</em> your computer, not the virtual phone, runs out of memory and everything slows. <em>The fix:</em> use moderate values. More emulator RAM does not make a starved computer faster.</p>
+<p class="v2-p"><strong>Mistake #6: Testing only on the newest Android.</strong> <em>The problem:</em> your app may crash on the older versions your <code>minSdk</code> promises to support. <em>The fix:</em> create a second AVD at or near your <code>minSdk</code> and test there before you publish (lesson 49).</p>
+<p class="v2-p"><strong>Mistake #7: Confusing "stop the app" with "stop the emulator".</strong> <em>The symptom:</em> the emulator is still eating RAM after your session. <em>The fix:</em> close the emulator window, or use <strong>Stop</strong> in the Device Manager.</p>
+<p class="v2-p"><strong>Mistake #8: Ignoring the first error in the Run window.</strong> <em>The symptom:</em> a wall of red text. <em>The fix:</em> read the first line. Typical first lines: "No connected devices" (nothing selected in the target menu), "INSTALL_FAILED_..." (installation problem such as low storage or a version conflict), or a Gradle error from lesson 03.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What is the difference between an AVD, a system image and a hardware profile?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A <strong>hardware profile</strong> describes the device (screen, RAM, sensors). A <strong>system image</strong> is the Android software for one API level and CPU architecture. An <strong>AVD</strong> is a saved configuration combining a hardware profile, a system image and settings, which the emulator runs.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> You have an Intel laptop. Which ABI should your system image use, and why?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><strong>x86_64</strong> (or x86). The image must match the host CPU so the emulator can use hardware virtualisation. ARM images on an Intel or AMD processor cannot use VM acceleration and are very slow.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between a cold boot and a Quick Boot?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">A cold boot starts the virtual phone from the powered-off state every time. Quick Boot loads a saved snapshot, resuming the earlier state, which can be many times faster. The first start is always a cold boot.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Name two things the Extended controls let you simulate and one reason each is useful.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">For example: <strong>Location</strong> (test map or delivery features without moving) and <strong>Cellular</strong> or <strong>Battery</strong> (test weak networks or low-battery behaviour). Others include phone calls and SMS, virtual sensors, fingerprint and camera scenes.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What command lists connected devices and emulators, and what does the state <code>offline</code> mean?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p"><code>adb devices</code>. <code>offline</code> means the device or emulator is listed but not connected or not responding, often because it is still booting. Wait for it, or restart the adb server with <code>adb kill-server</code> and <code>adb start-server</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-1-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 1: Set up Android Studio</a>: the official pathway this lesson is based on.</li>
+<li><a href="https://developer.android.com/studio/run/emulator" rel="noopener noreferrer">Run apps on the Android Emulator</a>: requirements and running an AVD.</li>
+<li><a href="https://developer.android.com/studio/run/managing-avds" rel="noopener noreferrer">Create and manage virtual devices</a>: hardware profiles, system images, graphics and boot options.</li>
+<li><a href="https://developer.android.com/studio/run/emulator-acceleration" rel="noopener noreferrer">Configure hardware acceleration</a>: WHPX, Hypervisor.framework, KVM and <code>-accel-check</code>.</li>
+<li><a href="https://developer.android.com/studio/run/emulator-snapshots" rel="noopener noreferrer">Use emulator snapshots</a>: Quick Boot and snapshots.</li>
+<li><a href="https://developer.android.com/studio/run/emulator-extended-controls" rel="noopener noreferrer">Use the extended controls</a>: every pane explained.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Emulator Test Lab</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Set up a small "test lab" of virtual phones and use it to find out how an app behaves in different conditions. You will produce a short test log, the kind real developers keep.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create two AVDs: <code>Lab_Current</code> (a recent stable image) and <code>Lab_Older</code> (an image near your app's <code>minSdk</code>, if your computer can handle it). If you can only run one, create just one and explain why in your log.</li>
+<li>Add this composable to a new or existing project and show it on both AVDs. It must show the model, API level and first supported ABI.</li>
+<li>Run <code>emulator -accel-check</code> and <code>adb devices</code> and copy the outputs into your log.</li>
+<li>Take a snapshot named <code>lab-start</code> on one AVD, change something, and restore it.</li>
+<li>Using Extended controls, set a location and a low battery level. Record what you observed.</li>
+<li>Write a five-line test log: date, AVD names, API levels, ABIs, and one observation per AVD.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a second line to the screen that reads the current screen orientation with <code>LocalConfiguration.current.orientation</code>, rotate the emulator, and record how the text changes.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p"><code>MainActivity.kt</code> additions (add these imports with the others):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.content.res.Configuration
+import android.os.Build
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+
+@Composable
+fun LabScreen(modifier: Modifier = Modifier) {
+    val orientation = LocalConfiguration.current.orientation
+    val orientationName =
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) "Landscape" else "Portrait"
+
+    Column(modifier = modifier) {
+        Text("Model: ${Build.MODEL}")
+        Text("API level: ${Build.VERSION.SDK_INT}")
+        Text("First ABI: ${Build.SUPPORTED_ABIS.first()}")
+        Text("Orientation: $orientationName")
+    }
+}</code></pre></div></div>
+<p class="v2-p">In <code>setContent</code>, call <code>LabScreen(modifier = Modifier.padding(innerPadding))</code> inside the <code>Scaffold</code>.</p>
+<p class="v2-p">Sample output on a current Intel/AMD AVD in portrait:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Model: sdk_gphone64_x86_64<br/>API level: 35<br/>First ABI: x86_64<br/>Orientation: Portrait</p>
+</blockquote>
+<p class="v2-p">After rotating the emulator, the last line changes to <code>Orientation: Landscape</code> (the activity is recreated and Compose reads the new configuration).</p>
+<p class="v2-p">A sample test log (your values will differ):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>TEST LOG
+Date: 18 October 2026
+AVDs: Lab_Current (API recent, x86_64), Lab_Older (API near minSdk, x86_64)
+accel-check: Hypervisor reported as installed and usable.
+adb devices: emulator-5554 device
+Lab_Current: App ran. Snapshot lab-start saved and restored. Low battery
+  shown after setting 10% in Battery pane.
+Lab_Older: App ran, slower first boot. Location pane set to Ibadan.</code></pre></div></div>
+<p class="v2-p">The key habit is writing down <em>what you saw</em>, not what you hoped to see.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 04 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-04-run-your-app-on-the-android-emulator</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 04 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Emulator, AVD and System Image</li><li>✅ Step-by-Step: Create Your First AVD</li><li>✅ Using the Emulator: Toolbar, Gestures and Keyboard</li><li>✅ Snapshots, Quick Boot and Cold Boot</li><li>✅ Hardware Acceleration</li><li>✅ Low-RAM and Low-Power Alternatives</li><li>✅ Command-Line Emulator and adb</li><li>✅ Troubleshooting the Emulator</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_03.html" class="ln-btn">&#8592; Lesson 03</a><a href="lesson_05.html" class="ln-btn primary">Lesson 05 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 04 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 35: Store Preferences with DataStore — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l35">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 35 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 35</div>
+      <h1>Store Preferences with DataStore</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Flight Search (Mini Version)</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 35</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Save key-value settings with Preferences DataStore and finish with the Flight Search project.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Flight Search (Mini Version)</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Room is perfect for lists of things: items, expenses, bus stops. But much of what an app remembers is small and simple: "dark theme on", "show items as a grid", "last search was <code>lagos</code>", "the user has finished the tutorial". Creating a database table for a single true/false value would be overkill.</p>
+<p class="v2-p"><strong>Jetpack DataStore</strong> is the modern way to save small key-value settings. It is asynchronous, built on coroutines and Flow, safe to use from any thread, and replaces the old <code>SharedPreferences</code>. In this lesson you will add a persistent layout toggle to an app, understand why DataStore is built the way it is, and plan the unit's capstone: the <strong>Flight Search</strong> project, which combines Room (the airports) and DataStore (the user's last search).</p>
+<p class="v2-p">This lesson covers the four items of Pathway 3, Unit 6 of the official <strong>Android Basics with Compose</strong> course: <em>Introduction to DataStore</em>, <em>Preferences DataStore</em>, <em>Save preferences locally with DataStore</em> and <em>Project: Create a flight search app</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Choose among DataStore, Room, <code>SharedPreferences</code> and plain files.</li>
+<li>Add the Preferences DataStore dependency and create a single DataStore instance.</li>
+<li>Define typed <strong>keys</strong>, read preferences as a <code>Flow</code>, and write them with <code>edit { }</code>.</li>
+<li>Handle <code>IOException</code> when reading.</li>
+<li>Build the repository, ViewModel and Compose UI that save and restore a layout choice.</li>
+<li>Explain Proto DataStore and when it matters.</li>
+<li>Plan the Flight Search project.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a preference is a small fact that must outlive the app process. DataStore stores it, exposes it as a <code>Flow</code>, and your UI simply collects.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Flow, <code>map</code>, <code>catch</code> and <code>stateIn</code></strong> (lesson 33).</li>
+<li><strong>Repositories and the app container</strong> (lesson 30).</li>
+<li><strong>ViewModel and UI state</strong> (lessons 24 and 25).</li>
+<li><strong>Room basics</strong> (lesson 34), used by the project at the end.</li>
+<li><strong>Coroutines</strong> (lesson 28). DataStore writes are <code>suspend</code> functions.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Where Should This Data Live?</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Storage</th>
+<th>Best for</th>
+<th>Strengths</th>
+<th>Weaknesses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Preferences DataStore</strong></td>
+<td>Small key-value settings</td>
+<td>Async, Flow-based, transactional, no main-thread risk</td>
+<td>No queries, no relations, not for large data</td>
+</tr>
+<tr>
+<td><strong>Proto DataStore</strong></td>
+<td>Small typed objects with a schema</td>
+<td>Type safety, versioning</td>
+<td>Needs a schema definition and code generation</td>
+</tr>
+<tr>
+<td><strong>Room</strong></td>
+<td>Lists of structured records</td>
+<td>Queries, relationships, observing</td>
+<td>Setup overhead for tiny data</td>
+</tr>
+<tr>
+<td><strong><code>SharedPreferences</code></strong> (legacy)</td>
+<td>Existing old code</td>
+<td>Simple API</td>
+<td>Synchronous reads can block the UI thread, no error signalling, no transactional guarantees</td>
+</tr>
+<tr>
+<td><strong>Files</strong></td>
+<td>Documents, images, exports</td>
+<td>Full control</td>
+<td>You manage format and errors</td>
+</tr>
+<tr>
+<td><strong>Remote server</strong></td>
+<td>Data that must follow the user across devices</td>
+<td>Sync</td>
+<td>Needs network and accounts</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A rule of thumb: if you would be happy to store it in a <code>Map&lt;String, Any&gt;</code>, use DataStore. If you want to ask questions like "all items where...", use Room.</p>
+<p class="v2-p">DataStore is <strong>not</strong> for secrets such as passwords or tokens: its files are plain data in your app's private folder, protected by the operating system's sandbox, not encrypted by DataStore. Use the platform's encrypted storage and keystore facilities for secrets.</p>
+<h3 class="v2-h3">Why DataStore beats <code>SharedPreferences</code></h3>
+<p class="v2-p">Older code uses <code>SharedPreferences</code>. You will meet it in existing projects, so know its problems:</p>
+<ul class="v2-ul">
+<li>Reads are synchronous. A first read can touch the disk on the main thread and cause jank.</li>
+<li>It offers no way to report errors from reading or parsing the file.</li>
+<li>Writes with <code>apply()</code> are fire-and-forget, so you cannot tell when they finished or whether they failed.</li>
+<li>It has no built-in way to observe changes as a stream of values.</li>
+</ul>
+<p class="v2-p">DataStore fixes each of these with coroutines and Flow. It also writes <strong>transactionally</strong>: an <code>edit { }</code> block either fully succeeds or leaves the data unchanged.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>UI  --event--&gt;  ViewModel  --suspend--&gt;  Repository  --edit{}--&gt;  DataStore (file on disk)
+UI  &lt;--state--  ViewModel  &lt;---Flow----  Repository  &lt;--data----  DataStore</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Where Should This Data Live?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: Add DataStore</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Look up the current stable version of <code>datastore-preferences</code> on the release page (https://developer.android.com/jetpack/androidx/releases/datastore) and add it to the version catalog:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+datastore = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.androidx.datastore.preferences)
+}</code></pre></div></div>
+<p class="v2-p">Sync. The official codelab used a direct dependency string (<code>androidx.datastore:datastore-preferences:&lt;version&gt;</code>) in the module file; the version catalog does the same job in one place.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Add DataStore</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: The Repository</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">We will add a persistent <strong>list or grid</strong> layout toggle to a small catalogue app (such as the Affirmations app of lesson 21, or Dessert Release in the official codelab). The preference is a single boolean: <code>isLinearLayout</code>.</p>
+<h3 class="v2-h3">Create exactly one DataStore</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// InventoryApplication.kt or a top-level file
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
+
+private const val LAYOUT_PREFERENCE_NAME = "layout_preferences"
+
+val Context.dataStore: DataStore&lt;Preferences&gt; by preferencesDataStore(
+    name = LAYOUT_PREFERENCE_NAME
+)</code></pre></div></div>
+<p class="v2-p">This <strong>property delegate</strong> creates the DataStore the first time it is used and returns the same instance afterwards. Two rules matter:</p>
+<ol class="v2-ol">
+<li>Declare it <strong>once</strong>, at the top level of a Kotlin file, never inside a class or function.</li>
+<li>Never create two DataStore instances for the same file name in the same process. That breaks its single-writer guarantee and throws <code>IllegalStateException: There are multiple DataStores active for the same file</code>.</li>
+</ol>
+<h3 class="v2-h3">The repository</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">UserPreferencesRepository.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.catalog.data
+
+import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import java.io.IOException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+
+class UserPreferencesRepository(
+    private val dataStore: DataStore&lt;Preferences&gt;
+) {
+    private companion object {
+        val IS_LINEAR_LAYOUT = booleanPreferencesKey("is_linear_layout")
+        const val TAG = "UserPreferencesRepo"
+    }
+
+    val isLinearLayout: Flow&lt;Boolean&gt; = dataStore.data
+        .catch { e -&gt;
+            if (e is IOException) {
+                Log.e(TAG, "Error reading preferences.", e)
+                emit(emptyPreferences())
+            } else {
+                throw e
+            }
+        }
+        .map { preferences -&gt;
+            preferences[IS_LINEAR_LAYOUT] ?: true
+        }
+
+    suspend fun saveLayoutPreference(isLinearLayout: Boolean) {
+        dataStore.edit { preferences -&gt;
+            preferences[IS_LINEAR_LAYOUT] = isLinearLayout
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Step through it:</p>
+<p class="v2-p"><strong>Keys.</strong> A preference is identified by a typed key made with one of the helper functions: <code>booleanPreferencesKey</code>, <code>intPreferencesKey</code>, <code>longPreferencesKey</code>, <code>floatPreferencesKey</code>, <code>doublePreferencesKey</code>, <code>stringPreferencesKey</code> and <code>stringSetPreferencesKey</code>. The type is part of the key, so reading with the wrong type is a compile error. The key name (<code>"is_linear_layout"</code>) is the label on disk: <strong>never change it later</strong> or users lose the saved value.</p>
+<p class="v2-p"><strong>Reading.</strong> <code>dataStore.data</code> is a <code>Flow&lt;Preferences&gt;</code>. It emits the current preferences immediately and <strong>again every time any preference is edited</strong>, so your UI updates automatically. We:</p>
+<ul class="v2-ul">
+<li><code>catch</code> an <code>IOException</code> (a disk problem reading the file) and emit empty preferences, so the app falls back to defaults instead of crashing. Any other exception is rethrown, which keeps <code>CancellationException</code> behaving correctly (lesson 28).</li>
+<li><code>map</code> the <code>Preferences</code> to the one value we want, using the <strong>elvis operator</strong> <code>?: true</code> to supply a <strong>default</strong> when the key has never been written. The first time the app runs, nothing is stored, so the default matters.</li>
+</ul>
+<p class="v2-p"><strong>Writing.</strong> <code>dataStore.edit { }</code> is a suspend function. The lambda receives mutable preferences, you assign with the key as an index (<code>preferences[KEY] = value</code>), and DataStore commits the whole block atomically. To clear a value use <code>preferences.remove(KEY)</code>; to clear everything use <code>preferences.clear()</code>.</p>
+<p class="v2-p">Notice how little code that is, and how it matches the Repository pattern from lesson 30: the repository hides DataStore from the rest of the app.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Repository</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Wire It Up</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Container or Application</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class CatalogApplication : Application() {
+    lateinit var userPreferencesRepository: UserPreferencesRepository
+
+    override fun onCreate() {
+        super.onCreate()
+        userPreferencesRepository = UserPreferencesRepository(dataStore)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Register it with <code>android:name=".CatalogApplication"</code> in the manifest (lesson 30). If you already have an <code>AppContainer</code>, add <code>userPreferencesRepository</code> there instead; the structure is the same.</p>
+<h3 class="v2-h3">ViewModel</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CatalogViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.catalog.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.catalog.CatalogApplication
+import com.example.catalog.data.UserPreferencesRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+data class CatalogUiState(val isLinearLayout: Boolean = true)
+
+class CatalogViewModel(
+    private val userPreferencesRepository: UserPreferencesRepository
+) : ViewModel() {
+
+    val uiState: StateFlow&lt;CatalogUiState&gt; =
+        userPreferencesRepository.isLinearLayout
+            .map { CatalogUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = CatalogUiState()
+            )
+
+    fun selectLayout(isLinearLayout: Boolean) {
+        viewModelScope.launch {
+            userPreferencesRepository.saveLayoutPreference(isLinearLayout)
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = this[APPLICATION_KEY] as CatalogApplication
+                CatalogViewModel(application.userPreferencesRepository)
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Observe the full loop, which is the whole lesson in one picture:</p>
+<ol class="v2-ol">
+<li>The user taps the toggle: the UI calls <code>viewModel.selectLayout(false)</code>.</li>
+<li>The ViewModel launches a coroutine and calls the repository's <code>saveLayoutPreference</code>.</li>
+<li>DataStore writes to disk and then <strong>emits</strong> new <code>data</code>.</li>
+<li><code>isLinearLayout</code> maps it, <code>stateIn</code> publishes it, and <code>collectAsStateWithLifecycle()</code> hands it to Compose.</li>
+<li>The screen recomposes with the other layout.</li>
+</ol>
+<p class="v2-p">Notice that the UI <strong>never</strong> sets the layout directly. It only reads state and reports events (unidirectional data flow, lesson 24). That is why the layout survives rotation, process death and a full phone restart.</p>
+<p class="v2-p">The <code>initialValue</code> is shown for a split second before the first emission arrives from disk. Choose it so there is no ugly flash: using the same default as the repository (<code>true</code>) avoids a visible jump for first-time users.</p>
+<h3 class="v2-h3">The toggle in Compose</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+@Composable
+fun CatalogApp(viewModel: CatalogViewModel = viewModel(factory = CatalogViewModel.Factory)) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Catalog") },
+                actions = {
+                    IconButton(onClick = { viewModel.selectLayout(!uiState.isLinearLayout) }) {
+                        Icon(
+                            imageVector = if (uiState.isLinearLayout) Icons.Filled.GridView
+                                          else Icons.Filled.ViewList,
+                            contentDescription = if (uiState.isLinearLayout) "Switch to grid" else "Switch to list"
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding -&gt;
+        if (uiState.isLinearLayout) CatalogList(Modifier.padding(innerPadding))
+        else CatalogGrid(Modifier.padding(innerPadding))
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>GridView</code> and <code>ViewList</code> come from the extended icon set; add <code>material-icons-extended</code> or use your own vector assets. <code>CenterAlignedTopAppBar</code> needs <code>@OptIn(ExperimentalMaterial3Api::class)</code> in many Material 3 versions.) The two content composables are the <code>LazyColumn</code> and <code>LazyVerticalGrid</code> from lesson 21. Notice the <strong>content description changes</strong> with the state, which tells screen-reader users what the button will do (lesson 47).</p>
+<p class="v2-p">Run it. Switch to grid, <strong>close the app from recents, reopen</strong>: the grid is still there. Now stop the app with <code>adb shell am kill</code> or restart the emulator: still there. That is persistence.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Wire It Up</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">More Than One Preference</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Real apps often need several settings. Two common approaches:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Approach 1: many keys in one DataStore, one Flow per setting
+val darkTheme: Flow&lt;Boolean&gt; = dataStore.data.map { it[DARK_THEME] ?: false }
+val username: Flow&lt;String&gt; = dataStore.data.map { it[USERNAME] ?: "" }
+
+// Approach 2: map once into a settings object
+data class UserSettings(val darkTheme: Boolean = false, val username: String = "", val fontScale: Float = 1f)
+
+val settings: Flow&lt;UserSettings&gt; = dataStore.data
+    .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+    .map { prefs -&gt;
+        UserSettings(
+            darkTheme = prefs[DARK_THEME] ?: false,
+            username = prefs[USERNAME] ?: "",
+            fontScale = prefs[FONT_SCALE] ?: 1f
+        )
+    }</code></pre></div></div>
+<p class="v2-p">Approach 2 is usually cleaner: one stream, one immutable object, and a single place for defaults. Use <code>distinctUntilChanged()</code> if a particular consumer should not be woken by unrelated changes. For several writes that belong together, put them in <strong>one</strong> <code>edit { }</code> block so they are applied atomically.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>More Than One Preference</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Proto DataStore (Briefly)</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><strong>Proto DataStore</strong> stores a <strong>typed object</strong> instead of loose keys. You define a schema (traditionally with Protocol Buffers; it can also use a Kotlin serializable class with a custom <code>Serializer</code>), and you read and write whole objects safely, with defaults and versioning.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Preferences DataStore</th>
+<th>Proto DataStore</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Schema</td>
+<td>None; keys at runtime</td>
+<td>Declared up front</td>
+</tr>
+<tr>
+<td>Type safety</td>
+<td>Per key</td>
+<td>Whole object</td>
+</tr>
+<tr>
+<td>Setup</td>
+<td>Minimal</td>
+<td>A serializer (and a schema if using protobuf)</td>
+</tr>
+<tr>
+<td>Use for</td>
+<td>A few independent settings</td>
+<td>Structured settings, nested data, strong migration needs</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">For this course Preferences DataStore is enough. Reach for Proto DataStore when your settings become a structured document that you want to evolve safely, and read the current official guide first, since its setup is more involved.</p>
+<h3 class="v2-h3">Migrating from <code>SharedPreferences</code></h3>
+<p class="v2-p">If an existing app already stores settings in <code>SharedPreferences</code>, DataStore can import them once with a <code>SharedPreferencesMigration</code>, passed to the delegate:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val Context.dataStore by preferencesDataStore(
+    name = "settings",
+    produceMigrations = { context -&gt;
+        listOf(SharedPreferencesMigration(context, "old_prefs_file_name"))
+    }
+)</code></pre></div></div>
+<p class="v2-p">The migration runs before the first read, copies the values, and (by default) removes them from the old file, so users keep their settings across the upgrade.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Proto DataStore (Briefly)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Testing</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Because the repository takes a <code>DataStore&lt;Preferences&gt;</code> in its constructor, a test can make its own DataStore backed by a <strong>temporary file</strong>. The <code>androidx.datastore:datastore-preferences-core</code> artifact offers <code>PreferenceDataStoreFactory</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+
+class UserPreferencesRepositoryTest {
+
+    @get:Rule val tmp = TemporaryFolder()
+
+    private fun createDataStore(scope: CoroutineScope): DataStore&lt;Preferences&gt; =
+        PreferenceDataStoreFactory.create(scope = scope) { tmp.newFile("test.preferences_pb") }
+
+    @Test
+    fun defaultsToLinearLayout() = runTest {
+        val repo = UserPreferencesRepository(createDataStore(backgroundScope))
+        assertEquals(true, repo.isLinearLayout.first())
+    }
+
+    @Test
+    fun savedChoiceIsReadBack() = runTest {
+        val repo = UserPreferencesRepository(createDataStore(backgroundScope))
+        repo.saveLayoutPreference(false)
+        assertFalse(repo.isLinearLayout.first())
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>backgroundScope</code> is provided by <code>runTest</code>; coroutines launched in it are cancelled automatically when the test ends, which is what DataStore needs for its internal work. Check the current DataStore testing documentation if the factory signature in your version differs.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Testing</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">The Project: Flight Search</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">The capstone of Unit 6 is the <strong>Flight Search</strong> app. This is a planning-first project: read the brief, design on paper, then build.</p>
+<p class="v2-p"><strong>The brief.</strong> The app has a search box. As the user types an airport name or its three-letter IATA code, a list of suggestions appears (ordered by how many passengers each airport handles). Tapping a suggestion shows flights <strong>from</strong> that airport to every other airport in the database. Each flight can be marked as a favourite, and when the search box is empty the user sees their saved favourites. The text in the search box is remembered the next time the app starts.</p>
+<p class="v2-p"><strong>Data.</strong> You need a table of airports (id, name, IATA code, passenger count) and a table of favourites (id, departure code, destination code). Create your own sample airports data; the official course supplies a starter database, which you should obtain from the official pathway page.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Tool</th>
+<th>Lesson</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Airports and favourites tables</td>
+<td>Room</td>
+<td>34</td>
+</tr>
+<tr>
+<td>Autocomplete query</td>
+<td><code>@Query</code> with <code>LIKE</code>, bound parameter</td>
+<td>32, 34</td>
+</tr>
+<tr>
+<td>Flights from X to all others</td>
+<td><code>SELECT * FROM airport WHERE iata_code &lt;&gt; :code</code></td>
+<td>32</td>
+</tr>
+<tr>
+<td>React to text</td>
+<td><code>debounce</code>, <code>flatMapLatest</code></td>
+<td>33</td>
+</tr>
+<tr>
+<td>Remember last search text</td>
+<td><strong>Preferences DataStore</strong></td>
+<td>this lesson</td>
+</tr>
+<tr>
+<td>Architecture</td>
+<td>Repository, container, ViewModel, <code>stateIn</code></td>
+<td>30</td>
+</tr>
+<tr>
+<td>Screens</td>
+<td>One screen, <code>LazyColumn</code>, search bar</td>
+<td>21, 26</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Design questions to answer before coding:</strong></p>
+<ol class="v2-ol">
+<li>Is a flight a table row? (Hint: no. It is a <em>pair</em> of airports, computed, not stored. Only favourites are stored.)</li>
+<li>What happens when the search text is empty: suggestions or favourites?</li>
+<li>When the user picks an airport, does the text field keep their typed text or fill in the full name? Where is that state kept?</li>
+<li>How do you avoid a flash of "no favourites" before the first database read finishes?</li>
+</ol><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Project: Flight Search</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Remember a username and a theme</strong></p>
+<p class="v2-p">Extend the repository to store a <code>username</code> (String) and <code>darkTheme</code> (Boolean) with defaults. Expose one <code>Flow&lt;UserSettings&gt;</code>. Add <code>setUsername</code> and <code>setDarkTheme</code>. Then write a test that proves the two writes do not overwrite each other.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class UserSettings(val username: String = "", val darkTheme: Boolean = false)
+
+class SettingsRepository(private val dataStore: DataStore&lt;Preferences&gt;) {
+
+    private companion object {
+        val USERNAME = stringPreferencesKey("username")
+        val DARK_THEME = booleanPreferencesKey("dark_theme")
+    }
+
+    val settings: Flow&lt;UserSettings&gt; = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { UserSettings(it[USERNAME] ?: "", it[DARK_THEME] ?: false) }
+
+    suspend fun setUsername(name: String) {
+        dataStore.edit { it[USERNAME] = name.trim() }
+    }
+
+    suspend fun setDarkTheme(enabled: Boolean) {
+        dataStore.edit { it[DARK_THEME] = enabled }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun twoWrites_doNotOverwriteEachOther() = runTest {
+    val repo = SettingsRepository(createDataStore(backgroundScope))
+    repo.setUsername("Ada")
+    repo.setDarkTheme(true)
+    assertEquals(UserSettings("Ada", true), repo.settings.first())
+}</code></pre></div></div>
+<p class="v2-p">Each <code>edit</code> changes only its own key, leaving the rest of the preferences intact.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Debug the missing default</strong></p>
+<p class="v2-p">Users report that on first launch the app crashes with a <code>NullPointerException</code> when reading a preference. The code is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val count: Flow&lt;Int&gt; = dataStore.data.map { it[COUNT]!! }</code></pre></div></div>
+<p class="v2-p">Explain and fix it. Then add a function that increments the count safely.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A key that has never been written has no value, so <code>it[COUNT]</code> returns <code>null</code> and <code>!!</code> throws on first launch. Give a default with the elvis operator: <code>it[COUNT] ?: 0</code>.</p>
+<p class="v2-p">For the increment, read and write in <strong>one</strong> <code>edit</code> block, so the read-modify-write is atomic:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>suspend fun increment() {
+    dataStore.edit { prefs -&gt;
+        prefs[COUNT] = (prefs[COUNT] ?: 0) + 1
+    }
+}</code></pre></div></div>
+<p class="v2-p">Reading with <code>data.first()</code> and then writing in a second call would let two quick taps both read the same old value and lose an increment.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Add the layout toggle to your Affirmations app from lesson 21. Kill the process with <code>adb shell am kill</code> and confirm the choice survives. Then use <strong>App Inspection</strong> or Device Explorer to look at the files under your app's <code>datastore</code> folder, and note the file name.</p></div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Creating more than one DataStore for the same file.</strong> <em>Symptom:</em> <em>There are multiple DataStores active for the same file.</em> <em>The fix:</em> a single top-level <code>by preferencesDataStore(...)</code> delegate per file.</p>
+<p class="v2-p"><strong>Mistake #2: Declaring the delegate inside a class.</strong> <em>What happens:</em> a new instance each time. <em>The fix:</em> top level, once.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting a default.</strong> <em>What happens:</em> nulls or wrong first-run values. <em>The fix:</em> <code>?: default</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Renaming a key.</strong> <em>What happens:</em> users silently lose their saved preference. <em>The fix:</em> treat keys as permanent, or write a migration.</p>
+<p class="v2-p"><strong>Mistake #5: Not handling <code>IOException</code>.</strong> <em>What happens:</em> a corrupt or unreadable file crashes the app. <em>The fix:</em> <code>catch</code> and emit empty preferences.</p>
+<p class="v2-p"><strong>Mistake #6: Swallowing all exceptions in <code>catch</code>.</strong> <em>What happens:</em> cancellation and real bugs vanish. <em>The fix:</em> rethrow anything that is not an <code>IOException</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Read-then-write across two calls.</strong> <em>What happens:</em> lost updates. <em>The fix:</em> do the whole change inside one <code>edit { }</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Storing big data or secrets.</strong> <em>What happens:</em> slow reads, and plain-text secrets. <em>The fix:</em> Room or files for large data; secure storage for secrets.</p>
+<p class="v2-p"><strong>Mistake #9: Reading the preference with <code>first()</code> in the UI.</strong> <em>What happens:</em> the screen never updates when the value changes. <em>The fix:</em> collect the Flow as state.</p>
+<p class="v2-p"><strong>Mistake #10: Blocking with <code>runBlocking</code> to "get the value".</strong> <em>What happens:</em> the UI thread blocks. <em>The fix:</em> stay in coroutines and Flow.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> When should you choose DataStore over Room?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">For small, simple key-value settings with no need for queries or relationships. Room is for structured lists of records.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why is DataStore safer than <code>SharedPreferences</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It is asynchronous (no main-thread blocking), exposes data as a Flow, reports errors, and applies edits transactionally.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>dataStore.edit { }</code> guarantee?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The changes inside the block are applied atomically: either all succeed or none do, and it is a suspend function so it does not block the caller.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why must there be only one DataStore instance per file?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">DataStore assumes it is the single writer of its file. Multiple instances would conflict and corrupt or contradict data, so it throws an exception if it detects them.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What value does the first read return for a key that was never written, and how do you control it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p"><code>null</code>. You supply a default in the mapping with the elvis operator, for example <code>preferences[KEY] ?: defaultValue</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-6-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 6, Pathway 3: DataStore</a>: the official pathway including Flight Search.</li>
+<li><a href="https://developer.android.com/codelabs/basic-android-kotlin-compose-datastore" rel="noopener noreferrer">Save preferences locally with DataStore codelab</a></li>
+<li><a href="https://developer.android.com/jetpack/androidx/releases/datastore" rel="noopener noreferrer">DataStore release notes</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer" rel="noopener noreferrer">Data layer guide</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Flight Search (Mini Version)</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a miniature <strong>Flight Search</strong> with a hand-made airports table (at least eight airports, such as LOS, ABV, PHC, KAN, ACC, LHR, JFK, DXB), a search box, favourites, and a remembered search text.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Room entities <code>Airport(id, name, iataCode, passengers)</code> and <code>Favorite(id, departureCode, destinationCode)</code>, with a database prepopulated in a <code>Callback</code> (or by inserting on first run).</li>
+<li>DAO queries: <code>searchAirports(text)</code> matching name <strong>or</strong> code with <code>LIKE</code>, ordered by passengers descending; <code>otherAirports(code)</code>; <code>getFavorites()</code>; <code>insertFavorite</code>, <code>deleteFavorite</code>.</li>
+<li>A DataStore preference <code>last_search</code> (String) that is saved as the user types (debounced) and restored on launch.</li>
+<li>A ViewModel producing one UI state: the search text, the suggestions, the selected departure airport (if any), the flights, and the favourite flags.</li>
+<li>Behaviour: empty text with no selection shows favourites; text shows suggestions; tapping a suggestion shows flights from it; a star toggles a favourite.</li>
+<li>A repository test for the DataStore preference and a DAO test for <code>searchAirports</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show a small <code>Snackbar</code> the first time a favourite is saved.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// FlightDao.kt
+@Dao
+interface FlightDao {
+
+    @Query("""
+        SELECT * FROM airport
+        WHERE name LIKE '%' || :text || '%' OR iata_code LIKE '%' || :text || '%'
+        ORDER BY passengers DESC
+    """)
+    fun searchAirports(text: String): Flow&lt;List&lt;Airport&gt;&gt;
+
+    @Query("SELECT * FROM airport WHERE iata_code &lt;&gt; :code ORDER BY passengers DESC")
+    fun otherAirports(code: String): Flow&lt;List&lt;Airport&gt;&gt;
+
+    @Query("SELECT * FROM airport WHERE iata_code = :code LIMIT 1")
+    fun airportByCode(code: String): Flow&lt;Airport?&gt;
+
+    @Query("SELECT * FROM favorite ORDER BY id")
+    fun getFavorites(): Flow&lt;List&lt;Favorite&gt;&gt;
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertFavorite(favorite: Favorite)
+
+    @Query("DELETE FROM favorite WHERE departure_code = :from AND destination_code = :to")
+    suspend fun deleteFavorite(from: String, to: String)
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// SearchViewModel.kt (core of the state production)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+class SearchViewModel(
+    private val dao: FlightDao,
+    private val prefs: SearchPreferencesRepository
+) : ViewModel() {
+
+    private val text = MutableStateFlow&lt;String?&gt;(null)     // null until restored
+    private val selected = MutableStateFlow&lt;Airport?&gt;(null)
+
+    init {
+        viewModelScope.launch { text.value = prefs.lastSearch.first() }   // restore once
+        viewModelScope.launch {
+            text.filterNotNull().debounce(400).collect { prefs.saveLastSearch(it) }
+        }
+    }
+
+    private val suggestions = text.filterNotNull().flatMapLatest { t -&gt;
+        if (t.isBlank()) flowOf(emptyList()) else dao.searchAirports(t.trim())
+    }
+
+    private val flights = selected.flatMapLatest { from -&gt;
+        if (from == null) flowOf(emptyList())
+        else dao.otherAirports(from.iataCode).map { dests -&gt; dests.map { from to it } }
+    }
+
+    val uiState: StateFlow&lt;SearchUiState&gt; = combine(
+        text.filterNotNull(), suggestions, selected, flights, dao.getFavorites()
+    ) { t, suggest, from, flightList, favorites -&gt;
+        val favKeys = favorites.map { it.departureCode to it.destinationCode }.toSet()
+        SearchUiState(
+            text = t,
+            suggestions = suggest,
+            selected = from,
+            flights = flightList.map { (a, b) -&gt;
+                FlightItem(a, b, isFavorite = (a.iataCode to b.iataCode) in favKeys)
+            },
+            showFavorites = t.isBlank() &amp;&amp; from == null
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SearchUiState())
+
+    fun onTextChange(newText: String) { text.value = newText; selected.value = null }
+    fun onAirportClick(airport: Airport) { selected.value = airport }
+    fun toggleFavorite(item: FlightItem) = viewModelScope.launch {
+        if (item.isFavorite) dao.deleteFavorite(item.from.iataCode, item.to.iataCode)
+        else dao.insertFavorite(Favorite(departureCode = item.from.iataCode, destinationCode = item.to.iataCode))
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// SearchPreferencesRepository.kt
+class SearchPreferencesRepository(private val dataStore: DataStore&lt;Preferences&gt;) {
+    private companion object { val LAST_SEARCH = stringPreferencesKey("last_search") }
+
+    val lastSearch: Flow&lt;String&gt; = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[LAST_SEARCH] ?: "" }
+
+    suspend fun saveLastSearch(text: String) {
+        dataStore.edit { it[LAST_SEARCH] = text }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the <code>text</code> flow starts as <code>null</code> so the UI waits for the restored value instead of flashing an empty search box (design question 4). <code>flatMapLatest</code> re-runs the SQL whenever the text or the selected airport changes and cancels the old query; <code>combine</code> merges all five streams into one immutable state; <code>stateIn</code> shares it. A flight is a computed pair, never a table row, which answers design question 1. The favourites table is the only flight data stored. The DAO's column names (<code>iata_code</code>, <code>departure_code</code>) assume <code>@ColumnInfo(name = ...)</code> on the entities. Room imports follow lesson 34 (<code>androidx.room3</code> for Room 3, <code>androidx.room</code> for Room 2.x); confirm them in the official setup page. The tests follow the patterns in this lesson and lesson 34: <code>PreferenceDataStoreFactory</code> with a temporary folder for the repository, and an in-memory database for <code>searchAirports</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 35 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-35-store-preferences-with-datastore</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 35 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Where Should This Data Live?</li><li>✅ Step-by-Step Build 1: Add DataStore</li><li>✅ Step-by-Step Build 2: The Repository</li><li>✅ Step-by-Step Build 3: Wire It Up</li><li>✅ More Than One Preference</li><li>✅ Proto DataStore (Briefly)</li><li>✅ Testing</li><li>✅ The Project: Flight Search</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_34.html" class="ln-btn">&#8592; Lesson 34</a><a href="lesson_36.html" class="ln-btn primary">Lesson 36 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 35 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

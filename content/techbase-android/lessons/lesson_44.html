@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 44: Android Studio Power Tools — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l44">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 44 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 44</div>
+      <h1>Android Studio Power Tools</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Bug Hunt: Fix the Broken App</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 44</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Get faster with Logcat, Layout Inspector, Database Inspector, Background Task Inspector, Profiler and Compose tooling.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Bug Hunt: Fix the Broken App</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Two developers can write the same app. One of them finds a bug in five minutes; the other spends a whole afternoon adding <code>println</code> statements. The difference is rarely talent. It is <strong>knowing the tools</strong> that Android Studio gives you for free: Logcat for messages, the Layout Inspector for the live UI tree, the Database Inspector for your Room tables, the Background Task Inspector for WorkManager, the Profiler for CPU, memory and network, and the Compose tooling for previews and live editing.</p>
+<p class="v2-p">This lesson covers the <em>Database Inspector</em> and <em>Background Task Inspector</em> items from Unit 6 and Unit 7 of the <em>Android Basics with Compose</em> programme, the <em>Accelerate with tooling</em> item, and the <em>Compose Preview and Layout Inspector</em> tooling items of Pathway 1 of <em>Jetpack Compose for Android developers</em> (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Read and filter <strong>Logcat</strong> effectively.</li>
+<li>Debug with <strong>breakpoints</strong>, the <strong>Debugger</strong> window and conditional breakpoints.</li>
+<li>Inspect a running app with <strong>App Inspection</strong>: Database Inspector, Background Task Inspector, Network Inspector and Layout Inspector.</li>
+<li>Use <strong>Compose Preview</strong> features: multipreview, interactive and animation preview, device configurations.</li>
+<li>Use <strong>Live Edit</strong> and <strong>Apply Changes</strong> to iterate fast.</li>
+<li>Find memory, CPU and battery problems with the <strong>Profiler</strong>.</li>
+<li>Use lint, code inspections and keyboard shortcuts to move faster.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> observe first, then fix. A bug you can see in a tool takes minutes. A bug you guess at takes hours.</p>
+<p class="v2-p"><strong>A note on menus.</strong> Android Studio is updated several times a year and window names, menu paths and tool layout move around. This lesson names the <em>tools and their purpose</em> and gives the usual menu path. If a path differs on your version, use <strong>Help → Find Action</strong> (or press <strong>Ctrl+Shift+A</strong>, <strong>Cmd+Shift+A</strong> on macOS) and type the tool's name.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Android Studio setup, emulator, running an app</strong> (lessons 1–5).</li>
+<li><strong>Room and the database</strong> (lesson 34).</li>
+<li><strong>WorkManager</strong> (lesson 36).</li>
+<li><strong>Recomposition</strong> (lesson 37) and Compose layouts (lessons 38–39).</li>
+<li><strong>Coroutines and logging with <code>Log</code></strong> (lessons 23 and 28).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: Which Tool for Which Problem?</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First tool</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"The app crashed"</td>
+<td><strong>Logcat</strong></td>
+<td>The stack trace is printed there</td>
+</tr>
+<tr>
+<td>"This value is wrong at this point"</td>
+<td><strong>Debugger</strong> (breakpoint)</td>
+<td>Pause and inspect variables</td>
+</tr>
+<tr>
+<td>"The screen looks wrong"</td>
+<td><strong>Layout Inspector</strong> or Compose Preview</td>
+<td>See the real UI tree and modifiers</td>
+</tr>
+<tr>
+<td>"The list does not recompose or recomposes too much"</td>
+<td><strong>Layout Inspector</strong> (recomposition counts)</td>
+<td>Counts per composable</td>
+</tr>
+<tr>
+<td>"Data is not saved"</td>
+<td><strong>Database Inspector</strong></td>
+<td>Look at the real tables</td>
+</tr>
+<tr>
+<td>"My background work never ran"</td>
+<td><strong>Background Task Inspector</strong></td>
+<td>See each worker and its state</td>
+</tr>
+<tr>
+<td>"The server call fails"</td>
+<td><strong>Network Inspector</strong></td>
+<td>See each request and response</td>
+</tr>
+<tr>
+<td>"The app is slow or janky"</td>
+<td><strong>Profiler</strong></td>
+<td>CPU, frames, memory</td>
+</tr>
+<tr>
+<td>"The app uses too much memory"</td>
+<td><strong>Profiler → memory</strong></td>
+<td>Heap dumps and allocations</td>
+</tr>
+<tr>
+<td>"I want to see my UI in 5 configurations"</td>
+<td><strong>Compose Preview</strong></td>
+<td>No emulator needed</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Most of these tools live in <strong>App Inspection</strong> (a tool window usually at the bottom of the IDE). To use it, run a <em>debuggable</em> build of your app on an emulator or device, and select the process from the dropdown.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Which Tool for Which Problem?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Step-by-Step Build 1: Logcat</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p"><strong>Logcat</strong> shows system and app messages in real time. Open it with <strong>View → Tool Windows → Logcat</strong> or the Logcat icon on the bottom bar.</p>
+<h3 class="v2-h3">Writing good logs</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.util.Log
+
+private const val TAG = "OrderViewModel"
+
+fun placeOrder(itemId: Int) {
+    Log.d(TAG, "placeOrder: itemId=$itemId")
+    try {
+        // ...
+    } catch (e: Exception) {
+        Log.e(TAG, "placeOrder failed for itemId=$itemId", e)   // pass the exception as the 3rd argument
+    }
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Level</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Log.v</code></td>
+<td>Verbose</td>
+<td>Very detailed tracing</td>
+</tr>
+<tr>
+<td><code>Log.d</code></td>
+<td>Debug</td>
+<td>Developer information</td>
+</tr>
+<tr>
+<td><code>Log.i</code></td>
+<td>Info</td>
+<td>Normal milestones</td>
+</tr>
+<tr>
+<td><code>Log.w</code></td>
+<td>Warn</td>
+<td>Something unexpected but handled</td>
+</tr>
+<tr>
+<td><code>Log.e</code></td>
+<td>Error</td>
+<td>Failures; pass the <code>Throwable</code> to get the stack trace</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Never log secrets</strong> (passwords, tokens, personal data). Logs can be read by other tools on a rooted or debugging device, and by bug reports. In release builds, debug logs should be removed or disabled (R8 can strip them if configured, or use a logging library that is a no-op in release, lesson 49).</p>
+<h3 class="v2-h3">Filtering</h3>
+<p class="v2-p">The Logcat toolbar lets you:</p>
+<ul class="v2-ul">
+<li>Pick the <strong>device</strong> and <strong>process</strong> (by default, your app only).</li>
+<li>Set the <strong>minimum level</strong> (for example <em>Warn</em> to reduce noise).</li>
+<li>Type a <strong>search query</strong> with filters such as <code>tag:OrderViewModel</code>, <code>level:error</code>, <code>package:mine</code>, <code>message:failed</code>. The query box supports <code>-</code> for "not" (for example <code>-tag:Choreographer</code>) and <code>age:5m</code> for "last five minutes". Check the Logcat help (the question mark in the filter field) for the syntax of your Studio version.</li>
+<li>Switch to <strong>compact/standard</strong> view, and <strong>fold</strong> repeated lines.</li>
+<li><strong>Save filters</strong> you reuse.</li>
+</ul>
+<h3 class="v2-h3">Reading a crash</h3>
+<p class="v2-p">A crash prints a <strong>stack trace</strong>. Read it from the top:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>FATAL EXCEPTION: main
+Process: com.example.classregister, PID: 12345
+java.lang.IllegalStateException: Required value was null.
+    at com.example.classregister.DetailFragment.onViewCreated(DetailFragment.kt:42)
+    at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3123)
+    ...</code></pre></div></div>
+<ol class="v2-ol">
+<li>The first line says <strong>what</strong> (<code>IllegalStateException</code>, with the message).</li>
+<li>The first line that mentions <strong>your package</strong> says <strong>where</strong> (<code>DetailFragment.kt:42</code>). Studio makes it a clickable link.</li>
+<li>Lines from <code>androidx</code> and <code>android</code> frameworks below it tell you <em>how it got there</em>, which can matter, but start with your code.</li>
+</ol>
+<p class="v2-p">If the trace has <code>Caused by:</code> lines, scroll to the <strong>last</strong> <code>Caused by:</code>; it is the root cause.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Logcat</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Step-by-Step Build 2: The Debugger</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Instead of printing values, <strong>pause</strong> the program and look.</p>
+<ol class="v2-ol">
+<li><strong>Set a breakpoint</strong>: click in the gutter (left of the line numbers) next to a line. A red dot appears.</li>
+<li><strong>Run in debug mode</strong>: click the <strong>bug icon</strong> (Debug) instead of Run. (Alternatively, <strong>Attach Debugger to Android Process</strong> if the app is already running.)</li>
+<li>When the line is reached, the app <strong>freezes</strong> and the <strong>Debug</strong> window shows the <strong>call stack</strong> (Frames) and <strong>Variables</strong>.</li>
+</ol>
+<p class="v2-p">Controls (names are consistent between Studio versions; shortcuts are shown in the toolbar tooltips):</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Control</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Resume</strong></td>
+<td>Continue to the next breakpoint</td>
+</tr>
+<tr>
+<td><strong>Step Over</strong></td>
+<td>Execute this line, go to the next line in this function</td>
+</tr>
+<tr>
+<td><strong>Step Into</strong></td>
+<td>Go inside the function being called</td>
+</tr>
+<tr>
+<td><strong>Step Out</strong></td>
+<td>Run until the current function returns</td>
+</tr>
+<tr>
+<td><strong>Run to Cursor</strong></td>
+<td>Run until the line where your cursor is</td>
+</tr>
+<tr>
+<td><strong>Evaluate Expression</strong></td>
+<td>Type any Kotlin expression and see its value</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Advanced breakpoints</h3>
+<ul class="v2-ul">
+<li><strong>Conditional breakpoint:</strong> right-click the red dot and add a condition (for example <code>student.id == 7</code>), so you stop only for the item you care about instead of 200 times in a loop.</li>
+<li><strong>Log message breakpoint:</strong> choose "Evaluate and log" instead of suspending, so you get a <code>println</code> without editing code.</li>
+<li><strong>Exception breakpoint:</strong> in the <strong>Breakpoints</strong> dialog, break whenever a certain exception type is thrown.</li>
+<li><strong>Watches:</strong> add an expression to the <em>Watches</em> pane to follow it across steps.</li>
+</ul>
+<h3 class="v2-h3">Debugging Compose and coroutines</h3>
+<p class="v2-p">Breakpoints work inside composables, but a composable can run <strong>many times</strong> (recomposition), so use a conditional breakpoint. In coroutines, the Debug window shows a <strong>Coroutines</strong> tab (when the coroutine debugger is available) listing active coroutines and their stacks. Stepping across a <code>suspend</code> call may land on a different thread; this is normal.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Debugger</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Step-by-Step Build 3: App Inspection</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Open <strong>View → Tool Windows → App Inspection</strong>. Run your app (debug build) on a device or emulator. Choose the device and process. Tabs along the top include <strong>Network Inspector</strong>, <strong>Database Inspector</strong> and <strong>Background Task Inspector</strong>. Some Studio versions list the <strong>Layout Inspector</strong> in the same area; others use a separate window.</p>
+<h3 class="v2-h3">Database Inspector</h3>
+<p class="v2-p">You wrote a Room database in lesson 34. Instead of printing every row to Logcat, <strong>look at the tables</strong>.</p>
+<ol class="v2-ol">
+<li>Run the Inventory or Class Register app (anything with Room) in debug mode.</li>
+<li><strong>App Inspection → Database Inspector</strong>.</li>
+<li>In the left pane, expand the database file; double-click a table to see all rows in a grid.</li>
+<li><strong>Live updates</strong>: tick <em>Live updates</em> and see rows change as you use the app.</li>
+<li><strong>Run a query:</strong> open the <em>Query</em> tab, write a <code>SELECT * FROM student WHERE present = 1</code>, run it, and use the results. You can edit cell values directly (for tables, not views) to test how your UI reacts to different data without changing code.</li>
+<li><strong>Export</strong>: right-click a table to export as CSV, or export the database file, which you can open in a desktop SQLite browser.</li>
+</ol>
+<p class="v2-p">What it is good for:</p>
+<ul class="v2-ul">
+<li>Confirm that an <code>@Insert</code> really saved the row.</li>
+<li>Check <strong>foreign keys</strong> and defaults (<code>NULL</code> where you expected a value).</li>
+<li>Test your <strong>migrations</strong>: install version 1, insert rows, run version 2 and compare.</li>
+<li>Run the exact SQL your DAO uses (copy it out of the <code>@Query</code> string).</li>
+</ul>
+<p class="v2-p">If the inspector says it cannot see the database, check that you are running a <strong>debuggable</strong> build, that the process is selected, and that the app has actually opened the database (it is created lazily on first access). In-memory databases (<code>Room.inMemoryDatabaseBuilder</code>) are not inspectable on disk, although the inspector can work with them in some versions.</p>
+<h3 class="v2-h3">Background Task Inspector</h3>
+<p class="v2-p">Lesson 36 taught WorkManager. The <strong>Background Task Inspector</strong> shows <strong>workers, jobs, alarms and wake locks</strong> your app has scheduled.</p>
+<ol class="v2-ol">
+<li>Run an app that enqueues work (for example the Blur-O-Matic style app from lesson 36).</li>
+<li><strong>App Inspection → Background Task Inspector</strong>.</li>
+<li>In the <strong>table view</strong> you see each <em>Worker</em> with its status: <strong>Enqueued, Running, Succeeded, Failed, Cancelled, Blocked</strong>. Click one to see its <strong>Description</strong> (class, tags, constraints, input and output data), <strong>Results</strong>, and <strong>WorkContinuation</strong> (the chain of dependent work).</li>
+<li>The <strong>graph view</strong> shows chains: A runs, then B, then C. If A fails, B and C never run and appear as <em>Blocked</em> or <em>Cancelled</em>.</li>
+<li>The <strong>timeline</strong> shows each task over time, together with alarms and wake locks.</li>
+<li>A <strong>Cancel</strong> button lets you stop a worker manually.</li>
+</ol>
+<p class="v2-p">This answers questions that are otherwise very hard: <em>Why did my sync never run?</em> (look for <em>Blocked</em> by a constraint such as unmetered network), <em>Why did my chain stop?</em> (a failed parent), <em>How many retries happened?</em> (the attempt count in the description).</p>
+<h3 class="v2-h3">Network Inspector</h3>
+<p class="v2-p">When your Retrofit code (lesson 29) misbehaves, open the <strong>Network Inspector</strong>. It lists each request with URL, method, status, size and time, and the <strong>Connection View</strong> shows request and response headers and bodies (JSON is pretty-printed). Use it to catch a wrong URL, a 404, an unexpected response shape, or a request that is sent far more often than you intended. It works with common HTTP stacks such as <code>HttpURLConnection</code> and OkHttp (so Retrofit); other stacks may need extra setup.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: App Inspection</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Step-by-Step Build 4: Layout Inspector</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">The <strong>Layout Inspector</strong> shows the <strong>actual UI tree of your running app</strong>, which is invaluable when a screen looks wrong and you cannot tell why.</p>
+<ol class="v2-ol">
+<li>Run the app. Open <strong>View → Tool Windows → Layout Inspector</strong> (the exact entry may be inside App Inspection on newer versions).</li>
+<li>Select your process.</li>
+<li>You see three panes: the <strong>Component Tree</strong> (hierarchy), a <strong>rendering of the screen</strong> (you can rotate it in 3D), and the <strong>Attributes</strong> pane for the selected element.</li>
+</ol>
+<p class="v2-p">For <strong>View</strong> screens, the tree lists <code>ConstraintLayout</code>, <code>TextView</code>, etc. with their XML attributes. For <strong>Compose</strong> screens, it lists composables (<code>Column</code>, <code>Row</code>, <code>Text</code>, <code>Button</code>) and shows their <strong>modifiers</strong>, parameters, size and semantic information. For apps that mix both (lesson 43) it shows the Compose tree inside the <code>ComposeView</code>.</p>
+<p class="v2-p">Useful tricks:</p>
+<ul class="v2-ul">
+<li><strong>Click a node in the screen</strong> to see which composable drew it, and use <strong>Go to source</strong> (right-click, or the Attributes toolbar) to jump to the code.</li>
+<li><strong>3D mode</strong> reveals overlapping or clipped layers.</li>
+<li><strong>Recomposition counts</strong> (a checkbox in the Compose tree settings, called <em>Show Recomposition Counts</em>). Interact with the app, and the tree shows how many times each composable <strong>recomposed</strong> and <strong>skipped</strong>. A <code>Text</code> that recomposed 300 times while you scrolled is a performance clue (lesson 57).</li>
+<li><strong>Live updates</strong> keep the inspector in step as the app runs, at some performance cost. Turn it off if the app becomes slow.</li>
+<li>Inspect <strong>semantics</strong> (the accessibility tree) to check labels and roles (lessons 46–48).</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p">Layout Inspector needs a <strong>debuggable</strong> build and, on older devices, extra permission, and it can slow down a weak emulator. Close it when not in use.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Layout Inspector</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Step-by-Step Build 5: Compose Preview</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">You used <code>@Preview</code> in lessons 15–22. The preview window can do far more.</p>
+<h3 class="v2-h3">Multipreview annotations</h3>
+<p class="v2-p">To see a composable in light and dark, large font, and different devices without stacking many annotations by hand, define a <strong>multipreview annotation</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Previews.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister.ui
+
+import android.content.res.Configuration
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(name = "Large font", fontScale = 1.5f, showBackground = true)
+@Preview(name = "Small phone", device = "spec:width=320dp,height=640dp,dpi=320", showBackground = true)
+annotation class ThemePreviews</code></pre></div></div>
+<p class="v2-p">Now one line puts all four previews on any composable:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+
+@ThemePreviews
+@Composable
+private fun StudentRowPreview() {
+    MaterialTheme { StudentRow(Student(1, "Ada Okafor", present = true), onPresentChange = {}) }
+}</code></pre></div></div>
+<p class="v2-p">Android's UI Tooling library also ships ready-made multipreview annotations, for example <code>@PreviewScreenSizes</code>, <code>@PreviewFontScale</code>, <code>@PreviewLightDark</code> and <code>@PreviewDynamicColors</code>, which are exactly this idea. Check the <code>androidx.compose.ui.tooling.preview</code> package for the current set.</p>
+<h3 class="v2-h3">PreviewParameter</h3>
+<p class="v2-p">Preview the same composable with many sets of data:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+
+class StudentProvider : PreviewParameterProvider&lt;Student&gt; {
+    override val values = sequenceOf(
+        Student(1, "Ada", present = true),
+        Student(2, "A very long student name that will have to wrap onto a second line", present = false),
+        Student(3, "", present = false)
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StudentRowVariants(@PreviewParameter(StudentProvider::class) student: Student) {
+    MaterialTheme { StudentRow(student, onPresentChange = {}) }
+}</code></pre></div></div>
+<p class="v2-p">This shows three previews: a normal row, a very long name and an empty name. Previewing <strong>edge cases</strong> catches layout bugs before you run the app.</p>
+<h3 class="v2-h3">Interactive, Animation and Deploy to Device modes</h3>
+<p class="v2-p">Above each preview you can choose:</p>
+<ul class="v2-ul">
+<li><strong>Interactive mode:</strong> click buttons and type into fields, as if on a device (with some limits).</li>
+<li><strong>Animation Preview:</strong> scrub through <code>updateTransition</code>, <code>AnimatedVisibility</code> and similar animations (lesson 41).</li>
+<li><strong>Deploy Preview to Device</strong> (the phone icon) runs only that composable on your emulator or device without launching the full app.</li>
+</ul>
+<h3 class="v2-h3">Preview limits and tips</h3>
+<ul class="v2-ul">
+<li>A preview cannot access things that need a real device: network, databases, <code>LocalContext</code> features like real resources of other apps. Give composables <strong>plain parameters</strong> (state and lambdas), not a ViewModel, so they stay previewable. This is the same advice as state hoisting (lesson 24).</li>
+<li>Use <code>showSystemUi = true</code> to show the status and navigation bars.</li>
+<li>If a preview breaks, press <strong>Build &amp; Refresh</strong> at the top of the preview. A red banner explains which line failed.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Compose Preview</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Step-by-Step Build 6: Live Edit and Apply Changes</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Waiting for a full build every time you change a colour is slow. Android Studio has two faster ways:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Feature</th>
+<th>What it does</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Apply Changes</strong> (Apply Code Changes / Apply Changes and Restart Activity)</td>
+<td>Pushes modified code or resources to the running app without a full reinstall</td>
+<td>Non-UI logic, resources</td>
+</tr>
+<tr>
+<td><strong>Live Edit</strong></td>
+<td>Updates <strong>composable functions</strong> in the running app as you type or on save</td>
+<td>Compose UI tuning: padding, colours, text</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">To use Live Edit: open <strong>Settings → Editor → Live Edit</strong> and choose the mode (manual or automatic; the exact labels change between versions). Run your app on a device or emulator on a supported API level (see the documentation for the minimum), edit a composable, and watch the app update in a second or two. Limitations: structural changes (new classes, changes to function signatures, new resources) need a normal run; a status indicator at the top right of the editor tells you whether the last edit was applied or needs a rebuild.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Live Edit and Apply Changes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Step-by-Step Build 7: The Profiler</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">The <strong>Android Profiler</strong> (<strong>View → Tool Windows → Profiler</strong>, or the <em>Profile</em> button) is where you investigate performance. Profile the <strong>release-like</strong> build whenever possible (lesson 49) because debug builds are slower and unrepresentative. The Studio can run the profiler on a <em>profileable</em> build for accurate results.</p>
+<p class="v2-p">The main task types (names and layout change between Studio versions):</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Task</th>
+<th>Question it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU / Callstack sampling, System Trace</strong></td>
+<td>Which functions use the time? Why is there jank?</td>
+</tr>
+<tr>
+<td><strong>Java/Kotlin memory (heap dump, allocations)</strong></td>
+<td>What objects are in memory and who holds them?</td>
+</tr>
+<tr>
+<td><strong>Energy / power</strong></td>
+<td>What wakes the device and drains battery?</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td>How much data is sent and received?</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A short, useful workflow for <strong>memory leaks</strong>:</p>
+<ol class="v2-ol">
+<li>Rotate the screen and navigate back and forth several times.</li>
+<li>Click <strong>Capture heap dump</strong>.</li>
+<li>Search for your Activity or Fragment class: if there are <em>several instances</em> of the same screen that should be gone, you have a leak.</li>
+<li>Select an instance and see the <strong>References</strong> (what keeps it alive). Common leaks: a static or singleton holding a <code>Context</code> or a View, a listener never removed, a fragment binding never nulled (lesson 42).</li>
+</ol>
+<p class="v2-p">For <strong>jank</strong> (stuttering), record a System Trace while scrolling and look at frames longer than 16 ms (at 60 Hz) in the <em>Frame</em> timeline. Long frames show which work ran on the main thread. Lesson 57 goes much deeper (Macrobenchmark and baseline profiles).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: The Profiler</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Step-by-Step Build 8: Accelerating Yourself: Inspections, Lint and Shortcuts</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">The programme's <em>Accelerate with tooling</em> theme is simple: spend 30 minutes learning shortcuts and you will save weeks of typing.</p>
+<h3 class="v2-h3">Shortcuts you should memorise (Windows/Linux, macOS in brackets)</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Action</th>
+<th>Shortcut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Search everywhere</td>
+<td>Double <strong>Shift</strong></td>
+</tr>
+<tr>
+<td>Find Action (any command)</td>
+<td><strong>Ctrl+Shift+A</strong> (<strong>Cmd+Shift+A</strong>)</td>
+</tr>
+<tr>
+<td>Go to file</td>
+<td><strong>Ctrl+Shift+N</strong> (<strong>Cmd+Shift+O</strong>)</td>
+</tr>
+<tr>
+<td>Go to class / symbol</td>
+<td><strong>Ctrl+N</strong> (<strong>Cmd+O</strong>)</td>
+</tr>
+<tr>
+<td>Recent files</td>
+<td><strong>Ctrl+E</strong> (<strong>Cmd+E</strong>)</td>
+</tr>
+<tr>
+<td>Show intention actions and quick fixes</td>
+<td><strong>Alt+Enter</strong> (<strong>Option+Return</strong>)</td>
+</tr>
+<tr>
+<td>Generate code (constructors, overrides)</td>
+<td><strong>Alt+Insert</strong> (<strong>Cmd+N</strong>)</td>
+</tr>
+<tr>
+<td>Reformat code</td>
+<td><strong>Ctrl+Alt+L</strong> (<strong>Cmd+Option+L</strong>)</td>
+</tr>
+<tr>
+<td>Go to declaration</td>
+<td><strong>Ctrl+B</strong> or Ctrl+click (<strong>Cmd+B</strong>)</td>
+</tr>
+<tr>
+<td>Find usages</td>
+<td><strong>Alt+F7</strong> (<strong>Option+F7</strong>)</td>
+</tr>
+<tr>
+<td>Rename (everywhere, safely)</td>
+<td><strong>Shift+F6</strong></td>
+</tr>
+<tr>
+<td>Comment line</td>
+<td><strong>Ctrl+/</strong> (<strong>Cmd+/</strong>)</td>
+</tr>
+<tr>
+<td>Run / Debug</td>
+<td><strong>Shift+F10 / Shift+F9</strong> (<strong>Ctrl+R / Ctrl+D</strong>, check your keymap)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Keymaps vary; if a shortcut differs, <strong>Settings → Keymap</strong> lets you search by action.</p>
+<h3 class="v2-h3">Code completion and live templates</h3>
+<ul class="v2-ul">
+<li>Type <code>Log</code> + Tab expands live templates (Studio has <code>logd</code>, <code>loge</code>, <code>logm</code>). Type <code>comp</code> + Tab in some project setups to scaffold a composable; check <strong>Settings → Editor → Live Templates</strong>, and create your own: for example <code>vm</code> expanding into a ViewModel class skeleton.</li>
+<li><strong>Postfix completion:</strong> type <code>list.size.if</code> and press Tab to wrap it in an <code>if</code>. Type <code>value.var</code> to create a variable.</li>
+<li><strong>Extract</strong>: select code, press <strong>Ctrl+Alt+M</strong> (<strong>Cmd+Option+M</strong>) to extract a function, <strong>Ctrl+Alt+V</strong> to extract a variable.</li>
+</ul>
+<h3 class="v2-h3">Lint and inspections</h3>
+<p class="v2-p"><strong>Lint</strong> is Studio's static analyser: it flags hard-coded text, missing content descriptions, unused resources, missing permissions, likely crashes and deprecated API usage. Run it from <strong>Analyze → Inspect Code</strong>, or from the command line with <code>./gradlew lint</code>. For Compose there are extra lint checks (for example for modifier parameters and state reads). Treat red/yellow squiggles seriously; <strong>Alt+Enter</strong> offers a fix for many of them. The accessibility checks in lint come back in lesson 48.</p>
+<h3 class="v2-h3">Version control and local history</h3>
+<p class="v2-p">The <strong>Git</strong> tools (Commit window, Log tab, the <em>Show History</em> view) and <strong>Local History</strong> (right-click a file → <em>Local History → Show History</em>) can recover a deleted block even if you never committed it.</p>
+<h3 class="v2-h3">Gemini in Android Studio</h3>
+<p class="v2-p">Recent Android Studio versions include <strong>Gemini</strong>, an AI assistant that can explain code, suggest fixes and help generate code in the IDE. Availability, plans and features have changed over time, so check the official Android Studio documentation for what your version offers. Treat suggestions like code from a classmate: read it, understand it, test it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: Accelerating Yourself: Inspections, Lint and Shortcuts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Find the crash in 60 seconds</strong></p>
+<p class="v2-p">The following code crashes when the user taps <strong>Save</strong> with an empty name. Run it, read Logcat, and name the exception, the file and line number. Then fix it with validation and a user-visible message.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun save(name: String?) {
+    val trimmed = name!!.trim()
+    require(trimmed.isNotEmpty())
+    repository.insert(Student(0, trimmed))
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">In Logcat filter by <code>level:error</code>. If <code>name</code> is null the trace shows <code>NullPointerException</code> (from <code>!!</code>) pointing at the line <code>name!!.trim()</code> in your file; if the name is blank, <code>IllegalArgumentException: Failed requirement.</code> pointing at <code>require</code>. The first line in your own package gives the file and line.</p>
+<p class="v2-p">Fix by not crashing, and tell the user:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun save(name: String?): String? {
+    val trimmed = name?.trim().orEmpty()
+    if (trimmed.isEmpty()) return "Please enter a name"   // message for the UI
+    repository.insert(Student(0, trimmed))
+    return null
+}</code></pre></div></div>
+<p class="v2-p">Return an error value (or update a <code>UiState</code> with an error message) rather than throwing for ordinary user mistakes.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Debug with a conditional breakpoint</strong></p>
+<p class="v2-p">A function loops over 500 students and one of them has a negative <code>score</code>. Set a breakpoint that stops only for that student, without adding any code.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Click the gutter on the line inside the loop that uses <code>score</code>, right-click the red dot, and type the condition <code>student.score &lt; 0</code> in the <strong>Condition</strong> field. Run in Debug mode. The program stops only when the condition is true; open <strong>Variables</strong> to see the offending student. Alternatively add an <em>Exception breakpoint</em> if the negative score causes a thrown exception.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Prove the data was saved</strong></p>
+<p class="v2-p">Using the Database Inspector, prove that tapping <strong>Add</strong> in your Room app inserts exactly one row. Describe the steps, and what you would check if the table is empty.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Run in debug on an emulator, open <strong>App Inspection → Database Inspector</strong>, pick the app process and database, open the table, tick <strong>Live updates</strong>, and tap <strong>Add</strong> once: one new row should appear. If it is empty, check: (1) you selected the right process and the app has opened the database; (2) the DAO call actually runs (set a breakpoint or log inside the repository); (3) the insert is not running inside a cancelled coroutine (look for <code>CancellationException</code> in Logcat); (4) the app is using an in-memory database; (5) you are looking at the right database file (debug and release can differ).</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Debugging with only <code>println</code>.</strong> <em>Fix:</em> use breakpoints and the Variables pane; use log-message breakpoints for quick prints.</p>
+<p class="v2-p"><strong>Mistake #2: Reading only the last line of a stack trace.</strong> <em>Fix:</em> read the top, then find your package's line, and the last <code>Caused by:</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Logging secrets.</strong> <em>Fix:</em> never log tokens, passwords or personal data.</p>
+<p class="v2-p"><strong>Mistake #4: Inspecting a release build.</strong> <em>Symptom:</em> inspectors show nothing. <em>Fix:</em> use a debuggable build (or a profileable one for profiling).</p>
+<p class="v2-p"><strong>Mistake #5: Profiling a debug build and trusting the numbers.</strong> <em>Fix:</em> profile a release-like build.</p>
+<p class="v2-p"><strong>Mistake #6: Leaving Live updates and Layout Inspector on.</strong> <em>Symptom:</em> a sluggish emulator. <em>Fix:</em> turn them off when finished.</p>
+<p class="v2-p"><strong>Mistake #7: Previews that need a ViewModel.</strong> <em>Symptom:</em> preview fails to render. <em>Fix:</em> hoist state and pass plain parameters.</p>
+<p class="v2-p"><strong>Mistake #8: Ignoring lint warnings.</strong> <em>Fix:</em> run Inspect Code before each release and fix real issues.</p>
+<p class="v2-p"><strong>Mistake #9: Not saving filters.</strong> <em>Fix:</em> save a Logcat filter for your package and tag.</p>
+<p class="v2-p"><strong>Mistake #10: Changing the database schema without checking the inspector.</strong> <em>Fix:</em> inspect after migrating.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Where do you look first when the app crashes, and what do you read?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Logcat (filter for errors). Read the exception type and message on the first line, then the first line from your own package for file and line, and the last <code>Caused by:</code> for the root cause.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What can the Database Inspector do that Logcat cannot?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It shows live table contents of the running app, lets you run SQL queries, edit values, and export data, so you can verify what is actually stored.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does the Background Task Inspector show?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">WorkManager workers, jobs, alarms and wake locks with their state (enqueued, running, succeeded, failed, cancelled, blocked), details, results and the chain of dependent work in a graph and a timeline.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> How do you find which composables recompose too often?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Use the Layout Inspector with recomposition counts enabled, interact with the app, and look for composables with high recomposition counts.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why use a multipreview annotation?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It bundles many <code>@Preview</code> configurations (light, dark, large font, small screen) into one annotation so that a single line previews a composable in all of them, catching layout and theme bugs early.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 1: Getting started</a></li>
+<li><a href="https://developer.android.com/studio/intro" rel="noopener noreferrer">Android Studio user guide</a></li>
+<li><a href="https://developer.android.com/studio" rel="noopener noreferrer">Android Studio download page</a></li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Bug Hunt: Fix the Broken App</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> You are given an app with <strong>five planted bugs</strong>. Use the tools in this lesson to find each one. Write a short report listing the tool you used and the cause.</p>
+<p class="v2-p"><strong>Create the app</strong> (<code>BugHunt</code>, Empty Activity with Compose and Room if you wish; the single file below is enough for bugs 1, 2, 3 and 5):</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li><strong>Crash:</strong> find the exception with Logcat and fix it.</li>
+<li><strong>Wrong value:</strong> find with a conditional breakpoint and fix it.</li>
+<li><strong>Over-recomposition:</strong> find it with Layout Inspector recomposition counts and fix it.</li>
+<li><strong>(If you have Room)</strong> an insert that never saves: find it with the Database Inspector.</li>
+<li><strong>A preview that crashes:</strong> fix it by hoisting state and add a multipreview annotation.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> record a heap dump after rotating the screen ten times and check there is only one <code>MainActivity</code> instance.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A single-file broken app and its fixes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.bughunt
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { MaterialTheme { BugHunt() } }
+    }
+}
+
+private const val TAG = "BugHunt"
+data class Item(val id: Int, val name: String, val price: Int)
+
+val items = List(200) { Item(it, "Item $it", it * 10) }
+
+// BUG 1 (crash): original used items[200] -&gt; IndexOutOfBoundsException. FIX: guard the index.
+fun safeItem(index: Int): Item? = items.getOrNull(index)
+
+// BUG 2 (wrong value): original summed prices with `price - 1`. FIX: sum the real price.
+fun total(list: List&lt;Item&gt;): Int = list.sumOf { it.price }
+
+@Composable
+fun BugHunt() {
+    var taps by remember { mutableIntStateOf(0) }
+
+    // BUG 3 (over-recomposition): original computed `expensive()` directly in the body so the
+    // whole screen redid it on every tap. FIX: remember it, keyed on what it really depends on.
+    val summary by remember { derivedStateOf { "Total: ${total(items)}" } }
+
+    Column(Modifier.padding(16.dp)) {
+        Text(summary)
+        Button(onClick = {
+            taps++
+            Log.d(TAG, "taps=$taps item=${safeItem(taps + 199)}")   // BUG 1 fixed: null instead of crash
+        }) { Text("Tap ($taps)") }
+
+        LazyColumn {
+            items(items, key = { it.id }) { Text(it.name) }
+        }
+    }
+}
+
+// BUG 5 (preview crash): original preview called a ViewModel. FIX: preview with plain state.
+@Preview(showBackground = true)
+@Composable
+private fun BugHuntPreview() {
+    MaterialTheme { BugHunt() }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Report template:</strong></p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Bug</th>
+<th>Tool</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 Crash</td>
+<td>Logcat</td>
+<td><code>IndexOutOfBoundsException</code> at the file/line shown</td>
+<td><code>getOrNull</code></td>
+</tr>
+<tr>
+<td>2 Wrong total</td>
+<td>Debugger (conditional breakpoint, Watches)</td>
+<td><code>price - 1</code></td>
+<td><code>sumOf { it.price }</code></td>
+</tr>
+<tr>
+<td>3 Recomposition</td>
+<td>Layout Inspector counts</td>
+<td>Expensive work in the body</td>
+<td><code>derivedStateOf</code> / <code>remember</code></td>
+</tr>
+<tr>
+<td>4 Not saved</td>
+<td>Database Inspector</td>
+<td>DAO insert called in a cancelled scope or on the wrong database</td>
+<td>Call <code>insert</code> from <code>viewModelScope</code> and verify live rows</td>
+</tr>
+<tr>
+<td>5 Preview</td>
+<td>Preview error banner</td>
+<td>ViewModel needs an Android context</td>
+<td>Preview with plain parameters</td>
+</tr>
+</tbody>
+</table></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 44 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-44-android-studio-power-tools</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 44 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Which Tool for Which Problem?</li><li>✅ Step-by-Step Build 1: Logcat</li><li>✅ Step-by-Step Build 2: The Debugger</li><li>✅ Step-by-Step Build 3: App Inspection</li><li>✅ Step-by-Step Build 4: Layout Inspector</li><li>✅ Step-by-Step Build 5: Compose Preview</li><li>✅ Step-by-Step Build 6: Live Edit and Apply Changes</li><li>✅ Step-by-Step Build 7: The Profiler</li><li>✅ Step-by-Step Build 8: Accelerating Yourself: Inspections, Lint and Shortcuts</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_43.html" class="ln-btn">&#8592; Lesson 43</a><a href="lesson_45.html" class="ln-btn primary">Lesson 45 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 44 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

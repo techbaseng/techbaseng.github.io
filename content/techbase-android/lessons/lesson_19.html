@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 19: State in Compose: The Tip Calculator and Art Space — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l19">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 19 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 19</div>
+      <h1>State in Compose: The Tip Calculator and Art Space</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Art Space: Your Own Gallery</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 19</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Understand state, recomposition and state hoisting by building a tip calculator, then apply it in the Art Space project.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Art Space: Your Own Gallery</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to one of the most important lessons in the whole course. Today you learn the single idea that makes every Compose app work: <strong>state</strong>.</p>
+<p class="v2-p">Picture a shop assistant with a notepad. Every customer who walks in sees whatever is written on the notepad's front page: today's price of garri. When the price changes, the assistant crosses out the old number and writes the new one, and from then on every customer sees the new number. In Compose, the <em>notepad value</em> is <strong>state</strong>, and the <em>act of showing it again</em> is <strong>recomposition</strong>. Once this picture is firmly in your head, text fields, switches, counters, shopping carts and even whole games become variations on the same theme.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what <strong>state</strong> is and how a change in state triggers <strong>recomposition</strong>.</li>
+<li>Use <code>remember</code> and <code>mutableStateOf</code>, and explain why <code>rememberSaveable</code> survives screen rotation.</li>
+<li>Build a text input with <code>OutlinedTextField</code> and control the on-screen keyboard with <code>KeyboardOptions</code>.</li>
+<li>Add a <code>Switch</code> and connect it to state.</li>
+<li>Apply <strong>state hoisting</strong> to make stateless, reusable, testable composables.</li>
+<li>Format money with <code>NumberFormat.getCurrencyInstance()</code>.</li>
+<li>Build a complete <strong>Tip Calculator</strong> app, including a custom tip percentage.</li>
+<li>Apply everything to the <strong>Art Space</strong> project: an original gallery app with images, buttons and state.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson covers the official Unit 2, Pathway 3 items of <strong>Android Basics with Compose</strong>: <em>Understanding state in Compose</em>, <em>Intro to tip calculator</em>, <em>Intro to state in Compose</em>, <em>Calculate a custom tip</em>, and the <em>Project: Create an Art Space app</em>. We follow the official order but write our own code, explain the "why" in more depth, and set up the code so that lesson 20 can test it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. Composable functions (lessons 15 and 16)</h3>
+<p class="v2-p">A <strong>composable function</strong> is a Kotlin function marked <code>@Composable</code> that describes a piece of UI. It <em>describes</em> the screen; it does not draw pixels directly. Rows, Columns, Text and Image are all composables.</p>
+<h3 class="v2-h3">2. Buttons and lambdas (lesson 17)</h3>
+<p class="v2-p"><code>Button(onClick = { ... }) { Text("Roll") }</code> takes a <strong>lambda</strong>, a block of code stored to run later. You saw in lesson 12 that lambdas can be passed to functions. State hoisting is entirely about passing lambdas <em>up</em> and values <em>down</em>.</p>
+<h3 class="v2-h3">3. <code>val</code> and <code>var</code> (lesson 7)</h3>
+<p class="v2-p"><code>val</code> cannot be reassigned; <code>var</code> can. State values are declared with <code>var</code> because they change.</p>
+<h3 class="v2-h3">4. Default arguments and named parameters (lesson 8)</h3>
+<p class="v2-p">You will meet functions like <code>calculateTip(amount, tipPercent = 15.0)</code>. A default means the caller may leave an argument out.</p>
+<h3 class="v2-h3">5. Nullable types and <code>toDoubleOrNull()</code> (lesson 10)</h3>
+<p class="v2-p">A text field gives you a <code>String</code>, but the user might type nothing or type <code>1.2.3</code>. <code>"12.5".toDoubleOrNull()</code> gives <code>12.5</code>, while <code>"abc".toDoubleOrNull()</code> gives <code>null</code>. The Elvis operator <code>?:</code> supplies a fallback: <code>value.toDoubleOrNull() ?: 0.0</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: State and Recomposition</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is state?</h3>
+<p class="v2-p"><strong>State is any value that can change over time and that the screen depends on.</strong> A counter's number, the text typed into a field, whether a switch is on, the index of the picture being shown: all of these are state.</p>
+<p class="v2-p">Not everything is state. The words "Calculate Tip" on a label never change, so they are just fixed data.</p>
+<h3 class="v2-h3">Why a plain variable does not work</h3>
+<p class="v2-p">Beginners often try this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun BrokenCounter() {
+    var count = 0                       // plain variable, NOT state
+    Button(onClick = { count++ }) {
+        Text("Clicked $count times")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Tap the button and nothing changes on screen. There are two separate reasons:</p>
+<ol class="v2-ol">
+<li>Compose has no idea that <code>count</code> changed, so it does not redraw the button.</li>
+<li>Even if it did redraw, the function would run again from the top and <code>var count = 0</code> would reset the number to zero.</li>
+</ol>
+<h3 class="v2-h3">The Compose cycle</h3>
+<p class="v2-p">Compose apps follow a three-step loop. Learn it by heart:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>        +-----------------------------+
+        |   1. EVENT                  |
+        |   The user taps, types,     |
+        |   slides a switch...        |
+        +--------------+--------------+
+                       |
+                       v
+        +-----------------------------+
+        |   2. UPDATE STATE           |
+        |   Your code changes a       |
+        |   state value.              |
+        +--------------+--------------+
+                       |
+                       v
+        +-----------------------------+
+        |   3. DISPLAY                |
+        |   Compose re-runs ONLY the  |
+        |   composables that read     |
+        |   that state (recomposition)|
+        +--------------+--------------+
+                       |
+                       +--------&gt; back to 1 when the user acts again</code></pre></div></div>
+<h3 class="v2-h3">Key vocabulary</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>State</strong></td>
+<td>A value that can change and affects the UI.</td>
+<td>The price written on the shop notepad.</td>
+</tr>
+<tr>
+<td><strong>Composition</strong></td>
+<td>The first time Compose builds the UI from your composables.</td>
+<td>Opening the shop and writing everything out.</td>
+</tr>
+<tr>
+<td><strong>Recomposition</strong></td>
+<td>Compose running composables <em>again</em> because state they read has changed.</td>
+<td>Crossing out the old price and rewriting it.</td>
+</tr>
+<tr>
+<td><code>MutableState</code></td>
+<td>An observable box that holds a value and tells Compose when it changes.</td>
+<td>A notepad that rings a bell when edited.</td>
+</tr>
+<tr>
+<td><code>remember</code></td>
+<td>Keeps a value alive across recompositions.</td>
+<td>The notepad does not get thrown away every time you glance at it.</td>
+</tr>
+<tr>
+<td><code>rememberSaveable</code></td>
+<td>Like <code>remember</code>, but also survives rotation and some other changes.</td>
+<td>A notepad saved in a drawer overnight.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Compose is smart about recomposition: it only re-runs the pieces that actually <em>read</em> the changed state, not the whole screen. Because recomposition can happen often and in any order, composable functions must be <strong>fast</strong> and <strong>free of side effects</strong> such as saving files or changing unrelated variables. Lesson 37 returns to this in depth.</p>
+<h3 class="v2-h3">The three ingredients of state in code</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+var count by remember { mutableStateOf(0) }</code></pre></div></div>
+<p class="v2-p">Read it from the inside out:</p>
+<ul class="v2-ul">
+<li><code>mutableStateOf(0)</code> creates the observable box with the starting value <code>0</code>.</li>
+<li><code>remember { ... }</code> stores that box so the next recomposition finds the <em>same</em> box instead of making a new one.</li>
+<li><code>by</code> is a <strong>property delegate</strong>. It lets you write <code>count</code> and <code>count++</code> instead of <code>count.value</code> and <code>count.value++</code>. It needs the two imports <code>getValue</code> and <code>setValue</code>, which Android Studio offers when you press <code>Alt + Enter</code> on a red <code>by</code>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Think about it:</strong> Why must <code>remember</code> wrap <code>mutableStateOf</code>? Because without it, every recomposition would run <code>mutableStateOf(0)</code> again and create a brand-new box holding <code>0</code>, wiping the user's progress.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: State and Recomposition</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Experiment: A Counter That Works</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a new <strong>Empty Activity</strong> project called <code>State Lab</code>, package <code>com.techbase.statelab</code>. Replace <code>MainActivity.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.statelab
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        RememberCounter()
+                        SavedCounter()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RememberCounter() {
+    var count by remember { mutableIntStateOf(0) }
+    Log.d("StateLab", "RememberCounter composed, count=$count")
+    Button(onClick = { count++ }) {
+        Text("remember: $count")
+    }
+}
+
+@Composable
+fun SavedCounter() {
+    var count by rememberSaveable { mutableIntStateOf(0) }
+    Log.d("StateLab", "SavedCounter composed, count=$count")
+    Button(onClick = { count++ }) {
+        Text("rememberSaveable: $count")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>mutableIntStateOf</code> is a version of <code>mutableStateOf</code> made for <code>Int</code>, which avoids boxing numbers. Either works; use <code>mutableStateOf(0)</code> if you prefer.</p>
+<h3 class="v2-h3">Run it and watch</h3>
+<ol class="v2-ol">
+<li>Tap each button three times. Both show <code>3</code>.</li>
+<li>Open <strong>Logcat</strong> (lesson 18) and filter with <code>tag:StateLab</code>. Every tap prints a fresh <em>composed</em> line. That is <strong>recomposition</strong> happening in front of you. Notice that tapping the first button does not necessarily re-log the second one, because only the composable that read the changed value recomposes.</li>
+<li><strong>Rotate the emulator</strong> (the rotate icons beside the emulator, or <code>Ctrl + Left Arrow</code>). The <code>remember</code> button goes back to <code>0</code>. The <code>rememberSaveable</code> button keeps <code>3</code>.</li>
+</ol>
+<p class="v2-p">If auto-rotate is off on your emulator, switch it on in the quick settings or the emulator side bar.</p>
+<h3 class="v2-h3">Why the difference?</h3>
+<p class="v2-p">Rotating the phone is a <strong>configuration change</strong>. By default Android destroys and recreates the activity, and <code>remember</code> lives inside the activity's composition, so it is thrown away. <code>rememberSaveable</code> additionally writes the value into a small bundle that Android hands back to the new activity. Lesson 23 explains the activity lifecycle behind this. For now:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Tool</th>
+<th>Survives recomposition</th>
+<th>Survives rotation</th>
+<th>Survives process death*</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>plain <code>var</code></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>remember</code></td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>rememberSaveable</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Usually yes, for small values</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">*When Android silently kills your app in the background to free memory and later restores it. Only small, simple values (numbers, text, booleans) belong in <code>rememberSaveable</code>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Rule of thumb:</strong> for anything the <em>user typed or chose</em>, use <code>rememberSaveable</code>. Nobody wants to lose a half-typed bill amount because they turned their phone sideways.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Experiment: A Counter That Works</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Tip Calculator, Step 1: Project, Strings and the Logic</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">You will now build the official <strong>Tip Time</strong> app in your own way. The finished screen has a bill amount field, a tip percentage field, a "Round up tip?" switch, and the calculated tip underneath.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+----------------------------------+
+|  Calculate Tip                   |
+|                                  |
+|  [ Bill Amount        1000    ]  |
+|  [ Tip Percentage       15    ]  |
+|  Round up tip?            (o-)   |
+|                                  |
+|  Tip Amount: $150.00             |
++----------------------------------+</code></pre></div></div>
+<h3 class="v2-h3">Create the project</h3>
+<ol class="v2-ol">
+<li><strong>File &gt; New &gt; New Project &gt; Empty Activity</strong>.</li>
+<li>Name: <code>Tip Time</code>. Package: <code>com.techbase.tiptime</code>.</li>
+<li>Wait for Gradle to sync.</li>
+</ol>
+<h3 class="v2-h3">Put the words in <code>strings.xml</code></h3>
+<p class="v2-p">Hard-coding text inside composables makes translation difficult. Android keeps user-visible words in <code>res/values/strings.xml</code>. Open it and make it look like this (keep the <code>app_name</code> that already exists):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Tip Time&lt;/string&gt;
+    &lt;string name="calculate_tip"&gt;Calculate Tip&lt;/string&gt;
+    &lt;string name="bill_amount"&gt;Bill Amount&lt;/string&gt;
+    &lt;string name="how_was_the_service"&gt;Tip Percentage&lt;/string&gt;
+    &lt;string name="round_up_tip"&gt;Round up tip?&lt;/string&gt;
+    &lt;string name="tip_amount"&gt;Tip Amount: %s&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p"><code>%s</code> is a <strong>placeholder</strong>. Later <code>stringResource(R.string.tip_amount, "$150.00")</code> fills it in. Placeholders let translators move the amount to wherever their language needs it.</p>
+<h3 class="v2-h3">Write the calculation first</h3>
+<p class="v2-p">A good habit: write the <em>logic</em> as a plain Kotlin function with no Compose in it. Plain functions are easy to reason about and, in lesson 20, easy to test. Create a new Kotlin file <code>TipCalculator.kt</code> in the <code>com.techbase.tiptime</code> package:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">TipCalculator.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.tiptime
+
+import java.text.NumberFormat
+import kotlin.math.ceil
+
+/**
+ * Returns the tip as a number.
+ * @param amount the bill before tip
+ * @param tipPercent the tip as a percentage, for example 15.0 means 15 percent
+ * @param roundUp when true, the tip is rounded UP to the next whole unit
+ */
+fun calculateTip(
+    amount: Double,
+    tipPercent: Double = 15.0,
+    roundUp: Boolean = false
+): Double {
+    val tip = tipPercent / 100 * amount
+    return if (roundUp) ceil(tip) else tip
+}
+
+/** Turns a number into money text using the phone's own currency settings. */
+fun formatCurrency(value: Double): String {
+    return NumberFormat.getCurrencyInstance().format(value)
+}</code></pre></div></div>
+<p class="v2-p">Let us walk through it:</p>
+<ul class="v2-ul">
+<li>The default <code>tipPercent = 15.0</code> means <code>calculateTip(1000.0)</code> works and gives <code>150.0</code>.</li>
+<li><code>ceil(tip)</code> from <code>kotlin.math</code> rounds <em>up</em> to the next whole number. A tip of <code>12.5</code> becomes <code>13.0</code>.</li>
+<li><code>NumberFormat.getCurrencyInstance()</code> produces money text <strong>using the phone's region settings</strong>: the currency symbol, the decimal separator and the grouping. A phone set to the US shows <code>$150.00</code>; a phone set to Nigeria typically shows <code>₦150.00</code>. The exact symbol depends on the device's locale data, so the output on your emulator may differ from the examples here.</li>
+</ul>
+<p class="v2-p">Some quick mental checks, which you will turn into real tests in lesson 20:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Call</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>calculateTip(1000.0)</code></td>
+<td><code>150.0</code></td>
+</tr>
+<tr>
+<td><code>calculateTip(1000.0, 20.0)</code></td>
+<td><code>200.0</code></td>
+</tr>
+<tr>
+<td><code>calculateTip(50.0, 15.0, roundUp = true)</code></td>
+<td><code>ceil(7.5)</code> which is <code>8.0</code></td>
+</tr>
+<tr>
+<td><code>calculateTip(0.0)</code></td>
+<td><code>0.0</code></td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Tip Calculator, Step 1: Project, Strings and the Logic</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Tip Calculator, Step 2: A Stateful Screen</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">First we build the screen the simplest way: all state lives inside one composable. Then in step 3 we improve it.</p>
+<p class="v2-p">Open <code>MainActivity.kt</code> and replace everything:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.tiptime
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    TipTimeLayout()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TipTimeLayout() {
+    var amountInput by rememberSaveable { mutableStateOf("") }
+    val amount = amountInput.toDoubleOrNull() ?: 0.0
+    val tip = formatCurrency(calculateTip(amount))
+
+    Column(
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(horizontal = 40.dp)
+            .verticalScroll(rememberScrollState())
+            .safeContentPaddingFallback(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.calculate_tip),
+            modifier = Modifier
+                .padding(bottom = 16.dp, top = 40.dp)
+                .align(alignment = Alignment.Start),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        OutlinedTextField(
+            value = amountInput,
+            onValueChange = { amountInput = it },
+            label = { Text(stringResource(R.string.bill_amount)) },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth()
+        )
+        Text(
+            text = stringResource(R.string.tip_amount, tip),
+            style = MaterialTheme.typography.displaySmall
+        )
+        Spacer(modifier = Modifier.height(150.dp))
+    }
+}
+
+private fun Modifier.safeContentPaddingFallback(): Modifier = this</code></pre></div></div>
+<p class="v2-p">The last helper is a harmless pass-through that keeps the chain readable; you may delete both it and its call. The important parts follow.</p>
+<h3 class="v2-h3">Run it</h3>
+<p class="v2-p">Start the app, tap the field, and type <code>1000</code>. The tip below should change <em>as you type</em> to <code>$150.00</code> (or your region's equivalent).</p>
+<h3 class="v2-h3">How it works, line by line</h3>
+<ol class="v2-ol">
+<li><code>var amountInput by rememberSaveable { mutableStateOf("") }</code> is the notepad value. It starts as an empty string, and it survives rotation.</li>
+<li><code>OutlinedTextField(value = amountInput, onValueChange = { amountInput = it }, ...)</code>. This is the cycle in miniature:
+   - <strong>Display:</strong> the field shows whatever <code>value</code> is.
+   - <strong>Event:</strong> when the user types, the field does <strong>not</strong> change itself. It calls <code>onValueChange</code> with the text it <em>would</em> like to show.
+   - <strong>Update:</strong> your lambda stores that text in <code>amountInput</code>.
+   - <strong>Display again:</strong> the change triggers recomposition and the field is redrawn with the new <code>value</code>.</li>
+</ol>
+<p class="v2-p">A Compose <code>TextField</code> is a <strong>controlled</strong> component: it is only ever as up-to-date as the state you give it. If you forget the assignment <code>amountInput = it</code>, typing appears to do nothing.
+3. <code>amountInput.toDoubleOrNull() ?: 0.0</code> turns the text into a number safely. Empty text gives <code>0.0</code>, so the screen shows a zero tip instead of crashing.
+4. <code>tip</code> is computed during composition from <code>amount</code>. Because <code>amount</code> depends on <code>amountInput</code>, which is state, the tip recalculates automatically each time. You never write "update the tip label" code. You describe how the tip is <em>derived</em> from state and Compose does the rest.
+5. <code>KeyboardOptions(keyboardType = KeyboardType.Number)</code> asks the phone to open the <strong>numeric keyboard</strong>. It is a request, not a guarantee, and it does not stop someone pasting letters, which is why we use <code>toDoubleOrNull()</code>.
+6. <code>singleLine = true</code> keeps the field to one line.
+7. <code>Modifier.statusBarsPadding()</code> stops content hiding under the status bar when the app draws edge to edge, and <code>verticalScroll</code> lets the layout scroll when the keyboard shrinks the available space.</p>
+<h3 class="v2-h3">Keyboard options in more detail</h3>
+<p class="v2-p"><code>KeyboardOptions</code> has several useful settings:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Setting</th>
+<th>Example</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>keyboardType</code></td>
+<td><code>KeyboardType.Number</code>, <code>Text</code>, <code>Email</code>, <code>Phone</code>, <code>Decimal</code></td>
+<td>Chooses the keyboard layout. <code>Decimal</code> suits money because it offers a decimal point.</td>
+</tr>
+<tr>
+<td><code>imeAction</code></td>
+<td><code>ImeAction.Next</code>, <code>ImeAction.Done</code>, <code>ImeAction.Search</code></td>
+<td>Changes the action key at the bottom-right of the keyboard.</td>
+</tr>
+<tr>
+<td><code>capitalization</code></td>
+<td><code>KeyboardCapitalization.Words</code></td>
+<td>Capitalises automatically.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Use <code>KeyboardType.Decimal</code> or <code>KeyboardType.Number</code> for amounts. We will use <code>Number</code> for consistency with the official app, and you may prefer <code>Decimal</code> in your own work.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Tip:</strong> If you see <code>Unresolved reference: KeyboardOptions</code>, the import is <code>androidx.compose.foundation.text.KeyboardOptions</code>. It is in the <code>foundation</code> package, not <code>material3</code>. The same goes for <code>KeyboardType</code>, which lives in <code>androidx.compose.ui.text.input</code>.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Tip Calculator, Step 2: A Stateful Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Tip Calculator, Step 3: State Hoisting, Custom Tip and the Switch</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Our screen works, but everything is crammed into one function. To add a second field and a switch cleanly, we apply the most important Compose design pattern.</p>
+<h3 class="v2-h3">What is state hoisting?</h3>
+<p class="v2-p"><strong>State hoisting</strong> means moving state <em>up</em> out of a composable, to its caller, so that the composable itself becomes <strong>stateless</strong>. A stateless composable follows one rule:</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>State flows down, events flow up.</strong></p>
+</blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>   TipTimeLayout   (OWNS the state)
+        |   ^
+ value  |   |  onValueChange(newText)
+ (down) v   |  (up)
+   EditNumberField   (STATELESS: just shows the value
+                      and reports what the user did)</code></pre></div></div>
+<p class="v2-p">Why bother?</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reusable</strong></td>
+<td>One <code>EditNumberField</code> serves both the bill and the tip percentage.</td>
+</tr>
+<tr>
+<td><strong>Testable</strong></td>
+<td>A stateless composable can be tested by simply handing it values (lesson 20).</td>
+</tr>
+<tr>
+<td><strong>Single source of truth</strong></td>
+<td>Exactly one place owns each value, so two parts of the screen cannot disagree.</td>
+</tr>
+<tr>
+<td><strong>Previewable</strong></td>
+<td>You can preview it in Android Studio with any fake value.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The usual pattern: a composable that needs state takes two parameters, <code>value: T</code> and <code>onValueChange: (T) -&gt; Unit</code>.</p>
+<h3 class="v2-h3">Add strings for the new field labels</h3>
+<p class="v2-p">Everything you need is already in <code>strings.xml</code>: <code>bill_amount</code>, <code>how_was_the_service</code> and <code>round_up_tip</code>. Good planning pays off.</p>
+<h3 class="v2-h3">The complete final screen</h3>
+<p class="v2-p">Replace <code>MainActivity.kt</code> one last time. This is the whole app:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.tiptime
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    TipTimeLayout()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TipTimeLayout() {
+    var amountInput by rememberSaveable { mutableStateOf("") }
+    var tipInput by rememberSaveable { mutableStateOf("") }
+    var roundUp by rememberSaveable { mutableStateOf(false) }
+
+    val amount = amountInput.toDoubleOrNull() ?: 0.0
+    val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
+    val tip = formatCurrency(calculateTip(amount, tipPercent, roundUp))
+
+    Column(
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(horizontal = 40.dp)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.calculate_tip),
+            modifier = Modifier
+                .padding(bottom = 16.dp, top = 40.dp)
+                .align(alignment = Alignment.Start),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        EditNumberField(
+            label = R.string.bill_amount,
+            value = amountInput,
+            onValueChange = { amountInput = it },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            ),
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth()
+        )
+        EditNumberField(
+            label = R.string.how_was_the_service,
+            value = tipInput,
+            onValueChange = { tipInput = it },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .fillMaxWidth()
+        )
+        RoundTheTipRow(
+            roundUp = roundUp,
+            onRoundUpChanged = { roundUp = it },
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+        Text(
+            text = stringResource(R.string.tip_amount, tip),
+            style = MaterialTheme.typography.displaySmall
+        )
+        Spacer(modifier = Modifier.height(150.dp))
+    }
+}
+
+/** Stateless: shows [value] and reports typing through [onValueChange]. */
+@Composable
+fun EditNumberField(
+    @StringRes label: Int,
+    value: String,
+    onValueChange: (String) -&gt; Unit,
+    keyboardOptions: KeyboardOptions,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(stringResource(label)) },
+        singleLine = true,
+        keyboardOptions = keyboardOptions,
+        modifier = modifier
+    )
+}
+
+/** Stateless: a label on the left and a Switch on the right. */
+@Composable
+fun RoundTheTipRow(
+    roundUp: Boolean,
+    onRoundUpChanged: (Boolean) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .size(48.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = stringResource(R.string.round_up_tip))
+        Switch(
+            checked = roundUp,
+            onCheckedChange = onRoundUpChanged,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.End)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TipTimePreview() {
+    MaterialTheme {
+        TipTimeLayout()
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Walking through the new pieces</h3>
+<ul class="v2-ul">
+<li><strong>Three pieces of state</strong> live in <code>TipTimeLayout</code>: the bill text, the tip percentage text and the switch position. The two number fields keep their values as <code>String</code> because that is what a text field edits; we convert to numbers only when calculating.</li>
+<li><strong><code>EditNumberField</code></strong> has no state of its own. It takes <code>value</code> and <code>onValueChange</code> and hands both straight to the field. We use it twice with different labels.</li>
+<li><strong><code>@StringRes label: Int</code></strong> is an annotation that tells Android Studio "this <code>Int</code> must be the id of a string resource". If you accidentally pass <code>R.drawable.something</code>, Android Studio flags the error. You will use <code>@DrawableRes</code> in the same way later in this lesson and in lesson 21.</li>
+<li><strong><code>imeAction</code></strong>: the bill field shows a <strong>Next</strong> key that moves to the tip field, and the tip field shows <strong>Done</strong>, which closes the keyboard. Next and Done work by default for focus movement in simple forms; for custom behaviour you would add <code>keyboardActions</code>, which is beyond this lesson.</li>
+<li><strong><code>Switch(checked = roundUp, onCheckedChange = onRoundUpChanged)</code></strong>: the same pattern as the text field. The switch does not flip itself; it reports the <em>wanted</em> new value and your state decides.</li>
+<li><strong><code>RoundTheTipRow</code></strong> sets the row height to 48.dp, a standard minimum <strong>touch target</strong> size, so the switch is easy to tap. Accessibility is covered in lessons 46 to 48.</li>
+</ul>
+<h3 class="v2-h3">Expected behaviour</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Bill</th>
+<th>Tip %</th>
+<th>Round up</th>
+<th>Tip shown (US-style locale)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1000</td>
+<td>15</td>
+<td>off</td>
+<td>$150.00</td>
+</tr>
+<tr>
+<td>1000</td>
+<td>20</td>
+<td>off</td>
+<td>$200.00</td>
+</tr>
+<tr>
+<td>50</td>
+<td>15</td>
+<td>on</td>
+<td>$8.00</td>
+</tr>
+<tr>
+<td>50</td>
+<td>15</td>
+<td>off</td>
+<td>$7.50</td>
+</tr>
+<tr>
+<td>(empty)</td>
+<td>15</td>
+<td>off</td>
+<td>$0.00</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Type <code>50</code>, <code>15</code>, then turn the switch on and off and watch <code>$8.00</code> change to <code>$7.50</code>. Rotate the phone: all three values survive because they are <code>rememberSaveable</code>.</p>
+<h3 class="v2-h3">Why hoisting where we did?</h3>
+<p class="v2-p">We could have hoisted state all the way up into a ViewModel. For a small screen like this, holding state in the top-level composable is the right size. In lesson 24 you will move state into a <strong>ViewModel</strong> when it grows or must survive more than the screen does.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Tip Calculator, Step 3: State Hoisting, Custom Tip and the Switch</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Art Space: Your Own Gallery App</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The final item of this pathway is the <strong>Project: Create an Art Space app</strong>. The official project asks you to build a gallery that shows one artwork at a time with its title, artist and year, and <strong>Previous</strong> and <strong>Next</strong> buttons. We build our own original version here, step by step. In the <code>@build</code> project at the end of the lesson you will extend it with your own artworks and extra features.</p>
+<h3 class="v2-h3">Design first</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+-----------------------------+
+|                             |
+|   +---------------------+   |
+|   |                     |   |
+|   |     ARTWORK         |   |   &lt;- picture inside a framed, shadowed Surface
+|   |     (image)         |   |
+|   |                     |   |
+|   +---------------------+   |
+|                             |
+|   Title of the artwork      |   &lt;- text block: title
+|   Artist name (2024)        |   &lt;-   artist and year
+|                             |
+|   [ Previous ]   [ Next ]   |   &lt;- two buttons
++-----------------------------+</code></pre></div></div>
+<p class="v2-p">The only thing that changes is <em>which</em> artwork is shown. So the app needs exactly <strong>one</strong> piece of state: the index of the current artwork.</p>
+<h3 class="v2-h3">Step 1: Add your own pictures</h3>
+<p class="v2-p">Use pictures you have the right to use: your own photographs, your own drawings, or images you have permission for. Three is enough.</p>
+<ol class="v2-ol">
+<li>Resource file names must be lowercase letters, digits and underscores, for example <code>art_one.png</code>, <code>art_two.png</code>, <code>art_three.jpg</code>.</li>
+<li>Copy the files and paste them into the <code>res/drawable</code> folder in Android Studio's <strong>Project</strong> view (switch the view from <em>Android</em>), or use <strong>View &gt; Tool Windows &gt; Resource Manager</strong> and import them there.</li>
+<li>Keep each file small. A phone photograph can be 5 MB or more; shrink it to roughly 1000 pixels wide before adding it, because big images use lots of memory and make an app crash on modest phones.</li>
+</ol>
+<p class="v2-p">Add strings in <code>strings.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Art Space&lt;/string&gt;
+    &lt;string name="art_one_title"&gt;Market Morning&lt;/string&gt;
+    &lt;string name="art_one_artist"&gt;Your Name&lt;/string&gt;
+    &lt;string name="art_one_desc"&gt;A busy market stall at sunrise&lt;/string&gt;
+    &lt;string name="art_two_title"&gt;Rooftops of Ibadan&lt;/string&gt;
+    &lt;string name="art_two_artist"&gt;Your Name&lt;/string&gt;
+    &lt;string name="art_two_desc"&gt;Rusty tin roofs under a hazy sky&lt;/string&gt;
+    &lt;string name="art_three_title"&gt;Evening Danfo&lt;/string&gt;
+    &lt;string name="art_three_artist"&gt;Your Name&lt;/string&gt;
+    &lt;string name="art_three_desc"&gt;A yellow and black bus at dusk&lt;/string&gt;
+    &lt;string name="previous"&gt;Previous&lt;/string&gt;
+    &lt;string name="next"&gt;Next&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p">Notice the extra <code>_desc</code> strings. Every image needs a <strong>content description</strong>, the text a screen reader speaks to blind users. It is not decoration; it is a requirement of good apps.</p>
+<h3 class="v2-h3">Step 2: Model the data</h3>
+<p class="v2-p">A <strong>data class</strong> (lesson 11) holds the details of one artwork. The annotations <code>@DrawableRes</code> and <code>@StringRes</code> make Studio check we pass the right kinds of resource id:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Artwork.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.artspace
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+
+data class Artwork(
+    @DrawableRes val image: Int,
+    @StringRes val title: Int,
+    @StringRes val artist: Int,
+    val year: Int,
+    @StringRes val description: Int
+)
+
+val artworks = listOf(
+    Artwork(R.drawable.art_one, R.string.art_one_title, R.string.art_one_artist, 2024, R.string.art_one_desc),
+    Artwork(R.drawable.art_two, R.string.art_two_title, R.string.art_two_artist, 2023, R.string.art_two_desc),
+    Artwork(R.drawable.art_three, R.string.art_three_title, R.string.art_three_artist, 2025, R.string.art_three_desc)
+)</code></pre></div></div>
+<p class="v2-p">Create a new project called <code>Art Space</code> with package <code>com.techbase.artspace</code> for this.</p>
+<h3 class="v2-h3">Step 3: The screen and its state</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.artspace
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    ArtSpaceApp()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ArtSpaceApp(modifier: Modifier = Modifier) {
+    var index by rememberSaveable { mutableIntStateOf(0) }
+    val art = artworks[index]
+
+    Column(
+        modifier = modifier
+            .safeDrawingPadding()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        ArtworkFrame(art = art, modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(16.dp))
+        ArtworkCaption(art = art)
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Button(onClick = { index = (index - 1 + artworks.size) % artworks.size }) {
+                Text(stringResource(R.string.previous))
+            }
+            Button(onClick = { index = (index + 1) % artworks.size }) {
+                Text(stringResource(R.string.next))
+            }
+        }
+    }
+}
+
+@Composable
+fun ArtworkFrame(art: Artwork, modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
+    ) {
+        Image(
+            painter = painterResource(art.image),
+            contentDescription = stringResource(art.description),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        )
+    }
+}
+
+@Composable
+fun ArtworkCaption(art: Artwork, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = stringResource(art.title),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Text(
+            text = "${stringResource(art.artist)} (${art.year})",
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">How the gallery works</h3>
+<ul class="v2-ul">
+<li><strong>One piece of state</strong>, <code>index</code>, decides everything. <code>artworks[index]</code> is the current artwork, and the two stateless composables <code>ArtworkFrame</code> and <code>ArtworkCaption</code> simply draw whatever artwork they are given. That is state hoisting again: they own nothing.</li>
+<li><strong>Wrap-around arithmetic.</strong> <code>(index + 1) % artworks.size</code> goes <code>0, 1, 2, 0, 1, ...</code>. The <code>%</code> (remainder) operator makes the number loop back to zero after the last picture. For Previous we add <code>artworks.size</code> first, because in Kotlin <code>-1 % 3</code> is <code>-1</code>, which is not a valid index; <code>(0 - 1 + 3) % 3</code> is <code>2</code>, the last picture.</li>
+<li><strong><code>Modifier.weight(1f)</code></strong> makes the picture frame take all the leftover space, pushing the caption and buttons to the bottom.</li>
+<li><strong><code>ContentScale.Fit</code></strong> shrinks the picture to fit without cropping. <code>Crop</code> would fill the frame but cut off the edges.</li>
+<li><strong><code>safeDrawingPadding()</code></strong> keeps the content clear of the status bar, navigation bar and cut-outs when the app draws edge to edge.</li>
+<li><strong><code>painterResource(art.image)</code></strong> loads a drawable by its id. The <code>contentDescription</code> comes from a string resource, never a hard-coded one.</li>
+</ul>
+<h3 class="v2-h3">Things to test by hand</h3>
+<ol class="v2-ol">
+<li>Tap <strong>Next</strong> past the last picture. It should loop to the first.</li>
+<li>Tap <strong>Previous</strong> on the first. It should go to the last.</li>
+<li>Rotate the phone. The same picture stays (thanks to <code>rememberSaveable</code>).</li>
+</ol><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Art Space: Your Own Gallery App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Tip percent as a slider-less shortcut</strong></p>
+<p class="v2-p">In the Tip Time app, add a small row of three buttons labelled <strong>10%</strong>, <strong>15%</strong> and <strong>20%</strong> that set the tip percentage field. Do this <em>without</em> adding any new state.</p>
+<p class="v2-p"><strong>Hint:</strong> the buttons should call the same <code>onValueChange</code> logic that the text field uses, i.e. set <code>tipInput</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><p class="v2-p">The tip percentage text is already state (<code>tipInput</code>), so the buttons only need to change it. Add this stateless composable and call it inside <code>TipTimeLayout</code> below the tip field:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun TipPresetRow(
+    onPresetSelected: (String) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        listOf("10", "15", "20").forEach { percent -&gt;
+            OutlinedButton(onClick = { onPresetSelected(percent) }) {
+                Text("$percent%")
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">In <code>TipTimeLayout</code>, after the second <code>EditNumberField</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>TipPresetRow(
+    onPresetSelected = { tipInput = it },
+    modifier = Modifier.padding(bottom = 32.dp)
+)</code></pre></div></div>
+<p class="v2-p">The row is stateless. It reports which preset was tapped, and the owner updates <code>tipInput</code>, so the text field redraws with the new value automatically.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Split the bill</strong></p>
+<p class="v2-p">Add a third number field, <strong>Number of people</strong>, and show a second line <strong>Each person pays: ...</strong> that divides the bill <strong>plus tip</strong> by the number of people. If the field is empty or zero, treat it as 1. Put the arithmetic in a plain function so it can be tested later.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// in TipCalculator.kt
+fun perPerson(amount: Double, tip: Double, people: Int): Double {
+    val count = if (people &lt; 1) 1 else people
+    return (amount + tip) / count
+}</code></pre></div></div>
+<p class="v2-p">New state and output inside <code>TipTimeLayout</code> (add the string resources <code>number_of_people</code> and <code>each_pays</code> with <code>%s</code> in <code>strings.xml</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>var peopleInput by rememberSaveable { mutableStateOf("") }
+val people = peopleInput.toIntOrNull() ?: 1
+val tipValue = calculateTip(amount, tipPercent, roundUp)
+val each = formatCurrency(perPerson(amount, tipValue, people))
+
+EditNumberField(
+    label = R.string.number_of_people,
+    value = peopleInput,
+    onValueChange = { peopleInput = it },
+    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+    modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth()
+)
+Text(stringResource(R.string.each_pays, each), style = MaterialTheme.typography.titleLarge)</code></pre></div></div>
+<p class="v2-p">For bill 1000, tip 15 percent and 4 people: tip is 150, total is 1150, so each pays 287.5. Because <code>EditNumberField</code> is stateless and reusable, adding a third field took only a few lines.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Favourite artworks</strong></p>
+<p class="v2-p">In Art Space, add a <strong>Favourite</strong> <code>Switch</code> under the caption. Each artwork must remember its own favourite setting while you move around the gallery. Hint: one Boolean is not enough. You need state per artwork.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Keep a set of favourite indexes in state. Using a <code>Set&lt;Int&gt;</code> is simple, and saving it with <code>rememberSaveable</code> works if you store it as a list of ints:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Switch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+
+// inside ArtSpaceApp, next to `index`
+var favourites by rememberSaveable { mutableStateOf(listOf&lt;Int&gt;()) }
+val isFavourite = index in favourites
+
+// below ArtworkCaption(art = art)
+Row(verticalAlignment = Alignment.CenterVertically) {
+    Text("Favourite")
+    Switch(
+        checked = isFavourite,
+        onCheckedChange = { wanted -&gt;
+            favourites = if (wanted) favourites + index else favourites - index
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p"><code>favourites + index</code> and <code>favourites - index</code> create <strong>new</strong> lists (Kotlin's <code>List</code> is read-only), and replacing the whole list is what notifies Compose of the change. <code>rememberSaveable</code> can store a list of <code>Int</code> because it is a type Android's <code>Bundle</code> understands. Add <code>Row</code> and <code>Alignment</code> imports if Studio asks.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">In the State Lab project, make a third composable, <code>ResetCounter</code>, with a button that increments <code>count</code> and a second button labelled <strong>Reset</strong> that sets it back to <code>0</code>. Add a <code>Log.d</code> and watch Logcat to see which composables recompose when you tap each button.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: A plain variable instead of state.</strong> <em>The wrong code:</em> <code>var count = 0</code> inside a composable. <em>The result:</em> the UI never updates and the value resets on any recomposition. <em>The fix:</em> <code>var count by remember { mutableStateOf(0) }</code>.</p>
+<p class="v2-p"><strong>Mistake #2: <code>mutableStateOf</code> without <code>remember</code>.</strong> <em>The wrong code:</em> <code>var count by mutableStateOf(0)</code>. <em>The problem:</em> a fresh box is created on every recomposition, so the value always snaps back to 0. <em>The fix:</em> wrap it in <code>remember</code> (or <code>rememberSaveable</code>).</p>
+<p class="v2-p"><strong>Mistake #3: Red <code>by</code> keyword.</strong> <em>The error:</em> <code>Property delegate must have a 'getValue(...)' method</code>. <em>The fix:</em> add <code>import androidx.compose.runtime.getValue</code> and <code>import androidx.compose.runtime.setValue</code>. Press <code>Alt + Enter</code> on the red text.</p>
+<p class="v2-p"><strong>Mistake #4: A text field that will not change.</strong> <em>The wrong code:</em> <code>OutlinedTextField(value = "", onValueChange = {}, ...)</code>. <em>The problem:</em> the field shows exactly the <code>value</code> you pass, and you never update it. <em>The fix:</em> store the new text in state: <code>onValueChange = { text = it }</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Using <code>remember</code> for user input and losing it on rotation.</strong> <em>The symptom:</em> typed text vanishes when the screen turns. <em>The fix:</em> <code>rememberSaveable</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Converting text to a number with <code>toDouble()</code>.</strong> <em>The wrong code:</em> <code>amountInput.toDouble()</code>. <em>The problem:</em> an empty string throws a <code>NumberFormatException</code> and the app crashes (read the stack trace using lesson 18). <em>The fix:</em> <code>toDoubleOrNull() ?: 0.0</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Hard-coded strings.</strong> <em>The wrong code:</em> <code>Text("Calculate Tip")</code>. <em>The fix:</em> put the words in <code>strings.xml</code> and use <code>stringResource(R.string.calculate_tip)</code> so the app can be translated and the words live in one place.</p>
+<p class="v2-p"><strong>Mistake #8: Hiding state inside reusable composables.</strong> <em>The problem:</em> if <code>EditNumberField</code> owned its own <code>remember</code>, the parent could not read the text, and two fields could not be coordinated. <em>The fix:</em> hoist state to the caller and pass <code>value</code> plus <code>onValueChange</code>.</p>
+<p class="v2-p"><strong>Mistake #9: Forgetting <code>contentDescription</code>.</strong> <em>The problem:</em> screen readers say nothing useful about your images. <em>The fix:</em> always give meaningful descriptions for pictures that carry meaning (use <code>null</code> only for purely decorative images).</p>
+<p class="v2-p"><strong>Mistake #10: Index arithmetic that goes out of range.</strong> <em>The wrong code:</em> <code>index = index + 1</code> in Next. <em>The problem:</em> past the last picture the app crashes with an index-out-of-bounds exception. <em>The fix:</em> use <code>% artworks.size</code>, or stop at the end.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is <em>state</em> in a Compose app, and what happens when it changes?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">State is any value that can change over time and that the UI depends on. When a <code>MutableState</code> value changes, Compose schedules <strong>recomposition</strong>: it re-runs the composables that read that value so the screen shows the new value.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why is <code>var count = 0</code> inside a composable not a good way to keep a counter?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Compose cannot observe a plain variable, so it will not redraw when it changes, and the composable function re-runs from the top and resets it to <code>0</code>. State needs <code>mutableStateOf</code> (so Compose observes it) wrapped in <code>remember</code> (so it survives recomposition).</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>remember</code> and <code>rememberSaveable</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>remember</code> keeps a value across recompositions but loses it when the activity is recreated, for example on rotation. <code>rememberSaveable</code> also stores the value in saved instance state, so it survives configuration changes and usually process death too, as long as the value is a type that can be saved to a Bundle.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Describe state hoisting and the two parameters a hoisted composable normally has.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">State hoisting moves state out of a composable into its caller, making the composable stateless. It receives the current <code>value</code> and an <code>onValueChange: (T) -&gt; Unit</code> callback. State flows down; events flow up. Benefits are reuse, easier testing and a single source of truth.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> In Art Space, why does the code use <code>(index + 1) % artworks.size</code> rather than <code>index + 1</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">The remainder operator wraps the index back to 0 after the last artwork, so the user can keep pressing <strong>Next</strong> without the app trying to read a non-existent item, which would crash with an index-out-of-bounds exception.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-2-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 2, Pathway 3</a>: the official pathway behind this lesson.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-state" rel="noopener noreferrer">Jetpack Compose state codelab</a>: a deeper look at state and hoisting.</li>
+<li><a href="https://developer.android.com/develop/ui/compose/state" rel="noopener noreferrer">State and Jetpack Compose</a>: the reference guide, including <code>remember</code>, <code>rememberSaveable</code> and hoisting.</li>
+<li><a href="https://developer.android.com/reference/java/text/NumberFormat" rel="noopener noreferrer">NumberFormat reference</a>: how currency formatting works.</li>
+<li><a href="https://kotlinlang.org/docs/delegated-properties.html" rel="noopener noreferrer">Kotlin docs: Delegated properties</a>: what <code>by</code> really does.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Art Space: Your Own Gallery</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a polished personal gallery app that you can put in your portfolio. Use your own artworks (photographs or drawings) and extend the lesson's code.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a new project <code>Art Space</code> (package <code>com.techbase.artspace</code>) with at least <strong>four</strong> of your own pictures in <code>res/drawable</code>, each shrunk to a sensible size.</li>
+<li>Show one artwork at a time with its title, artist and year, in a framed, shadowed picture area.</li>
+<li>Provide <strong>Previous</strong> and <strong>Next</strong> buttons that wrap around at both ends.</li>
+<li>Show a progress line such as <code>2 of 4</code> derived from the index (do <strong>not</strong> make it separate state).</li>
+<li>Add a <strong>Favourite</strong> switch that remembers a favourite for each artwork separately.</li>
+<li>All words come from <code>strings.xml</code>, and every image has a content description.</li>
+<li>State survives rotation.</li>
+<li>Keep the composables stateless wherever you can, with state only in <code>ArtSpaceApp</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a button <strong>Show only favourites</strong> that skips non-favourite artworks, and handle the case of zero favourites with a friendly message.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">Add a fourth artwork to <code>Artwork.kt</code> (with <code>art_four</code> and its four strings) and update the screen. The key changes follow.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Artwork.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.artspace
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+
+data class Artwork(
+    @DrawableRes val image: Int,
+    @StringRes val title: Int,
+    @StringRes val artist: Int,
+    val year: Int,
+    @StringRes val description: Int
+)
+
+val artworks = listOf(
+    Artwork(R.drawable.art_one, R.string.art_one_title, R.string.art_one_artist, 2024, R.string.art_one_desc),
+    Artwork(R.drawable.art_two, R.string.art_two_title, R.string.art_two_artist, 2023, R.string.art_two_desc),
+    Artwork(R.drawable.art_three, R.string.art_three_title, R.string.art_three_artist, 2025, R.string.art_three_desc),
+    Artwork(R.drawable.art_four, R.string.art_four_title, R.string.art_four_artist, 2022, R.string.art_four_desc)
+)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.artspace
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) { ArtSpaceApp() }
+            }
+        }
+    }
+}
+
+@Composable
+fun ArtSpaceApp(modifier: Modifier = Modifier) {
+    var index by rememberSaveable { mutableIntStateOf(0) }
+    var favourites by rememberSaveable { mutableStateOf(listOf&lt;Int&gt;()) }
+    val art = artworks[index]
+
+    Column(
+        modifier = modifier.safeDrawingPadding().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ArtworkFrame(art = art, modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(12.dp))
+        ArtworkCaption(art = art)
+        Text(
+            text = "${index + 1} of ${artworks.size}",
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.fillMaxWidth()
+        )
+        FavouriteRow(
+            isFavourite = index in favourites,
+            onChange = { wanted -&gt;
+                favourites = if (wanted) favourites + index else favourites - index
+            }
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Button(onClick = { index = (index - 1 + artworks.size) % artworks.size }) {
+                Text(stringResource(R.string.previous))
+            }
+            Button(onClick = { index = (index + 1) % artworks.size }) {
+                Text(stringResource(R.string.next))
+            }
+        }
+    }
+}
+
+@Composable
+fun FavouriteRow(
+    isFavourite: Boolean,
+    onChange: (Boolean) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text("Favourite")
+        Switch(checked = isFavourite, onCheckedChange = onChange)
+    }
+}
+
+@Composable
+fun ArtworkFrame(art: Artwork, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, shadowElevation = 8.dp, tonalElevation = 2.dp) {
+        Image(
+            painter = painterResource(art.image),
+            contentDescription = stringResource(art.description),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize().padding(24.dp)
+        )
+    }
+}
+
+@Composable
+fun ArtworkCaption(art: Artwork, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(text = stringResource(art.title), style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "${stringResource(art.artist)} (${art.year})",
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What you should see:</strong> a framed picture with its caption, a line such as <code>2 of 4</code>, a Favourite switch that keeps a separate setting per picture, and Previous and Next buttons that loop around. Rotating the phone keeps the same picture and the same favourites.</p>
+<p class="v2-p"><strong>Design notes:</strong></p>
+<ul class="v2-ul">
+<li>The progress line <code>${index + 1} of ${artworks.size}</code> is <strong>derived</strong> from <code>index</code>. It is not stored, so it can never disagree with the picture.</li>
+<li><code>FavouriteRow</code>, <code>ArtworkFrame</code> and <code>ArtworkCaption</code> are stateless. Only <code>ArtSpaceApp</code> owns state.</li>
+<li>For the stretch goal, compute <code>val visible = artworks.indices.filter { it in favourites }</code> and step through that list instead, showing a message when it is empty. Remember to clamp <code>index</code> when the favourites list shrinks.</li>
+<li>The hard-coded <code>"Favourite"</code> and <code>" of "</code> words are fine in a first draft; moving them to <code>strings.xml</code> with placeholders (for example <code>%1$d of %2$d</code>) is the polished, translatable version.</li>
+</ul><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 19 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-19-state-in-compose-the-tip-calculator-and-ar</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 19 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: State and Recomposition</li><li>✅ Experiment: A Counter That Works</li><li>✅ Tip Calculator, Step 1: Project, Strings and the Logic</li><li>✅ Tip Calculator, Step 2: A Stateful Screen</li><li>✅ Tip Calculator, Step 3: State Hoisting, Custom Tip and the Switch</li><li>✅ Art Space: Your Own Gallery App</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_18.html" class="ln-btn">&#8592; Lesson 18</a><a href="lesson_20.html" class="ln-btn primary">Lesson 20 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 19 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

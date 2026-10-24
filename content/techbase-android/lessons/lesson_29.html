@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 29: Get Data from the Internet: HTTP, REST and Retrofit — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l29">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 29 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 29</div>
+      <h1>Get Data from the Internet: HTTP, REST and Retrofit</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Posts Reader with Retry</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 29</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Learn how HTTP and REST work, then fetch and parse JSON with Retrofit and kotlinx.serialization in the Mars Photos app.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Posts Reader with Retry</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Almost every app you use gets its data from somewhere else: your bank balance, the football scores, the weather, the posts in your feed. The data lives on a <strong>server</strong>, and your app asks for it over the internet. In this lesson you learn how that conversation works (<strong>HTTP</strong> and <strong>REST</strong>), what the data looks like (<strong>JSON</strong>), and how to fetch it in a few lines with <strong>Retrofit</strong> and turn it into Kotlin objects with <strong>kotlinx.serialization</strong>.</p>
+<p class="v2-p">This lesson covers the two remaining items of Pathway 1, Unit 5 of the official <strong>Android Basics with Compose</strong> course: <em>Introduction to HTTP/REST</em> and <em>Get data from the internet</em> (the codelab in which you build the Mars Photos app). We build the same architecture with our own data source, a free test service that serves fake blog posts, because public demo servers come and go. The pattern is identical for any real API.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Describe a request and response: URL, method, headers, status code, body.</li>
+<li>Read and write JSON.</li>
+<li>Add the INTERNET permission and explain why it is needed.</li>
+<li>Define a Retrofit <strong>service interface</strong> and build a <code>Retrofit</code> object.</li>
+<li>Parse JSON into <code>@Serializable</code> data classes.</li>
+<li>Model Loading, Success and Error with a <strong>sealed interface</strong> and show each in Compose.</li>
+<li>Handle failures (no network, server errors, bad JSON) without crashing.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> an HTTP call is a function call that might take a second, might fail, and returns text. Your job is to wrap it so that the UI always has something sensible to show.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Coroutines and <code>suspend</code> functions</strong> (lesson 28). Retrofit's suspend functions are main-safe.</li>
+<li><strong>ViewModel, <code>StateFlow</code> and UI state</strong> (lessons 24 and 25).</li>
+<li><strong>Sealed types and <code>when</code></strong> (lesson 10). A sealed interface limits the possible subtypes, so <code>when</code> can be exhaustive.</li>
+<li><strong>Data classes</strong> (lesson 11).</li>
+<li><strong>Gradle version catalog</strong> (lessons 24 and 28).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: HTTP and REST</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The client and the server</h3>
+<p class="v2-p">When your app (the <strong>client</strong>) wants data it sends an <strong>HTTP request</strong> to a <strong>server</strong>. The server replies with an <strong>HTTP response</strong>. Think of ordering at a counter: you say what you want, the cook says "here it is" or "we have run out".</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> App (client)                                     Server
+     |   GET /posts/1  HTTP/1.1                      |
+     |   Host: jsonplaceholder.typicode.com          |
+     |   Accept: application/json                    |
+     | --------------------------------------------&gt; |
+     |                                               |
+     |   HTTP/1.1 200 OK                             |
+     |   Content-Type: application/json              |
+     |                                               |
+     |   {"userId":1,"id":1,"title":"...","body":"..."}
+     | &lt;-------------------------------------------- |</code></pre></div></div>
+<h3 class="v2-h3">Parts of a request</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Part</th>
+<th>Example</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>URL</strong></td>
+<td><code>https://example.com/api/posts?userId=1</code></td>
+<td>Where to go. Scheme, host, path and <strong>query</strong> (<code>?userId=1</code>).</td>
+</tr>
+<tr>
+<td><strong>Method</strong></td>
+<td><code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code></td>
+<td>What to do.</td>
+</tr>
+<tr>
+<td><strong>Headers</strong></td>
+<td><code>Accept: application/json</code>, <code>Authorization: Bearer ...</code></td>
+<td>Extra information.</td>
+</tr>
+<tr>
+<td><strong>Body</strong></td>
+<td><code>{"title":"Hello"}</code></td>
+<td>Data you send (POST, PUT).</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The methods map to everyday verbs:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Method</th>
+<th>Meaning</th>
+<th>Changes data?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td>Read something</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td>Create something</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>PUT</code> / <code>PATCH</code></td>
+<td>Replace or update something</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td>Remove something</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Status codes</h3>
+<p class="v2-p">The response begins with a three-digit <strong>status code</strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Range</th>
+<th>Meaning</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2xx</td>
+<td>Success</td>
+<td><code>200 OK</code>, <code>201 Created</code></td>
+</tr>
+<tr>
+<td>3xx</td>
+<td>Redirect</td>
+<td><code>301 Moved Permanently</code></td>
+</tr>
+<tr>
+<td>4xx</td>
+<td><strong>Your</strong> mistake</td>
+<td><code>400 Bad Request</code>, <code>401 Unauthorized</code>, <code>403 Forbidden</code>, <code>404 Not Found</code>, <code>429 Too Many Requests</code></td>
+</tr>
+<tr>
+<td>5xx</td>
+<td><strong>Server</strong> problem</td>
+<td><code>500 Internal Server Error</code>, <code>503 Service Unavailable</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">REST</h3>
+<p class="v2-p"><strong>REST</strong> is a style for designing web services. Data is organised as <strong>resources</strong> with URLs, and you use HTTP methods on them:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>GET    /posts        -&gt; list of posts
+GET    /posts/7      -&gt; post number 7
+POST   /posts        -&gt; create a post
+DELETE /posts/7      -&gt; delete post 7</code></pre></div></div>
+<p class="v2-p">A service that follows this style is called a <strong>RESTful web service</strong>, and its address list is its <strong>API</strong> (application programming interface). Most REST services return <strong>JSON</strong>.</p>
+<h3 class="v2-h3">JSON</h3>
+<p class="v2-p">JSON is plain text for structured data, with two building blocks: <strong>objects</strong> (<code>{ "key": value }</code>) and <strong>arrays</strong> (<code>[ ... ]</code>). Values can be strings, numbers, <code>true</code>/<code>false</code>, <code>null</code>, objects or arrays.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">json</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[
+  { "userId": 1, "id": 1, "title": "First post", "body": "Hello world" },
+  { "userId": 1, "id": 2, "title": "Second post", "body": "More text" }
+]</code></pre></div></div>
+<p class="v2-p">The outer <code>[ ]</code> is a list; each <code>{ }</code> is one object whose <strong>keys</strong> correspond to Kotlin property names. Parsing JSON means converting that text to Kotlin objects, and <strong>serialization</strong> is the reverse.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: HTTP and REST</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Project Setup</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a new Empty Activity project called <code>Posts</code> (package <code>com.example.posts</code>).</p>
+<h3 class="v2-h3">The INTERNET permission</h3>
+<p class="v2-p">Apps cannot use the network unless the manifest asks for it. Open <code>app/src/main/AndroidManifest.xml</code> and add the line <strong>above</strong> the <code>&lt;application&gt;</code> tag:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AndroidManifest.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+
+    &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
+
+    &lt;application
+        ...</code></pre></div></div>
+<p class="v2-p">INTERNET is a <strong>normal</strong> permission: the system grants it automatically at install time and the user is not asked. Forgetting it is the most common reason a first network call fails (with an <code>UnknownHostException</code> or a permission error in Logcat).</p>
+<h3 class="v2-h3">Dependencies</h3>
+<p class="v2-p">Add three libraries: Retrofit, the converter that links Retrofit to kotlinx.serialization, and kotlinx.serialization itself (plus its Gradle plugin). Look up current stable versions at the Retrofit releases page (https://github.com/square/retrofit/releases) and the kotlinx.serialization releases page (https://github.com/Kotlin/kotlinx.serialization/releases). Retrofit includes an <strong>official</strong> converter, <code>com.squareup.retrofit2:converter-kotlinx-serialization</code>, published from 2.10.0 onwards.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+retrofit = "&lt;latest stable&gt;"
+kotlinxSerializationJson = "&lt;latest stable&gt;"
+
+[libraries]
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.kotlin.serialization)
+}
+
+dependencies {
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.kotlinx.serialization.json)
+}</code></pre></div></div>
+<p class="v2-p">(Also add <code>alias(libs.plugins.kotlin.serialization) apply false</code> to the root <code>build.gradle.kts</code> plugins block, as in lesson 26.) Click <strong>Sync Now</strong>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Why these libraries?</strong> Retrofit turns an annotated Kotlin interface into working HTTP code. It runs on top of <strong>OkHttp</strong>, which does the actual networking and comes with it automatically. kotlinx.serialization is Kotlin's official JSON tool and the compiler plugin generates the parsing code at build time (no reflection, so it is fast and works with code shrinking).</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Project Setup</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Model, Service and Retrofit Object</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">The data class</h3>
+<p class="v2-p">The test service returns posts with four fields. Create <code>Post.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Post.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Post(
+    val id: Int,
+    val title: String,
+    val body: String,
+    @SerialName("userId") val authorId: Int
+)</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>@Serializable</code> tells the compiler plugin to generate the converter code.</li>
+<li>Property names must match the JSON keys, <strong>unless</strong> you rename with <code>@SerialName("jsonKey")</code>, as done for <code>authorId</code>.</li>
+<li>Types must match the JSON. A number cannot be read as a <code>String</code> by default.</li>
+</ul>
+<h3 class="v2-h3">The service interface</h3>
+<p class="v2-p">Describe the API as an interface. Retrofit generates the implementation.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsApiService.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.network
+
+import com.example.posts.model.Post
+import retrofit2.http.GET
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+interface PostsApiService {
+
+    @GET("posts")
+    suspend fun getPosts(): List&lt;Post&gt;
+
+    @GET("posts/{id}")
+    suspend fun getPost(@Path("id") id: Int): Post
+
+    @GET("posts")
+    suspend fun getPostsByAuthor(@Query("userId") authorId: Int): List&lt;Post&gt;
+}</code></pre></div></div>
+<p class="v2-p">Each function is one endpoint:</p>
+<ul class="v2-ul">
+<li><code>@GET("posts")</code> means <code>GET &lt;baseUrl&gt;/posts</code>.</li>
+<li><code>{id}</code> in the path is replaced by the <code>@Path("id")</code> argument.</li>
+<li><code>@Query("userId")</code> adds <code>?userId=3</code> to the URL.</li>
+<li><code>suspend</code> makes the function main-safe and lets you call it from a coroutine. Retrofit runs the request on a background thread for you, so you do <strong>not</strong> need <code>withContext(Dispatchers.IO)</code>.</li>
+<li>The return type is the parsed result. If the server returns <code>404</code> or <code>500</code>, Retrofit's suspend functions throw <code>HttpException</code>. If there is no network, they throw <code>IOException</code>.</li>
+</ul>
+<h3 class="v2-h3">Building Retrofit</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsApi.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.network
+
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.Retrofit
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
+
+private const val BASE_URL = "https://jsonplaceholder.typicode.com/"
+
+private val json = Json {
+    ignoreUnknownKeys = true      // do not crash if the server adds new fields
+}
+
+private val retrofit: Retrofit = Retrofit.Builder()
+    .baseUrl(BASE_URL)
+    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    .build()
+
+object PostsApi {
+    val service: PostsApiService by lazy { retrofit.create(PostsApiService::class.java) }
+}</code></pre></div></div>
+<p class="v2-p">Notes:</p>
+<ul class="v2-ul">
+<li>The <strong>base URL must end with a <code>/</code></strong>. Retrofit throws an exception at startup if it does not.</li>
+<li><code>jsonplaceholder.typicode.com</code> is a free, public test service built for exactly this kind of practice, with a <code>/posts</code> endpoint returning 100 fake posts. It is a third-party service and may change or go offline, so if it does not respond, any JSON-over-HTTPS service you control or trust works the same way; only the base URL and the data class change.</li>
+<li><code>ignoreUnknownKeys = true</code> makes the parser ignore JSON keys that your class does not declare. Without it, parsing fails the day the server adds a field. The default is strict, so setting this is a safe habit.</li>
+<li><code>by lazy</code> builds the service the first time it is used and then reuses it. Building a Retrofit object is expensive, so create <strong>one</strong> and share it. In lesson 30 you will move this into a dependency container.</li>
+<li><code>asConverterFactory</code> is an extension function on <code>Json</code>; import it from <code>retrofit2.converter.kotlinx.serialization</code>. The <code>toMediaType</code> extension comes from OkHttp, which Retrofit brings in.</li>
+</ul>
+<p class="v2-p">If you want a quick sanity check before writing any UI, open the URL <code>https://jsonplaceholder.typicode.com/posts</code> in a browser on your computer and look at the JSON.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Model, Service and Retrofit Object</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: UI State and ViewModel</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A network screen is never just "the data". It is one of three situations: <strong>loading</strong>, <strong>success</strong> or <strong>error</strong>. Model them with a sealed interface:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsUiState.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.ui
+
+import com.example.posts.model.Post
+
+sealed interface PostsUiState {
+    data class Success(val posts: List&lt;Post&gt;) : PostsUiState
+    data class Error(val message: String) : PostsUiState
+    data object Loading : PostsUiState
+}</code></pre></div></div>
+<p class="v2-p"><code>data object</code> (Kotlin 1.9 and later) is a singleton with a readable <code>toString</code>. Because the interface is <strong>sealed</strong>, <code>when (state)</code> must cover all three, and the compiler tells you if you forget one.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.posts.network.PostsApi
+import java.io.IOException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
+import retrofit2.HttpException
+
+class PostsViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow&lt;PostsUiState&gt;(PostsUiState.Loading)
+    val uiState: StateFlow&lt;PostsUiState&gt; = _uiState.asStateFlow()
+
+    init {
+        loadPosts()
+    }
+
+    fun loadPosts() {
+        viewModelScope.launch {
+            _uiState.value = PostsUiState.Loading
+            _uiState.value = try {
+                PostsUiState.Success(PostsApi.service.getPosts())
+            } catch (e: IOException) {
+                PostsUiState.Error("No connection. Check your data or Wi-Fi and try again.")
+            } catch (e: HttpException) {
+                PostsUiState.Error("The server returned an error (${e.code()}).")
+            } catch (e: SerializationException) {
+                PostsUiState.Error("The server sent data we could not read.")
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The three catch blocks match the three ways a call can fail:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Exception</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IOException</code></td>
+<td>The request never completed</td>
+<td>Airplane mode, timeout, no signal</td>
+</tr>
+<tr>
+<td><code>HttpException</code></td>
+<td>The server answered with an error code</td>
+<td>404, 500</td>
+</tr>
+<tr>
+<td><code>SerializationException</code></td>
+<td>The response arrived but was not what we expected</td>
+<td>Wrong JSON shape</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>CancellationException</code> is deliberately <strong>not</strong> caught, so cancellation still works (lesson 28). Catching broad <code>Exception</code> is tempting but would swallow it.</p>
+<p class="v2-p">Showing the user a clear, human message for each case matters on real phones in real places: mobile data is patchy, so error states are not a rare edge case but part of normal life, particularly when users switch between networks.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: UI State and ViewModel</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: The Screen</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.posts.model.Post
+
+@Composable
+fun PostsApp(modifier: Modifier = Modifier, viewModel: PostsViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    PostsScreen(state = state, onRetry = viewModel::loadPosts, modifier = modifier)
+}
+
+@Composable
+fun PostsScreen(state: PostsUiState, onRetry: () -&gt; Unit, modifier: Modifier = Modifier) {
+    when (state) {
+        is PostsUiState.Loading -&gt; Column(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) { CircularProgressIndicator() }
+
+        is PostsUiState.Error -&gt; Column(
+            modifier = modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(state.message)
+            Button(onClick = onRetry, modifier = Modifier.padding(top = 16.dp)) { Text("Try again") }
+        }
+
+        is PostsUiState.Success -&gt; LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(state.posts, key = { it.id }) { post -&gt; PostCard(post) }
+        }
+    }
+}
+
+@Composable
+fun PostCard(post: Post, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Column(Modifier.padding(16.dp)) {
+            Text(post.title, style = MaterialTheme.typography.titleMedium)
+            Text(post.body, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.compose.foundation.layout.PaddingValues</code>.) Call <code>PostsApp(Modifier.padding(innerPadding))</code> from your <code>Scaffold</code> in <code>MainActivity</code>.</p>
+<p class="v2-p">Run it. You should see a spinner for a moment and then a scrolling list of posts. Now test the failure paths, which is where many apps are fragile:</p>
+<ol class="v2-ol">
+<li><strong>Airplane mode on</strong>, then relaunch or tap <em>Try again</em>: you should see the "No connection" message, not a crash.</li>
+<li>Change the base path in the interface to <code>@GET("postz")</code> and run: you should see the error message with code 404.</li>
+<li>Remove the INTERNET permission and observe the error; restore it.</li>
+</ol>
+<p class="v2-p">Open <strong>Logcat</strong> while experimenting and read the exception type for each case. In the Android emulator you can also switch the network off in the emulator's <strong>Extended controls</strong> panel (the three-dot button) under <em>Cellular</em> or <em>Wi-Fi</em>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: The Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Seeing What Goes Over the Wire</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">When a call misbehaves, you want to see the request and response. OkHttp has a <strong>logging interceptor</strong> for that (<code>com.squareup.okhttp3:logging-interceptor</code>). Add it to the Retrofit client <strong>for debug builds only</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+
+val client = OkHttpClient.Builder()
+    .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC })
+    .build()
+
+Retrofit.Builder()
+    .baseUrl(BASE_URL)
+    .client(client)
+    .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+    .build()</code></pre></div></div>
+<p class="v2-p"><code>Level.BASIC</code> logs the method, URL and status. <code>Level.BODY</code> logs everything, including headers and body, which can contain <strong>passwords and tokens</strong>, so never leave it on in a release build. This is a security point, not just tidiness.</p>
+<h3 class="v2-h3">Security basics for networking</h3>
+<ul class="v2-ul">
+<li>Always use <code>https://</code>. Android blocks plain <code>http://</code> traffic by default for apps that target recent versions, for good reason: anyone on the same Wi-Fi can read it.</li>
+<li>Never hard-code secret API keys in your app. Anything in an APK can be extracted. Keys that must stay secret belong on <strong>your server</strong>, which calls the third-party service for you.</li>
+<li>Do not log personal data.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Seeing What Goes Over the Wire</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Fetch one post</strong></p>
+<p class="v2-p">Add a detail screen to the app. Tapping a card should call <code>getPost(id)</code> and show the full post. Model the detail state with its own sealed interface. For this exercise, keep it simple: navigate by changing a <code>selectedId</code> in the ViewModel rather than by using the Navigation library.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface DetailUiState {
+    data object Loading : DetailUiState
+    data class Success(val post: Post) : DetailUiState
+    data class Error(val message: String) : DetailUiState
+}
+
+// In PostsViewModel
+private val _detail = MutableStateFlow&lt;DetailUiState?&gt;(null)      // null = list is showing
+val detail: StateFlow&lt;DetailUiState?&gt; = _detail.asStateFlow()
+
+fun openPost(id: Int) {
+    viewModelScope.launch {
+        _detail.value = DetailUiState.Loading
+        _detail.value = try {
+            DetailUiState.Success(PostsApi.service.getPost(id))
+        } catch (e: IOException) {
+            DetailUiState.Error("No connection.")
+        } catch (e: HttpException) {
+            DetailUiState.Error("Server error ${e.code()}.")
+        }
+    }
+}
+
+fun closePost() { _detail.value = null }</code></pre></div></div>
+<p class="v2-p">In the UI, show the detail when <code>detail</code> is not null and add a <code>BackHandler(onBack = viewModel::closePost)</code>. In a real app you would use Navigation (lesson 26) with the ID in a type-safe route and a detail ViewModel loading by ID.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Filter by author</strong></p>
+<p class="v2-p">Add a row of three buttons (<code>Author 1</code>, <code>Author 2</code>, <code>Author 3</code>) above the list that call <code>getPostsByAuthor(n)</code>. Show which author is selected. Make sure a slow earlier request cannot overwrite the result of a later one.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>private var loadJob: Job? = null
+
+fun loadByAuthor(authorId: Int) {
+    loadJob?.cancel()                                  // stop the earlier request
+    loadJob = viewModelScope.launch {
+        _uiState.value = PostsUiState.Loading
+        _uiState.value = try {
+            PostsUiState.Success(PostsApi.service.getPostsByAuthor(authorId))
+        } catch (e: IOException) {
+            PostsUiState.Error("No connection.")
+        } catch (e: HttpException) {
+            PostsUiState.Error("Server error ${e.code()}.")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why cancel?</strong> Tap Author 1, then quickly Author 2. Without cancelling, the slower first response may arrive <strong>after</strong> the second and overwrite it with the wrong list (a <em>race condition</em>). Cancelling the earlier <code>Job</code> guarantees only the latest request can publish a result. Store the selected author in the UI state so the buttons can show which one is active.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Open <code>https://jsonplaceholder.typicode.com/posts/1</code> in a browser (or any JSON API you like) and write a matching <code>@Serializable</code> data class by hand. Then deliberately make one property the wrong type and read the exception in Logcat.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Missing INTERNET permission.</strong> <em>Symptom:</em> the call fails immediately with a host or permission error. <em>The fix:</em> add <code>&lt;uses-permission android:name="android.permission.INTERNET" /&gt;</code> above <code>&lt;application&gt;</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Base URL without a trailing slash.</strong> <em>Symptom:</em> a crash at startup saying the base URL must end in <code>/</code>. <em>The fix:</em> <code>"https://host/"</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting the serialization plugin.</strong> <em>Symptom:</em> <em>Serializer for class 'Post' is not found.</em> <em>The fix:</em> apply the <code>org.jetbrains.kotlin.plugin.serialization</code> plugin and annotate the class with <code>@Serializable</code>.</p>
+<p class="v2-p"><strong>Mistake #4: JSON key and property mismatch.</strong> <em>Symptom:</em> <em>Field 'x' is required but it was missing.</em> <em>The fix:</em> match names exactly or use <code>@SerialName</code>; give optional fields a default value (<code>val body: String = ""</code>) or make them nullable.</p>
+<p class="v2-p"><strong>Mistake #5: Not handling errors.</strong> <em>What happens:</em> the app crashes whenever the user is offline. <em>The fix:</em> catch <code>IOException</code>, <code>HttpException</code> and <code>SerializationException</code>, and show a retry button.</p>
+<p class="v2-p"><strong>Mistake #6: Creating Retrofit repeatedly.</strong> <em>What happens:</em> slow and wasteful. <em>The fix:</em> build one instance and share it.</p>
+<p class="v2-p"><strong>Mistake #7: Plain <code>http://</code> URLs.</strong> <em>What happens:</em> cleartext traffic is blocked by default and the call fails. <em>The fix:</em> use <code>https</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Logging full bodies in release builds.</strong> <em>What happens:</em> secrets in logs. <em>The fix:</em> log only in debug builds and at a low level.</p>
+<p class="v2-p"><strong>Mistake #9: Blocking the main thread with a non-Retrofit call.</strong> <em>What happens:</em> <code>NetworkOnMainThreadException</code>. <em>The fix:</em> keep network calls in suspend functions that Retrofit executes off the main thread.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What are the main parts of an HTTP request?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A URL, a method (GET, POST and so on), headers, and optionally a body.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What do the status code ranges 2xx, 4xx and 5xx mean?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">2xx means success, 4xx means a client error (the request was wrong, for example 404 Not Found), and 5xx means a server error.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is REST?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">An architectural style for web services where data is exposed as resources with URLs and manipulated using standard HTTP methods; responses are usually JSON.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is a sealed interface a good fit for UI state in a network screen?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It limits the state to a fixed set (Loading, Success, Error), so <code>when</code> can be exhaustive and the compiler warns about unhandled cases; impossible combinations cannot be represented.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Which exceptions should a network call handle, and what does each mean?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p"><code>IOException</code> for connectivity problems, <code>HttpException</code> for error status codes from the server, and <code>SerializationException</code> for unparseable or mismatched data.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-5-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 5, Pathway 1: Get data from the internet</a>: includes <em>Introduction to HTTP/REST</em> and the Mars Photos codelab.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a></li>
+<li><a href="https://kotlinlang.org/docs/home.html" rel="noopener noreferrer">Kotlin documentation: serialization</a></li>
+<li><a href="https://github.com/square/retrofit/releases" rel="noopener noreferrer">Retrofit releases</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Posts Reader with Retry</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Finish the Posts app as a small, solid product.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Show the list of posts in cards with title and body (body limited to three lines with an ellipsis).</li>
+<li>Pull the data in <code>init</code> and let the user retry from the error state.</li>
+<li>Add a <strong>search box</strong> that filters the loaded posts by title (client side; the filter text is part of the UI state).</li>
+<li>Show a different message for no connection and for a server error.</li>
+<li>Debug-only logging interceptor.</li>
+<li>A ViewModel unit test using a <strong>fake</strong> service (an object implementing <code>PostsApiService</code>) that returns a short list, throws an <code>IOException</code>, or throws an <code>HttpException</code>. Check each resulting state. (The ViewModel needs to accept the service as a constructor parameter, which lesson 30 explains in detail.)</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> cache the last successful list in memory so that an error on refresh keeps the old data visible with a banner.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts.ui
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.posts.model.Post
+import com.example.posts.network.PostsApi
+import com.example.posts.network.PostsApiService
+import java.io.IOException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+
+data class PostsScreenState(
+    val loading: Boolean = true,
+    val posts: List&lt;Post&gt; = emptyList(),
+    val error: String? = null,
+    val query: String = ""
+) {
+    val visiblePosts: List&lt;Post&gt;
+        get() = if (query.isBlank()) posts
+        else posts.filter { it.title.contains(query.trim(), ignoreCase = true) }
+}
+
+class PostsViewModel(
+    private val service: PostsApiService = PostsApi.service
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(PostsScreenState())
+    val state: StateFlow&lt;PostsScreenState&gt; = _state.asStateFlow()
+
+    init { load() }
+
+    fun load() {
+        viewModelScope.launch {
+            _state.update { it.copy(loading = true, error = null) }
+            try {
+                val posts = service.getPosts()
+                _state.update { it.copy(loading = false, posts = posts) }
+            } catch (e: IOException) {
+                _state.update { it.copy(loading = false, error = "No connection. Try again.") }
+            } catch (e: HttpException) {
+                _state.update { it.copy(loading = false, error = "Server error (${e.code()}).") }
+            }
+        }
+    }
+
+    fun onQueryChange(text: String) = _state.update { it.copy(query = text) }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PostsViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.posts
+
+import com.example.posts.model.Post
+import com.example.posts.network.PostsApiService
+import com.example.posts.ui.PostsViewModel
+import java.io.IOException
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Rule
+import org.junit.Test
+
+private class FakeService(private val action: () -&gt; List&lt;Post&gt;) : PostsApiService {
+    override suspend fun getPosts(): List&lt;Post&gt; = action()
+    override suspend fun getPost(id: Int): Post = error("not used")
+    override suspend fun getPostsByAuthor(authorId: Int): List&lt;Post&gt; = error("not used")
+}
+
+class PostsViewModelTest {
+    @get:Rule val mainRule = MainDispatcherRule()      // from lesson 25
+
+    private val sample = listOf(
+        Post(1, "Kotlin tips", "body", 1),
+        Post(2, "Compose basics", "body", 1)
+    )
+
+    @Test
+    fun success_showsPosts() = runTest {
+        val vm = PostsViewModel(FakeService { sample })
+        advanceUntilIdle()
+        assertEquals(2, vm.state.value.posts.size)
+    }
+
+    @Test
+    fun ioException_showsNoConnection() = runTest {
+        val vm = PostsViewModel(FakeService { throw IOException("offline") })
+        advanceUntilIdle()
+        assertNotNull(vm.state.value.error)
+    }
+
+    @Test
+    fun search_filtersByTitle() = runTest {
+        val vm = PostsViewModel(FakeService { sample })
+        advanceUntilIdle()
+        vm.onQueryChange("compose")
+        assertEquals(listOf(2), vm.state.value.visiblePosts.map { it.id })
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the ViewModel takes the service as a <strong>constructor parameter with a default</strong>, which is the first step toward dependency injection (lesson 30). The <code>viewModel()</code> function can still create it because every parameter has a default value. Building an <code>HttpException</code> in a test needs a <code>retrofit2.Response</code>, which is awkward, so the sample keeps to <code>IOException</code>; you can add the HTTP case by constructing <code>HttpException(Response.error&lt;Any&gt;(500, "".toResponseBody()))</code>. The screen is the <code>when</code>/<code>LazyColumn</code> pattern from Build 4, with an <code>OutlinedTextField</code> bound to <code>state.query</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 29 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-29-get-data-from-the-internet-http-rest-and-r</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 29 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: HTTP and REST</li><li>✅ Step-by-Step Build 1: Project Setup</li><li>✅ Step-by-Step Build 2: Model, Service and Retrofit Object</li><li>✅ Step-by-Step Build 3: UI State and ViewModel</li><li>✅ Step-by-Step Build 4: The Screen</li><li>✅ Seeing What Goes Over the Wire</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_28.html" class="ln-btn">&#8592; Lesson 28</a><a href="lesson_30.html" class="ln-btn primary">Lesson 30 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 29 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

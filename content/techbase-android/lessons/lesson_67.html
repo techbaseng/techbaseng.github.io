@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 67: KMP Project Structure: Targets and Source Sets — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l67">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 67 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 67</div>
+      <h1>KMP Project Structure: Targets and Source Sets</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Scaffold a KMP Project and Share One Rule</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 67</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Understand common code, targets, source sets, hierarchy and tests, and read a real KMP Gradle build.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Scaffold a KMP Project and Share One Rule</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">A new Kotlin Multiplatform project can look confusing at first: several folders with similar names, a Gradle file with an unusual <code>kotlin { }</code> block, and directory names such as <code>commonMain</code>, <code>androidMain</code> and <code>iosMain</code>. Once you understand <strong>three ideas</strong> (<strong>targets</strong>, <strong>source sets</strong> and <strong>how they depend on each other</strong>) the structure becomes predictable, and you will be able to read any KMP project.</p>
+<p class="v2-p">This lesson covers <em>The Basics of Project Structure</em> from the <strong>Kotlin Multiplatform</strong> programme (https://developer.android.com/courses/pathways/kotlin-multiplatform), and the pages it links to: the JetBrains guide to the project structure (https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-discover-project.html), the Kotlin documentation on the <strong>default hierarchy template</strong> (https://kotlinlang.org/docs/multiplatform/multiplatform-hierarchy.html), and Google's page on the <strong>Android Gradle library plugin for KMP</strong> (https://developer.android.com/kotlin/multiplatform/plugin).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Describe the <strong>top-level layout</strong> of a KMP project (shared module, Android app, iOS app).</li>
+<li>Explain <strong>targets</strong>, <strong>source sets</strong>, <strong><code>dependsOn</code></strong> and the <strong>default hierarchy template</strong>.</li>
+<li>Read and write a <strong><code>shared/build.gradle.kts</code></strong>, including the <strong>Android target</strong> and <strong>iOS frameworks</strong>.</li>
+<li>Declare <strong>dependencies per source set</strong> and use a <strong>version catalog</strong>.</li>
+<li>Place <strong>tests</strong> in the correct source sets and run them.</li>
+<li>Add a <strong>custom intermediate source set</strong> when needed.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a source set is a folder of Kotlin files plus a list of the other source sets it can see. Common code sees the least; platform code sees the most.</p>
+<p class="v2-p"><strong>Honesty note:</strong> the Android part of KMP builds changed recently. Google now recommends a dedicated Gradle plugin, <code>com.android.kotlin.multiplatform.library</code>, for the Android target of a shared library module; older projects use <code>com.android.library</code> with <code>androidTarget()</code>. Both appear in the wild, so this lesson shows the current plugin and explains the older form so you can recognise it. Version numbers are placeholders.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Why KMP and <code>expect</code>/<code>actual</code></strong> (lesson 66).</li>
+<li><strong>Gradle Kotlin DSL, plugins and version catalogs</strong> (lessons 3 and 34).</li>
+<li><strong>App architecture: modules and dependency rules</strong> (lesson 65).</li>
+<li><strong>Kotlin interfaces and generics</strong> (lessons 11 and 13).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: The Three Parts of a KMP Project</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A typical project created from the official template (Android Studio's KMP wizard, or the JetBrains wizard at https://kmp.jetbrains.com) looks like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>FeeTrackerKmp/
+├─ gradle/libs.versions.toml        shared version catalog
+├─ settings.gradle.kts
+├─ build.gradle.kts                  root plugins (apply false)
+├─ androidApp/                       Android application (Compose UI, Hilt, ...)
+│   └─ src/main/...
+├─ iosApp/                           Xcode project (SwiftUI)
+│   └─ iosApp.xcodeproj
+└─ shared/                           THE multiplatform module
+    ├─ build.gradle.kts
+    └─ src/
+        ├─ commonMain/kotlin/
+        ├─ commonTest/kotlin/
+        ├─ androidMain/kotlin/
+        └─ iosMain/kotlin/</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Part</th>
+<th>What it is</th>
+<th>Built with</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>shared</code></strong></td>
+<td>A Gradle module compiled for several targets, holding your shared logic</td>
+<td>Kotlin Multiplatform plugin</td>
+</tr>
+<tr>
+<td><strong><code>androidApp</code></strong></td>
+<td>An ordinary Android application module that depends on <code>:shared</code></td>
+<td>Android application plugin</td>
+</tr>
+<tr>
+<td><strong><code>iosApp</code></strong></td>
+<td>An Xcode project that links the framework built from <code>:shared</code></td>
+<td>Xcode (on a Mac)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Why is the Android app a separate module? Because the plugin for the multiplatform library has <strong>no direct replacement for the application plugin</strong> according to Google's documentation: you extract the app into its own module and keep <code>shared</code> as a library. This is the same modular separation you met in lesson 65.</p>
+<h3 class="v2-h3">Targets</h3>
+<p class="v2-p">A <strong>target</strong> is "one thing the Kotlin compiler can build for". You declare them in <code>shared/build.gradle.kts</code>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Declaration</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>android { ... }</code> (new plugin) or <code>androidTarget()</code> (older)</td>
+<td>Android</td>
+</tr>
+<tr>
+<td><code>iosArm64()</code></td>
+<td>Physical iPhones and iPads</td>
+</tr>
+<tr>
+<td><code>iosSimulatorArm64()</code></td>
+<td>The iOS simulator on Apple-silicon Macs</td>
+</tr>
+<tr>
+<td><code>iosX64()</code></td>
+<td>The iOS simulator on Intel Macs (check whether your Kotlin version still supports it)</td>
+</tr>
+<tr>
+<td><code>jvm("desktop")</code></td>
+<td>Desktop and server JVM</td>
+</tr>
+<tr>
+<td><code>js { browser() }</code>, <code>wasmJs { browser() }</code></td>
+<td>Web</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">You declare <strong>only what you need</strong>. A beginner project usually has Android plus the two iOS targets.</p>
+<h3 class="v2-h3">Source sets</h3>
+<p class="v2-p">For each target, and for groups of targets, there is a <strong>source set</strong>: a folder under <code>src/</code> with a name like <code>&lt;name&gt;Main</code> (production code) and <code>&lt;name&gt;Test</code> (tests).</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Source set</th>
+<th>Folder</th>
+<th>Compiled for</th>
+<th>Can use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>commonMain</code></td>
+<td><code>src/commonMain/kotlin</code></td>
+<td><strong>All</strong> targets</td>
+<td>Kotlin stdlib and multiplatform libraries only</td>
+</tr>
+<tr>
+<td><code>commonTest</code></td>
+<td><code>src/commonTest/kotlin</code></td>
+<td>All targets</td>
+<td><code>kotlin.test</code> and <code>commonMain</code></td>
+</tr>
+<tr>
+<td><code>androidMain</code></td>
+<td><code>src/androidMain/kotlin</code></td>
+<td>Android</td>
+<td>Android SDK, AndroidX, JVM libraries, plus <code>commonMain</code></td>
+</tr>
+<tr>
+<td><code>iosMain</code></td>
+<td><code>src/iosMain/kotlin</code></td>
+<td>All iOS targets</td>
+<td>Apple platform APIs (<code>platform.*</code>), plus <code>commonMain</code></td>
+</tr>
+<tr>
+<td><code>iosArm64Main</code>, <code>iosSimulatorArm64Main</code></td>
+<td>per target</td>
+<td>One iOS target</td>
+<td>Rarely used directly</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The rule: <strong>a source set sees its own code plus everything it depends on</strong>. <code>androidMain</code> depends on <code>commonMain</code>, so Android code can call the shared code, but <code>commonMain</code> can never call <code>androidMain</code>. Information flows from specific to general, never the other way.</p>
+<h3 class="v2-h3">The default hierarchy template</h3>
+<p class="v2-p">You do not have to wire the source sets yourself. Since Kotlin 1.9.20, the Gradle plugin applies a <strong>default hierarchy template</strong> that creates intermediate source sets for you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>commonMain
+ ├─ androidMain                         (separate branch: JVM-based target)
+ └─ nativeMain
+     └─ appleMain
+         └─ iosMain
+             ├─ iosArm64Main
+             └─ iosSimulatorArm64Main</code></pre></div></div>
+<p class="v2-p">When you declare <code>iosArm64()</code> and <code>iosSimulatorArm64()</code>, the template gives you <code>iosMain</code>, <code>appleMain</code> and <code>nativeMain</code> automatically, so you can place code in <code>iosMain</code> and it compiles for <strong>both</strong> iOS targets, with access to the full iOS API. Source sets for targets you did not declare (such as <code>watchosMain</code>) are simply not created. Adding <code>watchosArm64()</code> later creates <code>watchosMain</code>, and code in <code>appleMain</code>, <code>nativeMain</code> and <code>commonMain</code> then also compiles for the watch.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Three Parts of a KMP Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: The Version Catalog</div><div class="pc" id="chk4"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+kotlin = "&lt;latest stable&gt;"
+agp = "&lt;latest stable compatible with your Android Studio&gt;"
+coroutines = "&lt;latest stable&gt;"
+serialization = "&lt;latest stable&gt;"
+ktor = "&lt;latest stable&gt;"
+
+[libraries]
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }</code></pre></div></div>
+<p class="v2-p">Notice the <strong>per-platform engine</strong> pattern for Ktor: the client <strong>core</strong> is common, but the <strong>HTTP engine</strong> differs (OkHttp on Android, Darwin on iOS). That is a common KMP shape: a common API with platform-specific implementation libraries.</p>
+<p class="v2-p">Google's documentation says the new Android library plugin requires AGP 8.10.0 or newer and Kotlin Gradle plugin 2.0.0 or newer. Use the latest stable pair that your Android Studio supports.</p>
+<h3 class="v2-h3">Root <code>build.gradle.kts</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+}</code></pre></div></div>
+<p class="v2-p">Declaring plugins with <code>apply false</code> at the root puts them on the build's classpath once, so that modules can apply them by alias without version clashes.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The Version Catalog</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: The Shared Module&#x27;s Gradle File</div><div class="pc" id="chk5"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/build.gradle.kts
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.serialization)
+}
+
+kotlin {
+
+    // 1. TARGETS
+    android {
+        namespace = "com.example.fees.shared"
+        compileSdk = 36
+        minSdk = 24
+
+        // Optional, off by default in the new plugin:
+        withHostTest { isIncludeAndroidResources = true }   // unit tests on the JVM
+        withDeviceTest {                                    // instrumented tests on a device
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+    }
+
+    val xcfName = "SharedKit"
+    iosArm64 { binaries.framework { baseName = xcfName } }
+    iosSimulatorArm64 { binaries.framework { baseName = xcfName } }
+
+    // 2. SOURCE SETS AND THEIR DEPENDENCIES
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+        androidMain.dependencies {
+            implementation(libs.ktor.client.okhttp)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Read it as three questions:</p>
+<ol class="v2-ol">
+<li><strong>Which platforms?</strong> <code>android { }</code>, <code>iosArm64()</code> and <code>iosSimulatorArm64()</code>.</li>
+<li><strong>What frameworks do iOS targets export?</strong> <code>binaries.framework { baseName = ... }</code> produces a framework named <code>SharedKit</code>, which Swift imports with <code>import SharedKit</code>.</li>
+<li><strong>Which libraries does each source set need?</strong> Common ones in <code>commonMain</code>; platform engines in the platform source sets.</li>
+</ol>
+<p class="v2-p">Details worth knowing:</p>
+<ul class="v2-ul">
+<li>Inside <code>android { }</code> the settings (<code>namespace</code>, <code>compileSdk</code>, <code>minSdk</code>) replace the old top-level <code>android { }</code> block. Google's page says this DSL was previously called <code>androidLibrary { }</code>, so you may see that name in older material. Check which your AGP version expects.</li>
+<li>Host and device tests are <strong>opt-in</strong>. When enabled, the new plugin creates the source sets <code>androidHostTest</code> and <code>androidDeviceTest</code>. (The page shows two spellings in different sections, <code>withHostTest { }</code> and <code>withHostTestBuilder { }.configure { }</code>; check the API reference for your AGP version.)</li>
+<li>Android resources, Java compilation and published consumer keep rules are <strong>off by default</strong> and must be switched on if you need them.</li>
+<li>The new plugin has <strong>limitations</strong>: no build types or product flavours, no data binding or view binding, no <code>BuildConfig</code>, no AIDL. If you need those, keep an ordinary <code>com.android.library</code> module and consume it from <code>androidMain</code>.</li>
+</ul>
+<h3 class="v2-h3">The older style, so you can recognise it</h3>
+<p class="v2-p">Projects created before the dedicated plugin look like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)       // com.android.library
+}
+
+kotlin {
+    androidTarget {
+        compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
+    }
+    iosArm64()
+    iosSimulatorArm64()
+    // sourceSets ...
+}
+
+android {                                      // top-level block
+    namespace = "com.example.fees.shared"
+    compileSdk = 36
+    defaultConfig { minSdk = 24 }
+}</code></pre></div></div>
+<p class="v2-p">Google's documentation states that the legacy KMP support in <code>com.android.library</code> is deprecated and expected to be removed in a future AGP major version, so new modules should use the dedicated plugin and old ones should plan to migrate. The migration page lists renamed source sets: for example <code>src/test</code> becomes <code>src/androidHostTest</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Shared Module&#x27;s Gradle File</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: What Goes Where</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Real examples for FeeTracker:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/commonMain/kotlin/com/example/fees/data/PaymentsRepository.kt
+package com.example.fees.data
+
+import kotlinx.coroutines.flow.Flow
+
+interface PaymentsRepository {
+    fun observePayments(): Flow&lt;List&lt;Payment&gt;&gt;
+    suspend fun refresh(): Result&lt;Unit&gt;
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/commonMain/kotlin/com/example/fees/network/ApiClient.kt
+package com.example.fees.network
+
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
+
+fun createHttpClient(): HttpClient = HttpClient {        // engine is chosen per platform automatically
+    install(ContentNegotiation) {
+        json(Json { ignoreUnknownKeys = true })
+    }
+}</code></pre></div></div>
+<p class="v2-p">When you write <code>HttpClient { }</code> without naming an engine, Ktor picks the engine that is on the classpath of the target (OkHttp on Android, Darwin on iOS). That is why the engine dependencies live in the platform source sets.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/androidMain/kotlin/com/example/fees/Platform.android.kt
+package com.example.fees
+
+actual fun platformName(): String = "Android ${android.os.Build.VERSION.SDK_INT}"</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/iosMain/kotlin/com/example/fees/Platform.ios.kt
+package com.example.fees
+
+import platform.UIKit.UIDevice
+
+actual fun platformName(): String = UIDevice.currentDevice.systemName()</code></pre></div></div>
+<p class="v2-p">File naming convention: <code>Name.android.kt</code> and <code>Name.ios.kt</code> beside <code>Name.kt</code> in <code>commonMain</code>. The suffix is a convention and not a requirement, but it keeps <code>expect</code>/<code>actual</code> pairs easy to find and avoids JVM class-name clashes.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: What Goes Where</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Tests</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Put tests in the <strong>widest source set that can compile them</strong>.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Test location</th>
+<th>Runs on</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>commonTest</code></td>
+<td>Every target (JVM for Android host tests, iOS simulator for iOS)</td>
+<td>Business rules, mappers, anything platform-free</td>
+</tr>
+<tr>
+<td><code>androidHostTest</code></td>
+<td>JVM on your computer</td>
+<td>Android-specific shared code that needs Android classes with Robolectric-style setups</td>
+</tr>
+<tr>
+<td><code>androidDeviceTest</code></td>
+<td>An Android device or emulator</td>
+<td>Instrumented tests</td>
+</tr>
+<tr>
+<td><code>iosTest</code></td>
+<td>iOS simulator</td>
+<td>iOS-specific code</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/commonTest/kotlin/com/example/fees/CalculateFeeSummaryTest.kt
+package com.example.fees
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+
+class CalculateFeeSummaryTest {
+    @Test
+    fun fully_paid_student_is_not_owing() {
+        val summary = CalculateFeeSummary(termFee = 450_000)(listOf(450_000))
+        assertEquals(0, summary.balance)
+        assertFalse(summary.isOwing)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Run them from Android Studio's gutter icon, or with Gradle. Task names depend on your plugin and Kotlin versions, so list them with <code>./gradlew :shared:tasks --group verification</code> and pick the ones for the targets you have. Typically there is one task per target plus an aggregate (often <code>allTests</code>). iOS test tasks only run on a Mac.</p>
+<p class="v2-p">For common tests that need coroutines, use <code>kotlinx-coroutines-test</code> (<code>runTest</code>), which is multiplatform:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>commonTest.dependencies {
+    implementation(kotlin("test"))
+    implementation(libs.kotlinx.coroutines.test)
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Tests</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Step-by-Step Build 5: Custom Source Sets and Hierarchy Rules</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Sometimes two targets share code that others do not. Example: a JVM desktop target and Android both use JVM-only libraries. Kotlin does not allow a shared source set for "Android + JVM" directly, according to the hierarchy documentation, which says shared source sets for several JVM targets, JVM plus Android, or several JS targets are not supported. In that case, put the shared JVM code in a regular JVM library module, or duplicate it, or use an interface.</p>
+<p class="v2-p">For <strong>native</strong> targets you can create an intermediate source set. The documented pattern is to reapply the template and add your own set:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>kotlin {
+    jvm()
+    macosArm64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    applyDefaultHierarchyTemplate()
+
+    sourceSets {
+        val jvmAndMacos by creating {
+            dependsOn(commonMain.get())
+        }
+        macosArm64Main.get().dependsOn(jvmAndMacos)
+        jvmMain.get().dependsOn(jvmAndMacos)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Two cautions from the documentation:</p>
+<ul class="v2-ul">
+<li>Once you call <code>dependsOn</code> yourself, the default template is <strong>cancelled</strong> unless you reapply it with <code>applyDefaultHierarchyTemplate()</code>; the build warns you.</li>
+<li>You <strong>cannot change</strong> the template's own <code>dependsOn</code> relations. You may only add sets beside it, or switch the template off entirely (<code>kotlin.mpp.applyDefaultHierarchyTemplate=false</code> in <code>gradle.properties</code>) and connect everything by hand.</li>
+</ul>
+<p class="v2-p">Most beginner projects never need this. Prefer the template.</p>
+<h3 class="v2-h3">The Android app depends on <code>shared</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidApp/build.gradle.kts
+dependencies {
+    implementation(project(":shared"))      // or projects.shared if type-safe accessors are enabled
+}</code></pre></div></div>
+<p class="v2-p">The Android app can now use anything in <code>commonMain</code> and <code>androidMain</code> of <code>shared</code>. The iOS app gets the same code through the framework.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidApp/src/main/kotlin/.../MainActivity.kt
+import com.example.fees.CalculateFeeSummary
+
+val summary = CalculateFeeSummary()(listOf(100_000, 50_000))</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Custom Source Sets and Hierarchy Rules</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Which source set?</strong></p>
+<p class="v2-p">For each file decide where it belongs: (a) <code>data class Payment</code>; (b) a function using <code>android.os.Build</code>; (c) code that calls <code>UIDevice</code>; (d) a test of <code>CalculateFeeSummary</code>; (e) the Ktor Darwin engine dependency.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>commonMain</code>. (b) <code>androidMain</code>. (c) <code>iosMain</code>. (d) <code>commonTest</code>. (e) <code>iosMain.dependencies { }</code> in <code>build.gradle.kts</code>.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix the build error</strong></p>
+<p class="v2-p">This line is in <code>commonMain</code> and the build fails on the iOS targets: <code>import java.time.LocalDate</code>. Explain why and propose two fixes.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>java.time</code> is a JVM library and does not exist for iOS, so common code that must compile for iOS cannot import it. Fix 1: use the multiplatform <code>kotlinx-datetime</code> library (<code>LocalDate</code> there). Fix 2: define an interface or <code>expect</code> function in common code, and implement it with <code>java.time</code> in <code>androidMain</code> and with Foundation in <code>iosMain</code>.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Read the hierarchy</strong></p>
+<p class="v2-p">A project declares <code>iosArm64()</code>, <code>iosSimulatorArm64()</code> and <code>android { }</code>. Where would you put code that uses <code>platform.Foundation.NSDate</code> and must work on both iOS targets, and why not in <code>commonMain</code>?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">In <code>iosMain</code> (or <code>appleMain</code>), which the default template creates for both iOS targets. <code>commonMain</code> also compiles for Android, which has no <code>platform.Foundation</code>, so the build would fail there.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Putting Android imports in <code>commonMain</code>.</strong> <em>Fix:</em> move the code to <code>androidMain</code> or use an interface.</p>
+<p class="v2-p"><strong>Mistake #2: Declaring engine dependencies in <code>commonMain</code>.</strong> <em>Fix:</em> put platform engines in the platform source sets.</p>
+<p class="v2-p"><strong>Mistake #3: Using JUnit in <code>commonTest</code>.</strong> <em>Fix:</em> use <code>kotlin.test</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Mixing legacy and new Android target setups.</strong> <em>Fix:</em> choose one: the dedicated plugin for new modules.</p>
+<p class="v2-p"><strong>Mistake #5: Expecting build types or flavours in the new plugin.</strong> <em>Fix:</em> use a separate Android library module for those.</p>
+<p class="v2-p"><strong>Mistake #6: Wiring <code>dependsOn</code> by hand without reapplying the template.</strong> <em>Fix:</em> call <code>applyDefaultHierarchyTemplate()</code> or avoid manual wiring.</p>
+<p class="v2-p"><strong>Mistake #7: Forgetting <code>binaries.framework</code> for iOS targets.</strong> <em>Fix:</em> add it so Xcode gets a framework.</p>
+<p class="v2-p"><strong>Mistake #8: Using a library with no iOS variant.</strong> <em>Fix:</em> check klibs.io before adding it.</p>
+<p class="v2-p"><strong>Mistake #9: Declaring targets you never build.</strong> <em>Fix:</em> declare only what you need; fewer targets means faster builds.</p>
+<p class="v2-p"><strong>Mistake #10: Copying a Gradle file from an old tutorial.</strong> <em>Fix:</em> compare it against the current official pages first.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does <code>commonMain</code> compile for?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Every target the module declares.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Which source set sees the other: <code>commonMain</code> or <code>androidMain</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>androidMain</code> sees <code>commonMain</code>; common code cannot see platform code.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does the default hierarchy template do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It automatically creates and connects intermediate source sets (such as <code>iosMain</code>, <code>appleMain</code>, <code>nativeMain</code>) for the targets you declare.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is the Android app a separate module from <code>shared</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The dedicated KMP library plugin has no replacement for the application plugin, so the app lives in its own module that depends on <code>shared</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Where do platform-specific Ktor engines go?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">In the platform source sets: OkHttp in <code>androidMain</code> and Darwin in <code>iosMain</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/kotlin-multiplatform" rel="noopener noreferrer">Kotlin Multiplatform programme</a></li>
+<li><a href="https://developer.android.com/kotlin/multiplatform/plugin" rel="noopener noreferrer">Android Gradle library plugin for KMP</a></li>
+<li><a href="https://kotlinlang.org/docs/multiplatform/multiplatform-hierarchy.html" rel="noopener noreferrer">Hierarchical project structure (Kotlin docs)</a></li>
+<li><a href="https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-discover-project.html" rel="noopener noreferrer">Understand the project structure (JetBrains)</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Scaffold a KMP Project and Share One Rule</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Create a KMP project, read its structure, and share one rule with both platforms' test setups.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a project from the official wizard (Android Studio's KMP template or https://kmp.jetbrains.com), with Android and iOS targets. If you have no Mac, still select iOS so you can study the structure; you will build only the Android side.</li>
+<li>Draw the folder tree and annotate each directory with the targets it compiles for.</li>
+<li>Open <code>shared/build.gradle.kts</code> and label every block (plugins, targets, framework, source sets).</li>
+<li>Move <code>CalculateFeeSummary</code> and <code>FeeSummary</code> into <code>commonMain</code>, and write three tests in <code>commonTest</code>.</li>
+<li>Add <code>kotlinx-coroutines-core</code> and make the use case return a <code>Flow</code> using a <strong>common</strong> dependency.</li>
+<li>Add an <code>expect fun platformName()</code> with <code>actual</code> implementations for Android and iOS, and show the result in the Android app.</li>
+<li>Run the tests for the Android host target and, if you can, the iOS simulator target. Record the task names you used.</li>
+<li>Write a half-page note explaining which source set each file lives in and why.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add a <code>desktop</code> JVM target and discover (and document) what the default hierarchy template adds or does not add for it.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">An annotated tree (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>shared/
+ ├─ build.gradle.kts                 targets + dependencies
+ └─ src/
+     ├─ commonMain/kotlin/com/example/fees/
+     │    ├─ FeeSummary.kt           [all targets]  data class
+     │    ├─ CalculateFeeSummary.kt  [all targets]  rule
+     │    └─ Platform.kt             [all targets]  expect fun platformName()
+     ├─ commonTest/kotlin/com/example/fees/
+     │    └─ CalculateFeeSummaryTest.kt   [all targets] kotlin.test
+     ├─ androidMain/kotlin/com/example/fees/
+     │    └─ Platform.android.kt     [Android]  actual fun platformName()
+     └─ iosMain/kotlin/com/example/fees/
+          └─ Platform.ios.kt         [iosArm64 + iosSimulatorArm64] actual fun</code></pre></div></div>
+<p class="v2-p">A flow-based use case entirely in common code:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+class ObserveFeeSummary(
+    private val payments: PaymentsRepository,
+    private val calculate: CalculateFeeSummary = CalculateFeeSummary()
+) {
+    operator fun invoke(): Flow&lt;FeeSummary&gt; =
+        payments.observePayments().map { list -&gt; calculate(list.map { it.amountNaira }) }
+}</code></pre></div></div>
+<p class="v2-p">Showing the result in the Android app:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidApp
+Text("Running on ${platformName()}")</code></pre></div></div>
+<p class="v2-p">Test tasks recorded (example; names depend on your plugin and Kotlin versions):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew :shared:testAndroidHostTest     Android host (JVM) tests
+./gradlew :shared:iosSimulatorArm64Test   iOS simulator tests (Mac only)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 67 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-67-kmp-project-structure-targets-and-source-s</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 67 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Three Parts of a KMP Project</li><li>✅ Step-by-Step Build 1: The Version Catalog</li><li>✅ Step-by-Step Build 2: The Shared Module&#x27;s Gradle File</li><li>✅ Step-by-Step Build 3: What Goes Where</li><li>✅ Step-by-Step Build 4: Tests</li><li>✅ Step-by-Step Build 5: Custom Source Sets and Hierarchy Rules</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_66.html" class="ln-btn">&#8592; Lesson 66</a><a href="lesson_68.html" class="ln-btn primary">Lesson 68 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 67 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

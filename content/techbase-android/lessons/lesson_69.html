@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 69: Integrate with iOS: Direct Integration and Swift Package Manager — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l69">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 69 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 69</div>
+      <h1>Integrate with iOS: Direct Integration and Swift Package Manager</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Connect FeeTracker to iOS (or Prepare To)</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 69</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Consume your shared module from Xcode, add multiplatform dependencies, search klibs.io and publish through Swift Package Manager.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Connect FeeTracker to iOS (or Prepare To)</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Your shared module compiles for iOS, but an iPhone app is built in <strong>Xcode</strong>, with Swift code and Apple's tools. Something has to connect the two: Xcode must <strong>build your Kotlin code into a framework</strong> and <strong>link it into the iOS app</strong>, and Swift must be able to <strong>call</strong> it. This lesson covers the ways to do that, and how to find and add <strong>multiplatform libraries</strong>.</p>
+<p class="v2-p">It covers <em>Integrate iOS into your project with direct integration</em>, <em>Add dependencies on multiplatform libraries</em>, <em>Search for multiplatform dependencies at klibs.io</em> and <em>Integrate iOS with remote Swift Package Manager</em> from the <strong>Kotlin Multiplatform</strong> programme (https://developer.android.com/courses/pathways/kotlin-multiplatform), using the JetBrains pages for direct integration (https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-direct-integration.html), adding dependencies (https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-add-dependencies.html) and Swift package export (https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-spm-export.html), and the library index at https://klibs.io.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the <strong>three ways</strong> an iOS app can consume shared Kotlin code.</li>
+<li>Set up <strong>direct integration</strong> with a <strong>Run Script</strong> build phase.</li>
+<li>Call Kotlin from <strong>Swift</strong>, and know the main <strong>interop rules</strong>.</li>
+<li>Add <strong>multiplatform dependencies</strong> and use <strong>klibs.io</strong> to check target support.</li>
+<li>Describe how an <strong>XCFramework</strong> and <strong>Swift Package Manager (SPM)</strong> distribution work.</li>
+<li>Follow an <strong>Android-only path</strong> if you have no Mac.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> iOS integration is a <strong>build-system</strong> problem, not a language problem. Xcode asks Gradle to build the framework; Swift imports it like any other.</p>
+<p class="v2-p"><strong>Honesty note:</strong> you need <strong>a Mac with Xcode</strong> to build or run the iOS app. This lesson was written without access to one, so the Xcode steps follow the official documentation rather than my own run. Xcode menus, Kotlin plugin tasks and the Swift Package Manager integration are updated often, and the SPM support in particular has been evolving. Treat the exact setting names as a guide and check the pages linked above. If you have no Mac, read this lesson for understanding and follow the Android-only path at the end.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Shared module structure and the iOS framework block</strong> (lessons 67 and 68).</li>
+<li><strong><code>expect</code>/<code>actual</code> and interfaces</strong> (lessons 66 and 68).</li>
+<li><strong>Basic Swift syntax</strong>: constants, functions, classes (read-only familiarity is enough).</li>
+<li><strong>Coroutines and Flow</strong> (lesson 33).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Three Ways to Connect</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Method</th>
+<th>Idea</th>
+<th>Good for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Direct integration</strong></td>
+<td>Xcode runs a Gradle task during its build and links the produced framework</td>
+<td>A monorepo where Android and iOS share one repository (the usual starting point)</td>
+</tr>
+<tr>
+<td><strong>Local Swift Package</strong></td>
+<td>Kotlin exports a Swift package on your machine; Xcode adds it as a local package</td>
+<td>Teams who prefer SPM in Xcode but keep one repository</td>
+</tr>
+<tr>
+<td><strong>Remote Swift Package</strong></td>
+<td>You publish a built <strong>XCFramework</strong> and a <code>Package.swift</code>; iOS developers add the package by URL</td>
+<td>iOS developers who should not need a Kotlin toolchain, or sharing with other teams</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">(CocoaPods integration also exists, but it is being phased out in favour of the above; you may meet it in older projects.)</p>
+<p class="v2-p">Whatever you choose, the pipeline is the same:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>:shared (Kotlin) ──Gradle──► SharedKit.framework / XCFramework ──Xcode──► iosApp
+                                                                          │
+                                         Swift: import SharedKit ◄────────┘</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Three Ways to Connect</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Prepare the Shared Module</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">In <code>shared/build.gradle.kts</code> each iOS target must declare a <strong>framework</strong> (lesson 67). The framework name is what Swift imports.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>kotlin {
+    val xcfName = "SharedKit"
+
+    iosArm64 {
+        binaries.framework {
+            baseName = xcfName
+            isStatic = true            // common choice; check the current docs for your setup
+        }
+    }
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = xcfName
+            isStatic = true
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The documentation notes that the Gradle task used for direct integration only exists <strong>if</strong> <code>binaries.framework</code> is declared for the iOS target. If the task is missing, this is the first place to look.</p>
+<p class="v2-p">A <strong>static</strong> framework is linked into the app at build time; a <strong>dynamic</strong> one is a separate file loaded at run time. Static frameworks are the usual default for app code, and the page on iOS integration discusses when to choose otherwise. (I could not re-check the current guidance for <code>isStatic</code> while writing; follow the official page for your Kotlin version.)</p>
+<h3 class="v2-h3">Write Kotlin that is friendly to Swift</h3>
+<p class="v2-p">Swift sees your Kotlin API through an Objective-C-style header. A few habits make the API pleasant:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain: a facade class for iOS (also fine for Android)
+class FeeApi(
+    private val repository: PaymentsRepository,
+    private val calculate: CalculateFeeSummary = CalculateFeeSummary()
+) {
+    suspend fun loadSummary(): FeeSummary {
+        val payments = repository.payments()
+        return calculate(payments.map { it.amountNaira })
+    }
+
+    fun observeSummary(): Flow&lt;FeeSummary&gt; =
+        repository.observePayments().map { calculate(it.map { p -&gt; p.amountNaira }) }
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Kotlin feature</th>
+<th>How Swift sees it</th>
+<th>Advice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>suspend fun</code></td>
+<td>An <code>async</code> function (recent versions) or a completion-handler function</td>
+<td>Fine; errors arrive as <code>NSError</code> unless annotated</td>
+</tr>
+<tr>
+<td><code>Flow&lt;T&gt;</code></td>
+<td>A Kotlin class, <strong>not</strong> a Swift <code>AsyncSequence</code></td>
+<td>Wrap it, or use a helper library, or expose a callback</td>
+</tr>
+<tr>
+<td><code>sealed class</code></td>
+<td>Class hierarchy, no exhaustive <code>switch</code></td>
+<td>Add helpers or consider Swift export (below)</td>
+</tr>
+<tr>
+<td>Generics</td>
+<td>Often erased to <code>Any</code></td>
+<td>Keep public APIs concrete</td>
+</tr>
+<tr>
+<td>Default arguments</td>
+<td>Not visible</td>
+<td>Provide overloads or factory functions</td>
+</tr>
+<tr>
+<td><code>Long</code>, <code>Int</code></td>
+<td><code>Int64</code>, <code>Int32</code></td>
+<td>Be explicit</td>
+</tr>
+<tr>
+<td>Top-level functions</td>
+<td>Methods on a generated <code>...Kt</code> class (for example <code>Platform_iosKt.platform()</code>)</td>
+<td>Prefer classes</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The JetBrains documentation shows exactly this convention: a file <code>Platform.ios.kt</code> is called from Swift as <code>Platform_iosKt.platform()</code>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Kotlin exceptions:</strong> unless you declare them, Kotlin exceptions crossing into Swift <strong>terminate the app</strong>. Use <code>@Throws(SomeException::class)</code> on functions that may throw, so Swift receives a catchable error, or return a <code>Result</code>-like sealed type.</p>
+</blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Throws(IOException::class, CancellationException::class)
+suspend fun refresh() { /* ... */ }</code></pre></div></div>
+<h3 class="v2-h3">Wrapping a <code>Flow</code> for Swift</h3>
+<p class="v2-p">A simple callback-based wrapper works without extra libraries:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+class FlowObserver&lt;T&gt;(private val flow: Flow&lt;T&gt;) {
+    private var job: Job? = null
+
+    fun start(scope: CoroutineScope, onEach: (T) -&gt; Unit) {
+        job = scope.launch { flow.collect { onEach(it) } }
+    }
+
+    fun stop() { job?.cancel() }
+}
+
+class SummaryObserver(private val api: FeeApi) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val observer = FlowObserver(api.observeSummary())
+
+    fun start(onEach: (FeeSummary) -&gt; Unit) = observer.start(scope, onEach)
+    fun stop() { observer.stop(); scope.cancel() }
+}</code></pre></div></div>
+<p class="v2-p">Third-party libraries (for example SKIE or KMP-NativeCoroutines) can generate friendlier Swift wrappers; they are optional and change, so evaluate them at the time.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Prepare the Shared Module</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Direct Integration (Mac Only)</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">The JetBrains documentation describes direct integration as building the framework from an <strong>Xcode Run Script</strong> phase that calls a Gradle task named <code>embedAndSignAppleFrameworkForXcode</code>.</p>
+<ol class="v2-ol">
+<li><strong>Open the iOS project in Xcode.</strong> From Android Studio you can right-click the <code>.xcodeproj</code> and choose <strong>Open In → Open in Associated Application</strong>, or open it from Xcode directly.</li>
+<li>In Xcode choose your app <strong>target → Build Phases → + → New Run Script Phase</strong>.</li>
+<li>Paste a script of this form (from the documentation, adjusted to your paths):</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sh</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>if [ "YES" = "$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED" ]; then
+  echo "Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \"YES\""
+  exit 0
+fi
+cd "$SRCROOT/.."
+./gradlew :shared:embedAndSignAppleFrameworkForXcode</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>cd</code> must point to the <strong>root of the multiplatform project</strong> (here, one level above the iOS folder).</li>
+<li><code>:shared</code> is <strong>your shared module's name</strong>.</li>
+<li>The <code>if</code> guard stops Xcode from building the framework a second time when Android Studio's run configuration has already built it.</li>
+</ul>
+<ol class="v2-ol" start="4">
+<li><strong>Disable "Based on dependency analysis"</strong> for this phase, so that it runs on every build.</li>
+<li><strong>Drag the phase above "Compile Sources"</strong>, so the framework exists before Swift is compiled.</li>
+<li>In <strong>Build Settings</strong>, under Build Options, set <strong>User Script Sandboxing</strong> to <strong>No</strong>. A sandboxed script cannot run Gradle. If you built before changing it, stop the sandboxed Gradle daemon with <code>./gradlew --stop</code>.</li>
+<li>If you use build configurations other than <code>Debug</code> and <code>Release</code>, add a <strong>User-Defined</strong> setting <code>KOTLIN_FRAMEWORK_BUILD_TYPE</code> set to <code>Debug</code> or <code>Release</code>.</li>
+<li>Make sure Xcode can <strong>find and link</strong> the framework. The documentation points to the iOS integration overview for the framework search path and linker flags used by the task's output; the project template usually sets these for you, which is why starting from the official wizard is easier than wiring them by hand.</li>
+<li><strong>Build</strong> (Cmd+B).</li>
+</ol>
+<h3 class="v2-h3">Use it from Swift</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">swift</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import SwiftUI
+import SharedKit
+
+struct ContentView: View {
+    @State private var message = "Loading…"
+
+    var body: some View {
+        Text(message)
+            .task {
+                let summary = CalculateFeeSummary(termFee: 450_000)
+                    .invoke(payments: [100_000, 50_000])
+                message = "Balance: \(summary.balance)"
+            }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Kotlin's <code>Long</code> appears in Swift as <code>Int64</code>, and a Kotlin <code>List&lt;Long&gt;</code> as <code>[KotlinLong]</code>, so the call above may need <code>KotlinLong(value:)</code> wrapping in a real project. Xcode's autocomplete shows the exact generated signatures; trust it over a tutorial.)</p>
+<p class="v2-p">If you previously used <strong>CocoaPods</strong>, the documentation gives a migration: clean the build folder, run <code>pod deintegrate</code>, remove the <code>cocoapods { }</code> block from Gradle, and delete the podspec and Podfile.</p>
+<h3 class="v2-h3">Run on a simulator</h3>
+<p class="v2-p">In Xcode choose an iPhone simulator and <strong>Run</strong>. Android Studio can also launch the iOS run configuration on a Mac when the Kotlin Multiplatform tooling is installed. Because the Gradle task builds Kotlin each time, the first build is slow; later builds are incremental.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Direct Integration (Mac Only)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: Multiplatform Dependencies</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Shared code can only use libraries that publish <strong>a variant for each of your targets</strong>. Check before you depend on one.</p>
+<h3 class="v2-h3">Common examples</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sourceSets {
+    commonMain.dependencies {
+        implementation(libs.kotlinx.coroutines.core)       // multiplatform
+        implementation(libs.kotlinx.serialization.json)    // multiplatform
+        implementation(libs.kotlinx.datetime)              // multiplatform
+        implementation(libs.ktor.client.core)              // multiplatform client; engines per platform
+    }
+    androidMain.dependencies {
+        implementation(libs.ktor.client.okhttp)
+    }
+    iosMain.dependencies {
+        implementation(libs.ktor.client.darwin)
+    }
+}</code></pre></div></div>
+<p class="v2-p">When a multiplatform library publishes to Maven, Gradle metadata lets you declare it <strong>once in <code>commonMain</code></strong> and Gradle selects the right artifact for each target. If a library is JVM-only, declaring it in <code>commonMain</code> fails on iOS, which is the error you saw in lesson 67.</p>
+<h3 class="v2-h3">Search with klibs.io</h3>
+<p class="v2-p"><strong>klibs.io</strong> (https://klibs.io) is a search index for Kotlin Multiplatform libraries, launched by JetBrains, that lets you search and filter by <strong>target platform</strong>, so you can see at a glance whether a library supports Android and iOS. The index aims to make multiplatform libraries easier to discover and compare. Recent JetBrains posts describe it as indexing thousands of KMP projects, but its exact size and features change, so treat its numbers as a snapshot.</p>
+<p class="v2-p">A good routine before adopting any library:</p>
+<ol class="v2-ol">
+<li>Search klibs.io for the capability (for example "datetime", "image loading", "settings").</li>
+<li><strong>Filter by the targets you use</strong> (Android, iOS).</li>
+<li>Check <strong>last release date</strong>, <strong>stars/activity</strong>, and <strong>licence</strong>.</li>
+<li>Read the library's own README for setup: some need extra Gradle plugins or platform-specific configuration.</li>
+<li>Try it in a small spike before building on it.</li>
+</ol>
+<h3 class="v2-h3">Popular choices (check currency before use)</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Need</th>
+<th>Multiplatform option</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Async and streams</td>
+<td>kotlinx.coroutines</td>
+</tr>
+<tr>
+<td>JSON</td>
+<td>kotlinx.serialization</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>Ktor client</td>
+</tr>
+<tr>
+<td>Date and time</td>
+<td>kotlinx-datetime (and the growing stdlib time APIs)</td>
+</tr>
+<tr>
+<td>Local SQL database</td>
+<td>Room KMP (lesson 70), SQLDelight</td>
+</tr>
+<tr>
+<td>Key-value storage</td>
+<td>DataStore (multiplatform)</td>
+</tr>
+<tr>
+<td>Dependency injection</td>
+<td>Koin, kotlin-inject</td>
+</tr>
+<tr>
+<td>Image loading</td>
+<td>Coil 3 and others (verify targets)</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Multiplatform Dependencies</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Distributing with Swift Package Manager</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p"><strong>Swift Package Manager (SPM)</strong> is Apple's dependency tool. Sharing your Kotlin module as a Swift package means iOS developers add it in Xcode like any Swift dependency, <strong>without</strong> needing a Kotlin or Gradle setup in their project.</p>
+<h3 class="v2-h3">The building blocks</h3>
+<ol class="v2-ol">
+<li><strong>An XCFramework</strong>: a bundle that contains your framework for several Apple targets (devices and simulators). The Kotlin Gradle plugin can assemble one from your iOS targets:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+
+kotlin {
+    val xcf = XCFramework("SharedKit")
+
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target -&gt;
+        target.binaries.framework {
+            baseName = "SharedKit"
+            xcf.add(this)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Running the generated task (named like <code>assembleSharedKitReleaseXCFramework</code>; list tasks with <code>./gradlew :shared:tasks</code> to see the exact name) produces <code>SharedKit.xcframework</code> under the module's <code>build/XCFrameworks</code> folder.</p>
+<ol class="v2-ol" start="2">
+<li><strong>A <code>Package.swift</code> file</strong> that tells SPM where the binary is:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">swift</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// swift-tools-version:5.9
+import PackageDescription
+
+let package = Package(
+    name: "SharedKit",
+    platforms: [.iOS(.v15)],
+    products: [
+        .library(name: "SharedKit", targets: ["SharedKit"])
+    ],
+    targets: [
+        .binaryTarget(
+            name: "SharedKit",
+            url: "https://github.com/your-org/shared-kit/releases/download/1.0.0/SharedKit.xcframework.zip",
+            checksum: "&lt;result of swift package compute-checksum&gt;"
+        )
+    ]
+)</code></pre></div></div>
+<ol class="v2-ol" start="3">
+<li><strong>A place to host the zipped XCFramework</strong>: for example a GitHub Release or cloud storage, plus a Git repository containing <code>Package.swift</code> with a version tag.</li>
+</ol>
+<h3 class="v2-h3">The release routine</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>1. Build the XCFramework with Gradle (release configuration).
+2. Zip it:            zip -r SharedKit.xcframework.zip SharedKit.xcframework
+3. Compute checksum:  swift package compute-checksum SharedKit.xcframework.zip
+4. Upload the zip to a release (the URL goes in Package.swift).
+5. Put the checksum and URL into Package.swift, commit, tag it 1.0.0.
+6. In Xcode: File &gt; Add Package Dependencies... &gt; paste the repository URL.</code></pre></div></div>
+<p class="v2-p">The remote approach has a trade-off: iOS developers no longer need Kotlin, but <strong>every change to shared code needs a new release</strong>, which slows the feedback loop compared with direct integration. Many teams use direct integration while developing and SPM for releases or for other teams.</p>
+<h3 class="v2-h3">Newer tooling</h3>
+<p class="v2-p">The JetBrains documentation for Swift package export describes an integrated route in which the Kotlin Gradle plugin helps produce and wire Swift packages, and there is also <strong>Swift export</strong>, an effort to generate more idiomatic Swift APIs than the Objective-C bridge (better support for enums, sealed types and generics). Both have been changing from release to release and some parts are labelled experimental. <strong>Read the current page before adopting them</strong>; the manual XCFramework route above works because it relies only on stable Apple and Gradle features.</p>
+<h3 class="v2-h3">Local packages</h3>
+<p class="v2-p">For one repository, a local Swift package (a <code>Package.swift</code> with a <code>path</code>-based binary target or a package produced by the Gradle task) lets Xcode treat your module as a package without publishing. See the local integration page on kotlinlang.org for the current steps.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Distributing with Swift Package Manager</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Step-by-Step Build 5: The Android-Only Path (No Mac)</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">If you have no Mac you can still do almost everything in this programme:</p>
+<ol class="v2-ol">
+<li>Build and test the <strong>shared module for Android</strong> (<code>androidHostTest</code>, <code>commonTest</code> on the JVM).</li>
+<li>Keep <strong><code>iosArm64()</code> and <code>iosSimulatorArm64()</code> declared</strong>, so the structure matches a real project. Gradle will skip iOS compilation tasks that require Apple's toolchain on non-Mac machines; the exact behaviour depends on your Kotlin version and <code>kotlin.native.ignoreDisabledTargets</code> settings, so read any warning Gradle prints.</li>
+<li>Write the <code>iosMain</code> code carefully using the <strong>Apple API names</strong> you learn from the documentation; you will not be able to compile it, but a reviewer on a Mac can.</li>
+<li>Use a <strong>CI service with macOS runners</strong> (GitHub Actions offers them) to compile and test iOS targets on every push:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">yaml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># .github/workflows/ios.yml
+name: iOS build
+on: [push]
+jobs:
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - name: Build iOS framework and run simulator tests
+        run: ./gradlew :shared:iosSimulatorArm64Test :shared:linkDebugFrameworkIosSimulatorArm64</code></pre></div></div>
+<p class="v2-p">(Task names depend on your plugin versions; check <code>./gradlew :shared:tasks</code>.) This is a cost-effective way to keep the iOS side honest without owning a Mac.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: The Android-Only Path (No Mac)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Why is the build failing?</strong></p>
+<p class="v2-p">Xcode reports "Task 'embedAndSignAppleFrameworkForXcode' not found in project ':shared'". List two likely causes.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(1) The iOS target in <code>shared/build.gradle.kts</code> has no <code>binaries.framework { }</code> declaration, and the task only exists when it does. (2) The module name in the script (<code>:shared</code>) does not match the real module name, or the <code>cd</code> path does not point to the Gradle root, so the wrong project is used.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Make the API Swift-friendly</strong></p>
+<p class="v2-p">Improve this Kotlin API for iOS callers: <code>fun loadAll(): Flow&lt;List&lt;Payment&gt;&gt;</code> and <code>fun parse(raw: String): Payment</code> that throws on bad input.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Wrap the flow in an observer class with <code>start</code>/<code>stop</code> and callbacks (or use a Swift-interop library). Annotate the throwing function with <code>@Throws(IllegalArgumentException::class)</code> so Swift gets a catchable error instead of a crash, or return a sealed result type. Keep types concrete, since generics are erased at the boundary.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Pick a distribution method</strong></p>
+<p class="v2-p">Choose direct integration, local SPM or remote SPM for: (a) a small team in one repository developing both apps; (b) a separate iOS team in another company that must not install Gradle; (c) a CI release of version 2.1 of the shared SDK.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(a) Direct integration, for the fastest feedback. (b) Remote SPM with a published XCFramework, since they can add it by URL. (c) Remote SPM (an XCFramework attached to a tagged release), because releases need a versioned, reproducible artifact.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting <code>binaries.framework</code>.</strong> <em>Fix:</em> declare it on each iOS target.</p>
+<p class="v2-p"><strong>Mistake #2: Leaving User Script Sandboxing on.</strong> <em>Fix:</em> set it to No for the Gradle run script.</p>
+<p class="v2-p"><strong>Mistake #3: Putting the Run Script phase after Compile Sources.</strong> <em>Fix:</em> drag it above.</p>
+<p class="v2-p"><strong>Mistake #4: Wrong project root in the script.</strong> <em>Fix:</em> <code>cd</code> to the folder with <code>gradlew</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Exposing <code>Flow</code> and generics directly to Swift.</strong> <em>Fix:</em> wrap them.</p>
+<p class="v2-p"><strong>Mistake #6: Letting Kotlin exceptions cross unannotated.</strong> <em>Fix:</em> use <code>@Throws</code> or return result types.</p>
+<p class="v2-p"><strong>Mistake #7: Adding a JVM-only library to <code>commonMain</code>.</strong> <em>Fix:</em> check klibs.io for targets first.</p>
+<p class="v2-p"><strong>Mistake #8: Publishing a Swift package without a checksum or tag.</strong> <em>Fix:</em> compute and commit both.</p>
+<p class="v2-p"><strong>Mistake #9: Assuming iOS compiles because Android does.</strong> <em>Fix:</em> build iOS in CI on a macOS runner.</p>
+<p class="v2-p"><strong>Mistake #10: Following old CocoaPods tutorials blindly.</strong> <em>Fix:</em> use the current integration pages.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Which Gradle task does direct integration call from Xcode?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>embedAndSignAppleFrameworkForXcode</code> (run as <code>:yourModule:embedAndSignAppleFrameworkForXcode</code>).</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why must the Run Script phase come before Compile Sources?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The framework must be built before Swift code that imports it is compiled.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does klibs.io help you do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Search Kotlin Multiplatform libraries and filter by supported targets, so you can check Android and iOS support before adopting one.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is an XCFramework?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A bundle containing a framework built for several Apple targets (devices and simulators), which SPM can distribute as a binary target.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What are two options if you have no Mac?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Build and test the Android side locally while keeping iOS targets declared, and use a macOS CI runner to compile and test the iOS targets.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/kotlin-multiplatform" rel="noopener noreferrer">Kotlin Multiplatform programme</a></li>
+<li><a href="https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-direct-integration.html" rel="noopener noreferrer">Direct integration (JetBrains)</a></li>
+<li><a href="https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-add-dependencies.html" rel="noopener noreferrer">Add multiplatform dependencies (JetBrains)</a></li>
+<li><a href="https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-spm-export.html" rel="noopener noreferrer">Swift package export (JetBrains)</a></li>
+<li><a href="https://klibs.io" rel="noopener noreferrer">klibs.io</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Connect FeeTracker to iOS (or Prepare To)</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Produce everything needed for an iOS app to consume the shared FeeTracker module, to the extent your hardware allows.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Declare <code>binaries.framework</code> for both iOS targets, naming the framework <code>SharedKit</code>.</li>
+<li>Write a Swift-friendly facade (<code>FeeApi</code>) with <code>@Throws</code> where needed, and a <code>SummaryObserver</code> that wraps the flow.</li>
+<li><strong>With a Mac:</strong> create the Xcode project, add the Run Script phase exactly as in Build 2, disable script sandboxing, and show a screen in SwiftUI that displays the balance.</li>
+<li><strong>Without a Mac:</strong> write the Swift file you would use, and add the GitHub Actions workflow that builds the iOS framework on <code>macos-latest</code>.</li>
+<li>Add the XCFramework configuration and describe the release routine for a remote Swift package in a <code>RELEASING.md</code>.</li>
+<li>Search klibs.io for three libraries FeeTracker needs (for example datetime, settings, image loading) and record their supported targets and last release.</li>
+<li>Write a short comparison of direct integration versus remote SPM for your team.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> evaluate one Swift interop helper library (for example for Flow-to-AsyncSequence conversion) and write down its pros and cons.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A <code>RELEASING.md</code> (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># Releasing SharedKit for iOS
+
+1. ./gradlew :shared:assembleSharedKitReleaseXCFramework
+2. cd shared/build/XCFrameworks/release
+3. zip -r SharedKit.xcframework.zip SharedKit.xcframework
+4. swift package compute-checksum SharedKit.xcframework.zip     -&gt; paste into Package.swift
+5. Create a GitHub release "1.2.0", upload SharedKit.xcframework.zip
+6. Update url + checksum in Package.swift, commit, tag 1.2.0, push
+7. iOS app: File &gt; Add Package Dependencies &gt; repository URL, version rule "Up to next major 1.2.0"</code></pre></div></div>
+<p class="v2-p">A klibs.io research table (example; verify at the time):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Need          Library          Android  iOS  Last release   Note
+Date/time     kotlinx-datetime   yes    yes  recent         first-party
+Settings      multiplatform-settings or DataStore  yes yes  recent
+Images        Coil 3             yes    yes  recent         check Compose Multiplatform requirement</code></pre></div></div>
+<p class="v2-p">A SwiftUI view using the observer wrapper:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">swift</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>final class SummaryViewModel: ObservableObject {
+    @Published var balanceText = "…"
+    private let observer: SummaryObserver
+
+    init(api: FeeApi) {
+        observer = SummaryObserver(api: api)
+        observer.start { [weak self] summary in
+            DispatchQueue.main.async { self?.balanceText = "Balance: \(summary.balance)" }
+        }
+    }
+    deinit { observer.stop() }
+}</code></pre></div></div>
+<p class="v2-p">The Android-only path is complete when CI shows a green iOS build, even though no one on the team ran the app locally.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 69 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-69-integrate-with-ios-direct-integration-and</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 69 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Three Ways to Connect</li><li>✅ Step-by-Step Build 1: Prepare the Shared Module</li><li>✅ Step-by-Step Build 2: Direct Integration (Mac Only)</li><li>✅ Step-by-Step Build 3: Multiplatform Dependencies</li><li>✅ Step-by-Step Build 4: Distributing with Swift Package Manager</li><li>✅ Step-by-Step Build 5: The Android-Only Path (No Mac)</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_68.html" class="ln-btn">&#8592; Lesson 68</a><a href="lesson_70.html" class="ln-btn primary">Lesson 70 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 69 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

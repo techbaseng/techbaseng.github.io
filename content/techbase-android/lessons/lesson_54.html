@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 54: Advanced State and Side Effects — Techbase Android</title>
+</head>
+<body data-total="15" data-key="techbase_android_l54">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 54 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 54</div>
+      <h1>Advanced State and Side Effects</h1>
+      <div class="l-hero-sub">15 phases &nbsp;·&nbsp; Build: Study Planner with a State Holder</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 54</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Hoist state well, build state holders, and use LaunchedEffect, DisposableEffect, rememberCoroutineScope, produceState and derivedStateOf.</p></div><div class="wm"><span>📚 15 phases</span><span>🏗️ Study Planner with a State Holder</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 15</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">State is the heart of every Compose app. You have used <code>remember</code>, <code>mutableStateOf</code>, <code>rememberSaveable</code> and ViewModels. This lesson makes you <strong>fluent</strong>: where to put state, how to package it, and how to safely do things that are not pure UI (start a timer, load data, register a listener, show a snackbar). Those "things outside the UI" are <strong>side effects</strong>, and getting them wrong causes the bugs that are hardest to find: duplicated network calls, leaked listeners, stale values and screens that fight each other.</p>
+<p class="v2-p">This lesson covers <em>A Compose state of mind</em>, <em>Where to hoist your state</em>, <em>Advanced state and side effects</em> and <em>State holders and state production</em> from Pathway 3 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-3), and follows the ideas of the official <em>Advanced State and Side Effects in Jetpack Compose</em> codelab with our own examples.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Decide <strong>where to hoist</strong> state: to the caller, a plain state holder class, or a ViewModel.</li>
+<li>Write a <strong>state holder class</strong> with <code>remember</code> and a custom <strong><code>Saver</code></strong>.</li>
+<li>Use <strong><code>rememberSaveable</code></strong> with parcelable, <code>listSaver</code> and <code>mapSaver</code>.</li>
+<li>Explain the <strong>composable lifecycle</strong>: enter, recompose, leave.</li>
+<li>Use the effect APIs correctly: <strong><code>LaunchedEffect</code></strong>, <strong><code>rememberCoroutineScope</code></strong>, <strong><code>rememberUpdatedState</code></strong>, <strong><code>DisposableEffect</code></strong>, <strong><code>SideEffect</code></strong>, <strong><code>produceState</code></strong>, <strong><code>derivedStateOf</code></strong> and <strong><code>snapshotFlow</code></strong>.</li>
+<li>Pick the right API with a <strong>decision tree</strong>.</li>
+<li>Avoid the classic effect bugs.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> composition must stay <strong>pure</strong>: given the same inputs it draws the same UI and does nothing else. Anything else belongs in an <em>effect</em>, with a clear <strong>start</strong>, <strong>stop</strong> and <strong>key</strong>.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 15</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>State, recomposition, <code>remember</code>, state hoisting</strong> (lessons 17, 24 and 37).</li>
+<li><strong>ViewModel and <code>StateFlow</code></strong> (lessons 24–25).</li>
+<li><strong>Coroutines, <code>launch</code>, <code>delay</code>, cancellation</strong> (lesson 28).</li>
+<li><strong>Flow</strong> (lesson 33).</li>
+<li><strong>Lifecycle</strong> (lesson 23).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 15</div><div class="pt">Conceptual Understanding: A Compose State of Mind</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Three ideas, repeated in all of Compose:</p>
+<ol class="v2-ol">
+<li><strong>UI = f(state).</strong> The screen is a function of state. Change state, and Compose re-runs only the parts that read it.</li>
+<li><strong>Composables may run at any time, in any order, many times, or be skipped.</strong> Never rely on a composable running exactly once, and never do work in its body that is not safe to repeat (write to a database, start a request, launch a coroutine, register a listener).</li>
+<li><strong>State flows down, events flow up</strong> (unidirectional data flow).</li>
+</ol>
+<h3 class="v2-h3">The composable lifecycle</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>          +-----------+      recomposition (0..N times)      +-----------+
+ enter -&gt; | composed  | -----------------------------------&gt; |  leaves   |
+ the tree +-----------+                                       |  the tree |
+                                                              +-----------+
+ effects: start here -&gt;                          &lt;- cancelled/disposed here</code></pre></div></div>
+<p class="v2-p">A composable <strong>enters</strong> the composition the first time it is called, may <strong>recompose</strong> any number of times, and <strong>leaves</strong> when it is no longer called or removed (for example when <code>if (show)</code> becomes false). <code>remember</code> keeps a value across recompositions, and <strong>forgets it when the composable leaves</strong>. Effects tie their work to this lifecycle: start on enter, restart when keys change, stop on leave.</p>
+<h3 class="v2-h3">Where does state live? (state hoisting, three levels)</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Level</th>
+<th>Use it when</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inside the composable</strong> (<code>remember</code>)</td>
+<td>Pure UI state nobody else needs</td>
+<td>Whether a dropdown is open</td>
+</tr>
+<tr>
+<td><strong>A plain state holder class</strong> (remembered)</td>
+<td>Complex UI state and UI logic shared by several composables, no business logic</td>
+<td><code>ScaffoldState</code>, a form's field state, a calendar picker's selected range</td>
+</tr>
+<tr>
+<td><strong>A ViewModel</strong></td>
+<td>Business logic, data from other layers, state that must survive configuration change, screen-level state</td>
+<td>The list of students, loading and error</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Rule of thumb for hoisting:</strong> hoist state to <strong>the lowest common ancestor that reads or writes it</strong>, no higher. Hoist <strong>UI element state</strong> (scroll position, expansion) as high as the composables that need it; hoist <strong>screen UI state</strong> to a ViewModel (lesson 61). The official guidance describes the same idea: UI behaviour logic and UI element state in plain state holders, business logic in the ViewModel.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: A Compose State of Mind</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 15</div><div class="pt">Step-by-Step Build 1: Hoisting and a State Holder Class</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">We will build a <strong>registration form</strong> whose logic grows beyond a few <code>remember</code>s, and use a state holder to keep the composable simple.</p>
+<h3 class="v2-h3">The messy version</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+@Composable
+fun MessyForm() {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    val emailError = email.isNotEmpty() &amp;&amp; !email.contains("@")
+    val passwordError = password.isNotEmpty() &amp;&amp; password.length &lt; 8
+    val confirmError = confirm.isNotEmpty() &amp;&amp; confirm != password
+    // ...the validation grows with every field, inside the composable
+    OutlinedTextField(email, { email = it }, label = { Text("Email") }, isError = emailError)
+    // ...
+}</code></pre></div></div>
+<p class="v2-p">The composable mixes UI with validation rules. It cannot be reused, and it is hard to test without Compose.</p>
+<h3 class="v2-h3">The state holder</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">RegistrationState.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.formdemo
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+
+@Stable
+class RegistrationState(
+    email: String = "",
+    password: String = "",
+    confirm: String = ""
+) {
+    var email by mutableStateOf(email)
+    var password by mutableStateOf(password)
+    var confirm by mutableStateOf(confirm)
+
+    val emailError: Boolean get() = email.isNotEmpty() &amp;&amp; !email.contains("@")
+    val passwordError: Boolean get() = password.isNotEmpty() &amp;&amp; password.length &lt; 8
+    val confirmError: Boolean get() = confirm.isNotEmpty() &amp;&amp; confirm != password
+
+    val canSubmit: Boolean
+        get() = email.isNotEmpty() &amp;&amp; !emailError &amp;&amp;
+            password.length &gt;= 8 &amp;&amp; confirm == password
+
+    companion object {
+        val Saver: Saver&lt;RegistrationState, *&gt; = listSaver(
+            save = { listOf(it.email, it.password, it.confirm) },
+            restore = { RegistrationState(it[0], it[1], it[2]) }
+        )
+    }
+}
+
+@Composable
+fun rememberRegistrationState(): RegistrationState =
+    rememberSaveable(saver = RegistrationState.Saver) { RegistrationState() }</code></pre></div></div>
+<p class="v2-p">Points to notice:</p>
+<ul class="v2-ul">
+<li>The class holds <strong><code>mutableStateOf</code> properties</strong>, so any composable that reads <code>state.email</code> recomposes when it changes. Properties like <code>emailError</code> are <strong>derived</strong> from state, so they update automatically and never go stale.</li>
+<li><code>Saver</code> / <code>listSaver</code> explain how to turn the object into something the <code>Bundle</code> can store (a list of strings) and back. That makes it survive <strong>rotation and process death</strong>, as <code>rememberSaveable</code> does for simple types. (Saving a password is a design decision: you may prefer not to. Here we save it for the sake of the example; for real apps consider leaving passwords out of saved state.)</li>
+<li>A <strong><code>rememberXxxState()</code></strong> factory function is the standard Compose naming convention for state holders (<code>rememberScrollState</code>, <code>rememberLazyListState</code>).</li>
+<li><code>@Stable</code> is a promise to the compiler that the class notifies Compose of changes (lesson 57 explains stability).</li>
+</ul>
+<h3 class="v2-h3">The composable now reads like UI</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun RegistrationForm(
+    onSubmit: (email: String, password: String) -&gt; Unit,
+    modifier: Modifier = Modifier,
+    state: RegistrationState = rememberRegistrationState()
+) {
+    Column(modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = state.email,
+            onValueChange = { state.email = it },
+            label = { Text("Email") },
+            isError = state.emailError
+        )
+        OutlinedTextField(
+            value = state.password,
+            onValueChange = { state.password = it },
+            label = { Text("Password (8+ characters)") },
+            isError = state.passwordError
+        )
+        OutlinedTextField(
+            value = state.confirm,
+            onValueChange = { state.confirm = it },
+            label = { Text("Confirm password") },
+            isError = state.confirmError
+        )
+        Button(
+            onClick = { onSubmit(state.email, state.password) },
+            enabled = state.canSubmit
+        ) { Text("Register") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Passing the state holder as a <strong>parameter with a default</strong> (<code>state: RegistrationState = rememberRegistrationState()</code>) lets callers supply their own (for tests, previews or hoisting higher), which is a common Compose API pattern.</p>
+<h3 class="v2-h3">Testing the logic without Compose</h3>
+<p class="v2-p">Because <code>RegistrationState</code> is plain Kotlin with Compose state, you can test its rules with a simple unit test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">RegistrationStateTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.formdemo
+
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class RegistrationStateTest {
+    @Test
+    fun submitRequiresMatchingStrongPassword() {
+        val s = RegistrationState(email = "ada@example.ng", password = "12345678", confirm = "1234567")
+        assertFalse(s.canSubmit)
+        s.confirm = "12345678"
+        assertTrue(s.canSubmit)
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Snapshot state objects can be read outside composition in simple unit tests like this. For heavier use, wrap in <code>Snapshot.withMutableSnapshot</code> or use the Compose test rule.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Hoisting and a State Holder Class</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 15</div><div class="pt">Step-by-Step Build 2: rememberSaveable and Savers</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><code>remember</code> survives <strong>recomposition</strong> but not <strong>configuration change</strong> or process death. <code>rememberSaveable</code> stores the value in the saved instance state <code>Bundle</code> (lesson 23).</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Value type</th>
+<th>How to save</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primitives, <code>String</code>, <code>Parcelable</code>, <code>Serializable</code>, collections of those</td>
+<td><code>rememberSaveable { mutableStateOf(...) }</code> works automatically</td>
+</tr>
+<tr>
+<td>A custom class</td>
+<td><code>@Parcelize</code> (Kotlin Parcelize plugin), or <code>Saver</code>, <code>listSaver</code>, <code>mapSaver</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Parcelize</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.os.Parcelable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+data class City(val name: String, val country: String) : Parcelable
+
+// inside a composable:
+var city by rememberSaveable { mutableStateOf(City("Ibadan", "Nigeria")) }</code></pre></div></div>
+<p class="v2-p">This needs the <code>kotlin-parcelize</code> Gradle plugin (<code>id("kotlin-parcelize")</code>).</p>
+<h3 class="v2-h3">mapSaver</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
+data class Point(val x: Int, val y: Int)
+
+val PointSaver = mapSaver(
+    save = { mapOf("x" to it.x, "y" to it.y) },
+    restore = { Point(it["x"] as Int, it["y"] as Int) }
+)
+
+// inside a composable:
+var point by rememberSaveable(stateSaver = PointSaver) { mutableStateOf(Point(0, 0)) }</code></pre></div></div>
+<p class="v2-p">Use <code>rememberSaveable(stateSaver = ...)</code> when the saver is for the <em>value inside</em> a <code>MutableState</code>. Keep saved state <strong>small</strong> (a few kilobytes at most): the <code>Bundle</code> is limited and large data causes <code>TransactionTooLargeException</code>. Large or complex data belongs in a ViewModel plus a database (lessons 24 and 34).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: rememberSaveable and Savers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 15</div><div class="pt">Step-by-Step Build 3: Side Effects, the Big Picture</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A <strong>side effect</strong> is a change to the <strong>outside world</strong> that happens during composition: starting a coroutine, registering a callback, writing to a log or database, updating non-Compose state, showing a snackbar. Because composition can run repeatedly, these must be wrapped in effect APIs that give them a <strong>lifecycle</strong>.</p>
+<h3 class="v2-h3">The decision tree</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Need to run a suspend function / coroutine?
+  |-- when the composable enters (and restart when a key changes)  -&gt; LaunchedEffect(key) { ... }
+  |-- from an event handler (a click, a callback)                  -&gt; rememberCoroutineScope() + scope.launch
+  |-- to produce a State&lt;T&gt; from a non-Compose source (Flow, callback)  -&gt; produceState / collectAsState...
+
+Need setup AND cleanup (register/unregister a listener, observer, receiver)?
+  -&gt; DisposableEffect(key) { ...; onDispose { ... } }
+
+Need to publish Compose state to non-Compose code on EVERY successful recomposition?
+  -&gt; SideEffect { ... }
+
+Need an effect to use the latest value of something WITHOUT restarting?
+  -&gt; rememberUpdatedState(value)
+
+Need a value computed from other state that changes less often?
+  -&gt; derivedStateOf { ... }
+
+Need to turn Compose state into a Flow (to debounce, filter)?
+  -&gt; snapshotFlow { ... }</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Side Effects, the Big Picture</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 15</div><div class="pt">Step-by-Step Build 4: LaunchedEffect and rememberCoroutineScope</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">LaunchedEffect: run a suspend block tied to the composition</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+
+@Composable
+fun ErrorSnackbar(errorMessage: String?, snackbarHostState: SnackbarHostState, onShown: () -&gt; Unit) {
+    LaunchedEffect(errorMessage) {                 // key: restart when the message changes
+        if (errorMessage != null) {
+            snackbarHostState.showSnackbar(errorMessage)   // suspends until dismissed
+            onShown()                                     // tell the ViewModel it was shown
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">How it behaves:</p>
+<ul class="v2-ul">
+<li><strong>On entering</strong> the composition, the block starts in a coroutine.</li>
+<li>If the <strong>key changes</strong> (<code>errorMessage</code>), the old coroutine is <strong>cancelled</strong> and a new one starts.</li>
+<li>When the composable <strong>leaves</strong>, the coroutine is cancelled.</li>
+<li><code>LaunchedEffect(Unit)</code> (a constant key) means "run once while this composable is in the tree".</li>
+<li><code>LaunchedEffect(true)</code> or <code>Unit</code> with a changing value read inside is the classic bug (below).</li>
+</ul>
+<h3 class="v2-h3">rememberCoroutineScope: launch from events</h3>
+<p class="v2-p">A <code>LaunchedEffect</code> is for work that begins when something enters composition. For work in response to a <strong>click</strong>, you need a scope you can launch from a callback:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun ScrollToTopButton(listState: LazyListState) {
+    val scope = rememberCoroutineScope()
+    Button(onClick = {
+        scope.launch { listState.animateScrollToItem(0) }   // suspend function, from an event
+    }) { Text("Top") }
+}</code></pre></div></div>
+<p class="v2-p">The scope is tied to the composable's lifecycle: cancelled when it leaves. <strong>Do not</strong> call <code>scope.launch</code> directly in the composable body, or you will start a new coroutine on every recomposition.</p>
+<h3 class="v2-h3">Why not just launch in the body?</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Bad(viewModel: StudentsViewModel) {
+    viewModel.load()     // WRONG: runs on EVERY recomposition (scrolling, typing, animation...)
+}
+
+@Composable
+fun Good(viewModel: StudentsViewModel) {
+    LaunchedEffect(Unit) { viewModel.load() }   // runs once per entry
+}</code></pre></div></div>
+<p class="v2-p">Even better, start loading from the ViewModel's <code>init</code> or when the first collector subscribes (lesson 61), so that your composable does not need to.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: LaunchedEffect and rememberCoroutineScope</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 15</div><div class="pt">Step-by-Step Build 5: rememberUpdatedState</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">A <code>LaunchedEffect</code> with <code>key = Unit</code> that <strong>uses a changing value or callback</strong> will keep using the <strong>first</strong> one it captured. Example: a splash timer that calls <code>onTimeout</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import kotlinx.coroutines.delay
+
+@Composable
+fun SplashScreen(onTimeout: () -&gt; Unit) {
+    val currentOnTimeout by rememberUpdatedState(onTimeout)
+
+    LaunchedEffect(Unit) {          // do NOT restart the timer when onTimeout changes
+        delay(3_000)
+        currentOnTimeout()          // but always call the LATEST onTimeout
+    }
+    // ...splash UI
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.compose.runtime.getValue</code> for the <code>by</code> delegate.) Without <code>rememberUpdatedState</code>, if <code>SplashScreen</code> recomposed with a different <code>onTimeout</code> during the 3 seconds, the effect would call the old, stale lambda. Restarting the effect with <code>LaunchedEffect(onTimeout)</code> would <strong>reset the timer</strong> every time. <code>rememberUpdatedState</code> gives the best of both: no restart, no stale value.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: rememberUpdatedState</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 15</div><div class="pt">Step-by-Step Build 6: DisposableEffect</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">When something needs <strong>cleanup</strong>, use <code>DisposableEffect</code>. Typical: lifecycle observers, broadcast receivers, sensor listeners, back-press callbacks.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+
+@Composable
+fun OnLifecycleEvent(onEvent: (Lifecycle.Event) -&gt; Unit) {
+    val currentOnEvent by rememberUpdatedState(onEvent)
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event -&gt; currentOnEvent(event) }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)   // required cleanup
+        }
+    }
+}
+
+@Composable
+fun LoggingScreen() {
+    OnLifecycleEvent { event -&gt; Log.d("Screen", "event=$event") }
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.compose.runtime.getValue</code>. In recent lifecycle versions <code>LocalLifecycleOwner</code> lives in <code>androidx.lifecycle.compose</code>; let Studio's import suggestion pick the correct one for your version.)</p>
+<p class="v2-p"><strong><code>DisposableEffect</code> must end with <code>onDispose { ... }</code></strong>, or it will not compile. It runs <code>onDispose</code> when the key changes (before starting the effect again) and when the composable leaves.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: DisposableEffect</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 15</div><div class="pt">Step-by-Step Build 7: SideEffect and produceState</div><div class="pc" id="chk10"></div></div><div class="pb2"><h3 class="v2-h3">SideEffect: publish state to non-Compose code</h3>
+<p class="v2-p"><code>SideEffect</code> runs after <strong>every successful recomposition</strong>. Use it to keep an object that Compose does not manage in sync with Compose state, such as analytics user properties or a legacy View.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+
+interface Analytics { fun setUserProperty(key: String, value: String) }
+
+@Composable
+fun TrackUserType(analytics: Analytics, isPremium: Boolean) {
+    SideEffect {
+        analytics.setUserProperty("user_type", if (isPremium) "premium" else "free")
+    }
+}</code></pre></div></div>
+<p class="v2-p">It has no key and no coroutine: keep it tiny and quick, and never do slow work in it.</p>
+<h3 class="v2-h3">produceState: turn a non-Compose source into State</h3>
+<p class="v2-p"><code>produceState</code> launches a coroutine scoped to the composition and gives you a <code>State&lt;T&gt;</code> that updates as the coroutine sets <code>value</code>. It is how you load something once and expose it as state, handling loading and error:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.produceState
+import kotlinx.coroutines.delay
+
+sealed interface Result&lt;out T&gt; {
+    data object Loading : Result&lt;Nothing&gt;
+    data class Success&lt;T&gt;(val data: T) : Result&lt;T&gt;
+    data class Failure(val message: String) : Result&lt;Nothing&gt;
+}
+
+interface PriceApi { suspend fun price(item: String): Int }
+
+@Composable
+fun rememberPrice(item: String, api: PriceApi): State&lt;Result&lt;Int&gt;&gt; =
+    produceState&lt;Result&lt;Int&gt;&gt;(initialValue = Result.Loading, item, api) {
+        value = Result.Loading
+        value = try {
+            Result.Success(api.price(item))
+        } catch (e: Exception) {
+            Result.Failure(e.message ?: "Unknown error")
+        }
+    }</code></pre></div></div>
+<p class="v2-p">The keys (<code>item</code>, <code>api</code>) restart the producer when they change. Prefer a <strong>ViewModel with a <code>StateFlow</code></strong> for screen-level data (lesson 61); <code>produceState</code> is best for self-contained composable-level sources (image loading, a one-off lookup, a callback API). The built-in <code>collectAsState</code>, <code>collectAsStateWithLifecycle</code> and <code>observeAsState</code> are implemented with the same idea.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: SideEffect and produceState</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 15</div><div class="pt">Step-by-Step Build 8: derivedStateOf and snapshotFlow</div><div class="pc" id="chk11"></div></div><div class="pb2"><h3 class="v2-h3">derivedStateOf: less recomposition</h3>
+<p class="v2-p">When one state is <strong>computed</strong> from another that changes more often than your result does, <code>derivedStateOf</code> makes readers recompose only when the <strong>result</strong> changes.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+
+@Composable
+fun showScrollToTop(listState: LazyListState): Boolean {
+    val show by remember { derivedStateOf { listState.firstVisibleItemIndex &gt; 5 } }
+    return show   // changes only when it crosses the threshold, not at every scroll position
+}</code></pre></div></div>
+<p class="v2-p"><strong>Do not overuse it.</strong> If the input changes about as often as the output (<code>derivedStateOf { count * 2 }</code>), it adds overhead for nothing. It shines when many input values map to few outputs (a threshold, a boolean, a filtered list of a text query when typing). Remember to wrap in <code>remember</code> (and pass keys to <code>remember</code> if the lambda captures other values that can change).</p>
+<h3 class="v2-h3">snapshotFlow: Compose state to Flow</h3>
+<p class="v2-p">When you need Flow operators (debounce, distinct, filter) on Compose state, convert it with <code>snapshotFlow</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+
+@Composable
+fun ReportScrolledPast(listState: LazyListState, onReached: (Int) -&gt; Unit) {
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .filter { it &gt; 0 &amp;&amp; it % 10 == 0 }
+            .distinctUntilChanged()
+            .collect { onReached(it) }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The block inside <code>snapshotFlow { }</code> re-runs whenever any Compose state it <strong>reads</strong> changes, and the flow emits the new result. This is the standard way to send "user scrolled past item 10, 20..." to analytics, without recomposing anything.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: derivedStateOf and snapshotFlow</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 15</div><div class="pt">Step-by-Step Build 9: Classic Mistakes with Effects</div><div class="pc" id="chk12"></div></div><div class="pb2"><h3 class="v2-h3">1. Wrong key (restarts too often or never)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>LaunchedEffect(Unit) { load(userId) }      // BUG: userId changes, nothing reloads
+LaunchedEffect(userId) { load(userId) }    // correct: reload when userId changes</code></pre></div></div>
+<p class="v2-p">The rule: <strong>every value the effect uses and that can change should be a key</strong> (or accessed through <code>rememberUpdatedState</code>).</p>
+<h3 class="v2-h3">2. Effect that should be an event handler</h3>
+<p class="v2-p">Do not use a <code>LaunchedEffect</code> to react to a click by flipping a flag and observing it; just call the handler or launch from <code>rememberCoroutineScope</code>.</p>
+<h3 class="v2-h3">3. Side effect in composition</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Bad() {
+    Log.d("X", "composed")                  // fine for debugging only
+    database.insert(item)                   // WRONG: runs on every recomposition
+    counter++                               // WRONG: mutating non-state in composition
+}</code></pre></div></div>
+<h3 class="v2-h3">4. Forgetting <code>onDispose</code></h3>
+<p class="v2-p">A listener registered in <code>DisposableEffect</code> but not removed leaks the Activity.</p>
+<h3 class="v2-h3">5. Capturing a changing lambda without <code>rememberUpdatedState</code></h3>
+<p class="v2-p">See Build 5.</p>
+<h3 class="v2-h3">6. Doing work in <code>SideEffect</code> that needs a coroutine or cleanup</h3>
+<p class="v2-p">Use <code>LaunchedEffect</code> or <code>DisposableEffect</code>.</p>
+<h3 class="v2-h3">7. One-shot events as state</h3>
+<p class="v2-p">A "navigate" or "show message" flag that stays <code>true</code> and fires again after rotation. Model events as <strong>state that is consumed</strong> (lesson 61) rather than a shared-flow that can be lost, or call <code>onShown()</code> after handling (as in Build 4).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 9: Classic Mistakes with Effects</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 15</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk13"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: A countdown timer with correct effects</strong></p>
+<p class="v2-p">Write <code>CountdownButton(seconds, onFinished)</code> that shows the remaining seconds, counts down once per second when the user taps Start, and calls the <strong>latest</strong> <code>onFinished</code> at zero. Restart safely if the user taps Start again. Use <code>rememberCoroutineScope</code>, <code>rememberUpdatedState</code> and a <code>Job</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+@Composable
+fun CountdownButton(seconds: Int, onFinished: () -&gt; Unit) {
+    val latestOnFinished by rememberUpdatedState(onFinished)
+    var remaining by remember { mutableIntStateOf(seconds) }
+    var job by remember { mutableStateOf&lt;Job?&gt;(null) }
+    val scope = rememberCoroutineScope()
+
+    Button(onClick = {
+        job?.cancel()                         // restart safely
+        remaining = seconds
+        job = scope.launch {
+            while (remaining &gt; 0) {
+                delay(1_000)
+                remaining--
+            }
+            latestOnFinished()
+        }
+    }) {
+        Text(if (job?.isActive == true) "$remaining s" else "Start")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>rememberUpdatedState</code> avoids a stale callback; cancelling the previous <code>Job</code> avoids two timers running; the scope cancels the job automatically if the composable leaves. (<code>job?.isActive</code> is read in composition from a plain <code>Job</code>, which is not state, so the label may lag by one recomposition; in production keep a <code>running</code> boolean in state.)</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix the buggy effect</strong></p>
+<p class="v2-p">This composable should reload the student's details when <code>studentId</code> changes and show a snackbar when loading fails. It reloads only once and shows the snackbar on every recomposition. Fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentDetail(studentId: Int, vm: DetailViewModel, snackbarHostState: SnackbarHostState) {
+    LaunchedEffect(Unit) { vm.load(studentId) }
+    if (vm.error != null) {
+        scope.launch { snackbarHostState.showSnackbar(vm.error!!) }
+    }
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentDetail(studentId: Int, vm: DetailViewModel, snackbarHostState: SnackbarHostState) {
+    LaunchedEffect(studentId) { vm.load(studentId) }          // key = the value that changes
+
+    val error = vm.error                                       // state read once per composition
+    LaunchedEffect(error) {                                    // effect, not a launch in the body
+        if (error != null) {
+            snackbarHostState.showSnackbar(error)
+            vm.errorShown()                                    // consume the one-off message
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Fixes: use <code>studentId</code> as the key so it reloads; replace the launch-in-body with a <code>LaunchedEffect</code> keyed on the error; consume the error so it is not shown again after rotation.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Pick the API</strong></p>
+<p class="v2-p">For each, pick the best API: (a) register a <code>BroadcastReceiver</code> for connectivity changes and unregister on leaving; (b) show a "Back to top" button only after scrolling past item 3; (c) load a profile picture from a callback-based library and expose it as state; (d) send a debounced search query to the ViewModel as the user types in a <code>TextField</code> held in Compose state; (e) keep a legacy analytics SDK's "theme" property in sync with the app theme.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>DisposableEffect(context)</code> with <code>onDispose</code> to unregister. (b) <code>derivedStateOf { listState.firstVisibleItemIndex &gt; 3 }</code>. (c) <code>produceState</code> (or <code>suspendCancellableCoroutine</code> inside it) with keys of the picture ID. (d) <code>LaunchedEffect</code> with <code>snapshotFlow { text }.debounce(300).distinctUntilChanged().collect { vm.search(it) }</code>; alternatively hold the text in the ViewModel and debounce there (lesson 33). (e) <code>SideEffect</code>, since it must run after each successful recomposition and does not need cleanup or a coroutine.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 15</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Doing real work in the composable body.</strong> <em>Symptom:</em> repeated network calls. <em>Fix:</em> effects or ViewModel.</p>
+<p class="v2-p"><strong>Mistake #2: <code>LaunchedEffect(Unit)</code> using a changing value.</strong> <em>Symptom:</em> stale data. <em>Fix:</em> key it, or use <code>rememberUpdatedState</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Restarting an effect by keying on a lambda.</strong> <em>Symptom:</em> timer resets. <em>Fix:</em> <code>rememberUpdatedState</code>.</p>
+<p class="v2-p"><strong>Mistake #4: <code>DisposableEffect</code> without proper cleanup.</strong> <em>Symptom:</em> leaks, duplicate callbacks. <em>Fix:</em> always remove listeners in <code>onDispose</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Storing large objects with <code>rememberSaveable</code>.</strong> <em>Symptom:</em> <code>TransactionTooLargeException</code>. <em>Fix:</em> ViewModel and database.</p>
+<p class="v2-p"><strong>Mistake #6: Using <code>derivedStateOf</code> where inputs and outputs change equally.</strong> <em>Symptom:</em> extra overhead. <em>Fix:</em> compute directly.</p>
+<p class="v2-p"><strong>Mistake #7: Forgetting <code>remember</code> around <code>derivedStateOf</code>.</strong> <em>Symptom:</em> recreated each recomposition. <em>Fix:</em> <code>remember { derivedStateOf { ... } }</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Hoisting state too high.</strong> <em>Symptom:</em> huge recompositions and parameter lists. <em>Fix:</em> hoist to the lowest common ancestor.</p>
+<p class="v2-p"><strong>Mistake #9: Putting business logic in a state holder.</strong> <em>Fix:</em> UI logic in state holders, business logic in ViewModels.</p>
+<p class="v2-p"><strong>Mistake #10: One-off events stored as a permanent flag.</strong> <em>Symptom:</em> repeat after rotation. <em>Fix:</em> consume events (lesson 61).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 15</div><div class="pt">Knowledge Check</div><div class="pc" id="chk15"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why can't you call a ViewModel <code>load()</code> directly in a composable body?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Composables can recompose many times, so the call would repeat. Side effects must be in an effect API (such as <code>LaunchedEffect</code>) or in event handlers.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What happens to a <code>LaunchedEffect</code> when its key changes?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The running coroutine is cancelled and a new one starts with the new key.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> When do you use <code>rememberCoroutineScope</code> instead of <code>LaunchedEffect</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">When the coroutine must start in response to an event such as a click, because <code>LaunchedEffect</code> can only start when the composable enters or its key changes.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is <code>rememberUpdatedState</code> for?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It lets a long-running effect always call the latest value or lambda without restarting the effect.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Name one correct use each for <code>DisposableEffect</code>, <code>SideEffect</code>, <code>produceState</code> and <code>snapshotFlow</code>.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p"><code>DisposableEffect</code>: register and unregister a lifecycle observer or receiver. <code>SideEffect</code>: publish state to non-Compose code after each recomposition. <code>produceState</code>: convert a callback or suspend source into <code>State</code>. <code>snapshotFlow</code>: turn Compose state, such as scroll position, into a Flow for debounce or analytics.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-3" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 3: Advanced state and navigation</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-advanced-state-side-effects" rel="noopener noreferrer">Advanced state and side effects codelab</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-state" rel="noopener noreferrer">Jetpack Compose state codelab</a></li>
+<li><a href="https://developer.android.com/develop/ui/compose/architecture" rel="noopener noreferrer">Jetpack Compose architecture guide</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Study Planner with a State Holder</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a <strong>study planner</strong> screen that uses a state holder class, a custom saver, and the main effects correctly.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li><code>PlannerState</code> state holder: a list of tasks (title, minutes, done), <code>add</code>, <code>toggle</code>, <code>remove</code>, derived <code>totalMinutes</code>, <code>doneCount</code>, and a <code>Saver</code> so it survives rotation.</li>
+<li>A <code>rememberPlannerState()</code> function.</li>
+<li>A <strong>Pomodoro timer</strong> composable (25 minutes shown as mm:ss, but use 10 seconds while testing) using <code>rememberCoroutineScope</code>, a cancellable <code>Job</code> and <code>rememberUpdatedState</code> for <code>onFinished</code>.</li>
+<li>A <code>LaunchedEffect</code> that shows a snackbar when a task is added, keyed correctly.</li>
+<li><code>DisposableEffect</code> that logs <code>ON_PAUSE</code>/<code>ON_RESUME</code> and removes its observer.</li>
+<li>A "Back to top" button using <code>derivedStateOf</code> on a <code>LazyListState</code>.</li>
+<li>A unit test for <code>PlannerState</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> use <code>snapshotFlow</code> to log "5 tasks done" once when <code>doneCount</code> reaches 5, with <code>distinctUntilChanged</code>.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PlannerState.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.planner
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+
+data class Task(val id: Int, val title: String, val minutes: Int, val done: Boolean = false)
+
+@Stable
+class PlannerState(initial: List&lt;Task&gt; = emptyList(), nextId: Int = 1) {
+    val tasks = mutableStateListOf&lt;Task&gt;().apply { addAll(initial) }
+    private var nextId = nextId
+
+    val totalMinutes: Int get() = tasks.sumOf { it.minutes }
+    val doneCount: Int get() = tasks.count { it.done }
+
+    fun add(title: String, minutes: Int) {
+        if (title.isBlank()) return
+        tasks.add(Task(nextId++, title.trim(), minutes))
+    }
+
+    fun toggle(id: Int) {
+        val i = tasks.indexOfFirst { it.id == id }
+        if (i &gt;= 0) tasks[i] = tasks[i].copy(done = !tasks[i].done)
+    }
+
+    fun remove(id: Int) { tasks.removeAll { it.id == id } }
+
+    companion object {
+        val Saver: Saver&lt;PlannerState, *&gt; = listSaver(
+            save = { s -&gt; listOf(s.nextId) + s.tasks.flatMap { listOf(it.id, it.title, it.minutes, it.done) } },
+            restore = { list -&gt;
+                val next = list[0] as Int
+                val tasks = list.drop(1).chunked(4).map {
+                    Task(it[0] as Int, it[1] as String, it[2] as Int, it[3] as Boolean)
+                }
+                PlannerState(tasks, next)
+            }
+        )
+    }
+}
+
+@Composable
+fun rememberPlannerState(): PlannerState =
+    rememberSaveable(saver = PlannerState.Saver) { PlannerState() }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PlannerScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.planner
+
+import android.util.Log
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleEventObserver
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+@Composable
+fun PlannerScreen(state: PlannerState = rememberPlannerState()) {
+    val snackbar = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showTop by remember { derivedStateOf { listState.firstVisibleItemIndex &gt; 5 } }
+
+    // Snackbar when a task is added: key on the count
+    val count = state.tasks.size
+    var lastCount by remember { mutableIntStateOf(count) }
+    LaunchedEffect(count) {
+        if (count &gt; lastCount) snackbar.showSnackbar("Task added")
+        lastCount = count
+    }
+
+    // Lifecycle logging with cleanup
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner) {
+        val observer = LifecycleEventObserver { _, e -&gt; Log.d("Planner", "event=$e") }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
+
+    Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding -&gt;
+        Column(Modifier.padding(padding).padding(16.dp)) {
+            Text("Total: ${state.totalMinutes} min, done ${state.doneCount}")
+            PomodoroTimer(seconds = 10, onFinished = { Log.d("Planner", "Pomodoro finished") })
+            Button(onClick = { state.add("Read chapter ${state.tasks.size + 1}", 25) }) { Text("Add task") }
+            LazyColumn(state = listState) {
+                items(state.tasks, key = { it.id }) { task -&gt;
+                    Row {
+                        Checkbox(task.done, { state.toggle(task.id) })
+                        Text(task.title)
+                    }
+                }
+            }
+            if (showTop) {
+                Button(onClick = { scope.launch { listState.animateScrollToItem(0) } }) { Text("Top") }
+            }
+        }
+    }
+}
+
+@Composable
+fun PomodoroTimer(seconds: Int, onFinished: () -&gt; Unit) {
+    val latest by rememberUpdatedState(onFinished)
+    var remaining by remember { mutableIntStateOf(seconds) }
+    var running by remember { mutableStateOf(false) }
+    var job by remember { mutableStateOf&lt;Job?&gt;(null) }
+    val scope = rememberCoroutineScope()
+
+    Button(onClick = {
+        job?.cancel()
+        remaining = seconds
+        running = true
+        job = scope.launch {
+            while (remaining &gt; 0) { delay(1_000); remaining-- }
+            running = false
+            latest()
+        }
+    }) {
+        Text(if (running) "%d:%02d".format(remaining / 60, remaining % 60) else "Start focus")
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PlannerStateTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.planner
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class PlannerStateTest {
+    @Test
+    fun totalsAndToggle() {
+        val s = PlannerState()
+        s.add("Maths", 30)
+        s.add("English", 20)
+        assertEquals(50, s.totalMinutes)
+        s.toggle(1)
+        assertEquals(1, s.doneCount)
+        s.remove(2)
+        assertEquals(30, s.totalMinutes)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected behaviour:</strong> adding tasks shows a snackbar and updates totals; the list survives rotation (the saver stores all tasks and the next id); the timer counts 10 → 0 and logs once, restarting cleanly when tapped again; the Top button appears after scrolling past six items; Logcat shows lifecycle events while the screen is visible, and the observer is removed when the screen leaves.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 54 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-54-advanced-state-and-side-effects</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 54 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: A Compose State of Mind</li><li>✅ Step-by-Step Build 1: Hoisting and a State Holder Class</li><li>✅ Step-by-Step Build 2: rememberSaveable and Savers</li><li>✅ Step-by-Step Build 3: Side Effects, the Big Picture</li><li>✅ Step-by-Step Build 4: LaunchedEffect and rememberCoroutineScope</li><li>✅ Step-by-Step Build 5: rememberUpdatedState</li><li>✅ Step-by-Step Build 6: DisposableEffect</li><li>✅ Step-by-Step Build 7: SideEffect and produceState</li><li>✅ Step-by-Step Build 8: derivedStateOf and snapshotFlow</li><li>✅ Step-by-Step Build 9: Classic Mistakes with Effects</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_53.html" class="ln-btn">&#8592; Lesson 53</a><a href="lesson_55.html" class="ln-btn primary">Lesson 55 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 54 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

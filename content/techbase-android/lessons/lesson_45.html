@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 45: Testing Jetpack Compose UIs — Techbase Android</title>
+</head>
+<body data-total="15" data-key="techbase_android_l45">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 45 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 45</div>
+      <h1>Testing Jetpack Compose UIs</h1>
+      <div class="l-hero-sub">15 phases &nbsp;·&nbsp; Build: Test Suite for a Shopping Cart</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 45</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Test composables with the semantics tree, finders, actions and assertions, and debug flaky tests with synchronisation.</p></div><div class="wm"><span>📚 15 phases</span><span>🏗️ Test Suite for a Shopping Cart</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 15</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You have tested a tip calculator and a ViewModel (lessons 20 and 25). Now we test <strong>what the user actually sees and touches</strong>: buttons, text fields, lists and screens built with Compose. UI tests are the safety net that lets you change code, upgrade libraries or migrate a screen without wondering "did I break the login button?"</p>
+<p class="v2-p">This lesson covers the <em>Write your very first Compose UI test</em>, <em>Testing</em> and <em>How Compose improves UI testing</em> items of Pathway 4 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4), and follows the ideas of the official <em>Testing in Jetpack Compose</em> codelab with our own example app.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the <strong>semantics tree</strong> and why Compose tests use it instead of Views and ids.</li>
+<li>Set up the test dependencies and write a test with <code>createComposeRule()</code> and <code>createAndroidComposeRule()</code>.</li>
+<li>Use <strong>finders</strong> (<code>onNodeWithText</code>, <code>onNodeWithTag</code>, <code>onNodeWithContentDescription</code>, <code>onAllNodes...</code>), <strong>actions</strong> (<code>performClick</code>, <code>performTextInput</code>, <code>performScrollTo</code>) and <strong>assertions</strong> (<code>assertIsDisplayed</code>, <code>assertTextEquals</code>, <code>assertIsEnabled</code>).</li>
+<li>Choose between the <strong>merged</strong> and <strong>unmerged</strong> tree, and use <code>printToLog</code> to debug.</li>
+<li>Control <strong>time</strong> and <strong>synchronisation</strong> with <code>waitUntil</code>, <code>mainClock</code> and idling.</li>
+<li>Test a screen <strong>in isolation</strong>, with state restoration and a ViewModel fake.</li>
+<li>Run tests and read the results.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a UI test does what a person does: find something on the screen, act on it, and check the result. Compose makes this reliable because the test framework is <strong>synchronised with the UI</strong>; it waits for recomposition and animations to finish before checking.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 15</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Unit tests with JUnit and <code>assertEquals</code></strong> (lesson 20).</li>
+<li><strong>ViewModel tests</strong> (lesson 25).</li>
+<li><strong>State and state hoisting</strong> (lessons 17 and 24).</li>
+<li><strong>Compose semantics and <code>Modifier</code></strong> (lessons 15–16, 37).</li>
+<li><strong>Running tests</strong>: local tests live in <code>src/test</code>, instrumented tests in <code>src/androidTest</code>.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 15</div><div class="pt">Conceptual Understanding: Semantics, Not Views</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A View test could say "find the view with id <code>R.id.save_button</code>". Compose has no ids. Instead every composable can describe <strong>what it means</strong> to the user and to accessibility services. That description is the <strong>semantics tree</strong>: a parallel tree of nodes, each with properties such as <code>Text</code>, <code>ContentDescription</code>, <code>Role</code>, <code>OnClick</code>, <code>Disabled</code>, <code>TestTag</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Composition (what you wrote)           Semantics tree (what tests and TalkBack see)
+
+Row {                                  Node: Row (merged)
+  Icon(Icons.Default.Favorite,           ContentDescription = "Favourite"
+       contentDescription = "Favourite") Text = "Ada"
+  Text("Ada")                            OnClick, Role = Button
+}  (clickable)</code></pre></div></div>
+<p class="v2-p">The same tree is used by <strong>accessibility</strong> (TalkBack reads it, lessons 46–48) and by <strong>tests</strong>. So writing accessible UI makes it easier to test, and vice versa. That is one of the ways Compose improves UI testing.</p>
+<p class="v2-p">Several more benefits worth naming (the <em>How Compose improves UI testing</em> idea):</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Why it helps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Synchronised</strong></td>
+<td>The test framework waits until the UI is idle (recomposition and animations finished) before each check, so you rarely need sleeps</td>
+</tr>
+<tr>
+<td><strong>Isolated</strong></td>
+<td>You can render a single composable with <code>setContent</code>, without launching a whole Activity or navigating</td>
+</tr>
+<tr>
+<td><strong>Fast</strong></td>
+<td>No XML inflation, and you can run on the JVM with Robolectric (optional)</td>
+</tr>
+<tr>
+<td><strong>Controllable time</strong></td>
+<td>A test clock lets you jump an animation forward</td>
+</tr>
+<tr>
+<td><strong>Same tree as accessibility</strong></td>
+<td>Tests double as accessibility checks</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">The three kinds of API</h3>
+<p class="v2-p">Every Compose UI test is built from three kinds of calls, chained together:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>composeTestRule.onNodeWithText("Add").performClick().assertIsEnabled()
+                \_____ finder _____/ \__ action __/ \__ assertion __/</code></pre></div></div>
+<ul class="v2-ul">
+<li><strong>Finders</strong> select one node (<code>onNode...</code>) or several (<code>onAllNodes...</code>).</li>
+<li><strong>Actions</strong> simulate input (<code>performClick</code>, <code>performTextInput</code>, ...).</li>
+<li><strong>Assertions</strong> check state (<code>assertIsDisplayed</code>, <code>assertTextEquals</code>, ...).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Semantics, Not Views</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 15</div><div class="pt">Step-by-Step Build 1: Set Up and the Very First Test</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Use our small <strong>Counter</strong> and <strong>Greeting</strong> examples. Start (or reuse) a Compose project called <code>TestLab</code>, package <code>com.example.testlab</code>.</p>
+<h3 class="v2-h3">Dependencies</h3>
+<p class="v2-p">Compose UI tests are <strong>instrumented tests</strong>: they run on an emulator or device (or with Robolectric). In <code>app/build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+}
+
+dependencies {
+    // Compose BOM already declared as implementation(platform(...))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+}</code></pre></div></div>
+<p class="v2-p">And in <code>gradle/libs.versions.toml</code> (versions come from the BOM, so you do not add one for the Compose artifacts):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[libraries]
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }</code></pre></div></div>
+<p class="v2-p"><code>ui-test-junit4</code> provides the rule and finders. <code>ui-test-manifest</code> (as a <code>debugImplementation</code>) adds the empty test Activity that <code>createComposeRule()</code> uses to host your composables. New Compose projects from Android Studio already include these lines; if they are missing, tests fail with an error that a <code>ComponentActivity</code> cannot be resolved.</p>
+<h3 class="v2-h3">The code to test</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Counter.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun Counter(modifier: Modifier = Modifier) {
+    var count by rememberSaveable { mutableIntStateOf(0) }
+    Column(modifier.padding(16.dp)) {
+        Text("Count: $count")
+        Button(onClick = { count++ }) { Text("Add") }
+        Button(onClick = { count = 0 }, enabled = count &gt; 0) { Text("Reset") }
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Your first test</h3>
+<p class="v2-p">In the <strong>Project</strong> view, the <code>androidTest</code> folder is <code>app/src/androidTest/java/com/example/testlab/</code>. Create <code>CounterTest.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CounterTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import org.junit.Rule
+import org.junit.Test
+
+class CounterTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    @Test
+    fun startsAtZero() {
+        composeTestRule.setContent { Counter() }
+
+        composeTestRule.onNodeWithText("Count: 0").assertExists()
+        composeTestRule.onNodeWithText("Reset").assertIsNotEnabled()
+    }
+
+    @Test
+    fun addIncrementsCount() {
+        composeTestRule.setContent { Counter() }
+
+        composeTestRule.onNodeWithText("Add").performClick()
+        composeTestRule.onNodeWithText("Add").performClick()
+
+        composeTestRule.onNodeWithText("Count: 2").assertExists()
+        composeTestRule.onNodeWithText("Reset").assertIsEnabled()
+    }
+
+    @Test
+    fun resetGoesBackToZero() {
+        composeTestRule.setContent { Counter() }
+
+        composeTestRule.onNodeWithText("Add").performClick()
+        composeTestRule.onNodeWithText("Reset").performClick()
+
+        composeTestRule.onNodeWithText("Count: 0").assertExists()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Walk through it:</p>
+<ol class="v2-ol">
+<li><strong><code>@get:Rule val composeTestRule = createComposeRule()</code></strong>: a JUnit <strong>rule</strong> is code that runs before and after each test. This one starts a test Activity and manages the Compose environment. The <code>@get:</code> prefix is needed because Kotlin properties otherwise apply the annotation to the field, and JUnit needs it on the getter.</li>
+<li><strong><code>composeTestRule.setContent { ... }</code></strong>: shows <strong>only</strong> the composable under test. No MainActivity, no navigation, no theme unless you add it. This is <em>isolation</em>.</li>
+<li><strong><code>onNodeWithText("Add")</code></strong> is a finder. <strong><code>performClick()</code></strong> is an action. <strong><code>assertExists()</code></strong> is an assertion.</li>
+<li>After <code>performClick</code>, the rule <strong>waits</strong> for recomposition to finish. There is no <code>Thread.sleep</code>.</li>
+</ol>
+<h3 class="v2-h3">Run the tests</h3>
+<p class="v2-p">Right-click <code>CounterTest</code> in the Project view and choose <strong>Run 'CounterTest'</strong>, or click the green triangle next to the class or a single test. Choose an emulator or device. The <strong>Run</strong> window shows a green check per test. A failure shows the assertion message and the semantics tree at that moment, which is very helpful.</p>
+<p class="v2-p">Command line (device needed): <code>./gradlew connectedDebugAndroidTest</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Set Up and the Very First Test</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 15</div><div class="pt">Step-by-Step Build 2: Finders, Actions and Assertions in Depth</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Finders</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Finder</th>
+<th>Finds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>onNodeWithText("Add")</code></td>
+<td>A node whose <strong>Text</strong> is exactly "Add" (substring with <code>substring = true</code>, ignore case with <code>ignoreCase = true</code>)</td>
+</tr>
+<tr>
+<td><code>onNodeWithContentDescription("Favourite")</code></td>
+<td>A node with that content description (icons, images)</td>
+</tr>
+<tr>
+<td><code>onNodeWithTag("studentList")</code></td>
+<td>A node with <code>Modifier.testTag("studentList")</code></td>
+</tr>
+<tr>
+<td><code>onNode(hasText("Add") and hasClickAction())</code></td>
+<td>General matcher with <code>and</code>, <code>or</code>, <code>not</code></td>
+</tr>
+<tr>
+<td><code>onAllNodesWithText("Delete")</code></td>
+<td><strong>Every</strong> match, as a collection; use <code>[0]</code>, <code>onFirst()</code>, <code>onLast()</code>, <code>assertCountEquals(n)</code></td>
+</tr>
+<tr>
+<td><code>onRoot()</code></td>
+<td>The root of the semantics tree (good for <code>printToLog</code>)</td>
+</tr>
+<tr>
+<td><code>onChild()</code>, <code>onChildren()</code>, <code>onParent()</code>, <code>onSiblings()</code></td>
+<td>Navigate the tree from a node</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">If a finder matches <strong>more than one node</strong> when you used a single-node finder, the test fails with an error telling you to refine it. That is intentional.</p>
+<p class="v2-p">Prefer finders in this order: <strong>content description / visible text</strong> (what the user sees) first, because they test the real UI and double as accessibility checks; then <strong><code>testTag</code></strong> for things with no stable text (a list container, a dynamic number).</p>
+<h3 class="v2-h3">Test tags</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+
+LazyColumn(Modifier.testTag("studentList")) { /* ... */ }</code></pre></div></div>
+<p class="v2-p">Tags are invisible to users, so use them sparingly and put the tag strings in a shared <code>object Tags</code> so the app and test use the same constant.</p>
+<h3 class="v2-h3">Actions</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Action</th>
+<th>Does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>performClick()</code></td>
+<td>Tap</td>
+</tr>
+<tr>
+<td><code>performTextInput("Ada")</code></td>
+<td>Type text into a text field (appends)</td>
+</tr>
+<tr>
+<td><code>performTextClearance()</code></td>
+<td>Clear a text field</td>
+</tr>
+<tr>
+<td><code>performTextReplacement("Bola")</code></td>
+<td>Replace the text</td>
+</tr>
+<tr>
+<td><code>performScrollTo()</code></td>
+<td>Scroll a lazy or scrollable container until the node is visible</td>
+</tr>
+<tr>
+<td><code>performScrollToIndex(20)</code> / <code>performScrollToKey(...)</code> / <code>performScrollToNode(matcher)</code></td>
+<td>Scroll a lazy list to a position, key or matching node</td>
+</tr>
+<tr>
+<td><code>performTouchInput { swipeLeft() }</code></td>
+<td>Gestures: <code>swipeUp</code>, <code>longClick</code>, <code>doubleClick</code>, <code>pinch</code> ...</td>
+</tr>
+<tr>
+<td><code>performImeAction()</code></td>
+<td>Press the keyboard action key</td>
+</tr>
+<tr>
+<td><code>performSemanticsAction(SemanticsActions.OnClick)</code></td>
+<td>Call a semantics action directly</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Assertions</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Assertion</th>
+<th>Checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>assertExists()</code> / <code>assertDoesNotExist()</code></td>
+<td>In/not in the semantics tree</td>
+</tr>
+<tr>
+<td><code>assertIsDisplayed()</code> / <code>assertIsNotDisplayed()</code></td>
+<td>Visible on screen (not clipped or scrolled off)</td>
+</tr>
+<tr>
+<td><code>assertIsEnabled()</code> / <code>assertIsNotEnabled()</code></td>
+<td>Enabled state</td>
+</tr>
+<tr>
+<td><code>assertIsSelected()</code>, <code>assertIsOn()</code>, <code>assertIsOff()</code></td>
+<td>Selection, toggle, checkbox</td>
+</tr>
+<tr>
+<td><code>assertTextEquals("Count: 2")</code></td>
+<td>Exact text (can pass several for merged text)</td>
+</tr>
+<tr>
+<td><code>assertTextContains("Ada")</code></td>
+<td>Substring</td>
+</tr>
+<tr>
+<td><code>assertContentDescriptionEquals(...)</code></td>
+<td>Content description</td>
+</tr>
+<tr>
+<td><code>assertHasClickAction()</code></td>
+<td>Is clickable</td>
+</tr>
+<tr>
+<td><code>assertCountEquals(5)</code></td>
+<td>On a collection</td>
+</tr>
+<tr>
+<td><code>assert(hasText("x"))</code></td>
+<td>Any matcher</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Exists vs displayed.</strong> A node can <strong>exist</strong> in the tree yet not be <strong>displayed</strong> (scrolled off-screen in a <code>Column</code> with <code>verticalScroll</code>, or clipped). In a <code>LazyColumn</code>, off-screen items usually do not exist at all, which is why <code>performScrollTo...</code> matters.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Finders, Actions and Assertions in Depth</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 15</div><div class="pt">Step-by-Step Build 3: Testing a Form with Text Input</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A form is the standard UI-test target. Our composable:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentForm.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun StudentForm(
+    onSave: (String) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    var name by rememberSaveable { mutableStateOf("") }
+    val error = name.isNotEmpty() &amp;&amp; name.length &lt; 2
+
+    Column(modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Student name") },
+            isError = error,
+            supportingText = { if (error) Text("At least 2 letters") }
+        )
+        Button(onClick = { onSave(name.trim()) }, enabled = name.length &gt;= 2) {
+            Text("Save")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>StudentForm</code> receives its behaviour through <code>onSave</code>: it does not know about a ViewModel or database. That is <strong>state hoisting</strong> (lesson 24) and it makes the test trivial.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentFormTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+
+class StudentFormTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    @Test
+    fun saveDisabledUntilTwoLetters() {
+        rule.setContent { StudentForm(onSave = {}) }
+
+        rule.onNodeWithText("Save").assertIsNotEnabled()
+
+        rule.onNodeWithText("Student name").performTextInput("A")
+        rule.onNodeWithText("At least 2 letters").assertExists()
+        rule.onNodeWithText("Save").assertIsNotEnabled()
+
+        rule.onNodeWithText("Student name").performTextInput("da")
+        rule.onNodeWithText("Save").assertIsEnabled()
+    }
+
+    @Test
+    fun saveReportsTheTrimmedName() {
+        var saved: String? = null
+        rule.setContent { StudentForm(onSave = { saved = it }) }
+
+        rule.onNodeWithText("Student name").performTextInput("  Ada ")
+        rule.onNodeWithText("Save").performClick()
+
+        assertEquals("Ada", saved)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Two points: finding the text field by its <strong>label</strong> (<code>"Student name"</code>) works because the label is part of the field's semantics; and a lambda captured in the test (<code>saved</code>) is the simplest way to check callbacks, a <strong>fake</strong> collaborator.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Testing a Form with Text Input</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 15</div><div class="pt">Step-by-Step Build 4: The Merged and Unmerged Semantics Trees</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Many composables <strong>merge</strong> their children's semantics into one node for accessibility: a clickable <code>Row</code> with an icon and text becomes a single node whose text is the combination. That is exactly what TalkBack announces. Tests use the merged tree by default.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.platform.testTag
+
+@Composable
+fun FavouriteRow(name: String, onClick: () -&gt; Unit) {
+    Row(Modifier.testTag("row_$name").clickable(onClick = onClick)) {
+        Icon(Icons.Filled.Favorite, contentDescription = "Favourite")
+        Text(name)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Which finders work?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// MERGED tree (default): the row is ONE node whose text is "Ada" and description "Favourite"
+rule.onNodeWithTag("row_Ada").assertExists()
+rule.onNodeWithText("Ada").assertExists()               // works: merged text
+rule.onNodeWithContentDescription("Favourite").assertExists() // works: merged description
+
+// UNMERGED tree: the Icon and the Text are separate nodes
+rule.onNodeWithText("Ada", useUnmergedTree = true).assertExists()
+rule.onNodeWithContentDescription("Favourite", useUnmergedTree = true).assertExists()</code></pre></div></div>
+<p class="v2-p">Use <strong><code>useUnmergedTree = true</code></strong> when you need a specific child (for example to assert on the icon alone) or when a finder cannot find a node because it was merged into its parent. Remember that merged is what assistive technology sees, so prefer testing against it when you can.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: The Merged and Unmerged Semantics Trees</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 15</div><div class="pt">Step-by-Step Build 5: Debugging Tests with printToLog</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">When a finder fails, <strong>look at the tree</strong>. The Logcat output of <code>printToLog</code> is the Compose test version of a debugger.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToLog
+
+@Test
+fun debugTree() {
+    rule.setContent { StudentForm(onSave = {}) }
+    rule.onRoot().printToLog("TREE")                      // merged tree
+    rule.onRoot(useUnmergedTree = true).printToLog("RAW") // unmerged tree
+}</code></pre></div></div>
+<p class="v2-p">In Logcat filter by the tag <code>TREE</code>. A sample of what you will see:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Printing with useUnmergedTree = 'false'
+Node #1 at (l=0.0, t=63.0, r=1080.0, b=2214.0)px
+ |-Node #2 at (...)px
+ |  Focused = 'false'
+ |  EditableText = ''
+ |  Text = '[Student name]'
+ |  Actions = [OnClick, RequestFocus, SetText, ...]
+ |-Node #5 at (...)px
+    Role = 'Button'
+    Text = '[Save]'
+    Disabled = 'kotlin.Unit'</code></pre></div></div>
+<p class="v2-p">Read it for <strong>Text</strong>, <strong>ContentDescription</strong>, <strong>TestTag</strong>, <strong>Role</strong>, <strong>Disabled</strong> and available <strong>Actions</strong>. The common reasons a finder fails: the text is slightly different (spaces, capitalisation, a string resource), the node is merged into a parent, or the node is not composed yet (lazy list or loading state).</p>
+<p class="v2-p">Also useful: <code>rule.onNode(...).assertExists()</code> failures print the whole tree automatically, and <code>fetchSemanticsNode()</code> returns the node for checking custom properties.</p>
+<h3 class="v2-h3">Using string resources in tests</h3>
+<p class="v2-p">To avoid duplicating strings, read them through the test context:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.test.platform.app.InstrumentationRegistry
+
+val context = InstrumentationRegistry.getInstrumentation().targetContext
+val saveLabel = context.getString(R.string.save)
+rule.onNodeWithText(saveLabel).assertExists()</code></pre></div></div>
+<p class="v2-p">Or use <code>createAndroidComposeRule&lt;MainActivity&gt;()</code>, then <code>rule.activity.getString(R.string.save)</code>. The Android-flavoured rule launches your <strong>real Activity</strong>, which is what you need for full-app tests with navigation:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import org.junit.Rule
+
+class AppFlowTest {
+    @get:Rule
+    val rule = createAndroidComposeRule&lt;MainActivity&gt;()
+    // rule.activity gives you the Activity; the app's own setContent is used.
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Debugging Tests with printToLog</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 15</div><div class="pt">Step-by-Step Build 6: Lists and Scrolling</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentListTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.hasText
+import org.junit.Rule
+import org.junit.Test
+
+class StudentListTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    private val names = List(100) { "Student $it" }
+
+    @Test
+    fun lastStudentAppearsAfterScrolling() {
+        rule.setContent {
+            LazyColumn(Modifier.testTag("list")) {
+                items(names) { Text(it) }
+            }
+        }
+
+        // Student 99 is not composed yet in a lazy list
+        rule.onNodeWithTag("list").performScrollToIndex(99)
+        rule.onNodeWithText("Student 99").assertIsDisplayed()
+    }
+
+    @Test
+    fun scrollToNodeByMatcher() {
+        rule.setContent {
+            LazyColumn(Modifier.testTag("list")) {
+                items(names) { Text(it) }
+            }
+        }
+        rule.onNodeWithTag("list").performScrollToNode(hasText("Student 50"))
+        rule.onNodeWithText("Student 50").assertIsDisplayed()
+    }
+}</code></pre></div></div>
+<p class="v2-p">If a test asserts on an item that is far down a <code>LazyColumn</code> without scrolling first, it fails with "no node found", because lazy lists compose only visible items (lesson 39). <code>performScrollToIndex</code> or <code>performScrollToNode</code> is the answer.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Lists and Scrolling</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 15</div><div class="pt">Step-by-Step Build 7: Time, Synchronisation and Animations</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">The rule <strong>auto-synchronises</strong>: before each action or assertion it waits for the UI to be idle, including recomposition and <strong>animations driven by Compose's clock</strong>. Things it cannot know about:</p>
+<ul class="v2-ul">
+<li><strong>Work on other threads</strong> such as a network call or database read in a ViewModel that updates state later.</li>
+<li><strong>Infinite animations</strong>, which never reach idle.</li>
+<li><strong>Delays</strong> with real time.</li>
+</ul>
+<h3 class="v2-h3">waitUntil</h3>
+<p class="v2-p">For asynchronous results, wait for a condition:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onNodeWithText
+
+@OptIn(ExperimentalTestApi::class)
+@Test
+fun loadedDataAppears() {
+    rule.setContent { StudentsScreen(viewModel = FakeViewModel(delayMs = 500)) }
+
+    rule.waitUntilExactlyOneExists(hasText("Ada"), timeoutMillis = 3_000)
+    rule.onNodeWithText("Ada").assertExists()
+}</code></pre></div></div>
+<p class="v2-p"><code>waitUntil(timeoutMillis) { condition }</code> is the basic form and returns when the lambda is true or fails on timeout. There are also <code>waitUntilAtLeastOneExists</code>, <code>waitUntilNodeCount</code> and <code>waitUntilDoesNotExist</code>. Some of them are marked experimental (<code>@ExperimentalTestApi</code>) depending on your version. Keep timeouts short: the point is to wait for <em>your own</em> events, not to hide slowness.</p>
+<p class="v2-p"><strong>A better design:</strong> replace the real data source with a <strong>fake</strong> that returns data immediately, so there is nothing to wait for (the next section).</p>
+<h3 class="v2-h3">Controlling the clock</h3>
+<p class="v2-p">For animations, take control of the test clock:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun bannerFadesIn() {
+    rule.mainClock.autoAdvance = false          // stop automatic time
+    rule.setContent { WelcomeBanner() }
+
+    rule.mainClock.advanceTimeBy(500)           // jump 500 ms (virtual time)
+    rule.onNodeWithText("Welcome back!").assertIsDisplayed()
+
+    rule.mainClock.autoAdvance = true
+}</code></pre></div></div>
+<p class="v2-p">The <code>mainClock</code> is <strong>virtual</strong>: advancing it is instant in real time, so a 5-second animation test takes milliseconds. This is also the cure for tests that hang because of an infinite animation: set <code>autoAdvance = false</code> and step manually (lesson 41).</p>
+<h3 class="v2-h3">Disabling animations on the device</h3>
+<p class="v2-p">Instrumented tests on real emulators are more stable if system animations are off. In Developer options set <em>Window animation scale</em>, <em>Transition animation scale</em> and <em>Animator duration scale</em> to <strong>off</strong>, or add this to <code>build.gradle.kts</code> so Gradle-managed runs do it for you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    testOptions {
+        animationsDisabled = true
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Time, Synchronisation and Animations</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 15</div><div class="pt">Step-by-Step Build 8: Testing a Screen with a ViewModel and State Restoration</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Test the UI in two layers.</strong></p>
+<ol class="v2-ol">
+<li>A <strong>stateless</strong> composable (<code>StudentsContent(state, onAdd)</code>), tested by giving it state directly.</li>
+<li>A <strong>stateful</strong> screen (<code>StudentsScreen(viewModel)</code>), tested with a <strong>fake</strong> ViewModel or repository.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentsScreenTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.assertIsDisplayed
+import org.junit.Rule
+import org.junit.Test
+
+class StudentsContentTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    @Test
+    fun showsEmptyMessage() {
+        rule.setContent {
+            StudentsContent(state = StudentsUiState(students = emptyList()), onAdd = {})
+        }
+        rule.onNodeWithText("No students yet").assertIsDisplayed()
+    }
+
+    @Test
+    fun clickingAddCallsCallback() {
+        var added = 0
+        rule.setContent {
+            StudentsContent(state = StudentsUiState(), onAdd = { added++ })
+        }
+        rule.onNodeWithText("Add student").performClick()
+        kotlin.test.assertEquals(1, added)
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>kotlin.test</code> needs <code>androidTestImplementation(kotlin("test"))</code>; you can use <code>org.junit.Assert.assertEquals</code> instead.)</p>
+<h3 class="v2-h3">State restoration</h3>
+<p class="v2-p">A frequent bug is state that disappears when the Activity is recreated (rotation, process death). Test it with <code>StateRestorationTester</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.StateRestorationTester
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+
+@Test
+fun counterSurvivesRecreation() {
+    val tester = StateRestorationTester(rule)
+    tester.setContent { Counter() }
+
+    rule.onNodeWithText("Add").performClick()
+    rule.onNodeWithText("Count: 1").assertExists()
+
+    tester.emulateSavedInstanceStateRestore()
+
+    rule.onNodeWithText("Count: 1").assertExists()   // passes only with rememberSaveable
+}</code></pre></div></div>
+<p class="v2-p">Change <code>rememberSaveable</code> to <code>remember</code> in <code>Counter</code> and this test fails. That is how you catch the lesson 23 bug automatically.</p>
+<h3 class="v2-h3">Theme, locale and font scale in tests</h3>
+<p class="v2-p">Wrap content in your theme to test with it: <code>rule.setContent { MyAppTheme { Counter() } }</code>. To check large fonts, provide a <code>LocalDensity</code> with a bigger <code>fontScale</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+
+rule.setContent {
+    val d = LocalDensity.current
+    CompositionLocalProvider(LocalDensity provides Density(d.density, fontScale = 2f)) {
+        Counter()
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: Testing a Screen with a ViewModel and State Restoration</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 15</div><div class="pt">Step-by-Step Build 9: Testing Navigation and Full Flows</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">You tested a <code>NavHost</code> with <code>TestNavHostController</code> in lesson 26. Here is the structure, in brief, for a UI-level test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.testing.TestNavHostController
+import androidx.compose.ui.platform.LocalContext
+import org.junit.Assert.assertEquals
+
+@Test
+fun tappingStudentOpensDetail() {
+    lateinit var navController: TestNavHostController
+    rule.setContent {
+        navController = TestNavHostController(LocalContext.current).apply {
+            navigatorProvider.addNavigator(ComposeNavigator())
+        }
+        AppNavHost(navController = navController)
+    }
+
+    rule.onNodeWithText("Ada").performClick()
+    assertEquals("detail/{id}", navController.currentBackStackEntry?.destination?.route)
+}</code></pre></div></div>
+<p class="v2-p">Your <code>AppNavHost</code> must accept the controller as a parameter for this to work, another reason to keep controllers out of deep code. The dependency is <code>androidx.navigation:navigation-testing</code> as <code>androidTestImplementation</code>. (With type-safe routes, check the destination with <code>hasRoute&lt;Detail&gt;()</code> from <code>androidx.navigation</code>.) A test against <code>createAndroidComposeRule&lt;MainActivity&gt;()</code> covers an entire flow, but such tests are slower and more brittle; keep most tests small and a few for the <strong>critical journeys</strong> (sign-in, add item, checkout).</p>
+<h3 class="v2-h3">The testing pyramid</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>         /\        few    Full-app UI flow tests (slow, realistic)
+        /  \
+       /----\      some   Screen tests with fakes (Compose rule, isolated)
+      /      \
+     /--------\    many   Unit tests: ViewModels, repositories, logic (fast, JVM)</code></pre></div></div>
+<p class="v2-p">A good project has many cheap unit tests at the bottom, a moderate number of Compose screen tests, and a handful of end-to-end tests.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 9: Testing Navigation and Full Flows</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 15</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk13"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Test the Reset button</strong></p>
+<p class="v2-p">Using the <code>Counter</code> composable, write a test that checks: Reset is disabled at 0; after one tap on Add it is enabled; after tapping Reset the text goes back to "Count: 0" and Reset is disabled again.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import org.junit.Rule
+import org.junit.Test
+
+class ResetTest {
+    @get:Rule
+    val rule = createComposeRule()
+
+    @Test
+    fun resetLifecycle() {
+        rule.setContent { Counter() }
+
+        rule.onNodeWithText("Reset").assertIsNotEnabled()
+        rule.onNodeWithText("Add").performClick()
+        rule.onNodeWithText("Reset").assertIsEnabled()
+        rule.onNodeWithText("Reset").performClick()
+        rule.onNodeWithText("Count: 0").assertExists()
+        rule.onNodeWithText("Reset").assertIsNotEnabled()
+    }
+}</code></pre></div></div></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Find an element in the unmerged tree</strong></p>
+<p class="v2-p">A <code>ProductCard</code> is <code>Card(Modifier.clickable { }) { Image(contentDescription = "Product photo"); Text("Zobo ₦250") }</code>. A test <code>onNodeWithContentDescription("Product photo").assertExists()</code> fails. Explain why, and give two fixes.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>clickable</code> merges descendants into a single semantics node, so the image's description is merged into the card node and the <code>Image</code> is not a separate node in the merged tree. Fix 1: query the unmerged tree, <code>onNodeWithContentDescription("Product photo", useUnmergedTree = true)</code>. Fix 2: assert against the merged node, for example <code>onNode(hasContentDescription("Product photo") and hasClickAction())</code>, or add a <code>testTag</code> to the card and check <code>assertContentDescriptionEquals</code>. Use <code>printToLog</code> to see which is true.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Prove state survives rotation</strong></p>
+<p class="v2-p">Write a test for the <code>StudentForm</code> that types "Ada", simulates recreation, and asserts "Ada" is still in the field. Say what happens if <code>rememberSaveable</code> is replaced with <code>remember</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.StateRestorationTester
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextInput
+import org.junit.Rule
+import org.junit.Test
+
+class FormRestoreTest {
+    @get:Rule
+    val rule = createComposeRule()
+
+    @Test
+    fun nameSurvivesRecreation() {
+        val tester = StateRestorationTester(rule)
+        tester.setContent { StudentForm(onSave = {}) }
+
+        rule.onNodeWithText("Student name").performTextInput("Ada")
+        tester.emulateSavedInstanceStateRestore()
+
+        rule.onNodeWithText("Student name").assertTextContains("Ada")
+    }
+}</code></pre></div></div>
+<p class="v2-p">With plain <code>remember</code> the field resets to empty after restoration, so the assertion fails, which reveals the bug.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 15</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Putting UI tests in <code>src/test</code>.</strong> <em>Symptom:</em> unresolved references to the rule or "Method not mocked". <em>Fix:</em> <code>src/androidTest</code> for instrumented tests (or configure Robolectric for JVM tests).</p>
+<p class="v2-p"><strong>Mistake #2: Missing <code>ui-test-manifest</code>.</strong> <em>Symptom:</em> "Unable to resolve activity for Intent". <em>Fix:</em> add it as <code>debugImplementation</code>.</p>
+<p class="v2-p"><strong>Mistake #3: <code>Thread.sleep</code> for async work.</strong> <em>Symptom:</em> slow, flaky tests. <em>Fix:</em> <code>waitUntil</code>, fakes and the test clock.</p>
+<p class="v2-p"><strong>Mistake #4: Finding by text that appears several times.</strong> <em>Symptom:</em> "Expected exactly 1 node but found 2". <em>Fix:</em> refine with matchers or <code>onAllNodes...[index]</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Testing implementation, not behaviour.</strong> <em>Symptom:</em> tests break on refactors. <em>Fix:</em> assert what the user sees.</p>
+<p class="v2-p"><strong>Mistake #6: Forgetting <code>@get:Rule</code>.</strong> <em>Symptom:</em> "rule must be public" or the rule never runs. <em>Fix:</em> <code>@get:Rule val rule = ...</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Asserting on off-screen lazy items.</strong> <em>Symptom:</em> "no node found". <em>Fix:</em> <code>performScrollToIndex</code> / <code>performScrollToNode</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Tests that depend on the real network.</strong> <em>Symptom:</em> failures with no code change. <em>Fix:</em> inject fakes.</p>
+<p class="v2-p"><strong>Mistake #9: Infinite animations hang <code>waitForIdle</code>.</strong> <em>Fix:</em> <code>mainClock.autoAdvance = false</code>, or disable the animation in tests.</p>
+<p class="v2-p"><strong>Mistake #10: Overusing test tags.</strong> <em>Symptom:</em> tests unrelated to accessibility. <em>Fix:</em> prefer text and content descriptions where the user would use them.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 15</div><div class="pt">Knowledge Check</div><div class="pc" id="chk15"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the semantics tree and why does Compose testing use it?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It is a tree describing what each part of the UI means (text, description, role, actions, state). It is shared by accessibility services and tests, so tests find and check UI by meaning instead of by view ids.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Name the three kinds of calls in a Compose UI test.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Finders (select nodes), actions (simulate input such as <code>performClick</code>) and assertions (check state such as <code>assertIsDisplayed</code>).</p></div>
+<p class="v2-p"><strong>Question 3.</strong> When would you use <code>useUnmergedTree = true</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">When a child node has been merged into its parent's semantics and you need to find or check the child by itself, for example an icon inside a clickable row.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> How do you test a screen that loads data asynchronously?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Prefer a fake data source that returns instantly. When you must wait, use <code>waitUntil</code> (or <code>waitUntilExactlyOneExists</code>) with a short timeout. For animations, control <code>mainClock</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> How does <code>StateRestorationTester</code> help?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It lets a test simulate saving and restoring instance state (as on rotation or process death), so you can check that <code>rememberSaveable</code> state survives and catch state that would be lost.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 4: Testing, performance and accessibility</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-testing" rel="noopener noreferrer">Jetpack Compose testing codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Test Suite for a Shopping Cart</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Write a Compose UI test suite for a small <strong>shopping cart</strong> screen, covering display, interaction, scrolling and state restoration.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <code>CartContent(items, onAdd, onRemove)</code> composable showing a list of items (name, price, quantity), a total, and an empty message.</li>
+<li>At least <strong>eight</strong> tests: empty state, total calculation, add, remove, disabled minus at quantity 1, scroll to the last item in a list of 50, content descriptions on buttons, and state restoration of a "coupon code" field.</li>
+<li>Use <code>testTag</code> only for the list; everything else by text or content description.</li>
+<li>Use a fake list, no ViewModel, no network.</li>
+<li>Add a <code>printToLog</code> call to one test and read the output.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add <code>StateRestorationTester</code> for the quantity and a test with <code>fontScale = 2f</code> that checks the <strong>Checkout</strong> button is still displayed.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Cart.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+
+data class CartItem(val id: Int, val name: String, val price: Int, val qty: Int)
+
+@Composable
+fun CartContent(
+    items: List&lt;CartItem&gt;,
+    onAdd: (Int) -&gt; Unit,
+    onRemove: (Int) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    var coupon by rememberSaveable { mutableStateOf("") }
+
+    Column(modifier.padding(16.dp)) {
+        if (items.isEmpty()) {
+            Text("Your cart is empty")
+        } else {
+            LazyColumn(Modifier.weight(1f).testTag("cartList")) {
+                items(items, key = { it.id }) { item -&gt;
+                    Row(
+                        Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("${item.name} ₦${item.price}")
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Button(
+                                onClick = { onRemove(item.id) },
+                                enabled = item.qty &gt; 1,
+                                modifier = Modifier.semantics { contentDescription = "Remove one ${item.name}" }
+                            ) { Text("-") }
+                            Text("${item.qty}", Modifier.padding(horizontal = 8.dp))
+                            Button(
+                                onClick = { onAdd(item.id) },
+                                modifier = Modifier.semantics { contentDescription = "Add one ${item.name}" }
+                            ) { Text("+") }
+                        }
+                    }
+                }
+            }
+            val total = items.sumOf { it.price * it.qty }
+            Text("Total: ₦$total")
+        }
+        OutlinedTextField(value = coupon, onValueChange = { coupon = it }, label = { Text("Coupon code") })
+        Button(onClick = {}) { Text("Checkout") }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CartTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.testlab
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.StateRestorationTester
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.printToLog
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+
+class CartTest {
+
+    @get:Rule
+    val rule = createComposeRule()
+
+    private val one = listOf(CartItem(1, "Zobo", 250, 1))
+
+    @Test
+    fun emptyCartShowsMessage() {
+        rule.setContent { CartContent(emptyList(), {}, {}) }
+        rule.onNodeWithText("Your cart is empty").assertIsDisplayed()
+    }
+
+    @Test
+    fun totalIsPriceTimesQuantity() {
+        rule.setContent {
+            CartContent(listOf(CartItem(1, "Zobo", 250, 2), CartItem(2, "Akara", 400, 1)), {}, {})
+        }
+        rule.onNodeWithText("Total: ₦900").assertIsDisplayed()
+    }
+
+    @Test
+    fun addButtonReportsItemId() {
+        var added = -1
+        rule.setContent { CartContent(one, onAdd = { added = it }, onRemove = {}) }
+        rule.onNodeWithContentDescription("Add one Zobo").performClick()
+        assertEquals(1, added)
+    }
+
+    @Test
+    fun removeDisabledAtQuantityOne() {
+        rule.setContent { CartContent(one, {}, {}) }
+        rule.onNodeWithContentDescription("Remove one Zobo").assertIsNotEnabled()
+    }
+
+    @Test
+    fun lastItemReachableByScrolling() {
+        val many = List(50) { CartItem(it, "Item $it", 100, 1) }
+        rule.setContent { CartContent(many, {}, {}) }
+        rule.onNodeWithTag("cartList").performScrollToIndex(49)
+        rule.onNodeWithText("Item 49 ₦100").assertIsDisplayed()
+    }
+
+    @Test
+    fun couponSurvivesRecreation() {
+        val tester = StateRestorationTester(rule)
+        tester.setContent { CartContent(one, {}, {}) }
+        rule.onNodeWithText("Coupon code").performTextInput("NAIJA10")
+        tester.emulateSavedInstanceStateRestore()
+        rule.onNodeWithText("Coupon code").assertTextContains("NAIJA10")
+    }
+
+    @Test
+    fun checkoutButtonExists() {
+        rule.setContent { CartContent(one, {}, {}) }
+        rule.onNodeWithText("Checkout").assertIsDisplayed()
+    }
+
+    @Test
+    fun debugPrint() {
+        rule.setContent { CartContent(one, {}, {}) }
+        rule.onRoot().printToLog("CART")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> all eight tests pass on an emulator. Because the item rows contain a <code>Text</code> with "Zobo ₦250" and buttons with their own descriptions, the finders match one node each. If <code>onNodeWithText("Item 49 ₦100")</code> fails, run <code>printToLog</code> to see how the text appears (watch for the <code>₦</code> character and spacing), then fix the finder.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 45 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-45-testing-jetpack-compose-uis</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 45 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Semantics, Not Views</li><li>✅ Step-by-Step Build 1: Set Up and the Very First Test</li><li>✅ Step-by-Step Build 2: Finders, Actions and Assertions in Depth</li><li>✅ Step-by-Step Build 3: Testing a Form with Text Input</li><li>✅ Step-by-Step Build 4: The Merged and Unmerged Semantics Trees</li><li>✅ Step-by-Step Build 5: Debugging Tests with printToLog</li><li>✅ Step-by-Step Build 6: Lists and Scrolling</li><li>✅ Step-by-Step Build 7: Time, Synchronisation and Animations</li><li>✅ Step-by-Step Build 8: Testing a Screen with a ViewModel and State Restoration</li><li>✅ Step-by-Step Build 9: Testing Navigation and Full Flows</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_44.html" class="ln-btn">&#8592; Lesson 44</a><a href="lesson_46.html" class="ln-btn primary">Lesson 46 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 45 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -31,6 +31,14 @@ LEXERS = {
     "javascript": "javascript", "js": "javascript", "python": "python", "starter.py": "python",
     "json": "json", "bash": "bash", "php": "php", "sql": "sql", "java": "java",
     "csharp": "csharp", "apache": "apache", "nginx": "nginx",
+    "kotlin": "kotlin", "kts": "kotlin", "gradle": "groovy", "toml": "toml", "swift": "swift", "yaml": "yaml",
+    "properties": "properties", "text": "text",
+}
+# code labels that are file names (MainActivity.kt, build.gradle.kts) pick a lexer by extension
+EXT_LEXERS = {
+    ".kt": "kotlin", ".kts": "kotlin", ".gradle": "groovy", ".xml": "xml", ".toml": "toml", ".swift": "swift",
+    ".json": "json", ".py": "python", ".sql": "sql", ".java": "java", ".properties": "properties",
+    ".yml": "yaml", ".yaml": "yaml", ".sh": "bash", ".html": "html", ".css": "css", ".js": "javascript",
 }
 warnings: list[str] = []
 
@@ -155,7 +163,8 @@ def normalise_body(scope, name: str = "") -> None:
         code = wrap.select_one("code")
         if not (lang_el and code):
             continue
-        name = LEXERS.get(clean(lang_el.get_text()).lower())
+        label = clean(lang_el.get_text()).lower()
+        name = LEXERS.get(label) or EXT_LEXERS.get(Path(label).suffix)
         if not name:
             continue
         try:

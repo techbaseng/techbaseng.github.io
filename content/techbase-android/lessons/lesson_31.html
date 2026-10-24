@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 31: Load and Display Images from the Internet with Coil — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l31">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 31 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 31</div>
+      <h1>Load and Display Images from the Internet with Coil</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Remote Gallery</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 31</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Show remote images with Coil&#x27;s AsyncImage, handle loading and error states, and build the Amphibians and Bookshelf apps.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Remote Gallery</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Text is easy. Pictures are where networking gets interesting: a photo can be a few megabytes, it must be downloaded without freezing the screen, shrunk to fit a small card, kept in a cache so the next visit is instant, and replaced by a friendly placeholder when the network fails. Writing all that yourself takes weeks. A library called <strong>Coil</strong> does it in one composable.</p>
+<p class="v2-p">In this lesson you will use Coil's <code>AsyncImage</code> to show remote images, handle loading and error states, understand caching and memory, and build the two apps that close Pathway 2 of Unit 5: the <strong>Amphibians</strong> practice app and the <strong>Bookshelf</strong> project.</p>
+<p class="v2-p">This lesson covers three items from the official <strong>Android Basics with Compose</strong> course: <em>Load and display images from the internet</em>, <em>Practice: Build amphibians app</em> and <em>Project: Create a Bookshelf app</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Add Coil 3 to a project and explain why it needs a separate network artifact.</li>
+<li>Display a remote image with <code>AsyncImage</code>, with a placeholder, an error image and a content description.</li>
+<li>Use <code>ImageRequest</code> for crossfade and other options.</li>
+<li>Explain memory and disk caching, and image sizing.</li>
+<li>Build a grid of remote images with loading and error states.</li>
+<li>Plan a Bookshelf app from a public book-search API, taking care with API keys, terms and data.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> an image on screen is <em>a URL in your data</em>, plus a library that turns it into pixels at the right size.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Retrofit, <code>@Serializable</code>, sealed UI state</strong> (lesson 29).</li>
+<li><strong>Repositories and the app container</strong> (lesson 30).</li>
+<li><strong>Lazy grids</strong> (lesson 21).</li>
+<li><strong><code>contentDescription</code> and <code>ContentScale</code></strong> (lesson 21).</li>
+<li><strong>The INTERNET permission</strong> (lesson 29). Coil downloads images, so you still need it.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: What an Image Loader Does</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">When you ask Coil to display <code>https://example.com/photo.jpg</code> in a 120 dp card, it:</p>
+<ol class="v2-ol">
+<li>Checks the <strong>memory cache</strong>: has this exact image already been decoded at this size? If yes, show it immediately.</li>
+<li>Otherwise checks the <strong>disk cache</strong>: has the file been downloaded before? If yes, decode it.</li>
+<li>Otherwise <strong>downloads</strong> it over the network, on a background thread.</li>
+<li><strong>Decodes</strong> it to a bitmap, scaled <strong>down</strong> to the size of the target, not the full resolution.</li>
+<li>Caches it and shows it.</li>
+<li>If you leave the screen while it loads, the work is <strong>cancelled</strong>.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>AsyncImage(url)
+    |
+    v
+[memory cache?] --hit--&gt; show
+    | miss
+[disk cache?]   --hit--&gt; decode --&gt; show
+    | miss
+[network download] --&gt; decode (downsampled) --&gt; cache --&gt; show
+    | fails
+show error image</code></pre></div></div>
+<h3 class="v2-h3">Why size matters</h3>
+<p class="v2-p">A 4,000 x 3,000 pixel photo uses about 48 MB of memory when decoded (4,000 x 3,000 x 4 bytes). Ten of them in a list would crash a budget phone with little RAM. Coil decodes images at roughly the size they will be shown, so a 120 dp card gets a small bitmap. That is a major reason to use a library instead of loading bitmaps by hand.</p>
+<h3 class="v2-h3">Coil 3 package changes</h3>
+<p class="v2-p">Coil 3 is a rewrite that supports Kotlin Multiplatform. If you read older tutorials you will see Coil 2 code: be aware of the differences.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Coil 2</th>
+<th>Coil 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Group ID</td>
+<td><code>io.coil-kt</code></td>
+<td><code>io.coil-kt.coil3</code></td>
+</tr>
+<tr>
+<td>Compose artifact</td>
+<td><code>io.coil-kt:coil-compose</code></td>
+<td><code>io.coil-kt.coil3:coil-compose</code></td>
+</tr>
+<tr>
+<td>Package for <code>AsyncImage</code></td>
+<td><code>coil.compose</code></td>
+<td><code>coil3.compose</code></td>
+</tr>
+<tr>
+<td>Network loading</td>
+<td>Built in</td>
+<td>Separate artifact, for example <code>coil-network-okhttp</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The last row is the one that trips people up: in Coil 3, the base library no longer includes networking, so a URL will fail to load unless you add a network artifact.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What an Image Loader Does</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Add Coil</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Look up the latest stable Coil 3 version on the Coil releases page (https://github.com/coil-kt/coil/releases) and add:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+coil = "&lt;latest stable 3.x&gt;"
+
+[libraries]
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+}</code></pre></div></div>
+<p class="v2-p">Sync, and make sure the INTERNET permission is in your manifest. The two artifacts must use the <strong>same</strong> version.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Add Coil</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Your First `AsyncImage`</div><div class="pc" id="chk5"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+
+@Composable
+fun RemotePhoto(url: String, caption: String) {
+    Column {
+        AsyncImage(
+            model = url,
+            contentDescription = caption,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        )
+        Text(caption)
+    }
+}</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>model</code> is <strong>what to load</strong>. A <code>String</code> URL is the simplest. It can also be a <code>Uri</code>, a <code>File</code>, a drawable resource ID or an <code>ImageRequest</code>.</li>
+<li><code>contentDescription</code> is read by screen readers; describe the picture meaningfully (lesson 47).</li>
+<li><code>contentScale</code> works like <code>ImageView.scaleType</code>: <code>Crop</code> fills and trims, <code>Fit</code> shows the whole picture with gaps.</li>
+<li>Always give the image a size (a fixed <code>height</code> or <code>aspectRatio</code>). Without one, the layout jumps when the image arrives.</li>
+</ul>
+<h3 class="v2-h3">Placeholders and error images</h3>
+<p class="v2-p">While loading, show something; if it fails, show something else. Pass painters:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.res.painterResource
+import coil3.compose.AsyncImage
+
+AsyncImage(
+    model = url,
+    contentDescription = caption,
+    placeholder = painterResource(R.drawable.ic_loading),
+    error = painterResource(R.drawable.ic_broken_image),
+    fallback = painterResource(R.drawable.ic_no_image),
+    contentScale = ContentScale.Crop,
+    modifier = Modifier.height(200.dp)
+)</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Parameter</th>
+<th>When it is shown</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>placeholder</code></td>
+<td>While the request is loading</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>When the request fails (no network, 404, undecodable)</td>
+</tr>
+<tr>
+<td><code>fallback</code></td>
+<td>When <code>model</code> is <code>null</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Create <code>ic_loading</code>, <code>ic_broken_image</code> and <code>ic_no_image</code> as vector assets (<strong>File &gt; New &gt; Vector Asset</strong>, lesson 21), for example using the built-in "image" and "broken image" icons.</p>
+<h3 class="v2-h3">Controlling the request</h3>
+<p class="v2-p">For more options, build an <code>ImageRequest</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.platform.LocalContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+
+AsyncImage(
+    model = ImageRequest.Builder(LocalContext.current)
+        .data(url)
+        .crossfade(true)
+        .build(),
+    contentDescription = caption,
+    modifier = Modifier.height(200.dp)
+)</code></pre></div></div>
+<p class="v2-p"><code>crossfade(true)</code> fades the image in. In Coil 3 the <code>crossfade</code> builder function is an extension in <code>coil3.request</code>, so it needs its own import; if the compiler cannot find a builder method you expect, check the current Coil documentation, because the library is actively developed and some names have moved between 2.x and 3.x.</p>
+<h3 class="v2-h3">Observing loading state</h3>
+<p class="v2-p"><code>AsyncImage</code> also accepts <code>onLoading</code>, <code>onSuccess</code> and <code>onError</code> callbacks, which is useful for logging or for showing a progress indicator:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>AsyncImage(
+    model = url,
+    contentDescription = caption,
+    onError = { error -&gt; Log.e("Coil", "Failed: ${error.result.throwable}") }
+)</code></pre></div></div>
+<p class="v2-p">For fully custom loading UI there is also <code>SubcomposeAsyncImage</code> with <code>loading</code> and <code>error</code> slots that accept composables. It is more flexible but heavier, because it composes the slots separately, so avoid it in big grids; simple painters are cheaper.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Your First `AsyncImage`</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: The Amphibians App</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">The official <em>Practice: Build amphibians app</em> asks you to build an app that fetches a list of amphibians (name, type, description, image URL) from a service and shows them in a scrolling list of cards. We will build the same architecture using the pieces from lessons 29 and 30. The data shape:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">json</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[
+  {
+    "name": "Great Basin Spadefoot",
+    "type": "Toad",
+    "description": "This toad spends most of its life underground.",
+    "img_src": "https://example.com/images/spadefoot.png"
+  }
+]</code></pre></div></div>
+<p class="v2-p">The Android Developers course uses a small sample server for this. <strong>Servers for training courses can change or disappear</strong>, so open the practice page in the official pathway for the current address, or point the app at any JSON service of your own with the same shape (even a static <code>amphibians.json</code> file hosted on GitHub Pages works, and costs nothing).</p>
+<h3 class="v2-h3">Model</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Amphibian.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.amphibians.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Amphibian(
+    val name: String,
+    val type: String,
+    val description: String,
+    @SerialName("img_src") val imgSrc: String
+)</code></pre></div></div>
+<h3 class="v2-h3">Service, repository, container</h3>
+<p class="v2-p">These follow lesson 30 exactly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>interface AmphibiansApiService {
+    @GET("amphibians")
+    suspend fun getAmphibians(): List&lt;Amphibian&gt;
+}
+
+interface AmphibiansRepository {
+    suspend fun getAmphibians(): List&lt;Amphibian&gt;
+}
+
+class NetworkAmphibiansRepository(
+    private val api: AmphibiansApiService
+) : AmphibiansRepository {
+    override suspend fun getAmphibians(): List&lt;Amphibian&gt; = api.getAmphibians()
+}</code></pre></div></div>
+<p class="v2-p">with <code>retrofit2.http.GET</code> imported and a container that builds Retrofit with the base URL you chose (ending in <code>/</code>).</p>
+<h3 class="v2-h3">ViewModel and state</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface AmphibiansUiState {
+    data class Success(val amphibians: List&lt;Amphibian&gt;) : AmphibiansUiState
+    data object Error : AmphibiansUiState
+    data object Loading : AmphibiansUiState
+}</code></pre></div></div>
+<p class="v2-p">The ViewModel is the same as <code>PostsViewModel</code>, with the new repository type and factory.</p>
+<h3 class="v2-h3">The screen</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AmphibiansScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.amphibians.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import com.example.amphibians.R
+import com.example.amphibians.model.Amphibian
+
+@Composable
+fun AmphibianCard(amphibian: Amphibian, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Column {
+            Text(
+                text = "${amphibian.name} (${amphibian.type})",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            AsyncImage(
+                model = amphibian.imgSrc,
+                contentDescription = amphibian.name,
+                placeholder = painterResource(R.drawable.ic_loading),
+                error = painterResource(R.drawable.ic_broken_image),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().height(194.dp)
+            )
+            Text(
+                text = amphibian.description,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun AmphibiansList(amphibians: List&lt;Amphibian&gt;, modifier: Modifier = Modifier) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(amphibians, key = { it.name }) { AmphibianCard(it) }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The <code>when</code> over the sealed state, the retry button and the ViewModel factory are the same as in lessons 29 and 30. Resist copy-pasting without thinking: re-type the ViewModel yourself and notice each line you recognise.</p>
+<p class="v2-p">Notice that <code>key = { it.name }</code> assumes names are unique. If the service could return two items with the same name, the app would crash on scroll. Choose a key you know is unique, or omit the key.</p>
+<p class="v2-p">Run it with the device online, then in airplane mode: the first run shows images; the second shows the error state for the list (if the JSON cannot load) or the broken-image icon for images that fail (if the JSON came from cache but the pictures did not).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Amphibians App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Caching, Memory and Data Use</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">By default Coil keeps a <strong>memory cache</strong> (a fraction of the app's available memory) and a <strong>disk cache</strong> (a limited size in the app's cache directory), and respects the server's HTTP caching headers. That means:</p>
+<ul class="v2-ul">
+<li>Scrolling back to a card you have seen is instant.</li>
+<li>A second launch of the app reuses downloaded files, saving the user's mobile data, which is a real cost for many users.</li>
+<li>The system may delete cache files when storage is low. A cache is a convenience, never a place for important data.</li>
+</ul>
+<p class="v2-p">You can customise this with a global <code>ImageLoader</code>, for example to set the disk cache size or add logging, by creating the loader in your <code>Application</code> class and passing it to Coil's singleton setup. The defaults are good for most apps, so start there. Check the Coil documentation for the current API, as setup differs between Coil 2 and 3.</p>
+<p class="v2-p">Memory tips:</p>
+<ul class="v2-ul">
+<li>Give <code>AsyncImage</code> a bounded size so Coil can downsample.</li>
+<li>Avoid putting huge full-resolution pictures in <code>LazyColumn</code> items if the server offers thumbnails. Many APIs let you request a smaller version, for example via a size parameter in the URL.</li>
+<li>Test on a low-RAM device or emulator profile before shipping.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Caching, Memory and Data Use</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Project Planning: The Bookshelf App</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The unit's project is <strong>Bookshelf</strong>. The brief: a user searches for books by keyword and sees a grid of cover images; tapping one shows details (title, authors, description, link). The data comes from a public book-search API.</p>
+<p class="v2-p">Plan it properly before coding:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Decision</th>
+<th>Guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Which API?</strong></td>
+<td>Choose a public API with a free tier whose terms allow your use. The course uses the Google Books API. Read its documentation and terms yourself before you start, and never guess endpoints or field names.</td>
+</tr>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>Some endpoints need an API key. <strong>Do not commit keys to a public repository, and do not assume a key inside an APK is secret.</strong> For a learning project use a key restricted to your app, store it in <code>local.properties</code> and read it into <code>BuildConfig</code>, and understand that a determined user can still extract it.</td>
+</tr>
+<tr>
+<td><strong>Architecture</strong></td>
+<td>Service, repository, container, ViewModel, sealed UI state, exactly as lesson 30.</td>
+</tr>
+<tr>
+<td><strong>Screens</strong></td>
+<td>Search screen with a text field and a <code>LazyVerticalGrid</code> of covers; a detail screen (navigation from lesson 26).</td>
+</tr>
+<tr>
+<td><strong>Covers over HTTPS</strong></td>
+<td>Some APIs return <code>http://</code> image links; they will not load, because cleartext traffic is blocked. Convert to <code>https://</code> where the host supports it.</td>
+</tr>
+<tr>
+<td><strong>Empty and error states</strong></td>
+<td>No results, no network, rate limited (HTTP 429). Handle each.</td>
+</tr>
+<tr>
+<td><strong>Tests</strong></td>
+<td>Fake repository, ViewModel tests, one UI test.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Treat cover images and book text as <strong>third-party content</strong>: show attribution where the API requires it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Project Planning: The Bookshelf App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Grid with shimmer-free placeholders</strong></p>
+<p class="v2-p">Change the Amphibians list to a two-column <code>LazyVerticalGrid</code> of square cards showing only the image and the name. Use <code>AsyncImage</code> with <code>ContentScale.Crop</code> and <code>aspectRatio(1f)</code>. Provide a placeholder and an error painter.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+
+@Composable
+fun AmphibiansGrid(amphibians: List&lt;Amphibian&gt;, modifier: Modifier = Modifier) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(amphibians) { a -&gt;
+            Card {
+                Box {
+                    AsyncImage(
+                        model = a.imgSrc,
+                        contentDescription = a.name,
+                        placeholder = painterResource(R.drawable.ic_loading),
+                        error = painterResource(R.drawable.ic_broken_image),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+                    )
+                    Text(
+                        a.name,
+                        modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
+                    )
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>aspectRatio(1f)</code> fixes the height from the width so the grid does not jump as images load. Text laid directly over a photo can be hard to read; a real design adds a scrim (a semi-transparent background) behind the text for contrast (lesson 46).</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Handle HTTP image links</strong></p>
+<p class="v2-p">A service returns image URLs starting with <code>http://</code>. Images silently fail to load. Explain why and write a small helper that upgrades the link, then discuss the risk.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Android blocks cleartext (unencrypted) HTTP traffic by default for modern apps, so the request fails and the error painter appears. A helper can rewrite the scheme:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun String.toHttps(): String =
+    if (startsWith("http://")) replaceFirst("http://", "https://") else this</code></pre></div></div>
+<p class="v2-p">and use <code>model = amphibian.imgSrc.toHttps()</code>. The risk: not every host serves the same resource over HTTPS, so some links will still fail and you should show the error painter. <strong>Do not</strong> disable the cleartext protection for the whole app to work around one server; that weakens security for every request (anyone on the network can read or alter the traffic).</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Turn on airplane mode after your app has loaded the list once, force-stop and reopen it, then scroll. Which images still show, and why? Write down what you learned about the memory and disk caches.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Coil 2 imports with Coil 3 artifacts.</strong> <em>Symptom:</em> <em>Unresolved reference: coil.compose.</em> <em>The fix:</em> Coil 3 uses <code>coil3.compose.AsyncImage</code>; make sure the dependency group is <code>io.coil-kt.coil3</code>.</p>
+<p class="v2-p"><strong>Mistake #2: No network artifact.</strong> <em>Symptom:</em> images stay on the placeholder or error forever and Logcat mentions no fetcher for the URL. <em>The fix:</em> add <code>coil-network-okhttp</code> with the same version as <code>coil-compose</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Missing INTERNET permission.</strong> <em>Symptom:</em> every image fails. <em>The fix:</em> add the permission (lesson 29).</p>
+<p class="v2-p"><strong>Mistake #4: Layout jumps.</strong> <em>What happens:</em> images pop in and push content down. <em>The fix:</em> give <code>AsyncImage</code> a fixed height or <code>aspectRatio</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Empty or missing <code>contentDescription</code>.</strong> <em>What happens:</em> screen-reader users get nothing. <em>The fix:</em> a meaningful description, or <code>null</code> only for purely decorative images.</p>
+<p class="v2-p"><strong>Mistake #6: Duplicate keys in <code>items</code>.</strong> <em>Symptom:</em> a crash on scroll saying a key was already used. <em>The fix:</em> a unique key, or none.</p>
+<p class="v2-p"><strong>Mistake #7: <code>http://</code> URLs.</strong> <em>The fix:</em> use https (Exercise 2), never disable cleartext protection globally.</p>
+<p class="v2-p"><strong>Mistake #8: Using <code>SubcomposeAsyncImage</code> everywhere.</strong> <em>What happens:</em> slow scrolling in big grids. <em>The fix:</em> use <code>AsyncImage</code> with painters.</p>
+<p class="v2-p"><strong>Mistake #9: Committing API keys.</strong> <em>What happens:</em> a key in a public repo is found by bots in minutes. <em>The fix:</em> keep it out of source control, restrict it, and prefer a server for anything truly secret.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does an image-loading library do that you would not want to write yourself?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Background downloading, decoding at the target size, memory and disk caching, cancelling requests when the UI leaves the screen, and showing placeholders and error states.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why does Coil 3 need two dependencies to load a URL?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The Compose artifact displays images but networking was split into separate artifacts; <code>coil-network-okhttp</code> supplies the HTTP fetcher. Without it, URLs cannot be loaded.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> When are <code>placeholder</code>, <code>error</code> and <code>fallback</code> used?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>placeholder</code> while loading, <code>error</code> when loading fails, and <code>fallback</code> when the model is null.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why give <code>AsyncImage</code> a fixed size or aspect ratio?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">So the layout does not shift when the image finishes loading, and so Coil can decode at the right size, saving memory.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why should an API key in an app not be considered secret?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Anything inside the APK can be extracted by a determined person. Real secrets belong on a server; keys that must be in the app should be restricted and kept out of source control.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-5-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 5, Pathway 2</a>: <em>Load and display images</em>, the Amphibians practice and the Bookshelf project.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a></li>
+<li><a href="https://github.com/coil-kt/coil/releases" rel="noopener noreferrer">Coil releases</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer" rel="noopener noreferrer">Data layer guide</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Remote Gallery</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> A <strong>photo gallery</strong> that loads image URLs from a JSON file you host yourself (for example on GitHub Pages) and shows them in an adaptive grid, with loading, error and empty states.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A JSON file with at least eight entries: <code>title</code>, <code>imageUrl</code>, <code>credit</code>. Use images you own or that are licensed for reuse.</li>
+<li>Retrofit service, repository, container and ViewModel as in lessons 29 and 30.</li>
+<li>A <code>LazyVerticalGrid</code> with <code>GridCells.Adaptive(minSize = 150.dp)</code>; each cell is an <code>AsyncImage</code> with placeholder and error painters and a meaningful description.</li>
+<li>A sealed UI state with loading, success, empty and error; a retry button.</li>
+<li>Tapping an image opens a full-screen view (a dialog or a second destination) showing the credit.</li>
+<li>A fake repository and a ViewModel test for the empty and error states.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show <code>Image</code> placeholders with a pulsing alpha using <code>rememberInfiniteTransition</code> (lesson 41).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">GalleryScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.gallery.ui
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import com.example.gallery.R
+import com.example.gallery.model.GalleryItem
+
+sealed interface GalleryUiState {
+    data object Loading : GalleryUiState
+    data object Empty : GalleryUiState
+    data class Success(val items: List&lt;GalleryItem&gt;) : GalleryUiState
+    data class Error(val message: String) : GalleryUiState
+}
+
+@Composable
+fun GalleryScreen(state: GalleryUiState, onRetry: () -&gt; Unit, modifier: Modifier = Modifier) {
+    when (state) {
+        GalleryUiState.Loading -&gt; Column(
+            modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) { CircularProgressIndicator() }
+
+        GalleryUiState.Empty -&gt; Column(
+            modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) { Text("No photos yet.") }
+
+        is GalleryUiState.Error -&gt; Column(
+            modifier.fillMaxSize().padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(state.message)
+            Button(onClick = onRetry, modifier = Modifier.padding(top = 12.dp)) { Text("Retry") }
+        }
+
+        is GalleryUiState.Success -&gt; GalleryGrid(state.items, modifier)
+    }
+}
+
+@Composable
+fun GalleryGrid(items: List&lt;GalleryItem&gt;, modifier: Modifier = Modifier) {
+    var opened by rememberSaveable { mutableStateOf&lt;String?&gt;(null) }   // image URL
+    val openedItem = items.firstOrNull { it.imageUrl == opened }
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 150.dp),
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(items, key = { it.imageUrl }) { item -&gt;
+            AsyncImage(
+                model = item.imageUrl,
+                contentDescription = item.title,
+                placeholder = painterResource(R.drawable.ic_loading),
+                error = painterResource(R.drawable.ic_broken_image),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clickable { opened = item.imageUrl }
+            )
+        }
+    }
+
+    if (openedItem != null) {
+        AlertDialog(
+            onDismissRequest = { opened = null },
+            confirmButton = { TextButton(onClick = { opened = null }) { Text("Close") } },
+            title = { Text(openedItem.title) },
+            text = {
+                Column {
+                    AsyncImage(
+                        model = openedItem.imageUrl,
+                        contentDescription = openedItem.title,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f)
+                    )
+                    Text("Credit: ${openedItem.credit}", modifier = Modifier.padding(top = 8.dp))
+                }
+            }
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the ViewModel maps an empty successful response to <code>Empty</code> and failures to <code>Error</code>, with two ViewModel tests using the fake repository: <code>emptyList()</code> gives <code>Empty</code>; a thrown <code>IOException</code> gives <code>Error</code>. The selected image is stored by URL in <code>rememberSaveable</code> (a <code>String</code> fits in a Bundle), which survives rotation. The dialog uses <code>AsyncImage</code> again, so the image is served from Coil's cache and appears instantly.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 31 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-31-load-and-display-images-from-the-internet</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 31 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What an Image Loader Does</li><li>✅ Step-by-Step Build 1: Add Coil</li><li>✅ Step-by-Step Build 2: Your First `AsyncImage`</li><li>✅ Step-by-Step Build 3: The Amphibians App</li><li>✅ Caching, Memory and Data Use</li><li>✅ Project Planning: The Bookshelf App</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_30.html" class="ln-btn">&#8592; Lesson 30</a><a href="lesson_32.html" class="ln-btn primary">Lesson 32 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 31 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

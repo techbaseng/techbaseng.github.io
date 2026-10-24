@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 43: Compose and Views Interoperability — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l43">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 43 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 43</div>
+      <h1>Compose and Views Interoperability</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Migrate One Screen</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 43</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Use Compose and Views side by side: ComposeView in XML, AndroidView in Compose, and an incremental migration plan.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Migrate One Screen</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Most real Android apps are not purely Compose or purely Views. They are <strong>both</strong>, and they stay that way for months or years while the team migrates a screen at a time. Google designed Compose for exactly this: you can put Compose inside a View-based screen, put a View inside a Compose screen, and move over gradually without rewriting the whole app.</p>
+<p class="v2-p">This lesson covers these items: <em>Compose in Views</em> and <em>Add Compose to a legacy app</em> (Unit 8, Pathway 2 of <em>Android Basics with Compose</em>), and <em>Views in Compose</em>, <em>View Interoperability in Compose</em>, <em>Migrate from the View system</em> and the hands-on migration codelab (<em>Migrating to Jetpack Compose</em>) from Pathway 1 of the <em>Jetpack Compose for Android developers</em> programme. See https://developer.android.com/courses/pathways/android-basics-compose-unit-8-pathway-2 and https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Add Compose to an existing View-based project (Gradle setup).</li>
+<li>Embed Compose in an XML layout with <code>ComposeView</code>, and in a Fragment correctly with <code>ViewCompositionStrategy</code>.</li>
+<li>Embed a classic View in Compose with <code>AndroidView</code>, and a <code>Fragment</code> with <code>AndroidViewBinding</code>.</li>
+<li>Share state and theming between the two worlds.</li>
+<li>Explain and apply a safe, incremental <strong>migration strategy</strong>.</li>
+<li>Recognise the common interop bugs: lifecycle, state loss, and theming mismatches.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a migration is a series of <strong>small, shippable steps</strong>, never a big rewrite. At every step the app builds, runs and can be released.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Views, XML, view binding, Fragments, Navigation component</strong> (lesson 42).</li>
+<li><strong>Compose basics, state and recomposition</strong> (lessons 15–21 and 37).</li>
+<li><strong>ViewModel and StateFlow</strong> (lessons 24–25).</li>
+<li><strong>Material 3 theming</strong> (lesson 40).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Two Worlds, One Screen</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">There are two directions of interop:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Direction A: Compose inside Views             Direction B: Views inside Compose
+
+  Activity / Fragment (XML)                     Activity (setContent { })
+   +-- LinearLayout                              +-- Column
+        +-- TextView                                  +-- Text (Compose)
+        +-- ComposeView  &lt;--- Compose lives here      +-- AndroidView  &lt;--- a View lives here
+              Text, Button ...                              MapView / WebView / custom View</code></pre></div></div>
+<p class="v2-p"><strong>Direction A</strong> is how most migrations <em>start</em>: leave the Activity and navigation alone, replace one small piece of a screen with Compose, then grow it.</p>
+<p class="v2-p"><strong>Direction B</strong> is how you keep using things that have <strong>no Compose version yet or are too costly to rewrite</strong>: <code>WebView</code>, <code>MapView</code>, ad banners, video players, a complex custom View.</p>
+<p class="v2-p">Under the hood, a <code>ComposeView</code> is just a <code>View</code> (a <code>ViewGroup</code>, in fact) that owns a <strong>Composition</strong>. A Composition needs a <em>lifecycle</em>, a <em>saved-state registry</em> and a <em>ViewModelStore</em> to work. In an Activity or Fragment these are found automatically from the view tree. That is why correct setup (and the <code>ViewCompositionStrategy</code>) matters.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Two Worlds, One Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Add Compose to a View Project</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Start with the <code>ClassRegister</code> project from lesson 42 (or any View-based project). Its <code>app/build.gradle.kts</code> needs four things:</p>
+<ol class="v2-ol">
+<li>The <strong>Kotlin Compose compiler plugin</strong> (since Kotlin 2.0).</li>
+<li><code>buildFeatures { compose = true }</code>.</li>
+<li>The <strong>Compose BOM</strong> and the libraries you use.</li>
+<li>A Compose-ready <strong>theme</strong> (optional but recommended).</li>
+</ol>
+<p class="v2-p">In <code>gradle/libs.versions.toml</code>, add (look up the current stable versions: the Compose BOM and the Kotlin version should match what Android Studio's <em>New Project</em> creates):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+composeBom = "&lt;latest stable&gt;"
+kotlin = "&lt;your Kotlin version&gt;"
+
+[libraries]
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbinding" }
+
+[plugins]
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }</code></pre></div></div>
+<p class="v2-p">Add the plugin to the <strong>root</strong> <code>build.gradle.kts</code> (<code>alias(libs.plugins.kotlin.compose) apply false</code>) and to the <strong>app</strong> module:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    // ...
+    buildFeatures {
+        viewBinding = true
+        compose = true
+    }
+}
+
+dependencies {
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.viewbinding) // for AndroidViewBinding later
+    // ...existing dependencies
+}</code></pre></div></div>
+<p class="v2-p">Sync. If Gradle complains about the Kotlin version, remember: the Compose compiler is now shipped with Kotlin and its plugin version must equal your Kotlin version. This is a common first error when adding Compose to an old project that still uses the pre-2.0 <code>composeOptions { kotlinCompilerExtensionVersion }</code> setup; remove that block when switching to the plugin.</p>
+<p class="v2-p">Make sure your project's <strong>minSdk</strong> meets the Compose requirement shown in the official documentation (Compose has a minimum API level; check the current figure in the setup page).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Add Compose to a View Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Compose Inside an XML Layout</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Add a <code>ComposeView</code> to <code>fragment_detail.xml</code> (from the lesson 42 solution). It is an ordinary View tag:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">fragment_detail.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"&gt;
+
+    &lt;TextView
+        android:id="@+id/detailName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:textStyle="bold" /&gt;
+
+    &lt;androidx.compose.ui.platform.ComposeView
+        android:id="@+id/statusCompose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" /&gt;
+&lt;/LinearLayout&gt;</code></pre></div></div>
+<p class="v2-p">Then in the fragment, give it content. A <code>ComposeView</code> has a <code>setContent { }</code> function, exactly like an Activity:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DetailFragment.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.classregister.databinding.FragmentDetailBinding
+
+class DetailFragment : Fragment() {
+
+    private var _binding: FragmentDetailBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel: StudentViewModel by activityViewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentDetailBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val id = requireArguments().getInt("studentId")
+
+        binding.statusCompose.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme {
+                    val students by viewModel.students.collectAsStateWithLifecycle()
+                    val student = students.firstOrNull { it.id == id }
+                    if (student != null) StatusCard(student)
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}
+
+@Composable
+private fun StatusCard(student: Student) {
+    Card(Modifier.padding(top = 16.dp)) {
+        Column(Modifier.padding(16.dp)) {
+            Text(student.name, style = MaterialTheme.typography.titleLarge)
+            Text(if (student.present) "Present today" else "Absent today")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(If you also have the old code that sets <code>detailStatus</code> text, delete it; we replaced that view with Compose.)</p>
+<p class="v2-p">The new import you have not seen is <code>androidx.lifecycle.compose.collectAsStateWithLifecycle</code>, which needs the <code>androidx.lifecycle:lifecycle-runtime-compose</code> artifact (lesson 25).</p>
+<h3 class="v2-h3">ViewCompositionStrategy: when does the Composition die?</h3>
+<p class="v2-p">A Composition must be <strong>disposed</strong> at the right time to avoid leaks, but the right time depends on where the <code>ComposeView</code> lives. This is the single most important rule of interop. <code>ViewCompositionStrategy</code> chooses it:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Disposes when</th>
+<th>Use in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DisposeOnDetachedFromWindowOrReleasedFromPool</code></td>
+<td>The View is detached from the window (default; pool-aware)</td>
+<td>Activities, simple Views, and <code>RecyclerView</code> items</td>
+</tr>
+<tr>
+<td><code>DisposeOnViewTreeLifecycleDestroyed</code></td>
+<td>The <code>LifecycleOwner</code> of the view tree is destroyed</td>
+<td><strong>Fragments</strong>: use the fragment's <em>view</em> lifecycle</td>
+</tr>
+<tr>
+<td><code>DisposeOnLifecycleDestroyed(lifecycle)</code></td>
+<td>A given lifecycle is destroyed</td>
+<td>Custom cases</td>
+</tr>
+<tr>
+<td><code>DisposeOnDetachedFromWindow</code></td>
+<td>Detached from the window (non-pool-aware variant)</td>
+<td>Rarely, specific containers</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">For a ComposeView inside a <strong>Fragment</strong>, choose <code>DisposeOnViewTreeLifecycleDestroyed</code>. Fragments detach their views when you navigate away but keep the fragment on the back stack, and the default strategy would drop the Composition and its <strong>remembered state</strong>. For items in a <strong>RecyclerView</strong>, the default pool-aware strategy is intended.</p>
+<h3 class="v2-h3">When the fragment itself is just Compose</h3>
+<p class="v2-p">If the whole fragment is Compose, return a <code>ComposeView</code> directly from <code>onCreateView</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.fragment.app.Fragment
+
+class AboutFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View = ComposeView(requireContext()).apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            MaterialTheme { Text("About Class Register") }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">This is the standard shape of a <strong>Compose screen inside a Navigation-component graph</strong>, and it is the best first migration step: keep fragments and navigation, but write each screen's content in Compose.</p>
+<h3 class="v2-h3">Compose inside a RecyclerView item</h3>
+<p class="v2-p">You can migrate one list row at a time. In the view holder, wrap a <code>ComposeView</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.Text
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.recyclerview.widget.RecyclerView
+
+class ComposeStudentHolder(private val composeView: ComposeView) : RecyclerView.ViewHolder(composeView) {
+    init {
+        composeView.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+    }
+    fun bind(student: Student) {
+        composeView.setContent {
+            Text(student.name)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Keep Compose rows light: a <code>RecyclerView</code> creates many holders, and each is its own Composition. This works, but for a whole list it is usually better to migrate the <strong>entire list</strong> to <code>LazyColumn</code> than to keep the adapter.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Compose Inside an XML Layout</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: Views Inside Compose with AndroidView</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Now the reverse direction. <code>AndroidView</code> lets you place any <code>View</code> into a composable. It takes three main parameters:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Runs</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>factory</code></td>
+<td><strong>Once</strong>, when the View is created</td>
+<td>Create and configure the View (needs a <code>Context</code>)</td>
+</tr>
+<tr>
+<td><code>update</code></td>
+<td>On first composition and <strong>every time its state reads change</strong></td>
+<td>Push new state into the View</td>
+</tr>
+<tr>
+<td><code>onRelease</code> (optional)</td>
+<td>When the View leaves the composition</td>
+<td>Clean up</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Example: show a rating bar from the View system (<code>RatingBar</code>, which has no direct Material 3 Compose counterpart in the base library):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.widget.RatingBar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+
+@Composable
+fun StarRating(
+    rating: Float,
+    onRatingChange: (Float) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context -&gt;
+            RatingBar(context).apply {
+                numStars = 5
+                stepSize = 0.5f
+                setOnRatingBarChangeListener { _, value, fromUser -&gt;
+                    if (fromUser) onRatingChange(value)
+                }
+            }
+        },
+        update = { bar -&gt;
+            if (bar.rating != rating) bar.rating = rating
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">How state flows:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Compose state (rating) --&gt; update { bar.rating = rating }   (state flows DOWN into the View)
+View event (user taps) --&gt; listener --&gt; onRatingChange(...) (events flow UP to Compose state)</code></pre></div></div>
+<p class="v2-p">That is the same <em>state down, events up</em> pattern as everywhere else. The <code>if (bar.rating != rating)</code> check avoids setting a value that is already there, which would trigger the listener and cause a loop.</p>
+<p class="v2-p"><strong>A common trap:</strong> the lambda in <code>factory</code> captures <code>onRatingChange</code> the <em>first</em> time only, because <code>factory</code> runs once. If your callback changes later (a new lambda each recomposition), the View keeps calling the old one. The safe fix is <code>rememberUpdatedState</code> or setting the listener again in <code>update</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>update = { bar -&gt;
+    bar.setOnRatingBarChangeListener { _, value, fromUser -&gt;
+        if (fromUser) onRatingChange(value)
+    }
+    if (bar.rating != rating) bar.rating = rating
+}</code></pre></div></div>
+<h3 class="v2-h3">A WebView in Compose</h3>
+<p class="v2-p"><code>WebView</code> is the classic reason to use <code>AndroidView</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+
+@Composable
+fun SimpleWebPage(url: String, modifier: Modifier = Modifier) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context -&gt;
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                settings.javaScriptEnabled = false   // enable only if you trust and need it
+            }
+        },
+        update = { webView -&gt;
+            if (webView.url != url) webView.loadUrl(url)
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">Remember the <code>INTERNET</code> permission in the manifest (lesson 29), and enable JavaScript only for content you trust. For production-quality web content, also look at the <code>androidx.webkit</code> library for safe-browsing and dark-mode support.</p>
+<h3 class="v2-h3">AndroidView and lifecycle-heavy Views</h3>
+<p class="v2-p">Views such as <code>MapView</code> and <code>PlayerView</code> need lifecycle calls (<code>onResume</code>, <code>onPause</code>, <code>onDestroy</code>). In Compose you forward them with a <code>LifecycleEventObserver</code> inside a <code>DisposableEffect</code> (lesson 54), or use the library's own Compose wrapper if it has one (Maps and media libraries now ship Compose APIs; prefer those).</p>
+<h3 class="v2-h3">Fragments and XML layouts inside Compose</h3>
+<p class="v2-p">If you have a whole XML layout or a fragment container that you do not want to rewrite yet, use <code>AndroidViewBinding</code> (needs <code>ui-viewbinding</code> and view binding enabled):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidViewBinding
+import com.example.classregister.databinding.LegacyHeaderBinding
+
+@Composable
+fun LegacyHeader(title: String, modifier: Modifier = Modifier) {
+    AndroidViewBinding(LegacyHeaderBinding::inflate, modifier) {
+        headerTitle.text = title    // 'this' is the generated binding
+    }
+}</code></pre></div></div>
+<p class="v2-p">The trailing lambda runs on every recomposition with the binding as its receiver, so it is where you bind data. A <code>FragmentContainerView</code> inside such a layout lets you host an old fragment inside a Compose screen.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Views Inside Compose with AndroidView</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Sharing State and Theme</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">State</h3>
+<p class="v2-p">The cleanest bridge is a <code>ViewModel</code> exposing a <code>StateFlow</code>. A Fragment's View code can <code>collect</code> it (lesson 42) and a Compose screen can <code>collectAsStateWithLifecycle()</code>. Both see the same data, so you can move parts of a screen to Compose without changing the data layer at all. Other bridges: <code>LiveData.observeAsState()</code> (needs the <code>androidx.compose.runtime:runtime-livedata</code> artifact) if your old code uses LiveData, and <code>Flow.collectAsState()</code>.</p>
+<h3 class="v2-h3">Theme</h3>
+<p class="v2-p">Compose reads its colours and type from <code>MaterialTheme</code>; Views read from the XML theme (<code>Theme.Material3.*</code> in <code>themes.xml</code>). If they differ, your screens look like two different apps. Two strategies:</p>
+<ol class="v2-ol">
+<li><strong>Re-implement the XML theme in Compose</strong> by hand (copy the same colours into <code>Color.kt</code>).</li>
+<li><strong>Use the Material Theme Adapter</strong> library (<code>com.google.android.material:compose-theme-adapter</code>, or the M3 variant) that reads your XML theme and creates a Compose <code>MaterialTheme</code> automatically. It is useful <em>during</em> a migration, but treat it as a bridge rather than a long-term solution: check the library's page for its current status, and plan to move to a native Compose theme.</li>
+</ol>
+<p class="v2-p">If a Compose screen sits in an Activity with a Material 3 XML theme, also make sure <code>&lt;item name="android:windowBackground"&gt;</code> and status bar colours are consistent with what Compose draws.</p>
+<h3 class="v2-h3">Sizes, insets and dark mode</h3>
+<p class="v2-p">Mixed screens commonly have two bugs: <strong>double insets</strong> (the XML layout adds padding for the status bar and Compose adds it again) and <strong>dark mode mismatch</strong>. Decide once which layer owns window insets (modern apps call <code>enableEdgeToEdge()</code> in the Activity and handle insets in the layout system or in Compose, not in both).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Sharing State and Theme</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Step-by-Step Build 5: A Migration Strategy That Works</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The official <em>Migrate from the View system</em> material gives a practical order of work. Here is our own version, in six steps.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>STEP 1  Add Compose to the project (Gradle, theme). Ship nothing yet.
+STEP 2  Build ONE new, small screen in Compose. Host it in a Fragment (ComposeView).
+STEP 3  Migrate "leaf" UI first: buttons, cards, list rows, dialogs, empty states.
+STEP 4  Migrate whole screens (one fragment at a time), moving state into ViewModels.
+STEP 5  Replace the navigation (Navigation component -&gt; Navigation Compose) once most
+        screens are Compose.
+STEP 6  Remove XML, view binding, the Adapter classes and the theme bridge.</code></pre></div></div>
+<p class="v2-p">Guidelines that save pain:</p>
+<ul class="v2-ul">
+<li><strong>Start with a screen that has little navigation or state complexity</strong> (an About page, a settings list, a detail screen).</li>
+<li><strong>Migrate bottom-up (leaf to root)</strong> or <strong>top-down by whole screens</strong>, but not both at once.</li>
+<li><strong>Move logic to the ViewModel first.</strong> A screen whose state already lives in a ViewModel migrates in an afternoon.</li>
+<li><strong>Keep tests green</strong> at every step. UI tests with Espresso can still find Views inside a <code>ComposeView</code>; Compose test APIs can find composables inside View screens (lesson 45).</li>
+<li><strong>Do not start by redoing your theme or design system twice.</strong> Define Material 3 in Compose from the start.</li>
+<li><strong>Measure.</strong> Check start-up time and release-build performance after adding Compose, because Compose adds some library weight (lesson 57).</li>
+</ul>
+<h3 class="v2-h3">The hands-on migration codelab</h3>
+<p class="v2-p">The official <em>Migrating to Jetpack Compose</em> codelab migrates a real app (Sunflower) step by step: a detail screen, the plant name, the description with <code>HtmlText</code>, theming and the "add to garden" button. You can follow it with the links below. The skills it asks for are exactly the ones in this lesson: <code>ComposeView</code> in a fragment, <code>AndroidView</code> for HTML text, the theme adapter and state from a ViewModel.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: A Migration Strategy That Works</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Replace one row</strong></p>
+<p class="v2-p">In the lesson 42 <code>ClassRegister</code> project, replace the <strong>title <code>TextView</code></strong> at the top of the main fragment with a <code>ComposeView</code> showing "Class Register" and the count of present students, e.g. "Class Register (3 present)". The count must update when you tick boxes.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Add a <code>ComposeView</code> with id <code>headerCompose</code> to <code>fragment_class.xml</code> in place of the <code>TextView</code>, then in <code>onViewCreated</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
+
+binding.headerCompose.apply {
+    setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+    setContent {
+        MaterialTheme {
+            val students by viewModel.students.collectAsStateWithLifecycle()
+            val present = students.count { it.present }
+            Text(
+                "Class Register ($present present)",
+                style = MaterialTheme.typography.headlineSmall
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The View-based list and the Compose header observe the same <code>StateFlow</code>, so they stay in sync.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Compose screen hosting a View</strong></p>
+<p class="v2-p">Write a composable <code>HelpScreen</code> that shows a heading in Compose and, below it, a <code>WebView</code> loading <code>https://developer.android.com/courses</code>. Explain which part runs once and which part runs on each recomposition.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+
+@Composable
+fun HelpScreen(url: String = "https://developer.android.com/courses") {
+    Column(Modifier.padding(16.dp)) {
+        Text("Help", style = MaterialTheme.typography.headlineMedium)
+        AndroidView(
+            modifier = Modifier.padding(top = 12.dp),
+            factory = { context -&gt;
+                WebView(context).apply { webViewClient = WebViewClient() }
+            },
+            update = { webView -&gt;
+                if (webView.url != url) webView.loadUrl(url)
+            }
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>factory</code> runs <strong>once</strong> when the WebView is created. <code>update</code> runs after the first composition and again whenever state it reads (here <code>url</code>) changes. The manifest needs the <code>INTERNET</code> permission.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Write a migration plan</strong></p>
+<p class="v2-p">You inherit an app with 12 Fragment screens, an XML theme, a <code>RecyclerView</code>-based home feed and a <code>MapView</code> on one screen. In 6–8 lines, write the order you would migrate in and one risk for each of the first three steps.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">A reasonable plan:</p>
+<ol class="v2-ol">
+<li>Add Compose and a Compose theme matching the XML theme. <em>Risk:</em> Kotlin/Compose compiler mismatch, APK size increase.</li>
+<li>Build the next new screen in Compose inside a fragment (<code>ComposeView</code>). <em>Risk:</em> wrong <code>ViewCompositionStrategy</code> loses state on back navigation.</li>
+<li>Migrate leaf UI (list rows, dialogs, empty states) and simple screens (About, Settings). <em>Risk:</em> two themes drift apart.</li>
+<li>Move state into ViewModels for the remaining screens.</li>
+<li>Migrate the home feed to <code>LazyColumn</code> (keys and content types). <em>Risk:</em> scroll position and performance regressions.</li>
+<li>Keep <code>MapView</code> in <code>AndroidView</code> (or move to the maps Compose library if it meets your needs).</li>
+<li>Swap navigation to Navigation Compose when most screens are Compose.</li>
+<li>Remove XML, adapters and the theme bridge.</li>
+</ol></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Old <code>composeOptions</code> with the new compiler plugin.</strong> <em>Symptom:</em> Gradle errors about the compiler extension version. <em>Fix:</em> remove <code>composeOptions</code>, apply the <code>org.jetbrains.kotlin.plugin.compose</code> plugin.</p>
+<p class="v2-p"><strong>Mistake #2: Default <code>ViewCompositionStrategy</code> in a Fragment.</strong> <em>Symptom:</em> state lost when you navigate back. <em>Fix:</em> <code>DisposeOnViewTreeLifecycleDestroyed</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting <code>MaterialTheme</code> around Compose content in a <code>ComposeView</code>.</strong> <em>Symptom:</em> components use the default baseline theme. <em>Fix:</em> wrap content in your theme.</p>
+<p class="v2-p"><strong>Mistake #4: Putting a long-lived object creation in <code>update</code>.</strong> <em>Symptom:</em> leaks and slowness. <em>Fix:</em> create in <code>factory</code>, update in <code>update</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Stale callbacks in <code>factory</code>.</strong> <em>Symptom:</em> clicks call an old lambda. <em>Fix:</em> set listeners in <code>update</code>, or use <code>rememberUpdatedState</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Double window insets.</strong> <em>Symptom:</em> extra gap under the status bar. <em>Fix:</em> let one layer own insets.</p>
+<p class="v2-p"><strong>Mistake #7: Two themes that drift apart.</strong> <em>Symptom:</em> buttons in two styles. <em>Fix:</em> share the same colours (or a bridge during the migration).</p>
+<p class="v2-p"><strong>Mistake #8: A <code>ComposeView</code> inside a scrolling parent without a size.</strong> <em>Symptom:</em> zero height or measure crash for lazy lists. <em>Fix:</em> give the <code>ComposeView</code> a bounded height or avoid nesting lazy lists in View scrollers.</p>
+<p class="v2-p"><strong>Mistake #9: Big-bang rewrite.</strong> <em>Symptom:</em> months with no release. <em>Fix:</em> migrate screen by screen and ship each time.</p>
+<p class="v2-p"><strong>Mistake #10: Forgetting <code>ui-tooling</code> for previews.</strong> <em>Symptom:</em> <code>@Preview</code> does not show. <em>Fix:</em> add <code>debugImplementation</code> for <code>ui-tooling</code> and <code>implementation</code> for <code>ui-tooling-preview</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does <code>ComposeView</code> do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It is a View you can place in XML (or create in code) that hosts a Compose Composition. You call <code>setContent { }</code> on it to supply composables.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Which <code>ViewCompositionStrategy</code> should a <code>ComposeView</code> in a fragment use, and why?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>DisposeOnViewTreeLifecycleDestroyed</code>, because the fragment's view lifecycle matters. The default strategy disposes when the view is detached, which loses remembered state when the fragment goes onto the back stack.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>factory</code> and <code>update</code> in <code>AndroidView</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>factory</code> runs once to create the View. <code>update</code> runs after creation and whenever state it reads changes, so it pushes new data into the existing View.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Name two ways to share data between View-based and Compose-based parts of one screen.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">A shared <code>ViewModel</code> exposing <code>StateFlow</code> (collected in both worlds), and adapters such as <code>LiveData.observeAsState()</code> or <code>Flow.collectAsStateWithLifecycle()</code> in Compose.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What is a safe order for migrating an existing app?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Add Compose and a theme, build new screens or small pieces in Compose inside fragments, migrate leaf UI and simple screens, move state to ViewModels, then replace navigation and remove XML at the end, shipping at every step.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-8-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 8 Pathway 2</a></li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 1</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-migration" rel="noopener noreferrer">Migrating to Jetpack Compose codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Migrate One Screen</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Take the Views-based <strong>Class Register</strong> from lesson 42 and migrate it <strong>one step at a time</strong>, so that after each step the app still runs.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Add Compose to the project (plugin, BOM, <code>compose = true</code>) and confirm it builds.</li>
+<li>Create <code>Theme</code> in Compose with the same primary colour as the XML theme.</li>
+<li>Convert <code>DetailFragment</code> to return a <code>ComposeView</code> with the detail UI (name, present switch that updates the ViewModel).</li>
+<li>Replace the header of <code>ClassFragment</code> with a <code>ComposeView</code> showing the present count.</li>
+<li>Add a <code>StarRating</code> <code>AndroidView</code> to the detail screen (a "behaviour rating" stored in the ViewModel).</li>
+<li>Write down the next three migration steps for this app.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> convert the <code>RecyclerView</code> list to a <code>LazyColumn</code> inside a <code>ComposeView</code> and delete <code>StudentAdapter</code>.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">Add rating to the ViewModel:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class Student(
+    val id: Int,
+    val name: String,
+    val present: Boolean = false,
+    val behaviour: Float = 3f
+)
+
+class StudentViewModel : ViewModel() {
+    private val _students = MutableStateFlow&lt;List&lt;Student&gt;&gt;(emptyList())
+    val students: StateFlow&lt;List&lt;Student&gt;&gt; = _students.asStateFlow()
+    private var nextId = 1
+
+    fun add(name: String) { _students.update { it + Student(nextId++, name) } }
+
+    fun setPresent(id: Int, present: Boolean) = change(id) { it.copy(present = present) }
+
+    fun setBehaviour(id: Int, rating: Float) = change(id) { it.copy(behaviour = rating) }
+
+    private fun change(id: Int, transform: (Student) -&gt; Student) {
+        _students.update { list -&gt; list.map { if (it.id == id) transform(it) else it } }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Remove the older <code>data class Student</code> from <code>StudentAdapter.kt</code> so there is only one definition.) The detail fragment as a Compose screen:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DetailFragment.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.classregister
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+class DetailFragment : Fragment() {
+
+    private val viewModel: StudentViewModel by activityViewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val id = requireArguments().getInt("studentId")
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme {
+                    val students by viewModel.students.collectAsStateWithLifecycle()
+                    val student = students.firstOrNull { it.id == id }
+                    if (student != null) {
+                        Column(Modifier.padding(24.dp)) {
+                            Text(student.name, style = MaterialTheme.typography.headlineMedium)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("Present")
+                                Switch(
+                                    checked = student.present,
+                                    onCheckedChange = { viewModel.setPresent(id, it) },
+                                    modifier = Modifier.padding(start = 12.dp)
+                                )
+                            }
+                            Text("Behaviour rating", Modifier.padding(top = 16.dp))
+                            StarRating(
+                                rating = student.behaviour,
+                                onRatingChange = { viewModel.setBehaviour(id, it) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>StarRating</code> is the <code>AndroidView</code> composable from Build 3 (place it in <code>StarRating.kt</code> in the same package). The fragment no longer needs <code>fragment_detail.xml</code> or a view binding, so delete both.</p>
+<p class="v2-p"><strong>The next three migration steps:</strong> (1) convert <code>ClassFragment</code> to a <code>ComposeView</code> with a <code>LazyColumn</code> and delete the adapter and <code>item_student.xml</code>; (2) move navigation to Navigation Compose and make <code>MainActivity</code> use <code>setContent { }</code>; (3) remove view binding, the XML theme duplicates and unused layouts.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 43 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-43-compose-and-views-interoperability</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 43 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Two Worlds, One Screen</li><li>✅ Step-by-Step Build 1: Add Compose to a View Project</li><li>✅ Step-by-Step Build 2: Compose Inside an XML Layout</li><li>✅ Step-by-Step Build 3: Views Inside Compose with AndroidView</li><li>✅ Step-by-Step Build 4: Sharing State and Theme</li><li>✅ Step-by-Step Build 5: A Migration Strategy That Works</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_42.html" class="ln-btn">&#8592; Lesson 42</a><a href="lesson_44.html" class="ln-btn primary">Lesson 44 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 43 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

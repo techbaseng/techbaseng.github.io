@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 38: Layouts and Modifiers in Depth — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l38">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 38 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 38</div>
+      <h1>Layouts and Modifiers in Depth</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Recipe Detail Screen</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 38</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Master Row, Column, Box, Scaffold, ConstraintLayout and the order of modifiers while you implement a real-world design.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Recipe Detail Screen</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Almost every Compose problem that makes beginners say "why does it look like that?" is a layout problem: a button stretches to the full width, padding appears on the wrong side, a background paints outside the border, text is cut off on a small phone. The cure is to understand <strong>how Compose measures and places things</strong>, and to learn the handful of building blocks that do 95% of the work.</p>
+<p class="v2-p">This lesson covers the layout parts of the <em>Jetpack Compose for Android developers</em> programme: <em>The Compose UI toolkit</em>, <em>Implement a real-world design</em>, <em>Fundamentals of Compose layouts and modifiers</em> and <em>Constraints and modifier order</em> (Pathways 1 and 2, https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1). You will practise on a recipe screen of your own design.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Use <code>Row</code>, <code>Column</code> and <code>Box</code> with <code>Arrangement</code> and <code>Alignment</code>.</li>
+<li>Share space with <code>weight</code>, <code>fillMaxWidth</code> and fractions.</li>
+<li>Predict the effect of <strong>modifier order</strong>.</li>
+<li>Explain how <strong>constraints</strong> flow down and <strong>sizes</strong> flow up.</li>
+<li>Use <code>Scaffold</code>, <code>Surface</code>, <code>Card</code> and <code>Spacer</code> properly.</li>
+<li>Use <code>ConstraintLayout</code> in Compose when nesting gets awkward.</li>
+<li>Use <code>Modifier.layout</code> and intrinsic sizes in simple cases.</li>
+<li>Turn a visual design into composables, and handle small screens, large fonts and right-to-left languages.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a parent tells each child "you may be between this small and this big"; the child picks a size inside that range; then the parent decides where to put it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>The three phases and Compose basics</strong> (lesson 37). Layout is phase two.</li>
+<li><strong><code>Row</code>, <code>Column</code>, <code>Modifier</code> first steps</strong> (lesson 16).</li>
+<li><strong>dp and sp</strong> units (lesson 16). <code>dp</code> for sizes and spacing, <code>sp</code> for text.</li>
+<li><strong>Preview</strong> (lesson 15). Use previews with <code>widthDp</code>, <code>fontScale</code> and <code>locale</code> options throughout.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: How Layout Works</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Constraints down, sizes up</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>        parent
+          |  constraints: minWidth..maxWidth, minHeight..maxHeight
+          v
+        child  --- measures itself (and its own children) ---+
+          |                                                  |
+          +---------------- reports a size (w x h) &lt;---------+
+        parent places the child at (x, y)</code></pre></div></div>
+<p class="v2-p">A <code>Constraints</code> object holds a minimum and maximum width and height, in pixels. A child <strong>must</strong> pick a size within them. This has surprising, useful consequences:</p>
+<ul class="v2-ul">
+<li>A composable cannot be bigger than its parent allows, unless the parent allows it.</li>
+<li><code>Modifier.size(300.dp)</code> inside a parent that is only 200 dp wide yields 200 dp, because the constraint wins (you can override with <code>requiredSize</code>, which you rarely should).</li>
+<li>Each child is measured <strong>once</strong>, which is why deep nesting is cheap in Compose compared with old Views.</li>
+</ul>
+<h3 class="v2-h3">Modifier order matters</h3>
+<p class="v2-p">A <code>Modifier</code> is an <strong>ordered chain</strong>. Each element wraps what comes after it, like layers of an onion or nested boxes, from the outside in. So the same elements in a different order give a different result.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// A: background covers padding area
+Text("Hello", Modifier.background(Color.Yellow).padding(16.dp))
+
+// B: padding is OUTSIDE the background
+Text("Hello", Modifier.padding(16.dp).background(Color.Yellow))</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>A: background then padding            B: padding then background
++---------------------+               (transparent margin)
+|  yellow all over    |                  +-------+
+|     Hello           |                  |yellow |
++---------------------+                  | Hello |
+(padding is INSIDE yellow)               +-------+</code></pre></div></div>
+<p class="v2-p">In <strong>A</strong> the yellow fills the text and the padding. In <strong>B</strong> the padding is empty space outside the yellow box. The same applies to <code>clickable</code>: <code>Modifier.padding(16.dp).clickable { }</code> makes only the inner area clickable; <code>Modifier.clickable { }.padding(16.dp)</code> makes the padding clickable too, which is usually what you want for a comfortable touch target.</p>
+<p class="v2-p">A useful rule for sizing:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Box(Modifier.size(100.dp).padding(8.dp).background(Color.Red))   // red box is 84 dp: padding eats from the 100
+Box(Modifier.padding(8.dp).size(100.dp).background(Color.Red))   // red box is 100 dp, with 8 dp margin outside</code></pre></div></div>
+<p class="v2-p">Read left to right: <em>size first</em> means "I am 100 dp, including whatever follows"; <em>padding first</em> means "leave 8 dp around me, then I am 100".</p>
+<p class="v2-p">A common order for a clickable card: <code>size</code> or <code>fillMaxWidth</code> first, then <code>clip</code>, <code>background</code>, <code>clickable</code>, then <code>padding</code> for inner spacing. Experiment with each to see why.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: How Layout Works</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: The Big Three</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">Column and Row</h3>
+<p class="v2-p"><code>Column</code> stacks children vertically; <code>Row</code> stacks horizontally. Each has two <strong>axes</strong>: the <strong>main axis</strong> (the direction of stacking) and the <strong>cross axis</strong>. You control each with a different parameter.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Main axis</th>
+<th>Cross axis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td>vertical, <code>verticalArrangement</code></td>
+<td>horizontal, <code>horizontalAlignment</code></td>
+</tr>
+<tr>
+<td><code>Row</code></td>
+<td>horizontal, <code>horizontalArrangement</code></td>
+<td>vertical, <code>verticalAlignment</code></td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+
+Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween,   // main axis: distribute
+    verticalAlignment = Alignment.CenterVertically      // cross axis: align
+) {
+    Text("Left")
+    Text("Middle")
+    Text("Right")
+}</code></pre></div></div>
+<p class="v2-p">Arrangements, for a row with extra space (✱ = child):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Arrangement.Start          ✱✱✱.............
+Arrangement.Center         ......✱✱✱.......
+Arrangement.End            .............✱✱✱
+Arrangement.SpaceBetween   ✱......✱......✱
+Arrangement.SpaceAround    .✱....✱....✱.   (half-gaps at the ends)
+Arrangement.SpaceEvenly    ..✱...✱...✱..   (equal gaps everywhere)
+Arrangement.spacedBy(8.dp) ✱ ✱ ✱ ......... (fixed gap, packed at start)</code></pre></div></div>
+<p class="v2-p"><strong>Important:</strong> a <code>Row</code> or <code>Column</code> wraps its content by default. <code>Arrangement</code> and <code>Alignment</code> have no visible effect unless the container is <strong>bigger</strong> than its content: give it <code>fillMaxWidth()</code>, <code>fillMaxSize()</code> or a size. Forgetting this is the most common "why does <code>Arrangement.Center</code> not work?" bug.</p>
+<h3 class="v2-h3">Sharing space with <code>weight</code></h3>
+<p class="v2-p">Inside a <code>Row</code> or <code>Column</code>, <code>Modifier.weight(w)</code> divides the <strong>remaining</strong> space among weighted children in proportion:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Row(Modifier.fillMaxWidth()) {
+    Text("Label",  Modifier.weight(1f))     // gets 1/3 of the remaining width
+    Text("Value",  Modifier.weight(2f))     // gets 2/3
+}</code></pre></div></div>
+<p class="v2-p">Unweighted children are measured first at their natural size; the leftover is then split among the weighted ones. A single <code>weight(1f)</code> child between two fixed-size ones makes it fill the middle (a classic "title between two icons" toolbar). <code>fill = false</code> lets a weighted child take <strong>at most</strong> its share but shrink if it needs less.</p>
+<p class="v2-p"><code>fillMaxWidth(0.5f)</code> is the other option: a fraction of the <strong>parent's maximum</strong>, not of the leftover. Use <code>weight</code> to share among siblings; use fractions for a single element.</p>
+<h3 class="v2-h3">Box: stacking</h3>
+<p class="v2-p"><code>Box</code> places children <strong>on top of each other</strong>, like layers. <code>contentAlignment</code> positions them all, and <code>Modifier.align(...)</code> positions one child.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+
+Box(Modifier.size(200.dp).background(Color.LightGray)) {
+    Text("Center", Modifier.align(Alignment.Center))
+    Text("Top end", Modifier.align(Alignment.TopEnd))
+    Text("Bottom start", Modifier.align(Alignment.BottomStart))
+}</code></pre></div></div>
+<p class="v2-p">Use <code>Box</code> for badges on avatars, text over images, loading overlays and a floating button over content. Children are drawn in order, so later ones appear on top. Notice <code>TopEnd</code> and <code>Start</code>: these respect <strong>layout direction</strong>, flipping in right-to-left languages such as Arabic or Hebrew. Prefer <code>Start</code> and <code>End</code> over <code>Left</code> and <code>Right</code>, and use <code>padding(start = ..., end = ...)</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The Big Three</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Scaffold, Surface, Card and Spacing</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Surface and Card</h3>
+<p class="v2-p"><code>Surface</code> is the basic Material container: it gives a background colour from the theme, a shape, elevation and content colour, and it ensures text on it uses the right "on" colour. <code>Card</code>, <code>ElevatedCard</code> and <code>OutlinedCard</code> are ready-made variants. A rule of thumb: <strong>never hand-roll a coloured <code>Box</code> for a panel when <code>Surface</code> or <code>Card</code> exists</strong>, because those honour dark theme automatically (lesson 40).</p>
+<h3 class="v2-h3">Scaffold</h3>
+<p class="v2-p"><code>Scaffold</code> implements the standard Material screen skeleton: top bar, bottom bar, floating action button, snackbar host and the main content. It passes you <code>innerPadding</code> so content never hides behind the bars:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecipesScreen() {
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Recipes") }) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { /* add recipe */ }) {
+                Icon(Icons.Filled.Add, contentDescription = "Add recipe")
+            }
+        }
+    ) { innerPadding -&gt;
+        RecipeList(Modifier.padding(innerPadding))
+    }
+}</code></pre></div></div>
+<p class="v2-p">Forgetting to apply <code>innerPadding</code> makes the first list item vanish under the top bar, a bug you will meet often. Since Android 15 enforces <strong>edge-to-edge</strong> drawing for apps targeting recent API levels, <code>Scaffold</code> and its padding also handle the system bars (status bar and navigation bar), which is another reason to use it (lesson 40 covers system bars).</p>
+<h3 class="v2-h3">Spacing</h3>
+<ul class="v2-ul">
+<li><code>Spacer(Modifier.height(16.dp))</code> adds fixed empty space between siblings.</li>
+<li><code>Arrangement.spacedBy(8.dp)</code> on a <code>Column</code> or <code>Row</code> is cleaner than putting a Spacer between every pair.</li>
+<li><code>Modifier.padding</code> for space around a composable; <code>contentPadding</code> on lazy lists for space inside the scroll area.</li>
+</ul>
+<p class="v2-p">Keep spacing on a <strong>scale</strong> (4, 8, 12, 16, 24, 32 dp). Consistent numbers make a design look intentional.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Scaffold, Surface, Card and Spacing</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: ConstraintLayout in Compose</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Most screens are fine with <code>Row</code>, <code>Column</code> and <code>Box</code>. When you need to align things relative to each other in a way that would take three levels of nesting, <strong>ConstraintLayout</strong> is cleaner. Add its Compose artifact (check the current version at https://developer.android.com/jetpack/androidx/releases/constraintlayout):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+constraintlayoutCompose = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintlayoutCompose" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.androidx.constraintlayout.compose)
+}</code></pre></div></div>
+<p class="v2-p">A profile header: avatar on the left, name and role stacked to its right, and a follow button pinned to the end, vertically centred with the avatar.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+
+@Composable
+fun ProfileHeader(name: String, role: String, modifier: Modifier = Modifier) {
+    ConstraintLayout(modifier = modifier.fillMaxWidth().padding(16.dp)) {
+        val (avatar, title, subtitle, follow) = createRefs()
+
+        Box(
+            Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .constrainAs(avatar) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
+        Text(
+            name,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.constrainAs(title) {
+                start.linkTo(avatar.end, margin = 12.dp)
+                top.linkTo(avatar.top)
+            }
+        )
+        Text(
+            role,
+            modifier = Modifier.constrainAs(subtitle) {
+                start.linkTo(title.start)
+                top.linkTo(title.bottom)
+            }
+        )
+        Button(
+            onClick = { },
+            modifier = Modifier.constrainAs(follow) {
+                end.linkTo(parent.end)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+            }
+        ) { Text("Follow") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">How to read it:</p>
+<ul class="v2-ul">
+<li><code>createRefs()</code> makes <strong>references</strong>, one per child; <code>constrainAs(ref) { ... }</code> attaches constraints to a child.</li>
+<li><code>start.linkTo(parent.start)</code> means "my start edge sticks to the parent's start edge". Linking both <code>top</code> and <code>bottom</code> to the parent <strong>centres</strong> the item vertically.</li>
+<li><code>margin = 12.dp</code> is spacing from the target.</li>
+<li>You can also use <code>createGuidelineFromStart(0.3f)</code>, <code>createBarrier(...)</code> and <code>createHorizontalChain(...)</code>, which have no easy Row/Column equivalent, and <code>Dimension.fillToConstraints</code> to stretch between two anchors.</li>
+</ul>
+<p class="v2-p">When to choose it: relative positioning, chains, barriers, guidelines, and responsive designs that rearrange via <code>ConstraintSet</code>. When <strong>not</strong> to: a simple stack or row (use <code>Column</code> and <code>Row</code>); each tool has a cost, and a <code>Row</code> is easier to read and to review.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: ConstraintLayout in Compose</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Constraints and Custom Layout</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Seeing constraints at work</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Box(Modifier.size(100.dp).background(Color.Gray)) {
+    Box(Modifier.size(300.dp).background(Color.Red))        // ask for 300 dp
+}</code></pre></div></div>
+<p class="v2-p">The inner box asks for 300 dp, but its parent only allows up to 100 dp, so it is <strong>clamped to 100</strong>. Then change the inner modifier to <code>requiredSize(300.dp)</code>: it now ignores the constraint and overflows (it still places at the top-left of its parent). It is rarely the right fix; usually the real fix is to change the parent.</p>
+<p class="v2-p"><code>fillMaxWidth()</code> sets the minimum width equal to the maximum width, forcing the child to fill. <code>wrapContentSize()</code> resets the minimum to zero, letting the child be its natural size inside a larger parent, a useful trick when a parent's minimum constraints stretch a child you wanted small.</p>
+<h3 class="v2-h3"><code>Modifier.layout</code></h3>
+<p class="v2-p">When no existing modifier does what you need, you can intercept measuring and placing:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.layout.layout
+
+fun Modifier.firstBaselineToTop(firstBaselineToTop: Dp) = this.layout { measurable, constraints -&gt;
+    val placeable = measurable.measure(constraints)
+    val firstBaseline = placeable[FirstBaseline]
+    val placeableY = firstBaselineToTop.roundToPx() - firstBaseline
+    val height = placeable.height + placeableY
+    layout(placeable.width, height) {
+        placeable.placeRelative(0, placeableY)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The three steps are always: <strong>measure</strong> the child with <code>measurable.measure(constraints)</code>, <strong>report</strong> a size with <code>layout(width, height)</code>, and <strong>place</strong> it with <code>placeRelative</code>. (Imports: <code>androidx.compose.ui.layout.FirstBaseline</code>, <code>androidx.compose.ui.unit.Dp</code>.) For whole custom containers use the <code>Layout</code> composable with a list of children. This is an advanced tool; use it rarely, and prefer composing existing pieces.</p>
+<h3 class="v2-h3">Intrinsic measurements</h3>
+<p class="v2-p">Children are measured once, so a child cannot normally ask its siblings how big they will be. <strong>Intrinsics</strong> are a controlled exception: <code>Modifier.height(IntrinsicSize.Min)</code> on a <code>Row</code> makes it as tall as its tallest child's minimum intrinsic height, which lets you draw a divider that matches the text height:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.VerticalDivider
+
+Row(Modifier.height(IntrinsicSize.Min)) {
+    Text("Left text", Modifier.weight(1f).padding(8.dp))
+    VerticalDivider(Modifier.fillMaxHeight())
+    Text("Right text\nwith two lines", Modifier.weight(1f).padding(8.dp))
+}</code></pre></div></div>
+<p class="v2-p">Without <code>IntrinsicSize.Min</code>, the divider's <code>fillMaxHeight</code> would stretch to the whole parent. With it, the row is only as tall as its tallest text. It costs an extra measuring pass, so use it for small, local layouts, not in the middle of long lists.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Constraints and Custom Layout</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Implement a Real-World Design</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The programme's <em>Implement a real-world design</em> item gives you a mockup and asks you to rebuild it. The skill is <strong>breaking a picture into a tree of containers</strong>. Take this recipe card design:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+------------------------------------------+
+| [photo, full width, 180 dp tall]         |
+|                                          |
++------------------------------------------+
+| Jollof Rice with Chicken          [heart]|
+| 45 min  ·  4 servings  ·  Easy           |
+|                                          |
+| A smoky party-style classic that...      |
+|                                          |
+| [ View recipe ]            [ Share ]     |
++------------------------------------------+</code></pre></div></div>
+<p class="v2-p">Process:</p>
+<ol class="v2-ol">
+<li><strong>Outer shape:</strong> a <code>Card</code> containing a <code>Column</code>.</li>
+<li><strong>Row 1:</strong> a <code>Box</code> or image 180 dp tall, <code>fillMaxWidth</code>, <code>ContentScale.Crop</code>.</li>
+<li><strong>Row 2:</strong> a <code>Row</code> with the title taking <code>weight(1f)</code> and an <code>IconButton</code> at the end.</li>
+<li><strong>Row 3:</strong> a <code>Row</code> of three <code>Text</code>s separated by dots, or a single formatted <code>Text</code>.</li>
+<li><strong>Body:</strong> a <code>Text</code> with a max of 3 lines and an ellipsis.</li>
+<li><strong>Actions:</strong> a <code>Row</code> with <code>Arrangement.SpaceBetween</code>.</li>
+<li><strong>Spacing:</strong> use 16 dp content padding and 8 dp between rows, via <code>padding</code> and <code>spacedBy</code>.</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextOverflow
+
+@Composable
+fun RecipeCard(
+    title: String,
+    meta: String,
+    summary: String,
+    isFavourite: Boolean,
+    onToggleFavourite: () -&gt; Unit,
+    onViewClick: () -&gt; Unit,
+    onShareClick: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Column {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)   // stand-in for the photo
+            )
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = onToggleFavourite) {
+                        Icon(
+                            imageVector = if (isFavourite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            contentDescription = if (isFavourite) "Remove from favourites" else "Add to favourites"
+                        )
+                    }
+                }
+                Text(meta, style = MaterialTheme.typography.labelLarge)
+                Text(summary, maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(onClick = onViewClick) { Text("View recipe") }
+                    OutlinedButton(onClick = onShareClick) { Text("Share") }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360)
+@Composable
+fun RecipeCardPreview() {
+    MaterialTheme {
+        RecipeCard(
+            title = "Jollof Rice with Chicken",
+            meta = "45 min  ·  4 servings  ·  Easy",
+            summary = "A smoky party-style classic with a rich tomato and pepper base, slow-cooked until the rice is tender and a little crisp at the bottom.",
+            isFavourite = true,
+            onToggleFavourite = {}, onViewClick = {}, onShareClick = {}
+        )
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Test the design under stress</h3>
+<p class="v2-p">A design is not finished until it survives real conditions. Add previews for:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Preview(name = "Small phone", widthDp = 320, showBackground = true)
+@Preview(name = "Large font", fontScale = 1.8f, widthDp = 360, showBackground = true)
+@Preview(name = "Dark", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(name = "Arabic RTL", locale = "ar", widthDp = 360, showBackground = true)
+@Composable
+fun RecipeCardVariants() { /* same body as above */ }</code></pre></div></div>
+<p class="v2-p">Check each: Does the title wrap instead of clipping at font scale 1.8? Do the two buttons still fit at 320 dp? Does the heart appear on the correct side in right-to-left? Does text remain readable in dark mode? On a very small screen, two <code>Button</code>s side by side may not fit; the fix might be <code>FlowRow</code> (which wraps children onto a new line) or stacking them vertically below a width breakpoint (lesson 27).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Implement a Real-World Design</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Predict the order</strong></p>
+<p class="v2-p">For each snippet, draw what you expect (size of the red area, where taps register) before running it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// 1
+Box(Modifier.size(120.dp).padding(20.dp).background(Color.Red))
+// 2
+Box(Modifier.padding(20.dp).size(120.dp).background(Color.Red))
+// 3
+Box(Modifier.background(Color.Red).padding(20.dp).size(80.dp))
+// 4
+Box(Modifier.size(80.dp).clickable { }.padding(20.dp).background(Color.Red))</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><ol class="v2-ol">
+<li>The red area is <strong>80 dp</strong> square (120 dp minus 20 dp padding on each side), because <code>size</code> comes first and padding eats from it.</li>
+<li>The red area is <strong>120 dp</strong> square; 20 dp of empty margin surrounds it, so the whole element occupies 160 dp.</li>
+<li><code>background</code> is first, so the red covers everything inside it: padding (20 dp each side) plus the 80 dp content: <strong>120 dp</strong> red square in total.</li>
+<li>The element is 80 dp. The click area is the full 80 dp (clickable comes before padding, so it covers the padded region). The red area is the <strong>inner 40 dp</strong> (80 minus 20 on each side).</li>
+</ol>
+<p class="v2-p">Draw them on squared paper to confirm. Remember: each modifier wraps what comes after it.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Build a chat bubble row</strong></p>
+<p class="v2-p">Create <code>MessageRow(text, time, isMine)</code>. Messages from me sit on the right in a coloured bubble; others on the left in a grey bubble. The bubble is at most 75% of the screen width, with the time at its bottom-right inside. Use <code>Row</code>, <code>Box</code>, <code>weight</code>, <code>widthIn</code> or <code>fillMaxWidth(fraction)</code> appropriately and <code>Start</code>/<code>End</code> for RTL support.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun MessageRow(text: String, time: String, isMine: Boolean, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
+    ) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = if (isMine) MaterialTheme.colorScheme.primaryContainer
+                    else MaterialTheme.colorScheme.surfaceVariant,
+            modifier = Modifier.fillMaxWidth(0.75f)         // at most 75% of the row's width
+        ) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Text(text)
+                Text(
+                    time,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>fillMaxWidth(0.75f)</code> forces the bubble to exactly 75% even for short messages, which looks wrong. For "at most 75%, otherwise wrap content" use a width cap from the available space (for example with <code>BoxWithConstraints { Modifier.widthIn(max = maxWidth * 0.75f) }</code>), and the row's <code>Arrangement.End</code> or <code>Start</code> then positions it. That variant is the better answer for a real chat; try it as a follow-up. The use of <code>Alignment.End</code> and <code>horizontalArrangement.End</code> makes the layout flip correctly in right-to-left languages.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: ConstraintLayout versus Row</strong></p>
+<p class="v2-p">Rebuild <code>ProfileHeader</code> using only <code>Row</code> and <code>Column</code>. Which is shorter? Which is easier to change if the designer asks to move the Follow button below the name on small screens?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun ProfileHeaderRow(name: String, role: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth().padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
+        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+            Text(name, style = MaterialTheme.typography.titleMedium)
+            Text(role)
+        }
+        Button(onClick = {}) { Text("Follow") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The Row version is shorter and arguably clearer for this particular design. For a small-screen variant where the button moves below, either approach needs a conditional (a different arrangement based on width), but with <code>Row</code>/<code>Column</code> you swap containers simply. <code>ConstraintLayout</code> earns its keep when many items depend on each other irregularly (barriers, chains, guidelines), not for a three-part header. A senior habit: reach for the simplest container that works.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Build the recipe card, then run all four variant previews. List the problems you find (for example a clipped title or overlapping buttons) and fix at least two.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: <code>Arrangement</code> or <code>Alignment</code> has no effect.</strong> <em>Why:</em> the container is exactly as big as its content. <em>The fix:</em> give it <code>fillMaxWidth()</code>, <code>fillMaxSize()</code> or a size.</p>
+<p class="v2-p"><strong>Mistake #2: Wrong modifier order.</strong> <em>Symptoms:</em> padding in the wrong place, a tiny clickable area, a background spilling over a clip. <em>The fix:</em> read the chain from the outside in, and reorder.</p>
+<p class="v2-p"><strong>Mistake #3: <code>fillMaxHeight</code> inside a scrolling <code>Column</code>.</strong> <em>What happens:</em> a crash about infinite maximum height. <em>The fix:</em> give the child a fixed height, or use <code>weight</code> only in non-scrolling parents.</p>
+<p class="v2-p"><strong>Mistake #4: Ignoring <code>innerPadding</code> in <code>Scaffold</code>.</strong> <em>What happens:</em> content hides under bars. <em>The fix:</em> apply <code>Modifier.padding(innerPadding)</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Left and right instead of start and end.</strong> <em>What happens:</em> broken right-to-left layouts. <em>The fix:</em> use <code>start</code>/<code>end</code> everywhere.</p>
+<p class="v2-p"><strong>Mistake #6: Hard-coded sizes that ignore font scale.</strong> <em>What happens:</em> clipped text for users who set a large font. <em>The fix:</em> let text height wrap; use <code>sp</code> for text, and <code>heightIn(min = ...)</code> instead of a fixed <code>height</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Nesting many <code>Row</code>/<code>Column</code> to fake <code>ConstraintLayout</code>.</strong> <em>What happens:</em> unreadable code. <em>The fix:</em> switch to <code>ConstraintLayout</code> when relationships are irregular.</p>
+<p class="v2-p"><strong>Mistake #8: Using <code>weight</code> outside a <code>Row</code> or <code>Column</code> scope.</strong> <em>Symptom:</em> <em>Unresolved reference: weight.</em> <em>The fix:</em> <code>weight</code> exists only inside <code>RowScope</code> and <code>ColumnScope</code>; pass the modifier in from the caller.</p>
+<p class="v2-p"><strong>Mistake #9: Tiny touch targets.</strong> <em>What happens:</em> users struggle to tap. <em>The fix:</em> keep interactive elements at least 48 dp square; Material components do this for you, custom clickable boxes do not.</p>
+<p class="v2-p"><strong>Mistake #10: Using <code>requiredSize</code> to force a size.</strong> <em>What happens:</em> overflow and clipping. <em>The fix:</em> fix the parent's constraints instead.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> How do constraints and sizes flow through the layout tree?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A parent passes constraints (minimum and maximum width and height) down to each child; the child picks a size within them and reports it up; then the parent places the child.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why do <code>Modifier.padding(16.dp).background(c)</code> and <code>Modifier.background(c).padding(16.dp)</code> look different?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Modifiers apply from the outside in. With padding first, the space is outside the background, so the colour covers only the content. With background first, the colour covers the content and the padding.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>Arrangement</code> and <code>Alignment</code> in a <code>Row</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>horizontalArrangement</code> distributes children along the main (horizontal) axis; <code>verticalAlignment</code> positions them on the cross (vertical) axis.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> When would you choose <code>ConstraintLayout</code> over nested <code>Row</code> and <code>Column</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">When children must be positioned relative to each other in irregular ways (chains, barriers, guidelines, many cross dependencies) and nesting would become deep or unclear.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why use <code>Scaffold</code>'s <code>innerPadding</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It contains the space taken by the top bar, bottom bar and system bars, so your content is not drawn underneath them.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 1: Compose essentials</a></li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2" rel="noopener noreferrer">Pathway 2: Layouts, theming and animation</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-layouts" rel="noopener noreferrer">Jetpack Compose layouts codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Recipe Detail Screen</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Implement a full <strong>recipe detail screen</strong> from a design you sketch yourself, with a header image area, a title row, an info chip row, an ingredients list, a numbered steps list and a bottom action bar, and make it survive the stress previews.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li><code>Scaffold</code> with a <code>TopAppBar</code> (back arrow, title) and a bottom bar containing <strong>Start cooking</strong> and <strong>Save</strong>.</li>
+<li>A hero area (use a coloured <code>Box</code> if you have no image) with the dish name over it at the bottom start, in a <code>Box</code>.</li>
+<li>A row of three info items (time, servings, difficulty), each a small <code>Column</code>, spread with <code>Arrangement.SpaceEvenly</code>.</li>
+<li>An ingredients section where each row has the amount on the left (fixed 80 dp) and the name filling the remainder (<code>weight</code>).</li>
+<li>A steps section with numbered circles (use <code>Box</code> with <code>CircleShape</code>) beside the step text.</li>
+<li>A <code>LazyColumn</code> for the whole screen so it scrolls.</li>
+<li>Four previews: normal, small width (320 dp), font scale 1.8 and dark mode. Fix whatever breaks.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> convert the info row to a <code>ConstraintLayout</code> with a guideline at 50%, then decide which version you prefer.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">RecipeDetail.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.recipes
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+
+data class Ingredient(val amount: String, val name: String)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecipeDetailScreen(
+    title: String,
+    ingredients: List&lt;Ingredient&gt;,
+    steps: List&lt;String&gt;,
+    modifier: Modifier = Modifier
+) {
+    Scaffold(
+        modifier = modifier,
+        topBar = { TopAppBar(title = { Text(title) }) },
+        bottomBar = {
+            BottomAppBar {
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(onClick = {}, modifier = Modifier.weight(1f)) { Text("Start cooking") }
+                    OutlinedButton(onClick = {}, modifier = Modifier.weight(1f)) { Text("Save") }
+                }
+            }
+        }
+    ) { innerPadding -&gt;
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + 16.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)
+                    )
+                }
+            }
+            item {
+                Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    InfoItem("Time", "45 min")
+                    InfoItem("Serves", "4")
+                    InfoItem("Level", "Easy")
+                }
+            }
+            item { SectionTitle("Ingredients") }
+            items(ingredients.size) { i -&gt;
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Text(ingredients[i].amount, Modifier.width(80.dp))
+                    Text(ingredients[i].name, Modifier.weight(1f))
+                }
+            }
+            item { SectionTitle("Steps") }
+            itemsIndexed(steps) { index, step -&gt;
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.Top) {
+                    Box(
+                        Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center
+                    ) { Text("${index + 1}", color = MaterialTheme.colorScheme.onPrimary) }
+                    Text(step, Modifier.weight(1f).padding(start = 12.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoItem(label: String, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, style = MaterialTheme.typography.titleMedium)
+        Text(label, style = MaterialTheme.typography.labelMedium)
+    }
+}
+
+@Composable
+private fun SectionTitle(text: String) {
+    Text(text, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>contentPadding</code> takes only the top and bottom of <code>innerPadding</code> so the hero area can span the full width while content still clears the bars. The ingredient amount uses a fixed <code>width(80.dp)</code>; at font scale 1.8 an amount like "250 ml" may wrap, which the preview should reveal, and the fix is <code>widthIn(min = 80.dp)</code> so the column can grow. The bottom buttons share the space with <code>weight(1f)</code>, so they fit on 320 dp screens. Nothing here is clickable beyond the buttons, so no custom touch-target work is needed.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 38 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-38-layouts-and-modifiers-in-depth</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 38 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: How Layout Works</li><li>✅ Step-by-Step Build 1: The Big Three</li><li>✅ Step-by-Step Build 2: Scaffold, Surface, Card and Spacing</li><li>✅ Step-by-Step Build 3: ConstraintLayout in Compose</li><li>✅ Step-by-Step Build 4: Constraints and Custom Layout</li><li>✅ Implement a Real-World Design</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_37.html" class="ln-btn">&#8592; Lesson 37</a><a href="lesson_39.html" class="ln-btn primary">Lesson 39 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 38 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

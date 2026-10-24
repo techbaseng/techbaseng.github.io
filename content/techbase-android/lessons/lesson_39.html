@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 39: Lazy Layouts: Lists, Grids and Scrolling Performance — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l39">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 39 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 39</div>
+      <h1>Lazy Layouts: Lists, Grids and Scrolling Performance</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Mixed Feed with Sticky Sections</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 39</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Build efficient scrolling UIs with LazyColumn, LazyRow and grids, using keys, content types, sticky headers and item animations.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Mixed Feed with Sticky Sections</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 21 you built a list with <code>LazyColumn</code> and a grid with <code>LazyVerticalGrid</code>, and that took you a long way. This lesson goes deeper, because <strong>scrolling lists are where apps feel fast or feel broken</strong>. A list that stutters, loses its scroll position, resets an expanded item when you add a row, or jumps when images load is a list built without understanding keys, content types and state.</p>
+<p class="v2-p">This lesson covers the <em>Lazy layouts</em> item of Pathway 2 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Choose among <code>LazyColumn</code>, <code>LazyRow</code>, <code>LazyVerticalGrid</code>, <code>LazyHorizontalGrid</code> and staggered grids.</li>
+<li>Build lists from mixed content with <code>item { }</code>, <code>items { }</code>, <code>itemsIndexed</code> and <code>stickyHeader</code>.</li>
+<li>Explain what <strong>keys</strong> do and choose good ones.</li>
+<li>Use <strong>content types</strong> to help Compose reuse composables.</li>
+<li>Control and observe scrolling with <code>LazyListState</code>.</li>
+<li>Animate insertions, removals and reordering with <code>animateItem()</code>.</li>
+<li>Avoid the classic crashes: nested scrolling and zero-size items.</li>
+<li>Apply the main performance rules, and measure.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a lazy list is a window onto a large data set. Keys give each item an identity so that state, animations and scroll position follow the right item when the data changes.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Basic <code>LazyColumn</code> and <code>LazyVerticalGrid</code></strong> (lesson 21).</li>
+<li><strong>Recomposition and the three phases</strong> (lesson 37).</li>
+<li><strong>State hoisting and immutable data classes</strong> (lesson 24).</li>
+<li><strong>Layouts and modifiers</strong> (lesson 38).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: How Lazy Lists Work</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A normal <code>Column</code> composes <strong>all</strong> its children. A <code>LazyColumn</code> composes only the items <strong>visible plus a small buffer</strong>, and disposes of items that scroll far away.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data: [item 0][item 1][item 2] ... [item 998][item 999]
+
+screen window:       +--------+
+                     | item 40|   &lt;- composed
+                     | item 41|   &lt;- composed
+                     | item 42|   &lt;- composed
+                     +--------+
+ composed in a small buffer above and below; everything else does not exist as UI.</code></pre></div></div>
+<p class="v2-p">Three consequences you must keep in mind:</p>
+<ol class="v2-ol">
+<li><strong>Item state is not kept when an item scrolls away</strong>, unless it is stored with <code>rememberSaveable</code> (which survives item disposal in a lazy list) or, better, <strong>in your data/ViewModel</strong>.</li>
+<li><strong>Items are identified by position unless you give a key.</strong> If the data changes (an item is inserted at the top), position-based identity makes every item below look as if its content changed.</li>
+<li><strong>The lazy DSL (<code>LazyListScope</code>) is not composable code.</strong> Inside <code>LazyColumn { ... }</code> you call <code>item { }</code> and <code>items { }</code>; you cannot call <code>Text(...)</code> directly there. The lambda you pass to <code>item { }</code> <strong>is</strong> composable.</li>
+</ol>
+<h3 class="v2-h3">The lazy family</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Layout</th>
+<th>Direction</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>LazyColumn</code></td>
+<td>Vertical list</td>
+<td>Feeds, settings, messages</td>
+</tr>
+<tr>
+<td><code>LazyRow</code></td>
+<td>Horizontal list</td>
+<td>Carousels, chip rows</td>
+</tr>
+<tr>
+<td><code>LazyVerticalGrid</code></td>
+<td>Vertical grid, columns by <code>GridCells</code></td>
+<td>Photo gallery, product catalogue</td>
+</tr>
+<tr>
+<td><code>LazyHorizontalGrid</code></td>
+<td>Horizontal grid, rows</td>
+<td>Category shelves</td>
+</tr>
+<tr>
+<td><code>LazyVerticalStaggeredGrid</code></td>
+<td>Vertical grid with varied item heights</td>
+<td>Pinterest-style feeds</td>
+</tr>
+<tr>
+<td><code>LazyHorizontalStaggeredGrid</code></td>
+<td>Horizontal variant</td>
+<td>Rare</td>
+</tr>
+<tr>
+<td><code>HorizontalPager</code>/<code>VerticalPager</code></td>
+<td>One page at a time, swipeable</td>
+<td>Onboarding, image pagers (lesson 59)</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: How Lazy Lists Work</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: The DSL</div><div class="pc" id="chk4"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun MixedList(favourites: List&lt;String&gt;, recent: List&lt;String&gt;) {
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item { Text("Favourites") }                          // one item
+        items(favourites) { name -&gt; Text(name) }              // one item per element
+        item { Text("Recent") }
+        itemsIndexed(recent) { index, name -&gt; Text("${index + 1}. $name") }
+        item { Text("End of list") }
+    }
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>item { }</code></td>
+<td>A single item (header, footer, button)</td>
+</tr>
+<tr>
+<td><code>items(list) { element -&gt; }</code></td>
+<td>One item per list element</td>
+</tr>
+<tr>
+<td><code>items(count) { index -&gt; }</code></td>
+<td>One item per integer, when you have no list</td>
+</tr>
+<tr>
+<td><code>itemsIndexed(list) { index, element -&gt; }</code></td>
+<td>When the position matters</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The "mixed list" pattern, with headers and several kinds of rows in one scrolling container, is why you should have a single <code>LazyColumn</code> for a whole screen instead of nesting scrolling containers (see the nesting section).</p>
+<h3 class="v2-h3">Sticky headers</h3>
+<p class="v2-p"><code>stickyHeader</code> keeps the current section header pinned to the top while its section scrolls. It is currently marked experimental in many Foundation versions:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ContactsList(grouped: Map&lt;Char, List&lt;String&gt;&gt;) {
+    LazyColumn {
+        grouped.forEach { (initial, names) -&gt;
+            stickyHeader {
+                Text(
+                    initial.toString(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .padding(8.dp)
+                )
+            }
+            items(names, key = { it }) { name -&gt;
+                Text(name, Modifier.padding(16.dp))
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Give the sticky header an <strong>opaque background</strong>, otherwise the items scrolling underneath show through it. (If your Compose version no longer needs the opt-in, the compiler will warn that it is unnecessary; remove it.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The DSL</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Keys</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">The problem</h3>
+<p class="v2-p">Imagine a list of tasks, each with a checkbox whose state is held inside the row with <code>remember</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Task(val id: Int, val title: String)
+
+@Composable
+fun TaskRow(task: Task) {
+    var done by rememberSaveable { mutableStateOf(false) }
+    Row {
+        Checkbox(checked = done, onCheckedChange = { done = it })
+        Text(task.title)
+    }
+}
+
+LazyColumn {
+    items(tasks) { task -&gt; TaskRow(task) }          // no key
+}</code></pre></div></div>
+<p class="v2-p">Check "Buy rice" (position 0), then add a new task at the <strong>top</strong>. Without keys, Compose identifies rows by <strong>position</strong>. The row at position 0 keeps its <code>done = true</code> state but now displays the <strong>new</strong> task, so the new task appears ticked while "Buy rice" (now position 1) is not. The state stuck to the slot, not the item.</p>
+<h3 class="v2-h3">The fix</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>LazyColumn {
+    items(tasks, key = { it.id }) { task -&gt; TaskRow(task) }
+}</code></pre></div></div>
+<p class="v2-p">With <code>key = { it.id }</code>, state and animation follow the <strong>id</strong>. Insert, delete or reorder, and each row keeps its own state.</p>
+<p class="v2-p">Rules for keys:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Rule</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unique</strong> within that lazy container</td>
+<td>Duplicates crash with <em>Key was already used</em></td>
+</tr>
+<tr>
+<td><strong>Stable</strong>: the same item always has the same key</td>
+<td>Not <code>index</code>, not a random value generated each time</td>
+</tr>
+<tr>
+<td><strong>Saveable</strong>: a type that can go in a <code>Bundle</code> (<code>Int</code>, <code>Long</code>, <code>String</code>, <code>Parcelable</code>, <code>Serializable</code>)</td>
+<td>Keys are used to restore scroll position and <code>rememberSaveable</code> state</td>
+</tr>
+<tr>
+<td>Based on <strong>identity</strong> (database id, UUID), not on <strong>content</strong> (a title can repeat)</td>
+<td>Content changes should not change identity</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">In Room entities, the primary key is the natural key (lesson 34). For static lists that never change, keys matter less, but adding them is a good habit.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Keys</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Content Types</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When a list mixes different kinds of rows (headers, photos, ads), Compose can <strong>reuse</strong> the composition of an item that scrolled off for a new item that scrolls on, if they are the same <strong>type</strong> of item. By default it assumes all items are the same type. Tell it explicitly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface Row {
+    data class Header(val title: String) : Row
+    data class Product(val id: Int, val name: String) : Row
+}
+
+LazyColumn {
+    items(
+        items = rows,
+        key = { row -&gt;
+            when (row) {
+                is Row.Header -&gt; "header_${row.title}"
+                is Row.Product -&gt; "product_${row.id}"
+            }
+        },
+        contentType = { row -&gt;
+            when (row) {
+                is Row.Header -&gt; "header"
+                is Row.Product -&gt; "product"
+            }
+        }
+    ) { row -&gt;
+        when (row) {
+            is Row.Header -&gt; HeaderRow(row.title)
+            is Row.Product -&gt; ProductRow(row)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Notice the two <strong>string prefixes</strong> in the keys, which keep a header named "42" from clashing with a product with id 42. <code>contentType</code> is purely a performance hint: reusing a compatible composition is cheaper than creating a different one. It is worth adding to any list with clearly different row layouts; it does nothing for single-type lists.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Content Types</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: Grids and Staggered Grids</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">You met <code>LazyVerticalGrid</code> with <code>GridCells.Fixed</code> and <code>GridCells.Adaptive</code> in lesson 21. Two more capabilities:</p>
+<h3 class="v2-h3">Items that span columns</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+
+LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 140.dp)) {
+    item(span = { GridItemSpan(maxLineSpan) }) {       // a full-width header across all columns
+        Text("Photos", style = MaterialTheme.typography.titleLarge)
+    }
+    items(photos, key = { it.id }) { PhotoTile(it) }
+}</code></pre></div></div>
+<p class="v2-p"><code>maxLineSpan</code> is "all columns of this row", however many there are.</p>
+<h3 class="v2-h3">Staggered grids</h3>
+<p class="v2-p">When items have different heights (cards with varying text), a normal grid leaves gaps. A staggered grid packs each item under the shortest column:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+
+LazyVerticalStaggeredGrid(
+    columns = StaggeredGridCells.Adaptive(minSize = 160.dp),
+    contentPadding = PaddingValues(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalItemSpacing = 8.dp
+) {
+    items(notes, key = { it.id }) { note -&gt; NoteCard(note) }
+}</code></pre></div></div>
+<p class="v2-p">(Note <code>verticalItemSpacing</code> rather than <code>verticalArrangement</code>.) Use staggered grids for notes, photos of mixed aspect ratio and Pinterest-style feeds.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Grids and Staggered Grids</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: Controlling and Observing Scroll</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><code>LazyListState</code> holds the scroll position and lets you read it or move it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun MessagesScreen(messages: List&lt;Message&gt;) {
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    // true when the first visible item is not at the very top
+    val showScrollToTop by remember {
+        derivedStateOf { listState.firstVisibleItemIndex &gt; 0 }
+    }
+
+    Box {
+        LazyColumn(state = listState) {
+            items(messages, key = { it.id }) { MessageRow(it) }
+        }
+        if (showScrollToTop) {
+            FloatingActionButton(
+                onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+            ) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Back to top") }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Important details:</p>
+<ul class="v2-ul">
+<li><code>rememberLazyListState()</code> creates and <strong>remembers</strong> the state; it uses <code>rememberSaveable</code> internally so the scroll position survives rotation.</li>
+<li><code>animateScrollToItem(index)</code> and <code>scrollToItem(index)</code> are <strong>suspend</strong> functions: launch them from a coroutine scope (<code>rememberCoroutineScope</code>, lesson 28).</li>
+<li><strong><code>derivedStateOf</code></strong> is the key trick: <code>firstVisibleItemIndex</code> changes on almost every scroll frame, but <code>showScrollToTop</code> changes only when the answer flips between true and false. Wrapping the calculation in <code>derivedStateOf</code> makes the composable recompose only when the <strong>result</strong> changes, not on every scroll pixel. Reading <code>listState.firstVisibleItemIndex &gt; 0</code> directly in the composable would recompose on every index change.</li>
+<li>Other useful properties: <code>firstVisibleItemScrollOffset</code>, <code>layoutInfo.visibleItemsInfo</code>, <code>canScrollForward</code>, <code>isScrollInProgress</code>.</li>
+</ul>
+<p class="v2-p">To react to scroll <strong>events</strong> (for example, loading the next page), use a flow:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>LaunchedEffect(listState) {
+    snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
+        .filterNotNull()
+        .distinctUntilChanged()
+        .collect { lastVisible -&gt;
+            if (lastVisible &gt;= messages.size - 5) onLoadMore()
+        }
+}</code></pre></div></div>
+<p class="v2-p"><code>snapshotFlow</code> turns Compose state reads into a <code>Flow</code> (lessons 33 and 55). This is the standard way to implement infinite scrolling: when the user is within five items of the end, ask the ViewModel for another page (lesson 62 covers Paging 3, which automates this).</p>
+<h3 class="v2-h3">Item animations</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>LazyColumn {
+    items(tasks, key = { it.id }) { task -&gt;
+        TaskRow(task, modifier = Modifier.animateItem())
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>Modifier.animateItem()</code> animates <strong>placement</strong> (when an item moves because others were added or removed), fade-in and fade-out. It <strong>requires keys</strong>, because it needs to know which item is which. On older Compose versions the modifier is called <code>animateItemPlacement()</code> and is experimental; check which your version provides.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Controlling and Observing Scroll</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: Nesting and Zero-Size Pitfalls</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Never nest same-direction scrolling</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// CRASH: a vertically scrolling LazyColumn inside a vertically scrolling Column
+Column(Modifier.verticalScroll(rememberScrollState())) {
+    Text("Header")
+    LazyColumn { items(100) { Text("Row $it") } }
+}</code></pre></div></div>
+<p class="v2-p">This throws <em>Vertically scrollable component was measured with an infinity maximum height constraints</em>. The <code>Column</code> gives its child unlimited height, and a lazy list cannot decide how many items to compose in an infinite space. Fixes, in order of preference:</p>
+<ol class="v2-ol">
+<li><strong>One lazy container.</strong> Put the header as the first <code>item { }</code> of the <code>LazyColumn</code>.</li>
+<li>Give the inner list a <strong>fixed or bounded height</strong> (<code>Modifier.height(300.dp)</code>), when a small inner scroller is intentional.</li>
+<li>For a short, known-size list, use a plain <code>Column</code> (no laziness) inside the scrolling <code>Column</code>.</li>
+</ol>
+<p class="v2-p"><strong>Different directions</strong> are fine: a <code>LazyRow</code> carousel inside a <code>LazyColumn</code> item is a common, supported pattern.</p>
+<h3 class="v2-h3">Never create 0-pixel items</h3>
+<p class="v2-p">If an item has no content on first composition (for example, an image that loads asynchronously with no size set), its height is 0. The list may then compose <strong>hundreds</strong> of items at once to fill the screen, which defeats laziness and lags badly. Always give items a minimum size (<code>Modifier.heightIn(min = 72.dp)</code>, <code>aspectRatio</code>, or a placeholder of the right height) while their content loads.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Nesting and Zero-Size Pitfalls</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Performance Checklist</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Measure first (Layout Inspector recomposition counts and the profiler, lessons 44 and 59), then apply the relevant rules:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Rule</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provide stable, unique <code>key</code>s</td>
+<td>Avoid rebuilding and mis-assigned state</td>
+</tr>
+<tr>
+<td>Add <code>contentType</code> for mixed lists</td>
+<td>Composition reuse</td>
+</tr>
+<tr>
+<td>Use immutable data classes for items</td>
+<td>Allows skipping unchanged rows (lesson 37)</td>
+</tr>
+<tr>
+<td>Keep per-item work small: no sorting, formatting or filtering in the item body</td>
+<td>The body runs while scrolling</td>
+</tr>
+<tr>
+<td>Precompute in the ViewModel or with <code>remember(key)</code></td>
+<td>Done once, not on every pass</td>
+</tr>
+<tr>
+<td>Use <code>derivedStateOf</code> for values derived from fast-changing state</td>
+<td>Fewer recompositions</td>
+</tr>
+<tr>
+<td>Give images a fixed size; use Coil <code>AsyncImage</code> (lesson 31)</td>
+<td>No layout jumps; correct decoding size</td>
+</tr>
+<tr>
+<td>Avoid <code>Modifier.fillParentMaxHeight</code> surprises and 0-size items</td>
+<td>Prevent composing everything</td>
+</tr>
+<tr>
+<td>Test with a <strong>release</strong> build</td>
+<td>Debug builds are much slower; do not judge scroll performance in debug</td>
+</tr>
+<tr>
+<td>Put clickable lambdas in the item, not in a shared mutable thing</td>
+<td>Avoid accidental capture of changing state</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A very important point: <strong>always judge scrolling performance in a release (or <code>benchmark</code>) build</strong>, ideally on a real, modest phone. Debug builds include checks that make Compose look janky even when your code is fine.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Performance Checklist</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Find and fix the state bug</strong></p>
+<p class="v2-p">A shopping list uses <code>remember { mutableStateOf(false) }</code> in each row for a "bought" checkbox, no keys, and a button that adds a new item at the <strong>top</strong>. Describe the bug and fix it so each item keeps its own checkbox, and so the checkbox state also survives scrolling away and back.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Without keys, rows are identified by position. After inserting at the top, each existing row's remembered state stays in its <strong>position slot</strong>, so ticks appear on the wrong items. Also <code>remember</code> is lost when a row scrolls out of the composition.</p>
+<p class="v2-p">Best fix: keep the bought flag <strong>in the data</strong>, not in the row, and give keys.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class ShoppingItem(val id: Int, val name: String, val bought: Boolean = false)
+
+@Composable
+fun ShoppingList(
+    items: List&lt;ShoppingItem&gt;,
+    onToggle: (Int) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(modifier) {
+        items(items, key = { it.id }) { item -&gt;
+            Row(Modifier.animateItem(), verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = item.bought, onCheckedChange = { onToggle(item.id) })
+                Text(item.name)
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The ViewModel owns the list and flips <code>bought</code> with <code>copy</code>. This also satisfies the "survives scrolling away" requirement for free, since the state is not in the composition at all. If you must keep it local, use <code>rememberSaveable</code> <strong>with keys</strong>, which restores per key.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Sections with sticky headers</strong></p>
+<p class="v2-p">Given a list of students with a <code>className</code> property, show them grouped by class with sticky headers, a stable key for every row, and an alphabetical order within each class. Use <code>groupBy</code> and <code>sortedBy</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class Student(val id: Int, val name: String, val className: String)
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun StudentsByClass(students: List&lt;Student&gt;, modifier: Modifier = Modifier) {
+    val grouped = remember(students) {
+        students.groupBy { it.className }
+            .toSortedMap()
+            .mapValues { (_, list) -&gt; list.sortedBy { it.name } }
+    }
+
+    LazyColumn(modifier) {
+        grouped.forEach { (className, list) -&gt;
+            stickyHeader(key = "header_$className") {
+                Text(
+                    className,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(12.dp)
+                )
+            }
+            items(list, key = { it.id }) { student -&gt;
+                Text(student.name, Modifier.padding(16.dp))
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>remember(students)</code> recomputes the grouping only when the list changes, not on every scroll. Keys are prefixed so headers and rows never collide. The <code>stickyHeader(key = ...)</code> overload exists in recent versions; if yours does not accept a key, omit it.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Infinite scroll</strong></p>
+<p class="v2-p">A feed shows 20 items and should load 20 more when the user reaches within 5 items of the end, but not while a load is already in progress. Sketch the ViewModel function and the <code>LaunchedEffect</code> that triggers it.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// ViewModel
+private var loading = false
+fun loadMore() {
+    if (loading) return
+    loading = true
+    viewModelScope.launch {
+        try {
+            val next = repository.loadPage(page = currentPage + 1)
+            _uiState.update { it.copy(items = it.items + next) }
+            currentPage++
+        } finally {
+            loading = false
+        }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Composable
+@Composable
+fun Feed(items: List&lt;FeedItem&gt;, onLoadMore: () -&gt; Unit) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(listState, items.size) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }
+            .distinctUntilChanged()
+            .collect { lastVisible -&gt;
+                if (lastVisible &gt;= items.size - 5) onLoadMore()
+            }
+    }
+
+    LazyColumn(state = listState) {
+        items(items, key = { it.id }) { FeedRow(it) }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The <code>loading</code> guard stops overlapping requests. In a real app you would also handle the last page (no more data) and errors, and use Paging 3 (lesson 62) to get all of this without hand-written code.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Build a list of 5,000 rows, each with a checkbox. Scroll quickly in a debug build and then in a release build on the same device, and compare the smoothness. Write down what you observe about build types and performance.</p></div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: No keys on a list that changes.</strong> <em>What happens:</em> state attaches to the wrong item; animations look wrong. <em>The fix:</em> a stable, unique key based on identity.</p>
+<p class="v2-p"><strong>Mistake #2: Using the list index as the key.</strong> <em>What happens:</em> the same problem as no key. <em>The fix:</em> use the item id.</p>
+<p class="v2-p"><strong>Mistake #3: Duplicate keys.</strong> <em>Symptom:</em> <em>Key ... was already used.</em> <em>The fix:</em> make keys unique, prefixing by type if you mix item kinds.</p>
+<p class="v2-p"><strong>Mistake #4: A lazy list inside a vertical scroll.</strong> <em>Symptom:</em> the infinite-height crash. <em>The fix:</em> a single lazy container.</p>
+<p class="v2-p"><strong>Mistake #5: Zero-height items on first composition.</strong> <em>What happens:</em> hundreds of items composed at once. <em>The fix:</em> a minimum size or placeholder.</p>
+<p class="v2-p"><strong>Mistake #6: Expensive work in the item body.</strong> <em>What happens:</em> jank while scrolling. <em>The fix:</em> precompute in the ViewModel, or <code>remember</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Reading <code>firstVisibleItemIndex</code> directly for UI conditions.</strong> <em>What happens:</em> recomposition on every index change. <em>The fix:</em> <code>derivedStateOf</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Item state in <code>remember</code> inside the row.</strong> <em>What happens:</em> it is lost when the row scrolls away. <em>The fix:</em> keep it in your data or use <code>rememberSaveable</code> with proper keys.</p>
+<p class="v2-p"><strong>Mistake #9: Judging performance in a debug build.</strong> <em>What happens:</em> you "fix" problems that do not exist. <em>The fix:</em> test a release build.</p>
+<p class="v2-p"><strong>Mistake #10: Forgetting <code>contentPadding</code>.</strong> <em>What happens:</em> the first and last items stick to the edges, and a bottom FAB hides the last row. <em>The fix:</em> <code>contentPadding</code> (not outer padding), so items scroll through the padded area.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why is <code>LazyColumn</code> more efficient than <code>Column</code> with a loop?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It composes and lays out only the visible items (plus a small buffer) and disposes of far-away ones, while <code>Column</code> composes all children at once.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What problem do keys solve?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">They give items a stable identity so that state, scroll position and animations follow the item when the list changes, rather than sticking to a position.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is <code>contentType</code> for?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It tells Compose which items are of the same kind so it can reuse their compositions when scrolling, which improves performance in lists with different row types.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is <code>derivedStateOf</code> useful with scroll state?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It exposes a value computed from a fast-changing state and only notifies readers when the computed result changes, avoiding a recomposition on every scroll position change.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why does a <code>LazyColumn</code> inside a vertically scrolling <code>Column</code> crash?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">The parent gives it infinite height, and a lazy list cannot compose "just the visible items" in infinite space. Use one lazy container, bound the height, or use a plain <code>Column</code> for short content.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 2: Layouts, theming and animation</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-performance" rel="noopener noreferrer">Jetpack Compose performance codelab</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-layouts" rel="noopener noreferrer">Jetpack Compose layouts codelab</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Mixed Feed with Sticky Sections</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a <strong>school notice board</strong> feed that mixes headers, notices and an image-style card, with proper keys, content types, scroll-to-top button and animated insertion.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A sealed <code>FeedRow</code> type with <code>Header(title)</code>, <code>Notice(id, title, body, pinned)</code>, and <code>Highlight(id, title)</code> rows.</li>
+<li>One <code>LazyColumn</code> with a <code>key</code> and a <code>contentType</code> per row type; headers are <strong>sticky</strong>.</li>
+<li>An <strong>Add notice</strong> button that inserts a new notice at the top of its section with <code>Modifier.animateItem()</code>.</li>
+<li>A <strong>Pin</strong> toggle on each notice stored in the data (ViewModel), which moves pinned notices to a "Pinned" section.</li>
+<li>A scroll-to-top FAB that only appears after the first screenful, using <code>derivedStateOf</code>.</li>
+<li>200 sample notices generated in code. Test scrolling in a release build.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add a <code>LazyRow</code> carousel of highlights as the first item and confirm that nesting a horizontal lazy list is safe.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">NoticeBoard.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.notices
+
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+
+sealed interface FeedRow {
+    data class Header(val title: String) : FeedRow
+    data class Notice(val id: Int, val title: String, val body: String, val pinned: Boolean) : FeedRow
+    data class Highlight(val id: Int, val title: String) : FeedRow
+}
+
+private fun FeedRow.key(): Any = when (this) {
+    is FeedRow.Header -&gt; "header_$title"
+    is FeedRow.Notice -&gt; "notice_$id"
+    is FeedRow.Highlight -&gt; "highlight_$id"
+}
+
+private fun FeedRow.type(): String = when (this) {
+    is FeedRow.Header -&gt; "header"
+    is FeedRow.Notice -&gt; "notice"
+    is FeedRow.Highlight -&gt; "highlight"
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun NoticeBoard(
+    rows: List&lt;FeedRow&gt;,
+    onTogglePin: (Int) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val showTop by remember { derivedStateOf { listState.firstVisibleItemIndex &gt; 3 } }
+
+    Box(modifier) {
+        LazyColumn(state = listState) {
+            items(rows, key = { it.key() }, contentType = { it.type() }) { row -&gt;
+                when (row) {
+                    is FeedRow.Header -&gt; Text(
+                        row.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .padding(12.dp)
+                    )
+                    is FeedRow.Notice -&gt; Card(
+                        Modifier.animateItem().padding(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                        Column(Modifier.padding(16.dp)) {
+                            Text(row.title, style = MaterialTheme.typography.titleSmall)
+                            Text(row.body, maxLines = 2)
+                            TextButton(onClick = { onTogglePin(row.id) }) {
+                                Text(if (row.pinned) "Unpin" else "Pin")
+                            }
+                        }
+                    }
+                    is FeedRow.Highlight -&gt; Text(row.title, Modifier.padding(16.dp))
+                }
+            }
+        }
+        if (showTop) {
+            FloatingActionButton(
+                onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+            ) { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Back to top") }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>stickyHeader</code> was avoided here to keep the example free of experimental API opt-ins; to make the headers sticky, replace the header branch with a <code>stickyHeader { }</code> call outside the shared <code>items</code> block, as shown in Build 1. The ViewModel builds the <code>rows</code> list from the notices (pinned ones first under a "Pinned" header, then the rest under "All notices") and exposes it as <code>StateFlow&lt;List&lt;FeedRow&gt;&gt;</code>. Because every row has a unique, type-prefixed key, pinning moves a notice between sections with a placement animation instead of a jump. The 200 sample notices come from <code>List(200) { Notice(it, "Notice $it", "Body text ...", false) }</code>. <code>ExperimentalAnimationApi</code> is imported only in case your Compose version still requires an opt-in for <code>animateItem</code>; remove the import if the compiler reports it as unused.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 39 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-39-lazy-layouts-lists-grids-and-scrolling-per</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 39 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: How Lazy Lists Work</li><li>✅ Step-by-Step Build 1: The DSL</li><li>✅ Step-by-Step Build 2: Keys</li><li>✅ Step-by-Step Build 3: Content Types</li><li>✅ Step-by-Step Build 4: Grids and Staggered Grids</li><li>✅ Step-by-Step Build 5: Controlling and Observing Scroll</li><li>✅ Step-by-Step Build 6: Nesting and Zero-Size Pitfalls</li><li>✅ Performance Checklist</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_38.html" class="ln-btn">&#8592; Lesson 38</a><a href="lesson_40.html" class="ln-btn primary">Lesson 40 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 39 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

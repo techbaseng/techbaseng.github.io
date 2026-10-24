@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 28: Coroutines and Concurrency — Techbase Android</title>
+</head>
+<body data-total="10" data-key="techbase_android_l28">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 28 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 28</div>
+      <h1>Coroutines and Concurrency</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Parallel Price Checker</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 28</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Do many things at once without freezing the UI: suspend functions, launch, async, dispatchers and structured concurrency.</p></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Parallel Price Checker</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Tap a button in an app and nothing happens for three seconds. The screen is frozen, a dialog says "App is not responding", and the user leaves a one-star review. The cause is almost always the same: the app did slow work, such as downloading a file or reading a database, on the thread that is supposed to draw the screen.</p>
+<p class="v2-p">Modern Android apps avoid that with <strong>coroutines</strong>, a Kotlin feature that lets you write slow, waiting code in a simple top-to-bottom style without freezing anything. This lesson is the doorway to everything in Unit 5: networking, databases and background work all rely on it.</p>
+<p class="v2-p">This lesson covers three items of Pathway 1, Unit 5 of the official <strong>Android Basics with Compose</strong> course: <em>Connect to the internet</em> (the unit introduction), <em>Introduction to Coroutines in Kotlin Playground</em> and <em>Introduction to Coroutines in Android Studio</em>. You can run almost all the examples in the free <strong>Kotlin Playground</strong> at https://play.kotlinlang.org without installing anything, which is ideal on a slow connection or an old laptop.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain why the main thread must never block, and what ANR means.</li>
+<li>Explain <strong>concurrency</strong> versus <strong>parallelism</strong>.</li>
+<li>Write <code>suspend</code> functions and call them from <code>launch</code>, <code>async</code> and <code>runBlocking</code>.</li>
+<li>Choose a <strong>dispatcher</strong>: <code>Main</code>, <code>IO</code>, <code>Default</code>.</li>
+<li>Explain <strong>structured concurrency</strong>: scopes, jobs, parents, children and cancellation.</li>
+<li>Handle exceptions in coroutines.</li>
+<li>Launch coroutines safely in Android with <code>viewModelScope</code> and <code>rememberCoroutineScope</code>.</li>
+<li>Add a Gradle dependency using the version catalog.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a coroutine is a job that can <strong>pause</strong> without blocking a thread, then resume later. A thread is an expensive worker; a coroutine is cheap.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Lambdas and higher-order functions</strong> (lesson 12). <code>launch { ... }</code> takes a lambda.</li>
+<li><strong>ViewModel</strong> (lesson 24). You will launch coroutines from it.</li>
+<li><strong>State</strong> (lesson 17). Results of slow work end up in state that the UI shows.</li>
+<li><strong>Kotlin Playground.</strong> Open https://play.kotlinlang.org, paste code, and press the run button. Note that Playground examples need <code>import kotlinx.coroutines.*</code>.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Conceptual Understanding: The Main Thread and Why It Must Stay Free</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Android runs your UI on one special thread, the <strong>main thread</strong> (also called the UI thread). It must redraw the screen about 60 to 120 times per second, which means each frame has roughly 8 to 16 milliseconds. If you block that thread with a download that takes two seconds, roughly a hundred frames are skipped, so the app <strong>janks</strong>, then <strong>freezes</strong>. If it stays blocked for around five seconds the system shows an <strong>ANR</strong> ("Application Not Responding") dialog.</p>
+<p class="v2-p">Think of a restaurant with <strong>one waiter</strong> (the main thread). If the waiter walks to the market to buy tomatoes, nobody gets served. Better: the waiter sends a <strong>runner</strong> for the tomatoes and continues serving; when the runner returns, the waiter picks up the tomatoes. The runner is a background thread or coroutine.</p>
+<p class="v2-p">Android helps enforce this rule. Doing network access on the main thread throws <code>NetworkOnMainThreadException</code>, and the strict-mode developer tool can warn about disk reads there.</p>
+<h3 class="v2-h3">Concurrency, parallelism, asynchrony</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Everyday picture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Concurrency</strong></td>
+<td>Several tasks are <em>in progress</em> during the same period. They may take turns on one CPU.</td>
+<td>One cook juggling three pots</td>
+</tr>
+<tr>
+<td><strong>Parallelism</strong></td>
+<td>Several tasks run at <em>the same instant</em> on different CPU cores.</td>
+<td>Three cooks, three pots</td>
+</tr>
+<tr>
+<td><strong>Asynchronous</strong></td>
+<td>A task starts and you continue without waiting for it; you are told later when it finishes.</td>
+<td>Order food, sit down, the waiter calls your number</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Coroutines give you concurrency easily and can use parallelism when you give them a multi-threaded dispatcher.</p>
+<h3 class="v2-h3">Threads versus coroutines</h3>
+<p class="v2-p">A thread is managed by the operating system and costs about a megabyte of memory. Creating ten thousand threads would crash a phone. A coroutine is managed by Kotlin and costs a few dozen bytes. You can launch a hundred thousand coroutines on a small phone, because they run <strong>on top of</strong> a few threads and <strong>suspend</strong> instead of blocking.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Thread-based:  [thread 1: ....waiting for network....][thread 2: ....waiting....]
+                 each waiting thread is wasted
+
+Coroutine:     [thread: A starts -&gt; A suspends -&gt; B runs -&gt; C runs -&gt; A resumes]
+                 the thread is busy with other work while A waits</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Main Thread and Why It Must Stay Free</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Step-by-Step Build 1: Your First Coroutines in the Playground</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Open https://play.kotlinlang.org and replace the code with:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    println("Start: ${Thread.currentThread().name}")
+    delay(1000)
+    println("After one second")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Start: main<br/>After one second</p>
+</blockquote>
+<p class="v2-p">(The thread name may look different in the Playground, for example <code>main @coroutine#1</code>.)</p>
+<p class="v2-p">What each piece means:</p>
+<ul class="v2-ul">
+<li><code>runBlocking { ... }</code> starts a coroutine and <strong>blocks the current thread</strong> until it finishes. It exists to bridge ordinary code (like <code>main</code>) and coroutines. Use it in the Playground and in tests, <strong>never in Android UI code</strong>.</li>
+<li><code>delay(1000)</code> <strong>suspends</strong> the coroutine for one second without blocking its thread. Compare with <code>Thread.sleep(1000)</code>, which blocks the thread.</li>
+</ul>
+<h3 class="v2-h3">Suspend functions</h3>
+<p class="v2-p">A function marked <code>suspend</code> can pause and resume. It can only be called from another suspend function or from a coroutine.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+suspend fun fetchGreeting(): String {
+    delay(1000)                  // pretend this is a network call
+    return "Hello from the server"
+}
+
+fun main() = runBlocking {
+    val greeting = fetchGreeting()
+    println(greeting)
+}</code></pre></div></div>
+<p class="v2-p">The magic: <code>val greeting = fetchGreeting()</code> <strong>looks</strong> like a normal call that returns a value, but the coroutine pauses at that line while the "network" works, and the thread is free meanwhile. There are no callbacks and no nesting. The compiler rewrites it behind the scenes into a state machine.</p>
+<h3 class="v2-h3">Doing two things at once with <code>launch</code></h3>
+<p class="v2-p"><code>launch</code> starts a new coroutine and gives you a <code>Job</code>. It is fire-and-forget: it returns no result.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    launch {
+        delay(1000)
+        println("Task A done")
+    }
+    launch {
+        delay(500)
+        println("Task B done")
+    }
+    println("Waiting...")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Waiting...<br/>Task B done<br/>Task A done</p>
+</blockquote>
+<p class="v2-p"><code>runBlocking</code> does not finish until both children finish. The two tasks take turns while waiting, so the total time is about one second, not one and a half.</p>
+<h3 class="v2-h3">Getting results with <code>async</code> and <code>await</code></h3>
+<p class="v2-p"><code>async</code> starts a coroutine that returns a value wrapped in a <code>Deferred</code>. <code>await()</code> suspends until it is ready.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlin.system.measureTimeMillis
+
+suspend fun getPrice(): Int { delay(1000); return 500 }
+suspend fun getDeliveryFee(): Int { delay(1000); return 200 }
+
+fun main() = runBlocking {
+    val sequentialTime = measureTimeMillis {
+        val a = getPrice()
+        val b = getDeliveryFee()
+        println("Sequential total: ${a + b}")
+    }
+    println("Sequential took about $sequentialTime ms")
+
+    val parallelTime = measureTimeMillis {
+        val a = async { getPrice() }
+        val b = async { getDeliveryFee() }
+        println("Concurrent total: ${a.await() + b.await()}")
+    }
+    println("Concurrent took about $parallelTime ms")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Sequential total: 700<br/>Sequential took about 2000 ms<br/>Concurrent total: 700<br/>Concurrent took about 1000 ms</p>
+</blockquote>
+<p class="v2-p">(The millisecond figures vary slightly on each run; the roughly two-to-one ratio is the point.) Use <code>async</code> when two independent pieces of work can overlap and you need both results.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Your First Coroutines in the Playground</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Step-by-Step Build 2: Dispatchers</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">A <strong>dispatcher</strong> decides which thread or threads a coroutine runs on. You pass one to <code>launch</code>, <code>async</code> or <code>withContext</code>.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Dispatcher</th>
+<th>Threads</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Dispatchers.Main</code></td>
+<td>The Android main thread</td>
+<td>Updating UI, light work, calling suspend functions</td>
+</tr>
+<tr>
+<td><code>Dispatchers.IO</code></td>
+<td>A large shared pool (64 threads by default)</td>
+<td>Waiting on network, disk, databases</td>
+</tr>
+<tr>
+<td><code>Dispatchers.Default</code></td>
+<td>As many threads as CPU cores</td>
+<td>Heavy computation: sorting, parsing, image processing</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>Dispatchers.Main</code> needs the <code>kotlinx-coroutines-android</code> artifact, which the Android libraries bring in. It does not exist in the Playground.</p>
+<p class="v2-p">Switch dispatchers inside a function with <code>withContext</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+suspend fun readBigFile(): String = withContext(Dispatchers.IO) {
+    // blocking disk or network calls are fine here
+    delay(800)
+    "file contents"
+}
+
+fun main() = runBlocking {
+    println("Calling from: ${Thread.currentThread().name}")
+    val text = readBigFile()
+    println("Got: $text")
+}</code></pre></div></div>
+<p class="v2-p"><strong>The golden rule of suspend functions:</strong> a suspend function should be <strong>main-safe</strong>, meaning it is safe to call from the main thread because it switches to the right dispatcher itself. A caller should not need to know which thread to use. Libraries such as Retrofit and Room (lessons 29 and 34) already give you main-safe functions, so you will often not need <code>withContext(Dispatchers.IO)</code> yourself. Add it when you call something blocking, like reading a file with plain Java APIs.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Dispatchers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Step-by-Step Build 3: Structured Concurrency</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Starting coroutines is easy. The hard part is cleaning up: if the user leaves the screen while a download is running, you must cancel it, or it keeps wasting battery and may crash when it tries to update a screen that no longer exists.</p>
+<p class="v2-p">Kotlin solves this with <strong>structured concurrency</strong>: every coroutine lives inside a <strong>scope</strong>, and the scope tracks its children.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>CoroutineScope (for example, viewModelScope)
+   |
+   +-- launch  (Job A)
+   |     +-- launch (child A1)
+   |     +-- async  (child A2)
+   |
+   +-- launch  (Job B)
+
+Cancel the scope  --&gt;  A, A1, A2 and B are all cancelled.
+A child fails     --&gt;  the parent is cancelled, and so are its other children.
+A parent waits for all its children before it completes.</code></pre></div></div>
+<p class="v2-p">The rules:</p>
+<ol class="v2-ol">
+<li><strong>Scope = lifetime.</strong> When the scope ends, all its coroutines are cancelled.</li>
+<li><strong>A parent waits</strong> for its children.</li>
+<li><strong>Cancellation flows down</strong>, <strong>failure flows up</strong> (by default).</li>
+</ol>
+<h3 class="v2-h3">Cancellation in practice</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    val job = launch {
+        repeat(10) { i -&gt;
+            println("Working $i")
+            delay(300)
+        }
+    }
+    delay(1000)
+    println("Cancelling")
+    job.cancelAndJoin()
+    println("Done")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Working 0<br/>Working 1<br/>Working 2<br/>Working 3<br/>Cancelling<br/>Done</p>
+</blockquote>
+<p class="v2-p"><code>cancelAndJoin()</code> cancels the job and waits until it has actually finished. Cancellation is <strong>cooperative</strong>: it happens at suspension points such as <code>delay</code>. A coroutine stuck in a tight loop with no suspension point will not stop. Check <code>isActive</code> or call <code>ensureActive()</code> inside long loops:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+suspend fun crunch(): Long = withContext(Dispatchers.Default) {
+    var sum = 0L
+    for (i in 1..1_000_000_000L) {
+        if (i % 10_000_000L == 0L) ensureActive()   // throws CancellationException if cancelled
+        sum += i
+    }
+    sum
+}</code></pre></div></div>
+<p class="v2-p">A cancelled coroutine throws a <code>CancellationException</code>. This is normal. If you wrap code in <code>try/catch (e: Exception)</code>, either rethrow <code>CancellationException</code> or catch narrower types, otherwise you swallow the cancellation and the coroutine refuses to stop.</p>
+<h3 class="v2-h3">Exceptions</h3>
+<p class="v2-p">An uncaught exception in a coroutine cancels its parent, which can crash an app. You handle errors with ordinary <code>try/catch</code> <strong>inside</strong> the coroutine:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+suspend fun riskyCall(): String {
+    delay(200)
+    throw IllegalStateException("Server said no")
+}
+
+fun main() = runBlocking {
+    launch {
+        try {
+            val result = riskyCall()
+            println(result)
+        } catch (e: IllegalStateException) {
+            println("Caught: ${e.message}")
+        }
+    }
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Caught: Server said no</p>
+</blockquote>
+<p class="v2-p">Two important details. First, wrapping the <code>launch</code> call itself in <code>try/catch</code> does <strong>not</strong> work, because the exception happens later, inside the new coroutine. Second, with <code>async</code> the exception is thrown when you call <code>await()</code>. For independent children where one failure should not cancel the others, use <code>supervisorScope { }</code>. A <code>CoroutineExceptionHandler</code> is a last-resort logger for uncaught exceptions in <code>launch</code>, not a replacement for <code>try/catch</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Structured Concurrency</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Step-by-Step Build 4: Coroutines in Android Studio</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Time to use them in an app, as in the official <em>Introduction to Coroutines in Android Studio</em> codelab. You need the coroutines in your project. The Compose and Lifecycle libraries pull in <code>kotlinx-coroutines-android</code> for you, so <code>viewModelScope</code> and <code>launch</code> work already. If you ever need them directly, this is how a dependency is added with the version catalog:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+coroutines = "&lt;latest stable&gt;"
+
+[libraries]
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.kotlinx.coroutines.android)
+    testImplementation(libs.kotlinx.coroutines.test)
+}</code></pre></div></div>
+<p class="v2-p">Always take the latest stable version from the kotlinx.coroutines releases page (https://github.com/Kotlin/kotlinx.coroutines/releases). Where a <strong>BOM</strong> or another library already declares the version, do not add a conflicting one.</p>
+<h3 class="v2-h3">Launching from a ViewModel: <code>viewModelScope</code></h3>
+<p class="v2-p"><code>viewModelScope</code> is a scope tied to the ViewModel. It uses <code>Dispatchers.Main.immediate</code> and is <strong>cancelled automatically</strong> when the ViewModel is cleared, which gives you structured concurrency for free.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">QuoteViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.quotes
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+data class QuoteUiState(
+    val isLoading: Boolean = false,
+    val quote: String = "Press the button",
+    val error: String? = null
+)
+
+class QuoteViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(QuoteUiState())
+    val uiState: StateFlow&lt;QuoteUiState&gt; = _uiState.asStateFlow()
+
+    fun loadQuote() {
+        if (_uiState.value.isLoading) return          // ignore double taps
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            try {
+                delay(1_500)                           // stand-in for a network call
+                _uiState.update { it.copy(isLoading = false, quote = "Small steps still move you forward.") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Could not load") }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(In real code you would catch narrower exceptions, or rethrow <code>CancellationException</code>, as discussed.) Notice how this reads: set loading, wait, set result. No callbacks. The UI collects <code>uiState</code> exactly as in lesson 24:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+@Composable
+fun QuoteScreen(modifier: Modifier = Modifier, viewModel: QuoteViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (state.isLoading) CircularProgressIndicator() else Text(state.quote)
+        state.error?.let { Text(it) }
+        Button(onClick = viewModel::loadQuote, modifier = Modifier.padding(top = 16.dp)) {
+            Text("New quote")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Run it. While waiting the spinner turns; the UI stays responsive (try rotating mid-load: the ViewModel and its coroutine survive).</p>
+<h3 class="v2-h3">Launching from a composable: <code>rememberCoroutineScope</code></h3>
+<p class="v2-p">Sometimes an <strong>event in the UI</strong> must start a suspend call that belongs to the UI, for example scrolling a list to the top, which is a suspend function. Use <code>rememberCoroutineScope()</code>, a scope tied to the composable's life:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun ScrollToTopDemo() {
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    Column {
+        Button(onClick = {
+            scope.launch { listState.animateScrollToItem(0) }
+        }) { Text("Top") }
+        LazyColumn(state = listState) {
+            items(100) { Text("Row $it") }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.compose.foundation.lazy.items</code>.) The scope is cancelled when the composable leaves the screen. Rules of thumb: business work goes in <code>viewModelScope</code>; work that is purely about UI elements goes in <code>rememberCoroutineScope</code>; and work that must start <strong>when a composable appears</strong> uses <code>LaunchedEffect</code> (lesson 55).</p>
+<h3 class="v2-h3">Never use <code>GlobalScope</code></h3>
+<p class="v2-p"><code>GlobalScope.launch { ... }</code> starts a coroutine that lives as long as the whole app, belongs to nobody and is never cancelled. It breaks structured concurrency and leaks work. Avoid it. If work must outlive a screen, use WorkManager (lesson 36) or an application-level scope that you create and own deliberately.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Coroutines in Android Studio</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Race and pick the winner</strong></p>
+<p class="v2-p">In the Playground, write three suspend functions that each <code>delay</code> for a different time and return the name of a "server" (<code>A</code> 800 ms, <code>B</code> 300 ms, <code>C</code> 500 ms). Call all three with <code>async</code> and print the <strong>total time</strong> and the result of each. Then change the code to run them one after another and compare the times.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlin.system.measureTimeMillis
+
+suspend fun serverA(): String { delay(800); return "A" }
+suspend fun serverB(): String { delay(300); return "B" }
+suspend fun serverC(): String { delay(500); return "C" }
+
+fun main() = runBlocking {
+    val concurrent = measureTimeMillis {
+        val a = async { serverA() }
+        val b = async { serverB() }
+        val c = async { serverC() }
+        println("Results: ${a.await()}, ${b.await()}, ${c.await()}")
+    }
+    println("Concurrent: about $concurrent ms")      // close to 800
+
+    val sequential = measureTimeMillis {
+        println("Results: ${serverA()}, ${serverB()}, ${serverC()}")
+    }
+    println("Sequential: about $sequential ms")      // close to 1600
+}</code></pre></div></div>
+<p class="v2-p">Concurrent time is about the <strong>longest</strong> task (800 ms); sequential time is the <strong>sum</strong> (1,600 ms). Timings vary slightly each run.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Timeout and cancellation</strong></p>
+<p class="v2-p">Write a suspend function <code>slowSearch()</code> that takes five seconds. Call it with <code>withTimeoutOrNull(2000)</code> and print <code>Timed out</code> when it returns null. Explain what happens to the search coroutine.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+
+suspend fun slowSearch(): String {
+    delay(5_000)
+    return "Result"
+}
+
+fun main() = runBlocking {
+    val result = withTimeoutOrNull(2_000) { slowSearch() }
+    println(result ?: "Timed out")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Timed out</p>
+</blockquote>
+<p class="v2-p">After two seconds <code>withTimeoutOrNull</code> cancels the block. <code>delay</code> is a cancellable suspension point, so <code>slowSearch</code> stops immediately instead of wasting three more seconds. <code>withTimeout</code> (without <code>OrNull</code>) throws <code>TimeoutCancellationException</code> instead of returning null.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Fix the freeze</strong></p>
+<p class="v2-p">This ViewModel function freezes the screen. Explain why and fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun importContacts() {
+    val text = java.net.URL("https://example.com/contacts.txt").readText()
+    _uiState.update { it.copy(contacts = text) }
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>readText()</code> is a <strong>blocking</strong> network call that runs on the main thread (the caller's thread), causing <code>NetworkOnMainThreadException</code> or a frozen UI. Wrap it in a coroutine and move the blocking part to the IO dispatcher:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun importContacts() {
+    viewModelScope.launch {
+        val text = withContext(Dispatchers.IO) {
+            java.net.URL("https://example.com/contacts.txt").readText()
+        }
+        _uiState.update { it.copy(contacts = text) }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Also remember to catch <code>IOException</code> and add the INTERNET permission, which lesson 29 covers. In practice you would use Retrofit rather than <code>URL.readText()</code>.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">In the Playground, write a coroutine that prints a message every 200 ms, cancel it after one second, and print how many messages appeared. Then remove the <code>delay</code> and put a busy loop instead; watch cancellation fail to stop it, and fix it with <code>ensureActive()</code>.</p></div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: <code>runBlocking</code> in app code.</strong> <em>What happens:</em> it blocks the main thread and freezes the UI. <em>The fix:</em> <code>viewModelScope.launch</code> or <code>rememberCoroutineScope</code>. Use <code>runBlocking</code> only in <code>main()</code> in the Playground and in some tests.</p>
+<p class="v2-p"><strong>Mistake #2: <code>Thread.sleep</code> instead of <code>delay</code>.</strong> <em>What happens:</em> the thread is blocked. <em>The fix:</em> <code>delay</code>.</p>
+<p class="v2-p"><strong>Mistake #3: <code>GlobalScope.launch</code>.</strong> <em>What happens:</em> leaked work that is never cancelled. <em>The fix:</em> use a lifecycle-bound scope.</p>
+<p class="v2-p"><strong>Mistake #4: Swallowing <code>CancellationException</code>.</strong> <em>The wrong code:</em> <code>catch (e: Exception) { log(e) }</code> around a suspend call. <em>What happens:</em> the coroutine ignores cancellation. <em>The fix:</em> catch specific exceptions, or rethrow <code>CancellationException</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Wrapping <code>launch</code> in <code>try/catch</code>.</strong> <em>What happens:</em> the exception escapes anyway. <em>The fix:</em> put the <code>try/catch</code> inside the coroutine.</p>
+<p class="v2-p"><strong>Mistake #6: Blocking call inside <code>Dispatchers.Main</code>.</strong> <em>What happens:</em> the UI freezes even though you are "in a coroutine". <em>The fix:</em> <code>withContext(Dispatchers.IO)</code> for blocking calls, or use main-safe libraries.</p>
+<p class="v2-p"><strong>Mistake #7: Forgetting <code>await()</code>.</strong> <em>What happens:</em> the result is never used and errors are ignored. <em>The fix:</em> every <code>async</code> should be awaited.</p>
+<p class="v2-p"><strong>Mistake #8: Updating UI state from a background thread.</strong> <em>What happens:</em> unpredictable crashes with plain mutable state. <em>The fix:</em> <code>StateFlow.update</code> is thread-safe; with Compose <code>mutableStateOf</code> prefer to update from the main dispatcher.</p>
+<p class="v2-p"><strong>Mistake #9: Starting the same work twice.</strong> <em>What happens:</em> double taps launch two downloads. <em>The fix:</em> a guard on the loading flag, as in <code>loadQuote</code>, or cancel the previous <code>Job</code> before starting a new one.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Knowledge Check</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why must the main thread not block?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It draws the UI and handles input. Blocking it makes the app skip frames, freeze, and eventually trigger an ANR dialog.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the difference between <code>launch</code> and <code>async</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>launch</code> starts a coroutine that returns a <code>Job</code> and no value. <code>async</code> returns a <code>Deferred</code> whose result you obtain with <code>await()</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>suspend</code> mean?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The function can pause without blocking its thread and resume later. It may only be called from another suspend function or a coroutine.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What are the three common dispatchers and their uses?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>Main</code> for UI work, <code>IO</code> for blocking input and output such as network and disk, and <code>Default</code> for CPU-heavy computation.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does structured concurrency guarantee?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Coroutines live inside scopes. Cancelling a scope cancels all its children, a parent waits for its children, and failures propagate upward, so work is not leaked.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-5-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 5, Pathway 1: Get data from the internet</a>: the official pathway, which includes both coroutines codelabs.</li>
+<li><a href="https://developer.android.com/kotlin/coroutines" rel="noopener noreferrer">Kotlin coroutines on Android</a></li>
+<li><a href="https://play.kotlinlang.org/" rel="noopener noreferrer">Kotlin Playground</a></li>
+<li><a href="https://kotlinlang.org/docs/home.html" rel="noopener noreferrer">Kotlin documentation home</a>: the coroutines guide lives here.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Parallel Price Checker</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> An app that checks the "prices" of three shops <strong>concurrently</strong> and shows the cheapest, with a loading state, error handling, a cancel button and no UI freezing.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Three suspend functions <code>shopA</code>, <code>shopB</code>, <code>shopC</code> simulating delays of 1.2 s, 0.8 s and 1.5 s and returning different prices. Make one of them throw an exception on demand (a switch in the UI).</li>
+<li>A ViewModel function <code>compare()</code> that starts all three with <code>async</code> inside <code>viewModelScope</code>, waits for them, and exposes the cheapest price.</li>
+<li>Loading, success and error states using a sealed UI state.</li>
+<li>A <strong>Cancel</strong> button that cancels the running job and shows <code>Cancelled</code>.</li>
+<li>Prevent starting a second comparison while one is running.</li>
+<li>A unit test (using the dispatcher rule from lesson 25) proving the total virtual time is about 1.5 s, not 3.5 s.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> make a failing shop not cancel the others; show the cheapest of the successful ones.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PriceViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.pricecheck
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
+
+sealed interface PriceUiState {
+    data object Idle : PriceUiState
+    data object Loading : PriceUiState
+    data class Success(val cheapestShop: String, val price: Int) : PriceUiState
+    data class Error(val message: String) : PriceUiState
+    data object Cancelled : PriceUiState
+}
+
+class PriceViewModel : ViewModel() {
+
+    private val _state = MutableStateFlow&lt;PriceUiState&gt;(PriceUiState.Idle)
+    val state: StateFlow&lt;PriceUiState&gt; = _state.asStateFlow()
+
+    var shopBShouldFail = false
+    private var job: Job? = null
+
+    private suspend fun shopA(): Int { delay(1_200); return 5200 }
+    private suspend fun shopB(): Int {
+        delay(800)
+        if (shopBShouldFail) throw IllegalStateException("Shop B is offline")
+        return 4900
+    }
+    private suspend fun shopC(): Int { delay(1_500); return 5100 }
+
+    fun compare() {
+        if (job?.isActive == true) return              // already running
+        job = viewModelScope.launch {
+            _state.value = PriceUiState.Loading
+            try {
+                val result = supervisorScope {
+                    // supervisorScope: one failing shop does not cancel the others
+                    val deferred = mapOf(
+                        "Shop A" to async { shopA() },
+                        "Shop B" to async { shopB() },
+                        "Shop C" to async { shopC() }
+                    )
+                    deferred.mapNotNull { (name, d) -&gt;
+                        try { name to d.await() } catch (e: CancellationException) { throw e }
+                        catch (e: Exception) { null }
+                    }
+                }
+                val cheapest = result.minByOrNull { it.second }
+                _state.value = if (cheapest == null) PriceUiState.Error("No shop answered")
+                else PriceUiState.Success(cheapest.first, cheapest.second)
+            } catch (e: CancellationException) {
+                _state.value = PriceUiState.Cancelled
+                throw e
+            }
+        }
+    }
+
+    fun cancel() { job?.cancel() }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">PriceViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.pricecheck
+
+import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+
+class PriceViewModelTest {
+    @get:Rule val mainRule = MainDispatcherRule()    // from lesson 25
+
+    @Test
+    fun compare_runsShopsConcurrently() = runTest {
+        val vm = PriceViewModel()
+        vm.compare()
+        advanceUntilIdle()
+
+        assertEquals(1_500, currentTime)              // longest shop, not the 3,500 ms sum
+        val state = vm.state.value
+        assertTrue(state is PriceUiState.Success)
+        assertEquals("Shop B", (state as PriceUiState.Success).cheapestShop)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>supervisorScope</code> makes each <code>async</code> independent, so with <code>shopBShouldFail = true</code> the answer is the cheapest of A and C. The test relies on <code>runTest</code> and the rule sharing one scheduler, as lesson 25 explained; if <code>currentTime</code> reports zero in your setup, make sure <code>MainDispatcherRule</code> uses the same scheduler as <code>runTest</code> (<code>StandardTestDispatcher(testScheduler)</code> pattern from the coroutines test documentation). The cancel path rethrows <code>CancellationException</code>, which is the rule from the lesson. The UI is a button row and a <code>when (state)</code> over the sealed type, as in lesson 29.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 28 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-28-coroutines-and-concurrency</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 28 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Main Thread and Why It Must Stay Free</li><li>✅ Step-by-Step Build 1: Your First Coroutines in the Playground</li><li>✅ Step-by-Step Build 2: Dispatchers</li><li>✅ Step-by-Step Build 3: Structured Concurrency</li><li>✅ Step-by-Step Build 4: Coroutines in Android Studio</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_27.html" class="ln-btn">&#8592; Lesson 27</a><a href="lesson_29.html" class="ln-btn primary">Lesson 29 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 28 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

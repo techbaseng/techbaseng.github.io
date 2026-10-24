@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 61: The UI Layer: State Holders, State Production and Events — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l61">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 61 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 61</div>
+      <h1>The UI Layer: State Holders, State Production and Events</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: The Students Screen, Done Properly</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 61</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Define, produce and consume UI state, handle UI events correctly, and choose between ViewModels and plain state holders.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ The Students Screen, Done Properly</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">The <strong>UI layer</strong> has one job: <strong>show application data on the screen and serve as the point of user interaction</strong>. Whenever data changes, the UI must update. Whenever the user acts, the UI must tell someone who can respond. In lesson 60 you separated the layers. This lesson goes deep inside the top one.</p>
+<p class="v2-p">It covers the <em>UI Layer</em>, <em>The UI layer - MAD Skills</em>, <em>Handling UI events</em>, <em>State holders and UI state</em> and <em>State production</em> items of the <strong>Modern Android App Architecture</strong> programme (https://developer.android.com/courses/android-architecture), based on the official pages:</p>
+<ul class="v2-ul">
+<li>UI layer: https://developer.android.com/topic/architecture/ui-layer</li>
+<li>UI events: https://developer.android.com/topic/architecture/ui-layer/events</li>
+<li>State holders and UI state: https://developer.android.com/topic/architecture/ui-layer/stateholders</li>
+<li>State production: https://developer.android.com/topic/architecture/ui-layer/state-production</li>
+</ul>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Design <strong>UI state</strong> classes for loading, content and error.</li>
+<li>Choose between a <strong>ViewModel</strong> and a <strong>plain state holder</strong>.</li>
+<li><strong>Produce</strong> state with <code>StateFlow</code>, <code>stateIn</code>, <code>combine</code>, <code>produceState</code> and <code>mutableStateOf</code>.</li>
+<li>Handle <strong>UI events</strong> correctly, including <strong>one-off events modelled as state</strong>.</li>
+<li>Preserve state across <strong>configuration changes</strong> and <strong>process death</strong> with <code>SavedStateHandle</code>.</li>
+<li>Distinguish <strong>UI logic</strong> from <strong>business logic</strong> and place each properly.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> the UI layer is a pipeline: <strong>data in → state production → UI state → render → user events → back to the state holder</strong>. If you can name every stage, you can debug any screen.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Architecture principles and layers</strong> (lesson 60).</li>
+<li><strong>ViewModel, <code>StateFlow</code>, <code>collectAsStateWithLifecycle</code></strong> (lessons 25 and 33).</li>
+<li><strong>Flow operators</strong> (lesson 33).</li>
+<li><strong>State hoisting</strong> (lessons 19 and 37).</li>
+<li><strong>Navigation arguments</strong> (lessons 26 and 55).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: The Parts of the UI Layer</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> Data layer
+     │  Flow / suspend
+     ▼
+ State holder (ViewModel or plain class)
+     │  produces
+     ▼
+ UI state  (immutable data class)
+     │  collected by
+     ▼
+ UI elements (composables)
+     │  user events
+     └──────────► back to the state holder</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Part</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UI state</strong></td>
+<td>An immutable snapshot of everything the screen needs</td>
+</tr>
+<tr>
+<td><strong>State holder</strong></td>
+<td>Owns the state, exposes it, and handles events</td>
+</tr>
+<tr>
+<td><strong>UI elements</strong></td>
+<td>Render state and report events</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Designing UI state</h3>
+<p class="v2-p">A good UI state:</p>
+<ul class="v2-ul">
+<li>is <strong>immutable</strong> (<code>val</code>s in a <code>data class</code>),</li>
+<li>contains <strong>only what the screen shows</strong>,</li>
+<li>makes <strong>impossible states impossible</strong>.</li>
+</ul>
+<p class="v2-p"><strong>Version A: a flat class with flags.</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class FeeUiState(
+    val loading: Boolean = true,
+    val payments: List&lt;Payment&gt; = emptyList(),
+    val error: String? = null
+)</code></pre></div></div>
+<p class="v2-p">This allows <code>loading = true</code> <strong>and</strong> <code>error != null</code> at the same time, a combination that makes no sense.</p>
+<p class="v2-p"><strong>Version B: a sealed hierarchy.</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface FeeUiState {
+    data object Loading : FeeUiState
+    data class Success(val payments: List&lt;Payment&gt;, val summary: FeeSummary) : FeeUiState
+    data class Error(val message: String) : FeeUiState
+}</code></pre></div></div>
+<p class="v2-p">Now exactly one case is possible at a time, and a <code>when</code> expression must handle all of them:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun FeeScreen(state: FeeUiState, onRetry: () -&gt; Unit) {
+    when (state) {
+        FeeUiState.Loading -&gt; CircularProgressIndicator()
+        is FeeUiState.Error -&gt; ErrorMessage(state.message, onRetry)
+        is FeeUiState.Success -&gt; PaymentList(state.payments, state.summary)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Which to choose?</strong> Use a <strong>sealed</strong> state when the cases are truly exclusive. Use a <strong>flat data class</strong> when the pieces vary independently (a screen showing a list <em>and</em> a refresh indicator <em>and</em> a snackbar). Many real screens use a flat class with a few sealed parts. The official guidance only asks that state be <strong>immutable</strong> and <strong>complete</strong>.</p>
+<h3 class="v2-h3">Properties of good state</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Do</th>
+<th>Do not</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expose <code>StateFlow&lt;UiState&gt;</code></td>
+<td>Expose <code>MutableStateFlow</code></td>
+</tr>
+<tr>
+<td>Use immutable <code>List</code></td>
+<td>Use <code>MutableList</code> in state</td>
+</tr>
+<tr>
+<td>Keep display-ready values when helpful (<code>"₦150,000"</code>)</td>
+<td>Put raw <code>Context</code> or <code>View</code> references in state</td>
+</tr>
+<tr>
+<td>Have a <strong>default initial state</strong></td>
+<td>Leave the screen with nothing to render</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Parts of the UI Layer</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: ViewModel or Plain State Holder?</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">There are two kinds of state holder.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th><strong>ViewModel</strong></th>
+<th><strong>Plain state holder class</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lives</td>
+<td><strong>Screen level</strong> (survives configuration changes)</td>
+<td>Composable level, created with <code>remember</code></td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>The whole screen</td>
+<td>A part of the UI (a form, a search bar, a scaffold)</td>
+</tr>
+<tr>
+<td>Needs the data layer</td>
+<td>Yes (business logic, repositories)</td>
+<td>Usually not, UI logic only</td>
+</tr>
+<tr>
+<td>Example</td>
+<td><code>FeeViewModel</code></td>
+<td><code>rememberSearchState()</code>, <code>ScaffoldState</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The guidance: <strong>business logic</strong> (rules about fees, repository calls) belongs in a <strong>ViewModel</strong>; <strong>UI logic</strong> (how to show something, scroll positions, expansion states) belongs in a <strong>plain state holder</strong> or composable state.</p>
+<h3 class="v2-h3">A plain state holder</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Stable
+class SearchState(initialQuery: String = "") {
+    var query by mutableStateOf(initialQuery)
+        private set
+
+    val isActive: Boolean get() = query.isNotBlank()
+
+    fun onQueryChange(value: String) { query = value }
+    fun clear() { query = "" }
+
+    companion object {
+        val Saver: Saver&lt;SearchState, String&gt; = Saver(
+            save = { it.query },
+            restore = { SearchState(it) }
+        )
+    }
+}
+
+@Composable
+fun rememberSearchState(): SearchState =
+    rememberSaveable(saver = SearchState.Saver) { SearchState() }</code></pre></div></div>
+<p class="v2-p">Usage:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentSearchBar(onSearch: (String) -&gt; Unit) {
+    val state = rememberSearchState()
+    OutlinedTextField(
+        value = state.query,
+        onValueChange = {
+            state.onQueryChange(it)
+            onSearch(it)
+        },
+        trailingIcon = { if (state.isActive) IconButton(onClick = state::clear) { Icon(Icons.Default.Clear, "Clear") } }
+    )
+}</code></pre></div></div>
+<p class="v2-p">The holder is <strong>plain Kotlin</strong> with Compose state: no ViewModel is needed, because nothing here involves the data layer. Using <code>rememberSaveable</code> with a custom <code>Saver</code> keeps the query across rotation.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Rule of thumb:</strong> if the logic needs a repository or must outlive the composition, use a ViewModel. If it only manipulates what is shown, use a plain holder. They can <strong>work together</strong>: the ViewModel holds screen state and the plain holder wraps UI-only details.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: ViewModel or Plain State Holder?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Producing State</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><strong>State production</strong> is how you turn data (flows, suspend calls, user input) into UI state. The official page describes it as a pipeline with <strong>inputs</strong> (events, data) and <strong>outputs</strong> (state).</p>
+<h3 class="v2-h3">Pattern 1: Update a <code>MutableStateFlow</code> in response to events</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FeeViewModel(private val repository: PaymentsRepository) : ViewModel() {
+
+    private val _uiState = MutableStateFlow&lt;FeeUiState&gt;(FeeUiState.Loading)
+    val uiState: StateFlow&lt;FeeUiState&gt; = _uiState.asStateFlow()
+
+    fun refresh() {
+        viewModelScope.launch {
+            _uiState.value = FeeUiState.Loading
+            _uiState.value = try {
+                val payments = repository.payments()
+                FeeUiState.Success(payments, summarise(payments))
+            } catch (e: IOException) {
+                FeeUiState.Error("Could not load payments")
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Good for <strong>one-shot</strong> loads and events.</p>
+<h3 class="v2-h3">Pattern 2: Transform a data stream with <code>stateIn</code></h3>
+<p class="v2-p">When the data layer exposes a <code>Flow</code> (for example from Room), convert it directly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FeeViewModel(repository: PaymentsRepository) : ViewModel() {
+
+    val uiState: StateFlow&lt;FeeUiState&gt; = repository.paymentsStream()      // Flow&lt;List&lt;Payment&gt;&gt;
+        .map&lt;List&lt;Payment&gt;, FeeUiState&gt; { FeeUiState.Success(it, summarise(it)) }
+        .catch { emit(FeeUiState.Error("Could not load payments")) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = FeeUiState.Loading
+        )
+}</code></pre></div></div>
+<p class="v2-p"><code>stateIn</code> turns a cold flow into a hot <code>StateFlow</code>. <code>WhileSubscribed(5_000)</code> keeps the upstream running for <strong>5 seconds</strong> after the last collector leaves. This survives a screen rotation without restarting the work, but stops when the user really leaves the screen. It is the recommended default in the official material.</p>
+<h3 class="v2-h3">Pattern 3: Combine several inputs</h3>
+<p class="v2-p">A screen with a search query and a filter uses <code>combine</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class StudentsViewModel(repository: StudentsRepository) : ViewModel() {
+
+    private val query = MutableStateFlow("")
+    private val onlyOwing = MutableStateFlow(false)
+
+    val uiState: StateFlow&lt;StudentsUiState&gt; =
+        combine(repository.studentsStream(), query, onlyOwing) { students, q, owing -&gt;
+            val shown = students
+                .filter { it.name.contains(q, ignoreCase = true) }
+                .filter { !owing || it.balance &gt; 0 }
+            StudentsUiState(query = q, onlyOwing = owing, students = shown)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudentsUiState())
+
+    fun onQueryChange(value: String) { query.value = value }
+    fun onOnlyOwingChange(value: Boolean) { onlyOwing.value = value }
+}</code></pre></div></div>
+<p class="v2-p">Every input change produces a <strong>new complete state</strong>, so the UI never sees half-updated data.</p>
+<h3 class="v2-h3">Pattern 4: Compose-only production with <code>produceState</code></h3>
+<p class="v2-p">For small, UI-local sources, <code>produceState</code> converts a non-Compose source into Compose <code>State</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun rememberNow(): State&lt;LocalTime&gt; = produceState(initialValue = LocalTime.now()) {
+    while (true) {
+        delay(1_000)
+        value = LocalTime.now()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Another useful tool is <code>snapshotFlow</code>, which turns Compose state <strong>into</strong> a flow, as you saw in lesson 54.</p>
+<h3 class="v2-h3">Where do you collect?</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun FeeRoute(viewModel: FeeViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    FeeScreen(state = state, onRetry = viewModel::refresh)
+}</code></pre></div></div>
+<p class="v2-p">Always use <strong><code>collectAsStateWithLifecycle</code></strong> (from <code>lifecycle-runtime-compose</code>) so that collection <strong>stops</strong> when the app is in the background, saving work and battery.</p>
+<h3 class="v2-h3">Surviving process death with <code>SavedStateHandle</code></h3>
+<p class="v2-p">A ViewModel survives configuration changes but <strong>not</strong> the system killing your process. Small, important pieces of state (a search query, a selected id) can be saved with <code>SavedStateHandle</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class StudentsViewModel(
+    private val savedState: SavedStateHandle,
+    repository: StudentsRepository
+) : ViewModel() {
+
+    val query: StateFlow&lt;String&gt; = savedState.getStateFlow("query", "")
+
+    fun onQueryChange(value: String) { savedState["query"] = value }
+}</code></pre></div></div>
+<p class="v2-p">Keep what you store <strong>small</strong> (strings, ids, flags). The big data is reloaded from the data layer.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Producing State</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: Handling UI Events</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A <strong>UI event</strong> is something that happens in or to the UI: a click, a text change, a swipe. The official page splits events by who should handle them:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Event</th>
+<th>Handled by</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Needs <strong>business logic</strong></td>
+<td><strong>ViewModel</strong></td>
+<td>"Pay" clicked: validate and record payment</td>
+</tr>
+<tr>
+<td>Needs <strong>UI behaviour logic</strong></td>
+<td><strong>UI</strong> (composable or plain holder)</td>
+<td>Show a snackbar, navigate, scroll to top</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Business-logic events: ViewModel functions</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun onPayClicked(studentId: Int, amount: Int) {
+    viewModelScope.launch {
+        repository.recordPayment(studentId, amount)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The UI calls <code>viewModel.onPayClicked(...)</code>. The ViewModel changes state; the UI recomposes.</p>
+<h3 class="v2-h3">UI-behaviour events: handle in the UI</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentRow(student: Student, onPay: () -&gt; Unit, onOpen: () -&gt; Unit) {
+    // navigation and "open details" are UI behaviour; the ViewModel need not know
+    Row(Modifier.clickable(onClick = onOpen)) { /* ... */ }
+}</code></pre></div></div>
+<h3 class="v2-h3">The one-off events problem</h3>
+<p class="v2-p">Some outcomes are <strong>"do it once"</strong>: show a snackbar "Payment saved", navigate after saving. The old approach used <code>SharedFlow</code> or <code>Channel</code> events from the ViewModel. The current official recommendation is: <strong>model one-off events as state</strong>, and have the UI <strong>consume</strong> them.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class PayUiState(
+    val saving: Boolean = false,
+    val userMessage: String? = null,        // "Payment saved", consumed once
+    val savedAndFinished: Boolean = false    // navigation trigger
+)
+
+class PayViewModel(private val repository: PaymentsRepository) : ViewModel() {
+    private val _uiState = MutableStateFlow(PayUiState())
+    val uiState: StateFlow&lt;PayUiState&gt; = _uiState.asStateFlow()
+
+    fun pay(studentId: Int, amount: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(saving = true) }
+            repository.recordPayment(studentId, amount)
+            _uiState.update { it.copy(saving = false, userMessage = "Payment saved", savedAndFinished = true) }
+        }
+    }
+
+    fun messageShown() = _uiState.update { it.copy(userMessage = null) }
+}</code></pre></div></div>
+<p class="v2-p">The UI shows the message and then tells the ViewModel it was consumed:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun PayRoute(viewModel: PayViewModel, snackbar: SnackbarHostState, onFinished: () -&gt; Unit) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.userMessage) {
+        state.userMessage?.let {
+            snackbar.showSnackbar(it)
+            viewModel.messageShown()
+        }
+    }
+    LaunchedEffect(state.savedAndFinished) {
+        if (state.savedAndFinished) onFinished()
+    }
+    PayScreen(state = state, onPay = viewModel::pay)
+}</code></pre></div></div>
+<p class="v2-p">Why state instead of an event stream? Events sent while the UI is not listening (during rotation, for example) can be <strong>lost</strong> or <strong>delivered twice</strong> with channels. State is retained until consumed, so it is never lost, and it can be rendered repeatedly without side effects if you clear it after use.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">A <strong>rule of thumb:</strong> the ViewModel says <em>what happened</em> (state). The UI decides <em>how to show it</em> (a snackbar, a dialog, a navigation call).</p>
+</blockquote>
+<h3 class="v2-h3">Text fields and state</h3>
+<p class="v2-p">A text field is an event source that must update state <strong>synchronously</strong> to avoid cursor jumps. For simple fields, keep the field in UI state (<code>rememberSaveable</code>) or, when business logic needs every keystroke (validation), keep it in the ViewModel as a <code>StateFlow&lt;String&gt;</code> and read it with <code>collectAsStateWithLifecycle</code>. If you use <code>TextFieldState</code> (the newer Compose text API) hold it in a plain state holder. Do not debounce the value that the field <strong>displays</strong>; debounce only the work that reacts to it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Handling UI Events</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: UI Logic vs Business Logic</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Question</th>
+<th>Business logic</th>
+<th>UI logic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What does it need?</td>
+<td>Data and domain rules</td>
+<td>Screen elements and resources</td>
+</tr>
+<tr>
+<td>Example</td>
+<td>"A student with a balance over 0 is <em>owing</em>"</td>
+<td>"Show the owing badge in red"</td>
+</tr>
+<tr>
+<td>Home</td>
+<td>Domain/data layer (via ViewModel)</td>
+<td>Composable or plain state holder</td>
+</tr>
+<tr>
+<td>Test</td>
+<td>JUnit</td>
+<td>Compose UI test</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Mixing them is the cause of most "my ViewModel is 800 lines long" problems.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Business logic (domain)
+fun Student.isOwing(): Boolean = balance &gt; 0
+
+// UI logic (composable)
+@Composable
+fun OwingBadge(student: Student) {
+    if (student.isOwing()) {
+        AssistChip(onClick = {}, label = { Text("Owing") }, colors = AssistChipDefaults.assistChipColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer))
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: UI Logic vs Business Logic</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Step-by-Step Build 5: Putting the Pipeline Together</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Before the exercises, trace one user action through the whole pipeline, because being able to narrate the flow is the best debugging skill in this layer. Suppose a bursar taps <strong>Mark as paid</strong> on a student row in the Students screen.</p>
+<ol class="v2-ol">
+<li><strong>The UI element reports an event.</strong> The row's button calls a lambda passed from above, <code>onMarkPaid(student.id)</code>. The row does not know what happens next, and it holds no state of its own about payment.</li>
+<li><strong>The route composable forwards it.</strong> <code>StudentsRoute</code> receives <code>viewModel::markPaid</code> as the callback. This is a business-logic event, because it changes stored data, so it goes to the ViewModel rather than being handled in the UI.</li>
+<li><strong>The state holder runs business logic.</strong> <code>markPaid</code> launches a coroutine in <code>viewModelScope</code>, asks the repository to record the payment, and then writes a message into its message flow.</li>
+<li><strong>The data layer changes the source of truth.</strong> The repository updates the database. Because the screen collects a <code>Flow</code> from that database, the list re-emits on its own.</li>
+<li><strong>State is produced.</strong> <code>combine</code> merges the new student list, the unchanged query and filter, and the new message into a fresh <code>Success</code> state. <code>stateIn</code> publishes it.</li>
+<li><strong>The UI renders.</strong> <code>collectAsStateWithLifecycle</code> hands the new state to Compose. The row now shows a cleared balance, and a <code>LaunchedEffect</code> keyed on the message shows a snackbar and calls <code>messageShown()</code>.</li>
+</ol>
+<p class="v2-p">If any step misbehaves you can look at exactly one boundary: is the event reaching the ViewModel (add a log or a breakpoint in <code>markPaid</code>)? Is the repository changing the data (check the database with the Database Inspector from lesson 44)? Is the state being produced (inspect <code>uiState.value</code> in a test)? Is the UI reading the right state (check that you are collecting the same <code>StateFlow</code> and not a copy)? Debugging by boundary is far quicker than staring at a whole screen.</p>
+<h3 class="v2-h3">Two warnings about state production</h3>
+<p class="v2-p">First, <strong>never create a new <code>StateFlow</code> inside a getter</strong>. A property such as <code>val uiState get() = flow.stateIn(...)</code> builds a new pipeline each time it is read, so the UI would restart your work on every recomposition. Define the property once, as a value, as in the examples above.</p>
+<p class="v2-p">Second, <strong>keep the initial value honest</strong>. <code>stateIn</code> needs an <code>initialValue</code>, and many learners pass an empty <code>Success</code>, which makes the screen flash "no students" before the data arrives. Use <code>Loading</code> (or a <code>Success</code> with a <code>refreshing</code> flag when you already have cached content), so that what the user sees matches reality.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Putting the Pipeline Together</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Make impossible states impossible</strong></p>
+<p class="v2-p">This state allows <code>loading = true</code> with a non-empty <code>error</code>. Redesign it for a screen that shows a list of students, an error, or a spinner.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class StudentsUiState(
+    val loading: Boolean = false,
+    val students: List&lt;Student&gt; = emptyList(),
+    val error: String? = null
+)</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface StudentsUiState {
+    data object Loading : StudentsUiState
+    data class Success(val students: List&lt;Student&gt;) : StudentsUiState
+    data class Error(val message: String) : StudentsUiState
+}</code></pre></div></div>
+<p class="v2-p">Now only one case exists at a time and <code>when</code> forces every case to be handled. (If you also need a pull-to-refresh indicator while content is visible, keep a <code>refreshing: Boolean</code> inside <code>Success</code>.)</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Pick the holder</strong></p>
+<p class="v2-p">For each, choose ViewModel or plain state holder: (a) the loaded list of students; (b) whether a filter panel is expanded; (c) the text in a search box that must survive rotation; (d) the result of saving a payment.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">(a) ViewModel (data layer, screen state). (b) Plain state or <code>rememberSaveable</code> (pure UI). (c) Plain state holder with <code>rememberSaveable</code>, or <code>SavedStateHandle</code> if the ViewModel filters with it. (d) ViewModel, because it follows a business operation.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Replace the channel</strong></p>
+<p class="v2-p">Convert this one-off event approach into state:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>private val _events = Channel&lt;String&gt;()
+val events = _events.receiveAsFlow()
+fun save() { viewModelScope.launch { repo.save(); _events.send("Saved") } }</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>data class SaveUiState(val message: String? = null)
+
+private val _uiState = MutableStateFlow(SaveUiState())
+val uiState = _uiState.asStateFlow()
+
+fun save() {
+    viewModelScope.launch {
+        repo.save()
+        _uiState.update { it.copy(message = "Saved") }
+    }
+}
+fun messageShown() = _uiState.update { it.copy(message = null) }</code></pre></div></div>
+<p class="v2-p">The UI shows <code>message</code> in a <code>LaunchedEffect(state.message)</code> and calls <code>messageShown()</code> afterwards, so it is neither lost during rotation nor shown twice.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Exposing <code>MutableStateFlow</code>.</strong> <em>Fix:</em> expose <code>StateFlow</code> with <code>asStateFlow()</code>.</p>
+<p class="v2-p"><strong>Mistake #2: Using <code>collectAsState</code> instead of <code>collectAsStateWithLifecycle</code>.</strong> <em>Fix:</em> the lifecycle version stops collection in the background.</p>
+<p class="v2-p"><strong>Mistake #3: Flags that allow impossible states.</strong> <em>Fix:</em> a sealed interface where cases are exclusive.</p>
+<p class="v2-p"><strong>Mistake #4: Doing heavy mapping in the composable.</strong> <em>Fix:</em> produce display-ready state in the state holder.</p>
+<p class="v2-p"><strong>Mistake #5: Passing <code>Context</code>, <code>NavController</code> or <code>SnackbarHostState</code> into the ViewModel.</strong> <em>Fix:</em> keep UI objects in the UI; send state.</p>
+<p class="v2-p"><strong>Mistake #6: One-off events through <code>SharedFlow</code> or <code>Channel</code> that get lost.</strong> <em>Fix:</em> model events as state and consume them.</p>
+<p class="v2-p"><strong>Mistake #7: Starting <code>stateIn</code> with <code>Eagerly</code> for everything.</strong> <em>Fix:</em> use <code>WhileSubscribed(5_000)</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Storing large data in <code>SavedStateHandle</code>.</strong> <em>Fix:</em> save ids; reload data.</p>
+<p class="v2-p"><strong>Mistake #9: Creating a ViewModel for every tiny widget.</strong> <em>Fix:</em> use a plain state holder.</p>
+<p class="v2-p"><strong>Mistake #10: Updating <code>StateFlow</code> with a mutable object in place.</strong> <em>Fix:</em> copy: <code>update { it.copy(...) }</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What are the three parts of the UI layer?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">UI state, state holders and UI elements.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why use <code>WhileSubscribed(5_000)</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">It keeps the upstream running through short interruptions like rotation but stops it when the user has really left, saving resources.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> When should a plain state holder be preferred to a ViewModel?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">When the logic is UI-only and does not need the data layer or to outlive the composition's screen scope.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> How should a ViewModel tell the UI to show a snackbar?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">By setting a state value (such as <code>userMessage</code>); the UI shows it and calls a function to clear it.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>SavedStateHandle</code> protect against?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Loss of small pieces of state when the system kills the app process while it is in the background.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/android-architecture" rel="noopener noreferrer">Modern Android App Architecture programme</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer" rel="noopener noreferrer">UI layer</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/events" rel="noopener noreferrer">UI events</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/stateholders" rel="noopener noreferrer">State holders and UI state</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/state-production" rel="noopener noreferrer">State production</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">The Students Screen, Done Properly</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a Students screen that demonstrates every part of the UI layer.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <code>StudentsRepository</code> interface and a fake with a <code>Flow&lt;List&lt;Student&gt;&gt;</code> that emits an update every few seconds.</li>
+<li>A <code>StudentsViewModel</code> that <strong>combines</strong> the repository flow, a search query (backed by <code>SavedStateHandle</code>) and an "only owing" filter, and produces a <code>StateFlow&lt;StudentsUiState&gt;</code> with <code>stateIn</code> and <code>WhileSubscribed(5_000)</code>.</li>
+<li>A sealed <code>StudentsUiState</code> with <code>Loading</code>, <code>Success</code> and <code>Error</code>.</li>
+<li>A plain <code>rememberSearchState</code>-style holder for the search field's UI behaviour (clear button).</li>
+<li>A <strong>one-off message</strong> ("Marked as paid") implemented as state and consumed with a snackbar.</li>
+<li>Collection with <code>collectAsStateWithLifecycle</code>.</li>
+<li>Tests: the ViewModel's filtering (with fake repository and <code>runTest</code>), and a UI test for <code>Success</code> and <code>Error</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add <code>produceState</code> to show a "last updated 12 s ago" label that ticks every second without involving the ViewModel.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The ViewModel (core of the answer):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface StudentsUiState {
+    data object Loading : StudentsUiState
+    data class Success(
+        val query: String,
+        val onlyOwing: Boolean,
+        val students: List&lt;Student&gt;,
+        val message: String? = null
+    ) : StudentsUiState
+    data class Error(val message: String) : StudentsUiState
+}
+
+class StudentsViewModel(
+    private val savedState: SavedStateHandle,
+    private val repository: StudentsRepository
+) : ViewModel() {
+
+    private val query = savedState.getStateFlow("query", "")
+    private val onlyOwing = MutableStateFlow(false)
+    private val message = MutableStateFlow&lt;String?&gt;(null)
+
+    val uiState: StateFlow&lt;StudentsUiState&gt; =
+        combine(repository.studentsStream(), query, onlyOwing, message) { students, q, owing, msg -&gt;
+            val shown = students
+                .filter { it.name.contains(q, ignoreCase = true) }
+                .filter { !owing || it.balance &gt; 0 }
+            StudentsUiState.Success(q, owing, shown, msg) as StudentsUiState
+        }
+            .catch { emit(StudentsUiState.Error("Could not load students")) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), StudentsUiState.Loading)
+
+    fun onQueryChange(value: String) { savedState["query"] = value }
+    fun onOnlyOwingChange(value: Boolean) { onlyOwing.value = value }
+
+    fun markPaid(id: Int) {
+        viewModelScope.launch {
+            repository.markPaid(id)
+            message.value = "Marked as paid"
+        }
+    }
+    fun messageShown() { message.value = null }
+}</code></pre></div></div>
+<p class="v2-p">A ViewModel test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class StudentsViewModelTest {
+    @get:Rule val mainRule = MainDispatcherRule()
+
+    @Test
+    fun filter_only_owing_hides_cleared_students() = runTest {
+        val repo = FakeStudentsRepository(
+            listOf(Student(1, "Ada", balance = 0), Student(2, "Tunde", balance = 5_000))
+        )
+        val vm = StudentsViewModel(SavedStateHandle(), repo)
+        val job = launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
+
+        vm.onOnlyOwingChange(true)
+        val state = vm.uiState.value as StudentsUiState.Success
+        assertEquals(listOf("Tunde"), state.students.map { it.name })
+        job.cancel()
+    }
+}</code></pre></div></div>
+<p class="v2-p">The test collects in the background because <code>stateIn(WhileSubscribed)</code> only runs while something is subscribed, which is exactly why this default saves work in the real app.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 61 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-61-the-ui-layer-state-holders-state-productio</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 61 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Parts of the UI Layer</li><li>✅ Step-by-Step Build 1: ViewModel or Plain State Holder?</li><li>✅ Step-by-Step Build 2: Producing State</li><li>✅ Step-by-Step Build 3: Handling UI Events</li><li>✅ Step-by-Step Build 4: UI Logic vs Business Logic</li><li>✅ Step-by-Step Build 5: Putting the Pipeline Together</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_60.html" class="ln-btn">&#8592; Lesson 60</a><a href="lesson_62.html" class="ln-btn primary">Lesson 62 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 61 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

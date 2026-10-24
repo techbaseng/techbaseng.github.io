@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 57: Compose Performance — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l57">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 57 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 57</div>
+      <h1>Compose Performance</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Performance Clinic</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 57</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Measure, debug and optimise: recomposition, stability, deferring state reads, baseline profiles and a scientific approach to performance.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Performance Clinic</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Performance is not the first thing a new Compose developer worries about, and that is correct: Compose is fast by default. But every serious app eventually meets a screen that stutters while scrolling, a start-up that feels slow on a modest phone, or a composable that recomposes hundreds of times for no visible reason. Many users in our market use phones with limited memory and older processors, so performance is also <strong>inclusion</strong>.</p>
+<p class="v2-p">This lesson covers <em>Debugging recomposition</em>, <em>Performance gotchas</em>, <em>More performance tips</em> and <em>Practical performance problem solving</em> from Pathway 4 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4), and the <em>Jetpack Compose performance</em> codelab (https://developer.android.com/codelabs/jetpack-compose-performance). We follow the codelab's <strong>scientific approach</strong>: <strong>measure, find the cause, change one thing, measure again</strong>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain <strong>recomposition, skipping and stability</strong> and what <strong>strong skipping</strong> changes.</li>
+<li>Find unnecessary recomposition with the <strong>Layout Inspector</strong> and with <strong>logging</strong>.</li>
+<li>Apply the main fixes: <strong>lazy list keys</strong>, <strong><code>remember</code></strong>, <strong><code>derivedStateOf</code></strong>, <strong>deferred state reads</strong>, <strong>stable models</strong>, <strong><code>graphicsLayer</code></strong> and <strong>lambda modifiers</strong>.</li>
+<li>Avoid <strong>backwards writes</strong> and heavy work in composition.</li>
+<li>Read <strong>compiler reports and metrics</strong>.</li>
+<li>Measure properly with <strong>release builds</strong>, <strong>Macrobenchmark</strong> and <strong>Baseline Profiles</strong>.</li>
+<li>Run the <strong>measure → hypothesise → change → verify</strong> loop.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> do not optimise by superstition. A change that cannot be measured is a guess, and a "fix" that adds complexity without a measured gain is a bug waiting to happen.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>The three phases and recomposition</strong> (lesson 37).</li>
+<li><strong>Lazy lists, keys and content types</strong> (lesson 39).</li>
+<li><strong>Animations and <code>graphicsLayer</code></strong> (lessons 41 and 56).</li>
+<li><strong>State, <code>remember</code>, <code>derivedStateOf</code></strong> (lessons 19 and 54).</li>
+<li><strong>Release builds and R8</strong> (lesson 49).</li>
+<li><strong>Android Studio tools, Layout Inspector, Profiler</strong> (lesson 44).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Where Time Goes</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">On a 60 Hz screen a frame has <strong>16.6 ms</strong> to be ready (about 8 ms at 120 Hz). Everything has to fit: input, composition, layout, drawing, and the GPU work.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> |&lt;------------------- 16.6 ms frame budget -------------------&gt;|
+ | input | composition | layout | draw (record) | GPU render ...  |
+          ^ your Kotlin  ^ your measure code
+   If the sum is bigger than the budget: a frame is dropped = jank.</code></pre></div></div>
+<p class="v2-p">Compose does as little work as possible by being <strong>smart about what it re-runs</strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Idea</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Recomposition</strong></td>
+<td>When state changes, re-run only the composables that <strong>read</strong> it</td>
+</tr>
+<tr>
+<td><strong>Skipping</strong></td>
+<td>If all parameters are unchanged, do not re-run the composable</td>
+</tr>
+<tr>
+<td><strong>Phase skipping</strong></td>
+<td>If state is read only in the layout or draw phase (inside a lambda), skip composition altogether</td>
+</tr>
+<tr>
+<td><strong>Lazy composition</strong></td>
+<td><code>LazyColumn</code> composes only what is visible</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Performance problems come from <strong>defeating</strong> these mechanisms: reading fast-changing state too high in the tree, passing parameters that change every time, doing heavy work during composition, or composing too much.</p>
+<h3 class="v2-h3">Stability, skipping and strong skipping</h3>
+<p class="v2-p">For skipping, Compose needs to compare the <strong>old and new parameters</strong>.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Parameter kind</th>
+<th>Comparison</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Stable</strong> type (primitives, <code>String</code>, functions with stable captures, classes marked <code>@Stable</code> or <code>@Immutable</code>, classes the compiler proves stable)</td>
+<td><code>equals()</code></td>
+</tr>
+<tr>
+<td><strong>Unstable</strong> type (classes with <code>var</code>s that are not Compose state, or types from other modules the compiler cannot see, or collections such as <code>List&lt;T&gt;</code> whose implementation could be mutable)</td>
+<td>Historically: <strong>never skipped</strong>. With <strong>strong skipping</strong>: compared by <strong>instance equality (<code>===</code>)</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Strong skipping mode</strong> is on <strong>by default</strong> from Kotlin 2.0.20 with the Compose compiler plugin (older Kotlin versions can enable it in the <code>composeCompiler { }</code> block). With strong skipping, composables with unstable parameters <strong>can be skipped</strong> too, as long as the same <em>instances</em> are passed, and lambdas are automatically <strong>remembered</strong> according to the same rules. This removes a large class of problems that older tutorials warn about ("make everything immutable or your app is slow"). However:</p>
+<ul class="v2-ul">
+<li><strong>Instance equality</strong> means that a <em>new</em> <code>List</code> object created on every recomposition (<code>items.filter { ... }</code> in the body) is a <strong>different</strong> instance even if its contents are the same. The child will recompose.</li>
+<li>A stable-annotated class (<code>@Immutable</code>, <code>@Stable</code>) is compared with <code>equals()</code> instead, which can <strong>skip more</strong>, but you are promising to follow the rules; a wrong promise gives stale UI.</li>
+</ul>
+<p class="v2-p">So the modern guidance is: <strong>do not annotate everything</strong>. First measure. If a composable with unstable parameters recomposes too often, fix the cause (create the object once, move the computation to the ViewModel, use <code>remember</code>), or use <code>@Immutable</code>/<code>@Stable</code> or the <strong>stability configuration file</strong> only where measurements show a benefit.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Where Time Goes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: Measure First, in a Release-Like Build</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Never judge Compose performance in a <strong>debug</strong> build, on an <strong>emulator</strong> with an overloaded laptop, or on <strong>your fastest phone</strong>.</p>
+<p class="v2-p">Why debug builds are slow:</p>
+<ul class="v2-ul">
+<li>No R8 optimisation; extra checks and debuggable code paths.</li>
+<li>Compose in debug mode has additional runtime checks and tooling.</li>
+<li>Code is <strong>interpreted or JIT-compiled</strong> at first use. Release builds use <strong>ahead-of-time (AOT) compilation</strong> guided by <strong>Baseline Profiles</strong> where available.</li>
+</ul>
+<p class="v2-p">Checklist for a fair measurement:</p>
+<ol class="v2-ol">
+<li>Build the <strong>release</strong> variant (lesson 49), minified. For local testing of a signed-less release you can use a <strong><code>benchmark</code></strong> or <strong><code>profileable</code></strong> build type that copies <code>release</code> but is signed with the debug key and marked profileable:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    buildTypes {
+        create("benchmark") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+            isDebuggable = false
+            proguardFiles("benchmark-rules.pro")   // keep rules if needed
+        }
+    }
+}</code></pre></div></div>
+<ol class="v2-ol" start="2">
+<li>Install on a <strong>real, mid-range or low-end device</strong> that represents your users.</li>
+<li>Let it <strong>cool down</strong>; repeat measurements several times; close other apps.</li>
+<li>Use the <strong>Profiler</strong> or <strong>Macrobenchmark</strong> (below) to record, not your eyes.</li>
+</ol>
+<h3 class="v2-h3">The performance loop</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>1. MEASURE      Record the problem (frame times, recomposition counts, start-up time).
+2. DIAGNOSE     Find the cause (Layout Inspector, system trace, compiler report).
+3. HYPOTHESISE  "Reading scroll offset in composition recomposes the whole header."
+4. CHANGE ONE   Make a single change.
+5. VERIFY       Measure again, with the same method. Keep it only if it helped.</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Measure First, in a Release-Like Build</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 2: Debugging Recomposition</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">The Layout Inspector</h3>
+<p class="v2-p">Run a <strong>debug</strong> build for <strong>diagnosis</strong> (counts are the same as in release; timings are not). Open <strong>Layout Inspector</strong> (lesson 44), enable <strong>Show recomposition counts</strong>, interact (type, scroll, tap), and look at the <strong>Recomposition</strong> columns: <strong>recomposition count</strong> and <strong>skip count</strong> per composable. What to look for:</p>
+<ul class="v2-ul">
+<li>A composable recomposing <strong>every frame</strong> while something else animates or scrolls.</li>
+<li>A child that recomposes whenever its parent does (skip count stays 0), even though its inputs did not "really" change.</li>
+<li>A huge subtree under a node with a high count.</li>
+</ul>
+<h3 class="v2-h3">Logging recompositions with a tiny helper</h3>
+<p class="v2-p">A simple counting helper for experiments:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">RecompositionCounter.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.perf
+
+import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
+
+class Ref(var value: Int)
+
+@Composable
+inline fun LogCompositions(tag: String, msg: String) {
+    val ref = remember { Ref(0) }
+    SideEffect { ref.value++ }
+    Log.d(tag, "Compositions: $msg ${ref.value}")
+}</code></pre></div></div>
+<p class="v2-p">Place <code>LogCompositions("Perf", "ItemRow")</code> at the top of a composable you suspect. The count tells you how many times it <strong>committed</strong> a recomposition. Remove it afterwards: logging inside composables costs time itself.</p>
+<h3 class="v2-h3">Common causes you will find</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>CAUSE                                         SYMPTOM IN INSPECTOR
+Reading fast state high in the tree           Large parent + all children recompose together
+New object every recomposition (list, lambda) Child never skips
+Unkeyed lazy items after an insert            Many items recompose
+State read in composition for an animation    Count increases ~60 times per second
+Expensive calculation in the body             Frame time spikes; count may be modest</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Debugging Recomposition</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 3: Deferring State Reads</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Compose has three phases. <strong>Where you read state decides which phases re-run.</strong> Reading state in the <strong>composition</strong> phase (directly in the composable body) re-runs composition, layout and draw. Reading it in a <strong>lambda that runs in layout or draw</strong> re-runs only that phase.</p>
+<h3 class="v2-h3">The problem: a parallax header</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// BAD: scroll offset read in composition, so the whole screen recomposes on every pixel scrolled
+@Composable
+fun Header(scrollState: ScrollState) {
+    val offset = scrollState.value / 2          // read in composition
+    Image(
+        painter = painterResource(R.drawable.banner),
+        contentDescription = null,
+        modifier = Modifier.offset(y = offset.dp)
+    )
+}</code></pre></div></div>
+<h3 class="v2-h3">The fix: read inside a lambda modifier</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
+
+@Composable
+fun Header(scrollState: ScrollState) {
+    Image(
+        painter = painterResource(R.drawable.banner),
+        contentDescription = null,
+        modifier = Modifier.offset { IntOffset(0, scrollState.value / 2) }   // read in the layout phase
+    )
+}</code></pre></div></div>
+<p class="v2-p"><code>Modifier.offset { ... }</code> (lambda version) reads <code>scrollState.value</code> during <strong>layout</strong>, so scrolling re-runs layout only, with <strong>no recomposition</strong>. For drawing-only effects such as fade, scale or rotation, use <code>Modifier.graphicsLayer { alpha = ...; translationY = ... }</code> or <code>drawBehind { ... }</code>, which read in the <strong>draw</strong> phase. Equivalent pairs:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Slow (composition read)</th>
+<th>Faster (deferred read)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Modifier.offset(x = state.dp)</code></td>
+<td><code>Modifier.offset { IntOffset(...) }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.alpha(a)</code></td>
+<td><code>Modifier.graphicsLayer { alpha = a }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.background(color)</code> where <code>color</code> animates</td>
+<td><code>Modifier.drawBehind { drawRect(color) }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.rotate(deg)</code></td>
+<td><code>Modifier.graphicsLayer { rotationZ = deg }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.size(animatedDp)</code></td>
+<td>lambda <code>layout</code> modifier, or avoid animating size in a hot path</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The lambda parameter pattern also applies to your own APIs: accept <code>() -&gt; Float</code> instead of <code>Float</code> when the value changes quickly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun ProgressBar(progress: () -&gt; Float, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(8.dp)
+            .drawBehind {
+                drawRect(Color.LightGray)
+                drawRect(Color.Green, size = size.copy(width = size.width * progress()))
+            }
+    )
+}
+// caller: ProgressBar(progress = { animatedProgress })   // state read in the draw phase only</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Deferring State Reads</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 4: The Gotchas</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Gotcha 1: Expensive work in the body</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentList(students: List&lt;Student&gt;, query: String) {
+    // BAD: sorting and filtering runs on EVERY recomposition (every keystroke elsewhere, every animation frame)
+    val shown = students.filter { it.name.contains(query, ignoreCase = true) }.sortedBy { it.name }
+    LazyColumn { items(shown) { StudentRow(it) } }
+}</code></pre></div></div>
+<p class="v2-p">Fix with <code>remember</code> keyed on the inputs:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentList(students: List&lt;Student&gt;, query: String) {
+    val shown = remember(students, query) {
+        students.filter { it.name.contains(query, ignoreCase = true) }.sortedBy { it.name }
+    }
+    LazyColumn { items(shown, key = { it.id }) { StudentRow(it) } }
+}</code></pre></div></div>
+<p class="v2-p">Even better, for heavy work or data that is more than UI shaping, do it in the <strong>ViewModel</strong> (on a background dispatcher) and expose the result as state (lesson 61), so that composition only reads the finished list.</p>
+<h3 class="v2-h3">Gotcha 2: Lazy lists without keys</h3>
+<p class="v2-p">Without <code>key</code>, an insertion at the top shifts every item's identity, so many items recompose and lose state (lesson 39). Always pass <code>key = { it.id }</code>, and <code>contentType</code> for mixed lists.</p>
+<h3 class="v2-h3">Gotcha 3: Backwards writes</h3>
+<p class="v2-p">Writing to state <strong>after</strong> it has been read in the same composition makes Compose recompose again, possibly forever:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun BackwardsWrite() {
+    var count by remember { mutableIntStateOf(0) }
+    Text("Count: $count")      // reads count
+    count++                    // WRITES count after reading it: recomposition loop!
+}</code></pre></div></div>
+<p class="v2-p">State must change in <strong>events</strong> (clicks, callbacks, effects), never in composition. The same hazard appears when a child writes to state that a parent already read.</p>
+<h3 class="v2-h3">Gotcha 4: Reading scroll position in composition</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// BAD: recomposes on every scroll position change
+val showButton = listState.firstVisibleItemIndex &gt; 0
+
+// GOOD: only recomposes when the boolean flips
+val showButton by remember { derivedStateOf { listState.firstVisibleItemIndex &gt; 0 } }</code></pre></div></div>
+<h3 class="v2-h3">Gotcha 5: Creating objects and lambdas that change every time</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Screen(vm: VM) {
+    // BAD with unstable params: a new Modifier-like object or list each recomposition
+    Child(items = vm.items.map { it.copy(selected = it.id == vm.selectedId) })
+}</code></pre></div></div>
+<p class="v2-p">Compute derived lists in the <strong>ViewModel</strong> (or with <code>remember(vm.items, vm.selectedId)</code>), so the instance only changes when the data does. With strong skipping, lambdas are remembered automatically; in older projects, wrap callbacks that capture unstable values with <code>remember</code> (or pass stable method references such as <code>vm::onClick</code>).</p>
+<h3 class="v2-h3">Gotcha 6: Overdraw and too-deep trees</h3>
+<p class="v2-p">Backgrounds on top of backgrounds make the GPU paint pixels many times. Avoid stacking opaque backgrounds, and prefer one <code>Surface</code> per region. Flatten unnecessary <code>Box</code>/<code>Column</code> nesting; use <code>ConstraintLayout</code> or a custom layout (lesson 56) only when it simplifies measurement. Compose handles deep nesting better than Views, but it is not free.</p>
+<h3 class="v2-h3">Gotcha 7: Images</h3>
+<p class="v2-p">Load images sized to the display (Coil does this by default for <code>AsyncImage</code>; lesson 31). Decoding a 4000-pixel photo to show a 100-dp thumbnail wastes memory and time.</p>
+<h3 class="v2-h3">Gotcha 8: Using <code>Modifier</code> factories badly</h3>
+<p class="v2-p"><code>Modifier.composed { }</code> allocates per use and is discouraged now; prefer <code>Modifier.Node</code> APIs or plain modifier chains. Create modifier chains in a <code>remember</code> only when they are large and constant.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: The Gotchas</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 5: Stability in Practice and the Compiler Reports</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">What the compiler thinks</h3>
+<p class="v2-p">The Compose compiler can write <strong>reports</strong> that say, for every composable, whether it is <strong>skippable</strong> and for every class, whether it is <strong>stable</strong>. Enable in the app module:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+}</code></pre></div></div>
+<p class="v2-p">Build the <strong>release</strong> variant (<code>./gradlew assembleRelease</code>) and open the files in <code>app/build/compose_compiler/</code>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>File</th>
+<th>What it shows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*-classes.txt</code></td>
+<td>Each class as <code>stable</code>, <code>unstable</code>, <code>runtime</code> with the reason per field</td>
+</tr>
+<tr>
+<td><code>*-composables.txt</code></td>
+<td>Each composable as <code>restartable</code>, <code>skippable</code>, and each parameter <code>stable</code>/<code>unstable</code></td>
+</tr>
+<tr>
+<td><code>*-module.json</code></td>
+<td>Counts: skippable and restartable totals</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A fragment of a classes report:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>unstable class Student {
+  stable val id: Int
+  stable val name: String
+  unstable val tags: List&lt;String&gt;
+  &lt;runtime stability&gt; = Unstable
+}</code></pre></div></div>
+<p class="v2-p"><code>List&lt;String&gt;</code> is considered <strong>unstable</strong> because <code>List</code> is an interface that could be backed by a mutable list. Remedies, in order of preference:</p>
+<ol class="v2-ol">
+<li><strong>Do nothing</strong> if strong skipping is on and the instance is stable across recompositions (the list comes from the ViewModel and does not change unless the data does).</li>
+<li>Use <strong><code>kotlinx.collections.immutable</code></strong> (<code>ImmutableList</code>, <code>persistentListOf()</code>), which the compiler treats as stable.</li>
+<li>Wrap in a small <code>@Immutable</code> data class: <code>@Immutable data class Tags(val values: List&lt;String&gt;)</code>.</li>
+<li>Add the type to a <strong>stability configuration file</strong> (a text file with class patterns, referenced from <code>composeCompiler { stabilityConfigurationFiles.add(...) }</code>; check the Compose compiler documentation for the exact option name in your version) when the class lives in a library you do not control.</li>
+</ol>
+<h3 class="v2-h3">@Stable and @Immutable</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Annotation</th>
+<th>Promise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Immutable</code></td>
+<td>All public properties never change after construction</td>
+</tr>
+<tr>
+<td><code>@Stable</code></td>
+<td>If a public property changes, Compose is notified (for example via <code>mutableStateOf</code>), and <code>equals</code> is consistent</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Break the promise and the UI shows stale data. Use these annotations <strong>only</strong> for measured wins.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Stability in Practice and the Compiler Reports</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 6: Macrobenchmark and Baseline Profiles</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Macrobenchmark</h3>
+<p class="v2-p"><strong>Macrobenchmark</strong> measures <strong>real, user-visible</strong> performance of a <strong>release-like</strong> app on a <strong>device</strong>: start-up time and frame timing during scrolling. It lives in its own Gradle module (<code>com.android.test</code> plugin; Android Studio has a template: <strong>File → New → Module → Benchmark → Macrobenchmark</strong>).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StartupBenchmark.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.benchmark
+
+import androidx.benchmark.macro.CompilationMode
+import androidx.benchmark.macro.FrameTimingMetric
+import androidx.benchmark.macro.StartupMode
+import androidx.benchmark.macro.StartupTimingMetric
+import androidx.benchmark.macro.junit4.MacrobenchmarkRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class StartupBenchmark {
+
+    @get:Rule
+    val rule = MacrobenchmarkRule()
+
+    @Test
+    fun startupNoCompilation() = rule.measureRepeated(
+        packageName = "com.example.perf",
+        metrics = listOf(StartupTimingMetric()),
+        compilationMode = CompilationMode.None(),
+        iterations = 10,
+        startupMode = StartupMode.COLD
+    ) {
+        pressHome()
+        startActivityAndWait()
+    }
+
+    @Test
+    fun scrollList() = rule.measureRepeated(
+        packageName = "com.example.perf",
+        metrics = listOf(FrameTimingMetric()),
+        compilationMode = CompilationMode.DEFAULT,
+        iterations = 5,
+        startupMode = StartupMode.WARM
+    ) {
+        startActivityAndWait()
+        val list = device.findObject(By.res("studentList"))
+        list.setGestureMargin(device.displayWidth / 5)
+        list.fling(Direction.DOWN)
+        device.waitForIdle()
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Expose <code>testTag("studentList")</code> as a resource id with <code>Modifier.semantics { testTagsAsResourceId = true }</code> on a root composable so UI Automator can find it, in the app code.) Run it on a device with the <code>benchmark</code> build type. The results show <strong>StartupTimingMetric</strong> (time to initial display) and <strong>FrameTimingMetric</strong> (frame duration and overrun percentiles such as P50, P90, P99). Compare <strong>before and after</strong> a change; <strong>P99</strong> frame times reveal the worst jank.</p>
+<h3 class="v2-h3">Baseline Profiles</h3>
+<p class="v2-p">When a user opens an app for the first time after install, much of your code and Compose's library code is <strong>interpreted or JIT-compiled</strong>, so the first launch and first scroll are slower. A <strong>Baseline Profile</strong> is a list of classes and methods that matter at start-up and in critical journeys; it is packaged in the app and used at install time so the system can <strong>pre-compile</strong> them (AOT). Google reports significant start-up and frame-time improvements, commonly in the tens of percent, and Compose libraries ship their own profiles, but <strong>your own screens</strong> benefit from yours.</p>
+<p class="v2-p">Steps (check the official guide for the current plugin version and DSL, which are updated often):</p>
+<ol class="v2-ol">
+<li>Add the <strong>Baseline Profile Gradle plugin</strong> (<code>androidx.baselineprofile</code>) and a <code>:baselineprofile</code> module (Android Studio's <em>Baseline Profile Generator</em> module template does this).</li>
+<li>Write a <strong>generator test</strong> that exercises your critical user journeys:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">BaselineProfileGenerator.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.baselineprofile
+
+import androidx.benchmark.macro.junit4.BaselineProfileRule
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class BaselineProfileGenerator {
+
+    @get:Rule
+    val rule = BaselineProfileRule()
+
+    @Test
+    fun generate() = rule.collect(packageName = "com.example.perf") {
+        pressHome()
+        startActivityAndWait()
+        device.findObject(By.res("studentList"))?.fling(Direction.DOWN)
+        device.waitForIdle()
+    }
+}</code></pre></div></div>
+<ol class="v2-ol" start="3">
+<li>Run the Gradle task the plugin creates (for example <code>./gradlew :app:generateBaselineProfile</code>). It writes <code>baseline-prof.txt</code> into your app's <code>src/main</code>.</li>
+<li>Build the release app: the profile is included in the AAB and applied by Google Play when installing (and by <code>ProfileInstaller</code> on other installs).</li>
+<li><strong>Measure again</strong> with Macrobenchmark using <code>CompilationMode.Partial(BaselineProfileMode.Require)</code> versus <code>CompilationMode.None()</code> and compare.</li>
+</ol>
+<p class="v2-p">Re-generate the profile when your key screens change.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Macrobenchmark and Baseline Profiles</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 7: A Worked Problem-Solving Session</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">The scenario (adapted from the codelab's idea): a <strong>Students</strong> screen with 500 rows is janky. Here is how to approach it.</p>
+<p class="v2-p"><strong>1. Measure.</strong> Macrobenchmark <code>FrameTimingMetric</code> on a release-like build on a low-end phone shows P90 frame duration 28 ms (budget 16 ms).</p>
+<p class="v2-p"><strong>2. Diagnose.</strong> Layout Inspector with recomposition counts: while scrolling, <code>StudentRow</code> composables each recompose 40 times, and the header recomposes on every scroll event.</p>
+<p class="v2-p"><strong>3. Find causes</strong> in the code:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentsScreen(students: List&lt;Student&gt;, listState: LazyListState) {
+    val showHeader = listState.firstVisibleItemIndex == 0       // cause A: read in composition
+    LazyColumn(state = listState) {                              // cause B: no keys
+        item { if (showHeader) Banner() }
+        items(students) { s -&gt;
+            val ranking = students.sortedByDescending { it.score }.indexOf(s) + 1   // cause C: O(n log n) per row!
+            StudentRow(s, ranking)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>4. Fix one by one, measuring:</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentsScreen(students: List&lt;Student&gt;, listState: LazyListState) {
+    val showHeader by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }   // A
+    val rankings = remember(students) {                                                      // C
+        students.sortedByDescending { it.score }.mapIndexed { i, s -&gt; s.id to i + 1 }.toMap()
+    }
+    LazyColumn(state = listState) {
+        item(key = "banner") { if (showHeader) Banner() }
+        items(students, key = { it.id }) { s -&gt;                                              // B
+            StudentRow(s, rankings.getValue(s.id))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>5. Verify.</strong> The counts drop to 0–1 recompositions per row; P90 frame time falls to 11 ms. Record it; if one change gave no improvement, <strong>revert it</strong>.</p>
+<p class="v2-p"><strong>6. Guard.</strong> Add a Macrobenchmark to CI so regressions are caught.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: A Worked Problem-Solving Session</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Defer the read</strong></p>
+<p class="v2-p">This floating button fades as the user scrolls, and the whole screen recomposes on every scroll event. Fix it so only the draw phase re-runs.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun FadingFab(scroll: ScrollState) {
+    val alpha = (1f - scroll.value / 400f).coerceIn(0f, 1f)
+    FloatingActionButton(onClick = {}, modifier = Modifier.alpha(alpha)) { Icon(Icons.Default.Add, "Add") }
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.ScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+
+@Composable
+fun FadingFab(scroll: ScrollState) {
+    FloatingActionButton(
+        onClick = {},
+        modifier = Modifier.graphicsLayer {
+            alpha = (1f - scroll.value / 400f).coerceIn(0f, 1f)   // read in the draw phase
+        }
+    ) { Icon(Icons.Default.Add, contentDescription = "Add") }
+}</code></pre></div></div>
+<p class="v2-p">Because <code>scroll.value</code> is now read inside the <code>graphicsLayer</code> lambda, scrolling invalidates only the layer, not the composition. Verify with recomposition counts: the FAB's count should stay constant while scrolling.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Backwards write</strong></p>
+<p class="v2-p">Explain why this composable loops, and fix it.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Total(items: List&lt;Item&gt;) {
+    var total by remember { mutableIntStateOf(0) }
+    total = items.sumOf { it.price }
+    Text("Total: $total")
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The write to <code>total</code> happens during composition, and <code>Text</code> reads <code>total</code> in the same composition. Writing state that has already been read, or that another part of the tree reads, invalidates those readers, so Compose schedules another recomposition. Depending on the values this wastes work or loops. State must not be updated in composition. Fix: <strong>derive</strong> the value instead of storing it:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Total(items: List&lt;Item&gt;) {
+    val total = remember(items) { items.sumOf { it.price } }
+    Text("Total: $total")
+}</code></pre></div></div>
+<p class="v2-p">A derived value needs no state at all.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Plan an experiment</strong></p>
+<p class="v2-p">A teammate says "our app is slow, let's add <code>@Immutable</code> to all our model classes." Write a measured plan for investigating instead, in five steps, naming one tool per step.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(1) Define the problem and <strong>measure</strong>: Macrobenchmark <code>FrameTimingMetric</code> and <code>StartupTimingMetric</code> on a release-like build on a low-end device. (2) <strong>Diagnose</strong> recomposition: Layout Inspector with recomposition counts during the slow interaction. (3) <strong>Check stability</strong> facts: Compose compiler reports for the slow composables to see whether parameters are unstable and whether strong skipping already skips them. (4) <strong>Change one thing</strong> (for example <code>derivedStateOf</code>, keys, deferred reads, or <code>@Immutable</code> on one class that the reports and counts implicate) and re-measure the same benchmark. (5) <strong>Keep or revert</strong> based on numbers, and add the benchmark to CI. Blanket annotations are risky: a wrong stability promise causes stale UI and may not fix anything.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Profiling a debug build.</strong> <em>Fix:</em> release-like builds on real devices.</p>
+<p class="v2-p"><strong>Mistake #2: Optimising without measuring.</strong> <em>Fix:</em> the measure-change-verify loop.</p>
+<p class="v2-p"><strong>Mistake #3: Reading fast state in composition.</strong> <em>Fix:</em> lambda modifiers, <code>graphicsLayer</code>, <code>derivedStateOf</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Heavy work in composable bodies.</strong> <em>Fix:</em> <code>remember(keys)</code> or the ViewModel.</p>
+<p class="v2-p"><strong>Mistake #5: Missing lazy keys.</strong> <em>Fix:</em> <code>key = { it.id }</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Writing state in composition.</strong> <em>Fix:</em> events and effects.</p>
+<p class="v2-p"><strong>Mistake #7: Annotating everything <code>@Immutable</code>.</strong> <em>Fix:</em> only where measured, and keep the promise.</p>
+<p class="v2-p"><strong>Mistake #8: New list instances every recomposition.</strong> <em>Fix:</em> build once in the ViewModel or <code>remember</code>.</p>
+<p class="v2-p"><strong>Mistake #9: Skipping Baseline Profiles for production apps.</strong> <em>Fix:</em> generate and measure them.</p>
+<p class="v2-p"><strong>Mistake #10: Leaving log helpers in release.</strong> <em>Fix:</em> remove diagnostics before shipping.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does strong skipping change?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Composables with unstable parameters can be skipped when the same instances are passed (compared with <code>===</code>), and lambdas are automatically remembered; it is on by default from Kotlin 2.0.20 with the Compose compiler plugin.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why is <code>Modifier.offset { ... }</code> better than <code>Modifier.offset(x = ...)</code> for a fast-changing value?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The lambda form reads the state in the layout phase, so changes re-run layout only and avoid recomposition.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>derivedStateOf</code> give you with scroll position?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It converts a fast-changing value into a value that changes rarely (such as a boolean), so readers recompose only when the result changes.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What are Baseline Profiles for?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">They list critical classes and methods so the system can pre-compile them at install time, improving start-up and early frame times.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What are the steps of the performance loop?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Measure, diagnose, hypothesise, change one thing, and verify by measuring again; revert changes that do not help.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-4" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 4: Testing, performance and accessibility</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-performance" rel="noopener noreferrer">Jetpack Compose performance codelab</a></li>
+<li><a href="https://developer.android.com/develop/ui/compose/performance/stability/strongskipping" rel="noopener noreferrer">Strong skipping mode</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Performance Clinic</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Take a deliberately slow screen and make it fast, <strong>proving every improvement with numbers</strong>.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a <code>Students</code> screen with 1,000 rows containing at least the five gotchas from Build 4 (no keys, sorting in the row, scroll read in composition, new list instances, a backwards-style recomposition trigger).</li>
+<li>Create a <code>benchmark</code> build type and a Macrobenchmark module with a scroll test.</li>
+<li>Record the <strong>baseline numbers</strong> (P50/P90 frame duration) on a real device or the best emulator you have.</li>
+<li>Use the Layout Inspector recomposition counts and the compiler reports to list your findings.</li>
+<li>Fix <strong>one gotcha at a time</strong>, re-measuring after each; keep a table of results.</li>
+<li>Generate a Baseline Profile and compare start-up with and without it.</li>
+<li>Write a short <strong>report</strong>: what helped, what did not, what you reverted.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add the benchmark to a GitHub Actions workflow that fails the build if P90 frame time regresses by more than 10%.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The fixed screen:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StudentsScreen.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.perf
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.platform.testTag
+
+data class Student(val id: Int, val name: String, val score: Int)
+
+@Composable
+fun StudentsScreen(students: List&lt;Student&gt;, query: String) {
+    val listState = rememberLazyListState()
+    val showBanner by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
+
+    val shown = remember(students, query) {
+        students.filter { it.name.contains(query, ignoreCase = true) }
+    }
+    val rankings = remember(students) {
+        students.sortedByDescending { it.score }
+            .mapIndexed { index, s -&gt; s.id to index + 1 }
+            .toMap()
+    }
+
+    Column(Modifier.semantics { testTagsAsResourceId = true }) {
+        LazyColumn(Modifier.testTag("studentList"), state = listState) {
+            item(key = "banner", contentType = "banner") {
+                if (showBanner) Text("Top of the class list")
+            }
+            items(shown, key = { it.id }, contentType = { "student" }) { s -&gt;
+                Text("${rankings.getValue(s.id)}. ${s.name} - ${s.score}")
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Results table (example numbers; yours will differ):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Change                              P50 ms   P90 ms   Row recompositions/scroll
+Baseline (all five gotchas)           16.1     31.4        ~40
++ keys and contentType                14.8     27.9        ~25
++ remember(rankings) (no per-row sort) 9.7     15.2        ~25
++ derivedStateOf for the banner        9.5     14.1         ~2
++ stable list instance from VM         9.4     13.8         ~1
++ Baseline Profile (start-up only)     --      --        cold start 780 ms -&gt; 610 ms</code></pre></div></div>
+<p class="v2-p">Report points: the <strong>biggest win</strong> came from removing sorting inside each row (an accidental O(n² log n)); <code>derivedStateOf</code> and keys mostly cut recomposition counts, with modest frame-time gains; <strong>stability annotations were not needed</strong> under strong skipping once the list instance stopped changing; one attempted change (<code>@Immutable</code> on <code>Student</code>) showed no measurable difference and was reverted.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 57 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-57-compose-performance</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 57 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Where Time Goes</li><li>✅ Step-by-Step Build 1: Measure First, in a Release-Like Build</li><li>✅ Step-by-Step Build 2: Debugging Recomposition</li><li>✅ Step-by-Step Build 3: Deferring State Reads</li><li>✅ Step-by-Step Build 4: The Gotchas</li><li>✅ Step-by-Step Build 5: Stability in Practice and the Compiler Reports</li><li>✅ Step-by-Step Build 6: Macrobenchmark and Baseline Profiles</li><li>✅ Step-by-Step Build 7: A Worked Problem-Solving Session</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_56.html" class="ln-btn">&#8592; Lesson 56</a><a href="lesson_58.html" class="ln-btn primary">Lesson 58 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 57 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

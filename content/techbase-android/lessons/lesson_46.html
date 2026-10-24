@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 46: Android Accessibility Fundamentals — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l46">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 46 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 46</div>
+      <h1>Android Accessibility Fundamentals</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Accessibility Audit Report</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 46</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Learn who benefits from accessibility, how Android settings and services work, and the accessibility model behind TalkBack.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Accessibility Audit Report</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Think of the last time you used your phone in bright sunlight, with one hand, while carrying something. The screen was hard to read, buttons were hard to hit, and you wished the app were simpler. For a moment you experienced what many people live with every day. <strong>Accessibility</strong> means building apps that work for everyone: people who are blind or have low vision, who are deaf or hard of hearing, who have limited movement, who have dyslexia or other cognitive differences, who are older, who are tired, or who are simply in a noisy bus on Ojota road.</p>
+<p class="v2-p">This lesson is the first of three accessibility lessons (46–48). It covers the <em>Get started with Android Accessibility</em>, <em>Accessibility in Android</em>, <em>Accessibility Services and the Android Accessibility Model</em> and <em>Common accessibility problems</em> items of the <em>Make your Android app accessible</em> pathway (https://developer.android.com/courses/pathways/make-your-android-app-accessible). Lesson 47 shows how to fix problems in Compose, and lesson 48 shows how to test.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain <strong>who</strong> benefits from accessibility and why it is good design, good business and, in many places, a legal requirement.</li>
+<li>Use Android's accessibility settings yourself: <strong>TalkBack</strong>, <strong>Select to Speak</strong>, <strong>font and display size</strong>, <strong>colour correction and inversion</strong>, <strong>Switch Access</strong>, <strong>Voice Access</strong> and <strong>captions</strong>.</li>
+<li>Describe the <strong>Android accessibility model</strong>: how an app exposes information to an <strong>accessibility service</strong>.</li>
+<li>Recognise the <strong>six most common accessibility problems</strong> in apps.</li>
+<li>Do a first manual accessibility check of any app.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> accessibility is not a feature added at the end. It is a quality of the design, like performance. Each barrier you remove helps people with permanent disabilities, temporary injuries and situational limits.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Running an app on an emulator or device</strong> (lessons 4–5).</li>
+<li><strong>Composables, <code>Text</code>, <code>Image</code>, <code>Button</code></strong> (lessons 15–17).</li>
+<li><strong>Resources: string and dimension resources</strong> (lesson 15).</li>
+<li><strong>Material 3 colours</strong> (lesson 40).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: Who Needs Accessibility?</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A helpful way to remember: needs come in three flavours.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Kind</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Permanent</strong></td>
+<td>A person who is blind, deaf, has a limb difference, or has a permanent cognitive or learning disability</td>
+</tr>
+<tr>
+<td><strong>Temporary</strong></td>
+<td>A broken wrist, an eye infection, a concussion, recovering from surgery</td>
+</tr>
+<tr>
+<td><strong>Situational</strong></td>
+<td>Bright sunlight on the screen, a noisy market, holding a baby in one arm, a cracked screen</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Because the needs overlap, <strong>one fix helps many people</strong>. Captions help a deaf student, but also someone watching a video on a noisy bus with the sound off. Large touch targets help a person with tremors, and also anyone using the phone while walking.</p>
+<h3 class="v2-h3">The four groups of abilities</h3>
+<p class="v2-p">Accessibility guidance often groups needs by what a person finds hard:</p>
+<ol class="v2-ol">
+<li><strong>Vision</strong>: blindness, low vision, colour blindness. <em>Needs:</em> screen readers, magnification, high contrast, large text, no information by colour alone.</li>
+<li><strong>Hearing</strong>: deafness, hard of hearing. <em>Needs:</em> captions, visual alerts and vibration instead of sound-only signals.</li>
+<li><strong>Motor / dexterity</strong>: limited movement, tremor, one-handed use. <em>Needs:</em> large touch targets, switch devices, voice control, no gestures that need precision or two fingers only.</li>
+<li><strong>Cognitive / learning</strong>: dyslexia, ADHD, memory difficulties, low literacy, stress. <em>Needs:</em> plain language, consistent layout, enough time, undo, clear errors.</li>
+</ol>
+<h3 class="v2-h3">Why it matters</h3>
+<ul class="v2-ul">
+<li><strong>People.</strong> The World Health Organization estimates that a very large number of people, well over a billion, live with some form of disability. Many more are older adults whose vision and dexterity change.</li>
+<li><strong>Reach.</strong> An app that works with large text, a screen reader and switch access has more potential users.</li>
+<li><strong>Quality.</strong> Accessible apps are also easier to test automatically (lesson 45) because they have a clear semantic structure.</li>
+<li><strong>Law and policy.</strong> Many countries and organisations require accessible digital services, and public and education clients may ask for accessibility conformance. Check the rules that apply to your market; this is not legal advice.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Who Needs Accessibility?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step Build 1: Experience Accessibility Settings Yourself</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">You cannot build for an experience you have never had. Spend 30 minutes with your emulator or phone and try each of these. Menu names differ by Android version and phone brand: search <strong>Settings</strong> for the feature name if you cannot find it.</p>
+<h3 class="v2-h3">1. Font size and display size</h3>
+<p class="v2-p"><strong>Settings → Accessibility → Display size and text</strong> (or <strong>Display → Font size and style</strong>):</p>
+<ul class="v2-ul">
+<li><strong>Font size</strong> scales text (it changes the <code>sp</code> scale).</li>
+<li><strong>Display size</strong> scales <em>everything</em> (it changes the density, so <code>dp</code> values get bigger).</li>
+<li><strong>Bold text</strong>, <strong>high contrast text</strong> and <strong>remove animations</strong> are here as well.</li>
+</ul>
+<p class="v2-p">Open <strong>your own app</strong> at the largest font and display size. Does text overlap? Do buttons get cut off? Is anything unreadable? Many apps break here, because the developer used fixed heights.</p>
+<h3 class="v2-h3">2. TalkBack (the screen reader)</h3>
+<p class="v2-p"><strong>TalkBack</strong> is Android's screen reader. It speaks what is on the screen and changes how you touch the phone:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Gesture with TalkBack on</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Touch/explore</td>
+<td>Reads the item under your finger</td>
+</tr>
+<tr>
+<td>Swipe right / left</td>
+<td>Move to next / previous item</td>
+</tr>
+<tr>
+<td>Double-tap</td>
+<td>Activate the focused item (a click)</td>
+</tr>
+<tr>
+<td>Two-finger swipe</td>
+<td>Scroll</td>
+</tr>
+<tr>
+<td>Swipe up then right etc.</td>
+<td>Gestures for menus and navigation (see the TalkBack tutorial in Settings)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Turn it on:</strong> Settings → Accessibility → TalkBack. The first time, Android offers a short <strong>tutorial</strong>: do it. Tip: set a <strong>shortcut</strong> (volume keys held for three seconds, or the accessibility button) so that you can switch it off easily. If you lose control of the phone, hold both volume keys for three seconds to turn TalkBack off.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Exercise for 10 minutes:</strong> turn the screen brightness down or close your eyes, and try to open the Settings app, find Wi-Fi and go back using only TalkBack. Then try your own app.</p>
+</blockquote>
+<p class="v2-p">On an emulator, TalkBack may not be installed by default; use an emulator image that includes Google Play services and install <strong>Android Accessibility Suite</strong> from the Play Store (that package contains TalkBack, Select to Speak and Switch Access), or test on a real phone.</p>
+<h3 class="v2-h3">3. Select to Speak</h3>
+<p class="v2-p">A lighter tool: tap an on-screen button, then tap or drag an area, and Android <strong>reads it aloud</strong>, without changing the touch gestures. It helps people with low vision or dyslexia.</p>
+<h3 class="v2-h3">4. Colour correction, inversion and contrast</h3>
+<p class="v2-p"><strong>Settings → Accessibility → Colour and motion</strong> (names vary): <strong>Colour correction</strong> (for different kinds of colour blindness), <strong>Colour inversion</strong> and <strong>Extra dim</strong>. Turn on <strong>grayscale</strong> (in some versions under Digital Wellbeing, or via Developer options "Simulate colour space") and look at your app: can you still tell the error state from the success state when there is no red and green?</p>
+<h3 class="v2-h3">5. Switch Access and Voice Access</h3>
+<ul class="v2-ul">
+<li><strong>Switch Access</strong> lets people operate the phone with one or two physical switches (a button, a keyboard key, or a head movement) instead of touch. The system <strong>scans</strong> from item to item and highlights each; the person presses the switch to select. Apps need <strong>logical focus order</strong> and every action reachable.</li>
+<li><strong>Voice Access</strong> lets people operate the phone by speaking: "Tap Save", "Scroll down". It uses the <strong>visible text and content descriptions</strong> of items, and can show numbers over clickable items.</li>
+</ul>
+<h3 class="v2-h3">6. Captions and hearing</h3>
+<p class="v2-p"><strong>Live Caption</strong> can caption audio on the device (available on some devices, may need to download language files). <strong>Sound Notifications</strong> can show alerts for sounds such as a doorbell or baby crying. For your app, any information given by sound (a beep for success) needs a visual or haptic equivalent.</p>
+<h3 class="v2-h3">7. Timing and animation</h3>
+<p class="v2-p"><strong>Remove animations</strong> reduces motion for people with vestibular disorders. <strong>Accessibility timeout</strong> ("Time to take action") lets people keep a transient message, such as a Snackbar with an action, on screen longer.</p>
+<p class="v2-p">Write down at least <strong>three things you noticed</strong> in each of your favourite apps. This list is your first accessibility audit.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Experience Accessibility Settings Yourself</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step Build 2: The Android Accessibility Model</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">How does TalkBack know what is on the screen of an app it did not write? Through the <strong>accessibility framework</strong>, a conversation between three parties.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> +--------------------+     events + node info     +-----------------------+
+ |  Your app (UI)     | -------------------------&gt; |  AccessibilityService |
+ |  Views / Compose   |                            |  (TalkBack, Switch    |
+ |  builds a tree of  | &lt;------------------------- |   Access, Voice       |
+ |  "accessibility    |   actions (click, scroll,  |   Access, ...)        |
+ |   nodes"           |   set text, focus)         +-----------+-----------+
+ +--------------------+                                        |
+                                                               v
+                                                 speech / braille / highlight / commands</code></pre></div></div>
+<h3 class="v2-h3">Accessibility nodes</h3>
+<p class="v2-p">For every thing on the screen your app can describe a <strong>node</strong> (an <code>AccessibilityNodeInfo</code> in the Views world; a <strong>semantics node</strong> in Compose, lesson 45). A node carries properties:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Property</th>
+<th>Question it answers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Text / label</strong></td>
+<td>What is it called?</td>
+</tr>
+<tr>
+<td><strong>Content description</strong></td>
+<td>What does it mean (for an image or icon)?</td>
+</tr>
+<tr>
+<td><strong>Role / class name</strong></td>
+<td>What kind of control is it (button, checkbox, tab, image)?</td>
+</tr>
+<tr>
+<td><strong>State</strong></td>
+<td>Checked? Selected? Disabled? Expanded?</td>
+</tr>
+<tr>
+<td><strong>Actions</strong></td>
+<td>What can the user do (click, long click, scroll, expand, dismiss)?</td>
+</tr>
+<tr>
+<td><strong>Bounds</strong></td>
+<td>Where is it? How big?</td>
+</tr>
+<tr>
+<td><strong>Hierarchy and order</strong></td>
+<td>Parent, children, reading order</td>
+</tr>
+<tr>
+<td><strong>Live region</strong></td>
+<td>Should changes be announced automatically?</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Accessibility events</h3>
+<p class="v2-p">When something changes, the framework sends <strong>events</strong> to services: a view got focus, a window changed, text changed, a notification appeared. The service decides what to say.</p>
+<h3 class="v2-h3">Accessibility services</h3>
+<p class="v2-p">An <strong>AccessibilityService</strong> is a special app component with powerful permissions, explicitly turned on by the user in Settings. Examples: TalkBack (speech and haptics), Switch Access (scanning), Voice Access, Select to Speak, braille displays (BrailleBack) and third-party tools. Because they can read the screen and perform actions, <strong>the user must enable them manually</strong>, and Google Play has strict rules about apps that use the accessibility API for anything other than helping people with disabilities.</p>
+<p class="v2-p">So your job as an app developer is <strong>not</strong> to talk to TalkBack. Your job is to <strong>describe your UI honestly</strong> (labels, roles, state, order, actions) so that <em>any</em> service can do its job. This is why standard components are so valuable: Material 3 buttons, checkboxes, text fields and switches already describe themselves correctly.</p>
+<h3 class="v2-h3">An analogy</h3>
+<p class="v2-p">Imagine you give a friend who cannot see a <strong>menu board</strong> in a restaurant and ask them to order. A good board has clear item names and prices in a logical order. If one item is just a picture of food with no words, your friend cannot order it, however nice the picture. The semantics tree is the <strong>spoken menu</strong> of your app.</p>
+<h3 class="v2-h3">Focus and reading order</h3>
+<p class="v2-p">Screen readers move <strong>focus</strong> through the tree, normally in <strong>reading order</strong> (top to bottom, start to end of text direction). Wrong order is a classic problem: an overlay is read after the content it covers, a floating button is read first. In Compose you can adjust order with traversal semantics (lesson 47). In Views you use <code>accessibilityTraversalBefore/After</code> and <code>nextFocus*</code> attributes.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Android Accessibility Model</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step Build 3: The Common Accessibility Problems</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Google's accessibility tooling and codelab highlight a few problems that account for most real failures. Memorise this list; lesson 47 fixes each in Compose, and lesson 48 tests them.</p>
+<h3 class="v2-h3">Problem 1: Missing or poor labels</h3>
+<p class="v2-p">An icon-only button such as a trash can has no text. A screen reader says <strong>"Button"</strong> or <strong>"Unlabelled button"</strong>, and a user cannot know what it does. <strong>Fix:</strong> give every meaningful image and icon a <strong>content description</strong> that says the <em>purpose</em> ("Delete message"), not the picture ("trash can"). For purely decorative images, mark them as decorative (no description) so they are skipped.</p>
+<h3 class="v2-h3">Problem 2: Touch targets that are too small</h3>
+<p class="v2-p">Fingers are bigger than icons. The Android guidance is that interactive elements should be at least <strong>48 × 48 dp</strong>, with some space between neighbours. A 24 dp icon is fine visually as long as its <strong>touch area</strong> is 48 dp. Small targets hurt everyone, and are a barrier for people with tremor or limited dexterity.</p>
+<h3 class="v2-h3">Problem 3: Low colour contrast</h3>
+<p class="v2-p">Text that is light grey on white is hard to read for anyone, and impossible for many people with low vision. <strong>WCAG</strong> (the Web Content Accessibility Guidelines, widely used as the basis for mobile guidance too) asks for a contrast ratio of at least <strong>4.5 : 1</strong> for normal text and <strong>3 : 1</strong> for large text and for important icons and UI component boundaries. We measure ratios in lesson 47.</p>
+<h3 class="v2-h3">Problem 4: Meaning conveyed by colour alone</h3>
+<p class="v2-p">A red border for an error and a green border for success mean nothing to a person with red-green colour blindness (roughly 1 in 12 men) or in grayscale. <strong>Fix:</strong> add an <strong>icon, text or pattern</strong> as well ("Error: enter a valid email" with an icon).</p>
+<h3 class="v2-h3">Problem 5: Text that does not scale, or breaks at large sizes</h3>
+<p class="v2-p">Text in <code>dp</code>, fixed-height containers, or text that is truncated at 200% font scale. <strong>Fix:</strong> use <code>sp</code> for text, let containers grow (<code>wrapContentHeight</code>, <code>heightIn(min = ...)</code>), and test at the largest font size.</p>
+<h3 class="v2-h3">Problem 6: Custom controls with no semantics</h3>
+<p class="v2-p">A <code>Box</code> with <code>clickable</code> works for a sighted finger but may not announce a role or state. A custom checkbox made of an icon and text must tell a service that it is a <strong>checkbox</strong> and whether it is <strong>checked</strong>. <strong>Fix:</strong> use standard components, or add semantics (<code>Role</code>, <code>toggleable</code>, <code>selectable</code>).</p>
+<h3 class="v2-h3">More problems to watch for</h3>
+<ul class="v2-ul">
+<li><strong>Focus traps and wrong focus order</strong>, and focus that disappears after a dialog closes.</li>
+<li><strong>Gestures with no alternative:</strong> swipe-to-delete with no button. Provide a visible, simple alternative (custom accessibility actions in lesson 47).</li>
+<li><strong>Time limits</strong> with no way to extend.</li>
+<li><strong>Unannounced changes:</strong> a toast or error that appears but is never spoken (use live regions).</li>
+<li><strong>Flashing content</strong> (more than three flashes per second) can trigger seizures.</li>
+<li><strong>Sound-only information</strong> and <strong>unlabelled form fields</strong>.</li>
+<li><strong>Orientation locked</strong> with no good reason.</li>
+<li><strong>Complex jargon</strong> and unclear error messages.</li>
+</ul>
+<h3 class="v2-h3">Severity: who is blocked?</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Severity</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Blocker</strong></td>
+<td>A screen reader user cannot find the Pay button</td>
+</tr>
+<tr>
+<td><strong>Major</strong></td>
+<td>Text unreadable at a large font size</td>
+</tr>
+<tr>
+<td><strong>Minor</strong></td>
+<td>Slightly low contrast on a decorative label</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Fix blockers first.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Common Accessibility Problems</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step Build 4: A First Manual Audit with a Sample App</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Create a Compose project <code>AccessDemo</code>. The following screen has <strong>six deliberate problems</strong>. Find them before reading the answer.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.accessdemo
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { MaterialTheme { BadScreen() } }
+    }
+}
+
+@Composable
+fun BadScreen() {
+    Column(Modifier.padding(16.dp)) {
+        Text(
+            "Order summary",
+            color = Color(0xFFBBBBBB),               // problem A
+            modifier = Modifier.background(Color.White)
+        )
+        Row {
+            Icon(
+                Icons.Filled.Delete,
+                contentDescription = null,           // problem B
+                modifier = Modifier
+                    .size(24.dp)                      // problem C
+                    .clickable { /* delete */ }
+            )
+            Text("Zobo x 2", fontSize = 14.sp)
+        }
+        Box(
+            Modifier
+                .height(30.dp)                        // problem D
+                .background(Color.Red)                // problem E
+        ) {
+            Text("Payment failed", color = Color.White)
+        }
+        Box(Modifier.clickable { /* pay */ }) {       // problem F
+            Text("Pay now")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Answers.</strong></p>
+<ul class="v2-ul">
+<li><strong>A:</strong> Light grey on white has a contrast ratio far below 4.5:1.</li>
+<li><strong>B:</strong> The delete icon is clickable but has no description: TalkBack cannot say what it does.</li>
+<li><strong>C:</strong> A 24 dp clickable area is below the 48 dp minimum touch target.</li>
+<li><strong>D:</strong> A fixed 30 dp height will clip the text at large font sizes.</li>
+<li><strong>E:</strong> The error is communicated by a red background only; add an icon and text role.</li>
+<li><strong>F:</strong> A clickable <code>Box</code> has no <strong>role</strong>: TalkBack announces "Pay now" but not that it is a button, so a user might not know to double-tap it. Use a <code>Button</code>, or add <code>Role.Button</code> through <code>Modifier.clickable(role = Role.Button, onClick = ...)</code>.</li>
+</ul>
+<p class="v2-p">Run it, turn on TalkBack and swipe through the screen to hear problems B and F, then set the font to the largest size to see D. In lesson 47 you fix all six.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: A First Manual Audit with a Sample App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build 5: Quick Accessibility Tools Overview</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">You do not need to wait for lesson 48 to start checking. Three quick tools:</p>
+<ol class="v2-ol">
+<li><strong>Accessibility Scanner</strong> (a free Google app on the Play Store). Turn it on, open your app, tap its floating button, and it lists suggestions such as touch target size, contrast and missing labels, with a screenshot of the problem area.</li>
+<li><strong>Layout Inspector → semantics</strong> (lesson 44) to look at labels and roles of Compose nodes.</li>
+<li><strong>Android Studio lint and the Compose accessibility checks</strong>. Lint flags missing content descriptions in Views; Compose UI tests can enable accessibility checks automatically (lesson 48).</li>
+</ol><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Quick Accessibility Tools Overview</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Step-by-Step Build 6: A First Look at Accessibility in Code</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Lesson 47 goes deep; here are the small building blocks you need to read other people's code today.</p>
+<h3 class="v2-h3">In Compose: content descriptions and decorative images</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.Image
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
+
+@Composable
+fun SearchIcon() {
+    // Meaningful: describe the purpose
+    Icon(Icons.Filled.Search, contentDescription = "Search")
+}
+
+@Composable
+fun Divider(dividerRes: Int) {
+    // Decorative: null means "skip this"
+    Image(painterResource(dividerRes), contentDescription = null)
+}</code></pre></div></div>
+<p class="v2-p"><code>contentDescription = null</code> is a <em>decision</em>, not an omission: it says "this image adds no information". Compose makes you write the parameter explicitly so that you cannot forget.</p>
+<h3 class="v2-h3">In Compose: a role and a state on a custom control</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+
+@Composable
+fun NotifyRow(checked: Boolean, onChange: (Boolean) -&gt; Unit) {
+    Row(
+        Modifier.toggleable(
+            value = checked,
+            role = Role.Switch,
+            onValueChange = onChange
+        )
+    ) {
+        Text("Send me reminders")
+    }
+}</code></pre></div></div>
+<p class="v2-p">TalkBack now says something like "Send me reminders, switch, on" and double-tap toggles it, because the row declares a toggle role and state.</p>
+<h3 class="v2-h3">In Views (XML): the same ideas</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">activity_main.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;ImageButton
+    android:id="@+id/deleteButton"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:src="@drawable/ic_delete"
+    android:contentDescription="@string/delete_item" /&gt;
+
+&lt;ImageView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:src="@drawable/divider"
+    android:importantForAccessibility="no" /&gt;
+
+&lt;TextView
+    android:id="@+id/nameLabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:labelFor="@id/nameInput"
+    android:text="@string/student_name" /&gt;</code></pre></div></div>
+<p class="v2-p"><code>importantForAccessibility="no"</code> is the Views version of a decorative image. <code>labelFor</code> links a label to the field it describes, so a screen reader reads the label when the field gets focus. A description must be a <strong>string resource</strong> so that it can be translated.</p>
+<h3 class="v2-h3">Asking whether a screen reader is on</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.content.Context
+import android.view.accessibility.AccessibilityManager
+
+fun isTalkBackLikelyOn(context: Context): Boolean {
+    val manager = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+    return manager.isEnabled &amp;&amp; manager.isTouchExplorationEnabled
+}</code></pre></div></div>
+<p class="v2-p"><code>isTouchExplorationEnabled</code> is true when a screen reader that uses explore-by-touch is running. Use this sparingly: the aim is to build one UI that works for everyone, not a separate "accessible mode". It is acceptable to adjust <em>timing</em> (for example keeping a message longer).</p>
+<h3 class="v2-h3">Reading the font scale</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+
+@Composable
+fun isLargeText(): Boolean {
+    val density = LocalDensity.current
+    return density.fontScale &gt;= 1.3f
+}</code></pre></div></div>
+<p class="v2-p">If you detect a very large font scale, you can switch a three-column row to a single column. Compose layouts that use <code>weight</code>, wrapping and <code>heightIn</code> usually adapt without any such code.</p>
+<h3 class="v2-h3">Preview at several font sizes</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+
+@Preview(name = "Normal", fontScale = 1.0f, showBackground = true)
+@Preview(name = "Large", fontScale = 1.5f, showBackground = true)
+@Preview(name = "Largest", fontScale = 2.0f, showBackground = true)
+@Composable
+private fun FontScalePreview() {
+    MaterialTheme { BadScreen() }
+}</code></pre></div></div>
+<p class="v2-p">Preview your screen at 2.0 and watch problem D (the fixed-height banner) clip its text. This is the cheapest accessibility test there is.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: A First Look at Accessibility in Code</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Settings audit</strong></p>
+<p class="v2-p">Turn on the largest <strong>Font size</strong> and <strong>Display size</strong>, then open three apps you use daily (WhatsApp, your bank, Chrome, or similar). For each, write one problem you found and which of the six common problems it belongs to.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">There is no single correct answer. Typical findings: text clipped in a fixed-height row (Problem 5), small icon buttons close together (Problem 2), unlabelled icon buttons in a toolbar when TalkBack is on (Problem 1), error shown only in red (Problem 4), light-grey hint text (Problem 3), or a custom control that does not announce its state (Problem 6). Write down the app, the screen and the exact symptom, because a clear report is half the fix.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Describe, don't decorate</strong></p>
+<p class="v2-p">Write a good content description for each: (a) a magnifying glass icon in a search bar; (b) a heart icon that toggles a favourite on and off; (c) a photo of a market stall in a news article; (d) a decorative divider line.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">(a) "Search" (the action, not "magnifying glass"). (b) "Add to favourites" when off, "Remove from favourites" when on, or a single description "Favourite" with the <em>state</em> (checked) exposed by the toggle semantics. (c) A short description of the relevant content, for example "Traders arranging tomatoes at Bodija market", if the image carries meaning; if the article text already says it, mark it decorative. (d) No description: mark it decorative so a screen reader skips it.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Explain the model</strong></p>
+<p class="v2-p">In five sentences, explain to a classmate how TalkBack knows what is on the screen of your app, and what you must do to make it work well.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Your app builds a tree of accessibility nodes (semantics in Compose) that describe each element's text, description, role, state, actions and position. The Android framework sends this information and events to accessibility services such as TalkBack, which the user has enabled. TalkBack turns the nodes into speech, haptics and focus movement, and sends actions (click, scroll) back to your app. You do not talk to TalkBack directly. You must describe your UI correctly with standard components, labels, roles, states and a logical order, so that any service can present it.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: "Our users are not disabled."</strong> <em>Reality:</em> situational and temporary needs affect everyone. <em>Fix:</em> design for the range of use.</p>
+<p class="v2-p"><strong>Mistake #2: Describing the picture, not the purpose.</strong> <em>Symptom:</em> "trash can" instead of "Delete". <em>Fix:</em> say what it does.</p>
+<p class="v2-p"><strong>Mistake #3: Repeating "image" or "button" in the description.</strong> <em>Symptom:</em> "Button, Save button". <em>Fix:</em> the role is announced for you.</p>
+<p class="v2-p"><strong>Mistake #4: Giving every decorative image a description.</strong> <em>Symptom:</em> noisy TalkBack. <em>Fix:</em> mark decorative images so they are skipped.</p>
+<p class="v2-p"><strong>Mistake #5: Fixed <code>dp</code> heights for text containers.</strong> <em>Fix:</em> allow growth.</p>
+<p class="v2-p"><strong>Mistake #6: Colour as the only signal.</strong> <em>Fix:</em> add icon or text.</p>
+<p class="v2-p"><strong>Mistake #7: Testing only with a mouse and good eyes.</strong> <em>Fix:</em> test with TalkBack, large text and grayscale.</p>
+<p class="v2-p"><strong>Mistake #8: Custom clickables with no role.</strong> <em>Fix:</em> use standard components.</p>
+<p class="v2-p"><strong>Mistake #9: Treating accessibility as a final polish.</strong> <em>Fix:</em> include it in each task's "definition of done".</p>
+<p class="v2-p"><strong>Mistake #10: Locking orientation and blocking zoom without reason.</strong> <em>Fix:</em> support rotation unless the task truly requires otherwise.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Give one example each of a permanent, temporary and situational need.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Permanent: blindness. Temporary: a broken arm. Situational: glare from bright sunlight, or holding a child in one hand.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the minimum recommended size for touch targets?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">48 × 48 dp, with some spacing between neighbouring targets.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What contrast ratio does WCAG ask for normal-sized text?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">At least 4.5 : 1 (3 : 1 for large text and important graphical elements).</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is an accessibility service, and who turns it on?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It is a privileged component, for example TalkBack or Switch Access, that reads accessibility nodes and events and can perform actions on the user's behalf. The user enables it explicitly in Settings.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What is the difference between Font size and Display size settings?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Font size scales text only (the <code>sp</code> scale). Display size scales the whole interface by changing the density, so <code>dp</code> values grow as well. Apps should be tested with both at their largest values.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/make-your-android-app-accessible" rel="noopener noreferrer">Make your Android app accessible pathway</a></li>
+<li><a href="https://developer.android.com/codelabs/starting-android-accessibility" rel="noopener noreferrer">Starting with Android accessibility codelab</a></li>
+<li><a href="https://developer.android.com/guide/topics/ui/accessibility/apps" rel="noopener noreferrer">Build more accessible apps (developer guide)</a></li>
+<li><a href="https://developer.android.com/guide/topics/ui/accessibility/testing" rel="noopener noreferrer">Testing your app's accessibility</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Accessibility Audit Report</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Produce a professional <strong>accessibility audit</strong> of the <code>BadScreen</code> app, as if reporting to a client.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Run the app with the largest font and display size, TalkBack on, and grayscale on. Take notes for each.</li>
+<li>A table of at least <strong>eight findings</strong>, each with: screen, problem (from the six categories), who is affected, severity (blocker / major / minor) and suggested fix.</li>
+<li>A one-paragraph <strong>summary</strong> and a <strong>priority order</strong> for fixing.</li>
+<li>Run <strong>Accessibility Scanner</strong> (if available) and note two findings it caught and one it missed.</li>
+<li>Write the "definition of done" checklist you would give your team (at least six lines).</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> repeat the audit for one app you use daily and share three suggestions with its feedback channel.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A sample audit (your wording will differ):</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>#</th>
+<th>Screen / element</th>
+<th>Problem</th>
+<th>Who is affected</th>
+<th>Severity</th>
+<th>Suggested fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>"Order summary" title</td>
+<td>Low contrast (light grey on white)</td>
+<td>Low vision, outdoors</td>
+<td>Major</td>
+<td>Use <code>onSurface</code> colour from the theme (contrast above 4.5:1)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Delete icon</td>
+<td>No content description</td>
+<td>Screen reader users</td>
+<td>Blocker</td>
+<td><code>contentDescription = "Delete Zobo"</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Delete icon</td>
+<td>Touch target 24 dp</td>
+<td>Motor, everyone</td>
+<td>Major</td>
+<td>48 dp touch area, use <code>IconButton</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>"Zobo x 2" text</td>
+<td>Text fixed 14 sp, no problem alone but sits in a Row with no wrap</td>
+<td>Large font users</td>
+<td>Minor</td>
+<td>Allow wrapping; test at 200%</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Error banner</td>
+<td>Fixed 30 dp height clips text at large size</td>
+<td>Low vision</td>
+<td>Major</td>
+<td><code>heightIn(min = 48.dp)</code> and padding</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Error banner</td>
+<td>Red background as the only signal</td>
+<td>Colour blind</td>
+<td>Major</td>
+<td>Add an error icon and clear text such as "Payment failed. Try again."</td>
+</tr>
+<tr>
+<td>7</td>
+<td>"Pay now"</td>
+<td>Clickable <code>Box</code> with no role</td>
+<td>Screen reader and switch users</td>
+<td>Blocker</td>
+<td>Use <code>Button</code>, or <code>Role.Button</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Whole screen</td>
+<td>Error not announced</td>
+<td>Screen reader users</td>
+<td>Major</td>
+<td>Make the banner a live region (lesson 47)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Summary:</strong> the screen has two blockers (unlabelled delete action and unrecognised Pay control), five major issues and one minor. Fix the two blockers first, then the touch targets and contrast, then the error banner.</p>
+<p class="v2-p"><strong>Priority order:</strong> 7, 2, 3, 1, 5, 6, 8, 4.</p>
+<p class="v2-p"><strong>Definition of done (team checklist):</strong></p>
+<ul class="v2-ul">
+<li>Every image and icon has a purposeful description or is marked decorative.</li>
+<li>Every interactive element is at least 48 dp and uses a standard component or correct role.</li>
+<li>Text and icons meet contrast ratios (4.5:1 and 3:1).</li>
+<li>No information is shown by colour alone.</li>
+<li>The screen works at the largest font and display size.</li>
+<li>A TalkBack pass has been done, with logical order and announced changes.</li>
+<li>Accessibility Scanner shows no unresolved issues for the screen.</li>
+</ul>
+<p class="v2-p"><strong>Scanner note:</strong> the scanner typically catches touch target size and contrast, and often flags the missing label, but it cannot tell whether a description is <em>meaningful</em> or whether the reading order is logical, so those need a human TalkBack pass.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 46 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-46-android-accessibility-fundamentals</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 46 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Who Needs Accessibility?</li><li>✅ Step-by-Step Build 1: Experience Accessibility Settings Yourself</li><li>✅ Step-by-Step Build 2: The Android Accessibility Model</li><li>✅ Step-by-Step Build 3: The Common Accessibility Problems</li><li>✅ Step-by-Step Build 4: A First Manual Audit with a Sample App</li><li>✅ Step-by-Step Build 5: Quick Accessibility Tools Overview</li><li>✅ Step-by-Step Build 6: A First Look at Accessibility in Code</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_45.html" class="ln-btn">&#8592; Lesson 45</a><a href="lesson_47.html" class="ln-btn primary">Lesson 47 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 46 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

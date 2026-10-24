@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 36: Background Work with WorkManager — Techbase Android</title>
+</head>
+<body data-total="15" data-key="techbase_android_l36">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 36 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 36</div>
+      <h1>Background Work with WorkManager</h1>
+      <div class="l-hero-sub">15 phases &nbsp;·&nbsp; Build: Water Me</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 36</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Schedule reliable background tasks with WorkManager: workers, constraints, chaining, inspection and testing in the Water Me app.</p></div><div class="wm"><span>📚 15 phases</span><span>🏗️ Water Me</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 15</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Some jobs should not happen while the user watches a screen: uploading a batch of photos once the phone is on Wi-Fi, syncing data every few hours, sending a daily "drink water" reminder, blurring an image and saving it. These jobs must still finish if the user switches apps, rotates the phone, or the phone restarts. A coroutine in <code>viewModelScope</code> is <strong>not</strong> the answer: it dies with the ViewModel.</p>
+<p class="v2-p"><strong>WorkManager</strong> is the Jetpack library for <strong>deferrable, guaranteed</strong> background work. You describe the work and the conditions (network, charging, battery), and the system runs it at a good time and makes sure it eventually runs, even after a reboot.</p>
+<p class="v2-p">In this lesson you will understand when to use WorkManager (and when not to), write workers, pass data in and out, add constraints, retry with backoff, chain and schedule work, observe progress, show notifications, inspect work in Android Studio and test workers. It covers Unit 7 of the official <strong>Android Basics with Compose</strong> course: <em>Introduction to WorkManager</em>, <em>Implementing WorkManager</em>, <em>Background work with WorkManager</em>, <em>Advanced WorkManager and Testing</em> and <em>Practice: Build Water Me app</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Decide between a coroutine, a foreground service, an alarm and WorkManager.</li>
+<li>Write a <code>CoroutineWorker</code>, build a <code>OneTimeWorkRequest</code> and enqueue it.</li>
+<li>Pass input data and return output data.</li>
+<li>Add <code>Constraints</code> and a backoff policy.</li>
+<li>Chain workers, run <strong>unique</strong> work and schedule <strong>periodic</strong> work (15-minute minimum).</li>
+<li>Observe <code>WorkInfo</code> from the UI.</li>
+<li>Post a notification safely, including the Android 13 permission.</li>
+<li>Use Background Task Inspector and write worker tests.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> WorkManager is a promise: "this work will run, under these conditions, even if the app is closed". It is not "run this right now".</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 15</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Coroutines, <code>suspend</code>, dispatchers and cancellation</strong> (lesson 28).</li>
+<li><strong>ViewModel, repositories, the app container and factories</strong> (lessons 24 and 30).</li>
+<li><strong>Flow and <code>stateIn</code></strong> (lesson 33). WorkManager reports status as a <code>Flow</code>.</li>
+<li><strong>Activity lifecycle and process death</strong> (lesson 23). Understanding process death is why WorkManager exists.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 15</div><div class="pt">Conceptual Understanding: Choosing the Right Tool</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Background work is a crowded field. Pick by asking two questions: <em>does it need to finish even if the app is killed?</em> and <em>must it run at an exact time or right now?</em></p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Need</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work tied to a screen, fine to cancel when the user leaves</td>
+<td>Coroutine in <code>viewModelScope</code> (lesson 28)</td>
+</tr>
+<tr>
+<td>Must finish even if the app closes, can wait for good conditions</td>
+<td><strong>WorkManager</strong></td>
+</tr>
+<tr>
+<td>User-visible ongoing task such as music playback or navigation</td>
+<td>Foreground service</td>
+</tr>
+<tr>
+<td>Must fire at an exact clock time (an alarm clock, a calendar reminder)</td>
+<td><code>AlarmManager</code> exact alarms (needs special permission; use sparingly)</td>
+</tr>
+<tr>
+<td>Sync that must run <em>now</em> and keep going while visible</td>
+<td>Coroutines, with WorkManager as a backup</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">WorkManager sits on top of the platform schedulers and picks the right one for the phone's Android version. It handles Doze mode, app standby and battery limits for you. <strong>It does not guarantee an exact time</strong>: a 9:00 a.m. request may run at 9:07 or later, because the system batches work to save battery.</p>
+<h3 class="v2-h3">Three kinds of work</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Kind</th>
+<th>Class</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>One-time</td>
+<td><code>OneTimeWorkRequest</code></td>
+<td>Upload this file; apply this filter</td>
+</tr>
+<tr>
+<td>Periodic</td>
+<td><code>PeriodicWorkRequest</code></td>
+<td>Sync every few hours. Minimum interval is <strong>15 minutes</strong>.</td>
+</tr>
+<tr>
+<td>Expedited</td>
+<td><code>setExpedited(...)</code> on a one-time request</td>
+<td>Short, important work that should start right away (with quota limits)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The main classes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Worker / CoroutineWorker   &lt;- WHAT to do   (your code in doWork())
+WorkRequest                &lt;- WHEN and HOW (constraints, delay, backoff, input)
+WorkManager                &lt;- enqueues requests and tracks them
+WorkInfo                   &lt;- status: ENQUEUED, RUNNING, SUCCEEDED, FAILED, CANCELLED, BLOCKED</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Choosing the Right Tool</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 15</div><div class="pt">Step-by-Step Build 1: Add WorkManager</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Look up the latest stable WorkManager version on its release page (https://developer.android.com/jetpack/androidx/releases/work). Older versions shipped Kotlin coroutine support in a separate <code>work-runtime-ktx</code> artifact; recent versions include it in <code>work-runtime</code>. Check the release notes for your version, and add what the current documentation shows:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+work = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "work" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "work" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.androidx.work.runtime)
+    androidTestImplementation(libs.androidx.work.testing)
+}</code></pre></div></div>
+<p class="v2-p">(If your version still needs the <code>-ktx</code> artifact for <code>CoroutineWorker</code>, use <code>work-runtime-ktx</code> instead; the compiler will say <code>CoroutineWorker</code> is unresolved.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Add WorkManager</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 15</div><div class="pt">Step-by-Step Build 2: Your First Worker</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">A worker is a class with one method, <code>doWork</code>, which runs on a background thread chosen by WorkManager. Use <code>CoroutineWorker</code> so you can call suspend functions.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">UploadWorker.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.waterme.worker
+
+import android.content.Context
+import android.util.Log
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+
+private const val TAG = "UploadWorker"
+
+class UploadWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        val fileName = inputData.getString(KEY_FILE_NAME) ?: return Result.failure()
+
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Uploading $fileName")
+                delay(2_000)                              // pretend upload
+                Result.success(workDataOf(KEY_RESULT_URL to "https://example.com/files/$fileName"))
+            } catch (e: java.io.IOException) {
+                Log.w(TAG, "Network problem, will retry", e)
+                Result.retry()
+            }
+        }
+    }
+
+    companion object {
+        const val KEY_FILE_NAME = "file_name"
+        const val KEY_RESULT_URL = "result_url"
+    }
+}</code></pre></div></div>
+<p class="v2-p">What to know:</p>
+<ul class="v2-ul">
+<li><code>doWork()</code> returns a <code>Result</code>:</li>
+</ul>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Result</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Result.success()</code> (optionally with output <code>Data</code>)</td>
+<td>Done. The next worker in a chain starts.</td>
+</tr>
+<tr>
+<td><code>Result.failure()</code></td>
+<td>Failed permanently; do not retry.</td>
+</tr>
+<tr>
+<td><code>Result.retry()</code></td>
+<td>Try again later using the backoff policy.</td>
+</tr>
+</tbody>
+</table></div>
+<ul class="v2-ul">
+<li>A <code>CoroutineWorker</code> runs on <code>Dispatchers.Default</code> by default. Use <code>withContext(Dispatchers.IO)</code> for blocking input/output.</li>
+<li>Input and output are small <strong><code>Data</code></strong> objects: key-value maps of primitives, strings and arrays, limited to about <strong>10 KB</strong>. Never pass a bitmap or a big list. Pass a <strong>file path or a database id</strong> and read the real data in the worker.</li>
+<li>The worker class needs the exact <code>(Context, WorkerParameters)</code> constructor: WorkManager creates it using reflection (or a <code>WorkerFactory</code>). Adding your own constructor parameters needs a custom factory (see "Dependencies in workers" below).</li>
+<li>Workers can be <strong>cancelled</strong>. Because this is a coroutine, cancellation arrives as <code>CancellationException</code> at suspension points, as in lesson 28. Do not swallow it.</li>
+</ul>
+<h3 class="v2-h3">Enqueue it</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+
+val request = OneTimeWorkRequestBuilder&lt;UploadWorker&gt;()
+    .setInputData(workDataOf(UploadWorker.KEY_FILE_NAME to "photo1.jpg"))
+    .build()
+
+WorkManager.getInstance(applicationContext).enqueue(request)</code></pre></div></div>
+<p class="v2-p"><code>getInstance(context)</code> returns the singleton WorkManager. Enqueueing is fast and returns immediately; the work runs later, in the background, when its conditions are met.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Your First Worker</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 15</div><div class="pt">Step-by-Step Build 3: Constraints, Delay and Backoff</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Real background work should be polite. Describe the conditions:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.work.BackoffPolicy
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import java.util.concurrent.TimeUnit
+
+val constraints = Constraints.Builder()
+    .setRequiredNetworkType(NetworkType.UNMETERED)   // Wi-Fi only; use CONNECTED for any network
+    .setRequiresBatteryNotLow(true)
+    .setRequiresCharging(false)
+    .build()
+
+val request = OneTimeWorkRequestBuilder&lt;UploadWorker&gt;()
+    .setConstraints(constraints)
+    .setInitialDelay(10, TimeUnit.MINUTES)
+    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+    .setInputData(workDataOf(UploadWorker.KEY_FILE_NAME to "photo1.jpg"))
+    .build()</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Setting</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setRequiredNetworkType(UNMETERED)</code></td>
+<td>Run only on Wi-Fi, saving the user's mobile data</td>
+</tr>
+<tr>
+<td><code>setRequiresBatteryNotLow(true)</code></td>
+<td>Wait until the battery is not low</td>
+</tr>
+<tr>
+<td><code>setRequiresCharging(true)</code></td>
+<td>Wait for charging</td>
+</tr>
+<tr>
+<td><code>setRequiresStorageNotLow(true)</code></td>
+<td>Wait until storage is not low</td>
+</tr>
+<tr>
+<td><code>setInitialDelay</code></td>
+<td>Do not start before this delay (it is a minimum, not an exact time)</td>
+</tr>
+<tr>
+<td><code>setBackoffCriteria</code></td>
+<td>How long to wait before retrying after <code>Result.retry()</code>, either <code>LINEAR</code> or <code>EXPONENTIAL</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">If a constraint stops being met while the work runs (for example Wi-Fi drops), WorkManager stops the worker and reschedules it. Design workers to be <strong>idempotent</strong>: running twice must not cause harm (no duplicate uploads or double charges), because retries and restarts happen.</p>
+<p class="v2-p">For many users on prepaid mobile data, defaulting heavy uploads to <code>UNMETERED</code> is a considerate choice. Consider making it a setting (lesson 35).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Constraints, Delay and Backoff</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 15</div><div class="pt">Step-by-Step Build 4: Chains, Unique Work and Periodic Work</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Chaining</h3>
+<p class="v2-p">Run workers in sequence with the output of one as the input of the next:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>WorkManager.getInstance(context)
+    .beginWith(OneTimeWorkRequestBuilder&lt;CompressWorker&gt;().build())
+    .then(OneTimeWorkRequestBuilder&lt;UploadWorker&gt;().build())
+    .then(OneTimeWorkRequestBuilder&lt;CleanupWorker&gt;().build())
+    .enqueue()</code></pre></div></div>
+<p class="v2-p">If one worker fails, the rest of the chain is marked as failed and never runs. You can also run steps <strong>in parallel</strong> and then continue with <code>beginWith(listOf(a, b)).then(c)</code>. Output <code>Data</code> of the previous step becomes input of the next, merged by key, using an <code>InputMerger</code> when several parallel workers feed one (the default is <code>OverwritingInputMerger</code>; use <code>ArrayCreatingInputMerger</code> to collect values from parallel workers into arrays).</p>
+<h3 class="v2-h3">Unique work</h3>
+<p class="v2-p">If the user taps the "Sync" button five times, you do not want five syncs. Make the work <strong>unique</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.work.ExistingWorkPolicy
+
+WorkManager.getInstance(context).enqueueUniqueWork(
+    "sync_notes",
+    ExistingWorkPolicy.KEEP,          // ignore new requests while one exists
+    OneTimeWorkRequestBuilder&lt;SyncWorker&gt;().build()
+)</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Policy</th>
+<th>Behaviour when a work with this name exists</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KEEP</code></td>
+<td>Keep the existing one, ignore the new request</td>
+</tr>
+<tr>
+<td><code>REPLACE</code></td>
+<td>Cancel the existing one, enqueue the new one</td>
+</tr>
+<tr>
+<td><code>APPEND</code> / <code>APPEND_OR_REPLACE</code></td>
+<td>Run the new one after the existing one</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Periodic work has its own <code>enqueueUniquePeriodicWork(name, ExistingPeriodicWorkPolicy.KEEP, request)</code>. In an Activity or <code>Application</code> you start with <code>KEEP</code>, otherwise each app launch would reschedule the job.</p>
+<h3 class="v2-h3">Periodic work</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingPeriodicWorkPolicy
+
+val daily = PeriodicWorkRequestBuilder&lt;ReminderWorker&gt;(1, TimeUnit.DAYS)
+    .setConstraints(constraints)
+    .build()
+
+WorkManager.getInstance(context)
+    .enqueueUniquePeriodicWork("daily_reminder", ExistingPeriodicWorkPolicy.KEEP, daily)</code></pre></div></div>
+<p class="v2-p">Remember:</p>
+<ul class="v2-ul">
+<li>The <strong>minimum</strong> repeat interval is <strong>15 minutes</strong>; shorter values are raised to 15 minutes.</li>
+<li>The interval is approximate and flexible: the system may run it late, and Doze can delay it by hours.</li>
+<li>The work will <strong>not</strong> fire at a fixed clock time. If the user wants "remind me at 7:30 a.m. exactly", WorkManager is the wrong tool (an exact alarm is, with its permission rules). A common workaround is to compute the delay to the next 7:30 and use a one-time request with <code>setInitialDelay</code>, accepting some drift.</li>
+</ul>
+<h3 class="v2-h3">Cancelling</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>WorkManager.getInstance(context).cancelWorkById(request.id)
+WorkManager.getInstance(context).cancelUniqueWork("daily_reminder")
+WorkManager.getInstance(context).cancelAllWorkByTag("uploads")</code></pre></div></div>
+<p class="v2-p">Give requests a tag with <code>.addTag("uploads")</code> so you can cancel or observe groups.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Chains, Unique Work and Periodic Work</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 15</div><div class="pt">Step-by-Step Build 5: Observing Work and Notifications</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">Observing status with Flow</h3>
+<p class="v2-p"><code>WorkManager.getWorkInfosForUniqueWorkFlow(name)</code> returns a <code>Flow&lt;List&lt;WorkInfo&gt;&gt;</code>. There are matching functions for work by id and by tag. Convert it to UI state in the repository or ViewModel:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.work.WorkInfo
+
+sealed interface UploadState {
+    data object Idle : UploadState
+    data object Running : UploadState
+    data class Done(val url: String) : UploadState
+    data object Failed : UploadState
+}
+
+class UploadRepository(private val workManager: WorkManager) {
+
+    val state: Flow&lt;UploadState&gt; =
+        workManager.getWorkInfosForUniqueWorkFlow("upload")
+            .map { infos -&gt;
+                val info = infos.firstOrNull() ?: return@map UploadState.Idle
+                when (info.state) {
+                    WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED, WorkInfo.State.RUNNING -&gt; UploadState.Running
+                    WorkInfo.State.SUCCEEDED -&gt;
+                        UploadState.Done(info.outputData.getString(UploadWorker.KEY_RESULT_URL).orEmpty())
+                    WorkInfo.State.FAILED, WorkInfo.State.CANCELLED -&gt; UploadState.Failed
+                }
+            }
+
+    fun start(fileName: String) {
+        val request = OneTimeWorkRequestBuilder&lt;UploadWorker&gt;()
+            .setInputData(workDataOf(UploadWorker.KEY_FILE_NAME to fileName))
+            .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+            .build()
+        workManager.enqueueUniqueWork("upload", ExistingWorkPolicy.REPLACE, request)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>WorkInfo.outputData</code> holds what the worker returned with <code>Result.success(data)</code>. Because the work state lives in WorkManager's own database, <strong>your UI can reconnect to a running job after rotation or after the process was killed and restarted</strong>. That is the real strength compared with a coroutine.</p>
+<p class="v2-p">Hide WorkManager behind a repository interface (lesson 30), so ViewModel tests can use a fake and never touch the real WorkManager.</p>
+<h3 class="v2-h3">Reporting progress</h3>
+<p class="v2-p">A worker can publish progress with <code>setProgress(workDataOf("percent" to 40))</code> inside a <code>CoroutineWorker</code>; the UI reads <code>info.progress.getInt("percent", 0)</code> while the state is <code>RUNNING</code>.</p>
+<h3 class="v2-h3">Showing a notification from a worker</h3>
+<p class="v2-p">A background job often ends with a notification. On Android 8 (API 26) and above every notification needs a <strong>channel</strong>, and on <strong>Android 13 (API 33) and above</strong> the app also needs the <strong><code>POST_NOTIFICATIONS</code></strong> runtime permission.</p>
+<p class="v2-p">Manifest:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AndroidManifest.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;uses-permission android:name="android.permission.POST_NOTIFICATIONS" /&gt;</code></pre></div></div>
+<p class="v2-p">Create a channel once (for example in <code>Application.onCreate</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+
+const val CHANNEL_ID = "water_reminders"
+
+fun createChannel(context: Context) {
+    val channel = NotificationChannel(
+        CHANNEL_ID,
+        "Water reminders",
+        NotificationManager.IMPORTANCE_DEFAULT
+    ).apply { description = "Reminders to water your plants" }
+
+    val manager = context.getSystemService(NotificationManager::class.java)
+    manager.createNotificationChannel(channel)
+}</code></pre></div></div>
+<p class="v2-p">Post from the worker, checking the permission first:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+
+fun showReminder(context: Context, plantName: String) {
+    val allowed = Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.TIRAMISU ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+        PackageManager.PERMISSION_GRANTED
+    if (!allowed) return                      // user declined; do not crash
+
+    val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_water_drop)
+        .setContentTitle("Time to water $plantName")
+        .setContentText("Your plant is thirsty.")
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setAutoCancel(true)
+        .build()
+
+    NotificationManagerCompat.from(context).notify(plantName.hashCode(), notification)
+}</code></pre></div></div>
+<p class="v2-p">Ask for the permission in the UI at a sensible moment (when the user first schedules a reminder, with a sentence explaining why), using the Activity Result API in Compose (<code>rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission())</code>). Never ask at app start with no context: users deny, and after two denials Android stops showing the dialog.</p>
+<h3 class="v2-h3">Long-running and foreground work</h3>
+<p class="v2-p">Workers have a time limit (around 10 minutes of execution per run). For long jobs you can promote a worker to a <strong>foreground service</strong> with <code>setForeground(ForegroundInfo(...))</code> in a <code>CoroutineWorker</code>, which shows an ongoing notification. On Android 14 and above you must declare a foreground service type, and on recent Android versions foreground services started by WorkManager can use up a quota, so check the current "long-running workers" documentation before relying on it. Prefer short workers that can resume.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Observing Work and Notifications</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 15</div><div class="pt">Background Task Inspector</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Android Studio's <strong>App Inspection</strong> window includes the <strong>Background Task Inspector</strong> (lesson 44 covers all inspectors). With your app running on a supported device or emulator:</p>
+<ol class="v2-ol">
+<li>Open <strong>View &gt; Tool Windows &gt; App Inspection</strong> and select <strong>Background Task Inspector</strong>.</li>
+<li>You see a table of workers with state (Enqueued, Running, Succeeded, Failed, Cancelled), their tags, and constraints.</li>
+<li>Click a worker to see its input and output data and its <strong>chain graph</strong>.</li>
+<li>Right-click to <strong>cancel</strong> a running job or inspect why it has not run (for example, a constraint not met).</li>
+</ol>
+<p class="v2-p">It is the fastest way to answer "why has my periodic job not run?". You can also trigger a job immediately on a debug build with:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb shell cmd jobscheduler run -f com.example.waterme &lt;jobId&gt;</code></pre></div></div>
+<p class="v2-p">but the Inspector is easier. (The exact menus move between Android Studio versions.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Background Task Inspector</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 15</div><div class="pt">Dependencies in Workers</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">A worker is created by WorkManager, not by you, so you cannot just pass it a repository in its constructor. Two common solutions:</p>
+<ol class="v2-ol">
+<li><strong>Reach for the container</strong>, as you did for ViewModels: <code>(applicationContext as WaterApplication).container.repository</code>. It is simple and perfectly fine for small apps.</li>
+<li><strong>A custom <code>WorkerFactory</code></strong> (or Hilt's <code>@HiltWorker</code>, lesson 63) that builds workers with their dependencies. More work, better testability.</li>
+</ol>
+<p class="v2-p">Keep workers thin: they should delegate to a repository, which is the part you unit test.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Dependencies in Workers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 15</div><div class="pt">Testing Workers</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Add the <code>work-testing</code> artifact (done above). It lets you run a worker directly, with no scheduler:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.work.ListenableWorker
+import androidx.work.testing.TestListenableWorkerBuilder
+import androidx.work.workDataOf
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class UploadWorkerTest {
+
+    private val context: Context = ApplicationProvider.getApplicationContext()
+
+    @Test
+    fun missingFileName_fails() = runTest {
+        val worker = TestListenableWorkerBuilder&lt;UploadWorker&gt;(context).build()
+        val result = worker.doWork()
+        assertTrue(result is ListenableWorker.Result.Failure)
+    }
+
+    @Test
+    fun withFileName_succeedsAndReturnsUrl() = runTest {
+        val worker = TestListenableWorkerBuilder&lt;UploadWorker&gt;(context)
+            .setInputData(workDataOf(UploadWorker.KEY_FILE_NAME to "a.jpg"))
+            .build()
+
+        val result = worker.doWork()
+
+        assertTrue(result is ListenableWorker.Result.Success)
+        val url = (result as ListenableWorker.Result.Success).outputData.getString(UploadWorker.KEY_RESULT_URL)
+        assertEquals("https://example.com/files/a.jpg", url)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>TestListenableWorkerBuilder&lt;T&gt;</code> (for <code>CoroutineWorker</code> use <code>TestListenableWorkerBuilder</code>, for plain <code>Worker</code> there is <code>TestWorkerBuilder</code>) creates the worker with the context and input you choose; you call <code>doWork()</code> directly and check the <code>Result</code>. This tests <strong>your logic</strong>, which is the part you wrote.</p>
+<p class="v2-p">To test <strong>scheduling</strong> behaviour (constraints, delays, chaining), use <code>WorkManagerTestInitHelper.initializeTestWorkManager(context)</code> and <code>TestDriver</code>, which let you pretend that constraints are met or a delay has passed, so you can check a chain without waiting. Search the official testing guide for the current helper names for your WorkManager version.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Testing Workers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 15</div><div class="pt">Practice: The Water Me App</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">The official <em>Practice: Build Water Me app</em> asks you to finish an app that reminds users to water plants: a list of plants with a "Remind me" button, where scheduling a reminder sends a notification after a delay (5 seconds, 1 day or 1 week) using WorkManager. Build your own version with this specification:</p>
+<ul class="v2-ul">
+<li>Plants are a hard-coded list (name, watering schedule text).</li>
+<li>A bottom sheet or dialog offers three delays: <em>In 5 seconds</em> (for demos), <em>In 1 day</em>, <em>In 1 week</em>.</li>
+<li>Selecting a delay enqueues a <strong>unique</strong> one-time <code>WaterReminderWorker</code> per plant (<code>REPLACE</code> policy), with input <code>plant_name</code> and <code>setInitialDelay</code>.</li>
+<li>The worker posts a notification (if permitted).</li>
+<li>A <code>WaterRepository</code> interface hides <code>WorkManager</code> so a <code>FakeWaterRepository</code> can replace it in ViewModel tests.</li>
+<li>The app asks for <code>POST_NOTIFICATIONS</code> the first time a reminder is scheduled.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Practice: The Water Me App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 15</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk13"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Compress, then upload</strong></p>
+<p class="v2-p">Create a chain of two workers. <code>CompressWorker</code> takes <code>file_name</code>, pretends to compress and outputs <code>compressed_name</code> (the original name plus <code>.zip</code>). <code>UploadWorker</code> reads <code>compressed_name</code>. Show the chain being enqueued as unique work named <code>pipeline</code>, and describe what happens if <code>CompressWorker</code> returns <code>Result.failure()</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class CompressWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result {
+        val name = inputData.getString("file_name") ?: return Result.failure()
+        delay(1_000)                                    // pretend compression
+        return Result.success(workDataOf("compressed_name" to "$name.zip"))
+    }
+}
+
+class UploadWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result {
+        val name = inputData.getString("compressed_name") ?: return Result.failure()
+        delay(2_000)                                    // pretend upload
+        return Result.success(workDataOf("result" to "uploaded $name"))
+    }
+}
+
+fun startPipeline(context: Context, fileName: String) {
+    val compress = OneTimeWorkRequestBuilder&lt;CompressWorker&gt;()
+        .setInputData(workDataOf("file_name" to fileName))
+        .build()
+    val upload = OneTimeWorkRequestBuilder&lt;UploadWorker&gt;()
+        .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+        .build()
+
+    WorkManager.getInstance(context)
+        .beginUniqueWork("pipeline", ExistingWorkPolicy.REPLACE, compress)
+        .then(upload)
+        .enqueue()
+}</code></pre></div></div>
+<p class="v2-p">The output <code>Data</code> of <code>CompressWorker</code> is merged into the input of <code>UploadWorker</code>, which is why <code>compressed_name</code> appears there. If <code>CompressWorker</code> returns <code>Result.failure()</code>, <code>UploadWorker</code> never starts and is marked as failed too (the chain stops), so the UI sees a failed state for the pipeline.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Retry with a limit</strong></p>
+<p class="v2-p">A worker uploads to a flaky server. Make it retry with exponential backoff but give up after 4 attempts and return <code>Result.failure()</code>, with a clear message in the output data.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>override suspend fun doWork(): Result {
+    return try {
+        uploadToServer()
+        Result.success()
+    } catch (e: java.io.IOException) {
+        if (runAttemptCount &gt;= 4) {
+            Result.failure(workDataOf("error" to "Gave up after $runAttemptCount attempts"))
+        } else {
+            Result.retry()
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>runAttemptCount</code> starts at 0 for the first attempt and increases with each retry. With <code>setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)</code> the delays grow (30 s, 60 s, 120 s, and so on, capped by the system maximum). Without a cap, a permanently broken server would be retried for ever, which wastes battery.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Periodic cleanup</strong></p>
+<p class="v2-p">Every day, delete cached files older than 7 days, but only while the phone is charging and the battery is not low. Show how to schedule it exactly once, from <code>Application.onCreate</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class CleanupWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        val limit = System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000
+        applicationContext.cacheDir.listFiles()
+            ?.filter { it.isFile &amp;&amp; it.lastModified() &lt; limit }
+            ?.forEach { it.delete() }
+        Result.success()
+    }
+}
+
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        val request = PeriodicWorkRequestBuilder&lt;CleanupWorker&gt;(1, TimeUnit.DAYS)
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresCharging(true)
+                    .setRequiresBatteryNotLow(true)
+                    .build()
+            )
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "cache_cleanup",
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>KEEP</code> is crucial: <code>onCreate</code> runs on every process start, and without a unique name plus <code>KEEP</code> you would enqueue a new copy each time. The work is idempotent (deleting already-deleted files is harmless), which suits retries.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Open Background Task Inspector, enqueue a worker with a 5-minute initial delay and a charging constraint, and find out from the Inspector why it is still enqueued. Then cancel it from the Inspector.</p></div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 15</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Using WorkManager for exact-time tasks.</strong> <em>What happens:</em> the alarm fires late. <em>The fix:</em> an exact alarm (with the right permission) for alarm-clock-style needs, or accept approximate timing.</p>
+<p class="v2-p"><strong>Mistake #2: Enqueueing in <code>onCreate</code> without unique work.</strong> <em>What happens:</em> duplicate jobs on every launch. <em>The fix:</em> <code>enqueueUnique...</code> with <code>KEEP</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Periodic interval under 15 minutes.</strong> <em>What happens:</em> silently raised to 15 minutes. <em>The fix:</em> accept the minimum, or use a foreground mechanism for a visible, short-interval task.</p>
+<p class="v2-p"><strong>Mistake #4: Passing big data through <code>Data</code>.</strong> <em>What happens:</em> an <code>IllegalStateException</code> over the 10 KB limit. <em>The fix:</em> pass an id or a file path.</p>
+<p class="v2-p"><strong>Mistake #5: Non-idempotent workers.</strong> <em>What happens:</em> a retry sends the same message twice. <em>The fix:</em> design work so that repeating it is safe (check before acting, use idempotency keys).</p>
+<p class="v2-p"><strong>Mistake #6: Blocking in <code>doWork</code> with no dispatcher.</strong> <em>What happens:</em> the default dispatcher is starved. <em>The fix:</em> <code>withContext(Dispatchers.IO)</code> for blocking calls.</p>
+<p class="v2-p"><strong>Mistake #7: Posting notifications without the permission and channel.</strong> <em>What happens:</em> nothing appears on Android 8 or 13+. <em>The fix:</em> create the channel and check <code>POST_NOTIFICATIONS</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Forgetting that <code>Result.retry()</code> needs a backoff and a cap.</strong> <em>What happens:</em> endless retries. <em>The fix:</em> <code>setBackoffCriteria</code> and a <code>runAttemptCount</code> limit.</p>
+<p class="v2-p"><strong>Mistake #9: Testing by waiting.</strong> <em>What happens:</em> slow, flaky tests. <em>The fix:</em> <code>TestListenableWorkerBuilder</code> and <code>TestDriver</code>.</p>
+<p class="v2-p"><strong>Mistake #10: Assuming it runs immediately.</strong> <em>What happens:</em> a demo fails because Doze delayed the work. <em>The fix:</em> for an on-the-spot job use a coroutine or expedited work, and explain timing to users.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 15</div><div class="pt">Knowledge Check</div><div class="pc" id="chk15"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> When is WorkManager the right choice?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">For deferrable work that must run reliably even if the app is closed or the phone restarts, subject to conditions such as network or charging. It is not for exact-time tasks or work that can safely stop when the user leaves the screen.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What are the three <code>Result</code> values returned by <code>doWork()</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>success</code> (optionally with output data), <code>failure</code> (do not retry) and <code>retry</code> (try again according to the backoff policy).</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the minimum interval for periodic work?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">15 minutes. Shorter intervals are raised to that minimum, and timing is approximate.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why use unique work?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">To prevent duplicate jobs, for example when the user taps a button repeatedly or when enqueueing from <code>onCreate</code>. The existing-work policy decides whether to keep, replace or append.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> How do you test a worker's logic without waiting for a scheduler?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Use <code>TestListenableWorkerBuilder</code> from the <code>work-testing</code> artifact to construct the worker with chosen input and call <code>doWork()</code> directly, then assert on the returned <code>Result</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-7-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 7: Background work with WorkManager</a>: all five items for this lesson.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a></li>
+<li><a href="https://developer.android.com/guide/background/persistent/how-to/long-running" rel="noopener noreferrer">Long-running workers</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Water Me</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build the <strong>Water Me</strong> reminder app from the specification above, with unique work, a notification, an observed status and tests.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A list of five plants. Each row has a <strong>Remind me</strong> button.</li>
+<li>A dialog with three delays (5 seconds, 1 day, 1 week). 5 seconds is for testing.</li>
+<li><code>WaterRepository</code> interface with <code>scheduleReminder(plantName, delay)</code>; <code>WorkManagerWaterRepository</code> implementation; <code>FakeWaterRepository</code> for tests.</li>
+<li><code>WaterReminderWorker</code> posting a notification titled with the plant name, after checking the permission and creating the channel.</li>
+<li>Ask for <code>POST_NOTIFICATIONS</code> the first time, with an explanation sentence.</li>
+<li>A worker test (missing plant name fails; valid input succeeds) and a ViewModel test with the fake repository confirming that choosing a delay calls <code>scheduleReminder</code> with the right duration.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show a <strong>pending</strong> indicator on rows whose reminder is scheduled, observed from <code>getWorkInfosForUniqueWorkFlow</code>.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">WaterReminderWorker.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.waterme.worker
+
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import androidx.work.CoroutineWorker
+import androidx.work.WorkerParameters
+import com.example.waterme.R
+
+class WaterReminderWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        val plantName = inputData.getString(KEY_PLANT_NAME) ?: return Result.failure()
+        showNotification(plantName)
+        return Result.success()
+    }
+
+    private fun showNotification(plantName: String) {
+        val allowed = Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                applicationContext, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        if (!allowed) return
+
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_water_drop)
+            .setContentTitle("Water your $plantName")
+            .setContentText("It is time for a drink.")
+            .setAutoCancel(true)
+            .build()
+
+        NotificationManagerCompat.from(applicationContext).notify(plantName.hashCode(), notification)
+    }
+
+    companion object {
+        const val KEY_PLANT_NAME = "plant_name"
+        const val CHANNEL_ID = "water_reminders"
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">WaterRepository.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.waterme.data
+
+import android.content.Context
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.example.waterme.worker.WaterReminderWorker
+import java.util.concurrent.TimeUnit
+
+interface WaterRepository {
+    fun scheduleReminder(plantName: String, delayMillis: Long)
+}
+
+class WorkManagerWaterRepository(context: Context) : WaterRepository {
+    private val workManager = WorkManager.getInstance(context)
+
+    override fun scheduleReminder(plantName: String, delayMillis: Long) {
+        val request = OneTimeWorkRequestBuilder&lt;WaterReminderWorker&gt;()
+            .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
+            .setInputData(workDataOf(WaterReminderWorker.KEY_PLANT_NAME to plantName))
+            .addTag("water")
+            .build()
+
+        workManager.enqueueUniqueWork("water_$plantName", ExistingWorkPolicy.REPLACE, request)
+    }
+}
+
+class FakeWaterRepository : WaterRepository {
+    val scheduled = mutableListOf&lt;Pair&lt;String, Long&gt;&gt;()
+    override fun scheduleReminder(plantName: String, delayMillis: Long) {
+        scheduled += plantName to delayMillis
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">WaterViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class WaterViewModelTest {
+    @Test
+    fun choosingOneDay_schedulesTwentyFourHours() {
+        val fake = FakeWaterRepository()
+        val vm = WaterViewModel(fake)
+
+        vm.onReminderChosen("Basil", ReminderDelay.ONE_DAY)
+
+        assertEquals(listOf("Basil" to TimeUnit.DAYS.toMillis(1)), fake.scheduled)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>REPLACE</code> per plant means tapping the button twice for the same plant keeps only the newest reminder, while different plants have independent reminders. The 5-second option is for demos; in practice the system may start the worker a little later. <code>ReminderDelay</code> is an enum with <code>FIVE_SECONDS</code>, <code>ONE_DAY</code> and <code>ONE_WEEK</code>, each carrying a duration in milliseconds, and <code>WaterViewModel.onReminderChosen</code> simply calls <code>repository.scheduleReminder(plant, delay.millis)</code>. Create the notification channel once in your <code>Application.onCreate</code> using the function shown in the lesson. For the stretch goal, expose <code>workManager.getWorkInfosByTagFlow("water")</code> through the repository and map <code>ENQUEUED</code> entries to a set of pending plant names; the unique work name encodes the plant, so you can read the name from the work's tags if you add <code>addTag(plantName)</code> too.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 36 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-36-background-work-with-workmanager</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 36 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Choosing the Right Tool</li><li>✅ Step-by-Step Build 1: Add WorkManager</li><li>✅ Step-by-Step Build 2: Your First Worker</li><li>✅ Step-by-Step Build 3: Constraints, Delay and Backoff</li><li>✅ Step-by-Step Build 4: Chains, Unique Work and Periodic Work</li><li>✅ Step-by-Step Build 5: Observing Work and Notifications</li><li>✅ Background Task Inspector</li><li>✅ Dependencies in Workers</li><li>✅ Testing Workers</li><li>✅ Practice: The Water Me App</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_35.html" class="ln-btn">&#8592; Lesson 35</a><a href="lesson_37.html" class="ln-btn primary">Lesson 37 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 36 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

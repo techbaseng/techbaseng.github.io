@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent.parent
 IMG = ROOT / "assets" / "img"
 mark = (IMG / "logo-mark.svg").read_text()
 courses = json.loads((ROOT / "content" / "courses.json").read_text())
-COLORS = {"html": "#e34f26", "css": "#0284c7", "js": "#d97706", "python": "#059669", "scratch": "#ea580c", "microbit": "#7c3aed", "practical": "#e11d48"}
+COLORS = {"html": "#e34f26", "css": "#0284c7", "js": "#d97706", "python": "#059669", "scratch": "#ea580c", "microbit": "#7c3aed", "practical": "#e11d48", "android": "#3ddc84"}
 
 def tile(size, pad=0, bg=None):
     inner = mark.replace('width="64" height="64"', f'width="{size-2*pad}" height="{size-2*pad}"')
@@ -39,7 +39,7 @@ with sync_playwright() as p:
     shot(tile(64), IMG / "favicon-64.png", 64, 64, True)
     (IMG / "og").mkdir(exist_ok=True)
     total = sum(1 for _ in range(0))
-    shot(og("Learn to code.<br>Build the future.", "Free coding and robotics courses from Ibadan, Nigeria.", "#2457e6", ["7 courses", "400 lessons", "100% free"]), IMG / "og" / "default.png", 1200, 630)
+    shot(og("Learn to code.<br>Build the future.", "Free coding and robotics courses from Ibadan, Nigeria.", "#2457e6", ["8 courses", "472 lessons", "100% free"]), IMG / "og" / "default.png", 1200, 630)
     for c in courses:
         n = len(list((ROOT / "content" / c["slug"] / "lessons").glob("*.html")))
         shot(og(c["title"], c["blurb"], COLORS[c["key"]], [f"{n} {c['noun']}s", c["level"], "Free"]), IMG / "og" / f"{c['slug']}.png", 1200, 630)

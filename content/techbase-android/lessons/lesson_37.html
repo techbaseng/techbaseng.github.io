@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 37: Thinking in Compose: Composable Functions and the Three Phases — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l37">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 37 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 37</div>
+      <h1>Thinking in Compose: Composable Functions and the Three Phases</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Habit Cards</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 37</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Shift from how to what: declarative UI, composable functions, composition, layout and drawing, and your first Compose essentials app.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Habit Cards</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You have built many Compose screens by now, but you may still catch yourself thinking "how do I change the text of that label?" That question belongs to the old way of building Android UIs. Compose asks a different question: "<strong>what should the screen look like for this state?</strong>" Once that shift clicks, everything else in Compose becomes predictable.</p>
+<p class="v2-p">This lesson is the foundation for the <em>Jetpack Compose for Android developers</em> course (the official programme at https://developer.android.com/courses/jetpack-compose/course). It covers <em>Thinking in Compose</em>, <em>Composable functions</em>, <em>Write your first Compose app</em> (the Compose basics codelab) and <em>Compose phases</em>. The next five lessons (38 to 41 and 43) continue with layouts, lazy lists, theming, animation and interoperability, and the <em>Jetpack Compose</em> programme's later pathways return in lessons 54 to 59.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain <strong>declarative</strong> versus <strong>imperative</strong> UI, and why Compose is declarative.</li>
+<li>Describe <strong>recomposition</strong>, and why composable functions must be fast, idempotent and free of side effects.</li>
+<li>Explain the three phases of every frame: <strong>composition</strong>, <strong>layout</strong> and <strong>drawing</strong>.</li>
+<li>Use that knowledge to avoid unnecessary work (deferring state reads, lambda-based modifiers).</li>
+<li>Explain <strong>stability</strong> and <strong>skipping</strong> in simple terms.</li>
+<li>Build a small two-screen app (onboarding plus an expandable list) using only the basics.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> <code>UI = f(state)</code>. The screen is a function of the data. When the data changes, Compose calls the function again.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>State</strong> (<code>remember</code>, <code>mutableStateOf</code>) and <strong>recomposition</strong> at a basic level (lessons 17 and 18).</li>
+<li><strong>State hoisting and unidirectional data flow</strong> (lesson 24).</li>
+<li><strong>Kotlin lambdas</strong> and trailing-lambda syntax (lesson 12).</li>
+<li><strong><code>@Composable</code> functions and <code>@Preview</code></strong> (lessons 15 and 16).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Declarative UI</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">The old way: imperative</h3>
+<p class="v2-p">With the older View system you built an object tree of views, then <strong>mutated</strong> each view by calling methods:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// View-system style (imperative); not Compose
+val label = findViewById&lt;TextView&gt;(R.id.label)
+val button = findViewById&lt;Button&gt;(R.id.button)
+
+button.setOnClickListener {
+    count++
+    label.text = "Clicked $count times"
+    if (count &gt;= 5) {
+        button.isEnabled = false
+        label.setTextColor(Color.RED)
+    }
+}</code></pre></div></div>
+<p class="v2-p">You must remember to update every affected view in every code path. Add a third widget and a fourth rule, and it is easy to forget one, leaving the UI <strong>inconsistent with the data</strong>. These are among the most common bugs in classic apps.</p>
+<h3 class="v2-h3">The new way: declarative</h3>
+<p class="v2-p">In Compose you <strong>describe</strong> the UI for the current state and let the framework work out what changed:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun ClickCounter() {
+    var count by remember { mutableIntStateOf(0) }
+
+    Column {
+        Text(
+            text = "Clicked $count times",
+            color = if (count &gt;= 5) Color.Red else Color.Unspecified
+        )
+        Button(onClick = { count++ }, enabled = count &lt; 5) {
+            Text("Click me")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">There is no "update the label" code. The click changes <code>count</code>; Compose <strong>recomposes</strong> the function with the new value; the text, the colour and the enabled flag are all derived from the same variable in one place. They cannot disagree.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th>Imperative (Views)</th>
+<th>Declarative (Compose)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>You write</td>
+<td>Steps to mutate widgets</td>
+<td>A description of the UI for a state</td>
+</tr>
+<tr>
+<td>On a data change</td>
+<td>You find the affected views and update them</td>
+<td>You change state; the UI is re-described</td>
+</tr>
+<tr>
+<td>Bugs of the kind</td>
+<td>Forgotten update paths</td>
+<td>Mostly impossible, because the UI derives from state</td>
+</tr>
+<tr>
+<td>Mental model</td>
+<td>"How do I change it?"</td>
+<td>"What should it be?"</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Composable functions</h3>
+<p class="v2-p">A <strong>composable function</strong> is a function annotated <code>@Composable</code> that <strong>emits UI</strong> into a tree rather than returning it. Calling <code>Text("Hi")</code> does not draw anything immediately; it tells the Compose runtime "there should be a Text here".</p>
+<p class="v2-p">The conventions you should follow:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Convention</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Name UI-emitting composables with <strong>PascalCase nouns</strong> (<code>ProfileCard</code>)</td>
+<td>They describe a thing in the UI</td>
+</tr>
+<tr>
+<td>Name composables that <strong>return a value</strong> with lower-case (<code>rememberScrollState</code>)</td>
+<td>They behave like ordinary functions</td>
+</tr>
+<tr>
+<td>Accept a <code>modifier: Modifier = Modifier</code> <strong>as the first optional parameter</strong></td>
+<td>Callers can adjust size, padding and so on</td>
+</tr>
+<tr>
+<td>Hoist state: take values and callbacks as parameters</td>
+<td>Reusable, testable, previewable</td>
+</tr>
+<tr>
+<td>Do not return a <code>Unit</code> UI element and also emit; either emit or return</td>
+<td>Keeps the model clear</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Declarative UI</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: The Contract of a Composable</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Compose may call your composable <strong>many times, in any order, even on different threads</strong>, and may <strong>skip</strong> calls that it knows are unnecessary. To make that safe, a composable must behave like a <strong>pure function</strong> of its inputs.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Rule</th>
+<th>Meaning</th>
+<th>A violation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Idempotent</strong></td>
+<td>Same inputs, same result, however often it runs</td>
+<td>Using the current time or a random number directly in the body</td>
+</tr>
+<tr>
+<td><strong>Free of side effects</strong></td>
+<td>No writes to shared variables, no network, no logging that matters, no database</td>
+<td>Incrementing a global counter inside a composable</td>
+</tr>
+<tr>
+<td><strong>Fast</strong></td>
+<td>Recomposition can happen on every frame during an animation</td>
+<td>Sorting a 10,000-item list in the body</td>
+</tr>
+<tr>
+<td><strong>Order-independent</strong></td>
+<td>Siblings may run in any order, and in parallel</td>
+<td>Writing code where one sibling reads what another set</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">A bad composable</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>var totalClicks = 0                               // shared variable outside Compose
+
+@Composable
+fun BadCounter(onClick: () -&gt; Unit) {
+    totalClicks++                                 // side effect during composition!
+    Text("Composed $totalClicks times")
+    Button(onClick = onClick) { Text("Tap") }
+}</code></pre></div></div>
+<p class="v2-p"><code>totalClicks++</code> runs each time the function runs, which is <strong>not</strong> the same as each time the user taps. Compose might call <code>BadCounter</code> several times for a single frame, or skip it entirely, so the number is meaningless, and it also produces unpredictable behaviour when composition runs on several threads.</p>
+<h3 class="v2-h3">Where side effects belong</h3>
+<p class="v2-p">Side effects belong in <strong>event handlers</strong> (<code>onClick</code>, run when the user acts) or inside <strong>effect APIs</strong> that run at well-defined moments:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun GoodCounter(onClick: () -&gt; Unit) {
+    Text("Tap the button")
+    Button(onClick = {
+        onClick()                                 // a side effect in an event handler: fine
+    }) { Text("Tap") }
+}</code></pre></div></div>
+<p class="v2-p">For effects that must happen as the screen appears or when a value changes (loading data, starting a timer, subscribing), use <code>LaunchedEffect</code>, <code>DisposableEffect</code> and <code>SideEffect</code>, covered in lesson 55. For now remember: <strong>the body of a composable only describes UI</strong>.</p>
+<h3 class="v2-h3">Do not read hidden mutable state</h3>
+<p class="v2-p">A composable that reads a plain <code>var</code> instead of Compose <code>State</code> will not recompose when it changes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Broken() {
+    var count = 0                                // ordinary variable
+    Button(onClick = { count++ }) {
+        Text("Clicked $count times")             // never updates on screen
+    }
+}</code></pre></div></div>
+<p class="v2-p">Compose only knows to re-run code when it reads a <strong>snapshot state</strong> object such as <code>mutableStateOf</code>. And even with <code>mutableStateOf</code>, writing <code>var count = mutableIntStateOf(0)</code> without <code>remember</code> would reset to 0 on every recomposition, because the function body runs from the top each time. That is why <code>remember { mutableIntStateOf(0) }</code> exists: it stores the value <strong>in the composition</strong> so it survives recomposition.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The Contract of a Composable</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Recomposition and Skipping</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">When a state value changes, Compose finds the composables that <strong>read</strong> that value and re-runs only those, and only as much as needed.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Dashboard() {
+    var count by remember { mutableIntStateOf(0) }
+
+    Column {
+        Header()                               // does not read count
+        CounterText(count)                     // reads count, so it recomposes
+        Footer()                               // does not read count
+        Button(onClick = { count++ }) { Text("Add") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">When <code>count</code> changes, <code>CounterText(count)</code> gets a new argument and re-runs. <code>Header()</code> and <code>Footer()</code> take <strong>no changing inputs</strong>, so Compose <strong>skips</strong> them: it reuses the previous result. Skipping is what makes Compose fast.</p>
+<h3 class="v2-h3">When can Compose skip?</h3>
+<p class="v2-p">A composable can be skipped if all its parameters are <strong>unchanged</strong> and <strong>stable</strong>. Roughly:</p>
+<ul class="v2-ul">
+<li><strong>Unchanged:</strong> the new value is <code>equals()</code> the old one (for primitives, strings and data classes with equal fields).</li>
+<li><strong>Stable:</strong> the type is guaranteed to tell Compose when it changes. Primitives, <code>String</code>, function types and classes with only stable <code>val</code> properties (and Compose <code>State</code>) are stable.</li>
+</ul>
+<p class="v2-p">Types the compiler cannot prove stable include classes with <code>var</code> properties and the standard collection interfaces <code>List</code>, <code>Set</code> and <code>Map</code>, because the compiler cannot know whether the object behind a <code>List</code> is mutable. Recent Compose compiler versions have <strong>strong skipping mode</strong> enabled by default, which relaxes this: composables with unstable parameters can also be skipped when the instances are the <strong>same object</strong> (identity equal), and lambdas are remembered automatically. If you target an older compiler, you may need to use immutable collections or the <code>@Immutable</code> or <code>@Stable</code> annotations. You will measure this properly with the Layout Inspector's recomposition counts in lesson 44 and learn performance rules in lesson 59. For now:</p>
+<ul class="v2-ul">
+<li>Prefer immutable data classes (<code>val</code> only) for UI state, as you have been doing.</li>
+<li>Pass the smallest data a composable needs, not a huge object.</li>
+<li>Do not worry about skipping for ordinary screens; measure before optimising.</li>
+</ul>
+<h3 class="v2-h3">Keep recomposition scopes small</h3>
+<p class="v2-p">Recomposition happens at the level of the composable (more precisely, the nearest enclosing <em>restartable</em> function or lambda) that <strong>reads</strong> the state. If you read a fast-changing value high in the tree, a large subtree re-runs. Reading it in a small child composable limits the work. We will exploit this in the next section.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Recomposition and Skipping</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: The Three Phases of a Frame</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Every time Compose produces a frame, it goes through three phases:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>        state changes (e.g. count++, scroll offset)
+                     |
+                     v
+ +-----------------------------------------------+
+ | 1. COMPOSITION   What to show?                |
+ |    Runs your @Composable functions,           |
+ |    builds / updates the UI tree.              |
+ +-----------------------------------------------+
+                     |
+ +-----------------------------------------------+
+ | 2. LAYOUT        Where to put it?             |
+ |    Measures each node (size), then places it  |
+ |    (x, y). Parent passes constraints down,    |
+ |    child reports size up.                     |
+ +-----------------------------------------------+
+                     |
+ +-----------------------------------------------+
+ | 3. DRAWING       How does it look?            |
+ |    Draws every node onto a canvas,            |
+ |    pixels reach the screen.                   |
+ +-----------------------------------------------+</code></pre></div></div>
+<p class="v2-p">The same three words describe a house: <em>decide what rooms there are</em> (composition), <em>decide where each wall and room goes</em> (layout), <em>paint and furnish</em> (drawing).</p>
+<h3 class="v2-h3">Phase 1: Composition</h3>
+<p class="v2-p">Runs the composable functions you wrote and produces the tree of UI nodes. This is where <code>Text("Clicked $count times")</code> is evaluated. Reading a <code>State</code> here <strong>subscribes</strong> that scope to changes.</p>
+<h3 class="v2-h3">Phase 2: Layout</h3>
+<p class="v2-p">Two steps, applied to the tree from the top down and the bottom up:</p>
+<ol class="v2-ol">
+<li><strong>Measure:</strong> a parent gives each child <strong>constraints</strong> (minimum and maximum width and height). The child measures itself within those constraints and reports a size. Children are measured <strong>once</strong> (a rule that makes layouts fast, unlike the older View system where nested layouts could measure repeatedly).</li>
+<li><strong>Place:</strong> once all sizes are known, the parent places each child at an <code>(x, y)</code> position.</li>
+</ol>
+<p class="v2-p">You will experiment with constraints and modifier order in lesson 38.</p>
+<h3 class="v2-h3">Phase 3: Drawing</h3>
+<p class="v2-p">Each node draws itself onto a canvas in order, parents first, then children on top. <code>Modifier.background</code>, <code>drawBehind</code>, <code>graphicsLayer</code> and <code>Canvas</code> participate here.</p>
+<h3 class="v2-h3">Why the phases matter: skip the earlier ones</h3>
+<p class="v2-p">Each phase <strong>reads state independently</strong>. If a state read happens only in the <strong>layout</strong> phase, a change to that state re-runs layout and drawing but <strong>not composition</strong>. If it happens only in the <strong>drawing</strong> phase, only drawing re-runs. That is a big performance lever, and it is how smooth animations work.</p>
+<p class="v2-p">Consider moving a box horizontally based on a fast-changing scroll offset.</p>
+<p class="v2-p"><strong>Slow: state read during composition</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun SlowBox(scrollOffset: State&lt;Int&gt;) {
+    Box(
+        Modifier.offset(x = scrollOffset.value.dp)   // read in composition
+    ) { Text("Hello") }
+}</code></pre></div></div>
+<p class="v2-p">Reading <code>scrollOffset.value</code> as a function argument happens during composition, so every change recomposes the function, then lays out and draws again: all three phases, many times a second.</p>
+<p class="v2-p"><strong>Fast: defer the read to the layout phase</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.IntOffset
+
+@Composable
+fun FastBox(scrollOffset: State&lt;Int&gt;) {
+    Box(
+        Modifier.offset { IntOffset(x = scrollOffset.value, y = 0) }   // lambda: read in layout
+    ) { Text("Hello") }
+}</code></pre></div></div>
+<p class="v2-p">The <code>offset { }</code> overload that takes a <strong>lambda</strong> reads the state <strong>inside</strong> the layout phase. When the value changes, only layout and drawing re-run; composition is skipped. Many modifiers come in a "lambda" flavour for exactly this reason:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Reads state in composition (slower for fast-changing values)</th>
+<th>Defers to a later phase (faster)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Modifier.offset(x = ...)</code></td>
+<td><code>Modifier.offset { IntOffset(...) }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.alpha(a)</code></td>
+<td><code>Modifier.graphicsLayer { alpha = a }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.rotate(deg)</code></td>
+<td><code>Modifier.graphicsLayer { rotationZ = deg }</code></td>
+</tr>
+<tr>
+<td><code>Modifier.background(color)</code> where <code>color</code> animates</td>
+<td><code>Modifier.drawBehind { drawRect(color) }</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The rule of thumb: <strong>for values that change on every frame (animations, scrolling, dragging), read them as late as possible</strong>, in a lambda. For values that change only on a user's tap, the ordinary form is fine and clearer. Do not rewrite everything; do this where profiling or an animation demands it (lessons 41 and 59).</p>
+<h3 class="v2-h3">Backwards writes</h3>
+<p class="v2-p">A related pitfall: <strong>never write to a state after you have read it in the same composition</strong>. For example, reading <code>count</code> and then setting <code>count++</code> inside the composable body (not inside an event handler) creates an endless recomposition loop. Compose logs a warning about a "backwards write". Changes to state belong in callbacks and effects.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Three Phases of a Frame</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Your First Compose Essentials App</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">This is the <strong>Compose basics</strong> codelab from the programme, rebuilt with our own code. The app has an <strong>onboarding screen</strong> with a Continue button, then a <strong>list of greetings</strong> whose items expand with an animation. It uses only what you have learned.</p>
+<p class="v2-p">Create an Empty Activity project named <code>Basics</code> (package <code>com.example.basics</code>).</p>
+<h3 class="v2-h3">The structure</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>MyApp
+ +-- if (shouldShowOnboarding) OnboardingScreen(onContinueClicked)
+ +-- else Greetings(names)
+        +-- LazyColumn
+              +-- Greeting(name)   (expandable card)</code></pre></div></div>
+<h3 class="v2-h3">Step 1: The entry point with hoisted state</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.basics
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    MyApp()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MyApp(modifier: Modifier = Modifier) {
+    var shouldShowOnboarding by rememberSaveable { mutableStateOf(true) }
+
+    Surface(modifier) {
+        if (shouldShowOnboarding) {
+            OnboardingScreen(onContinueClicked = { shouldShowOnboarding = false })
+        } else {
+            Greetings()
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>shouldShowOnboarding</code> lives in <code>MyApp</code>, the <strong>lowest common ancestor</strong> that needs it, and is saved with <code>rememberSaveable</code> so rotation does not send the user back to the welcome screen. <code>OnboardingScreen</code> is <strong>stateless</strong>: it receives a callback and does not know how the flag is stored. This is state hoisting (lesson 24) in miniature. (For a real "show once ever" onboarding you would save the flag in DataStore, lesson 35.)</p>
+<h3 class="v2-h3">Step 2: The onboarding screen</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun OnboardingScreen(
+    onContinueClicked: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Welcome to the Basics Codelab!")
+        Button(
+            modifier = Modifier.padding(vertical = 24.dp),
+            onClick = onContinueClicked
+        ) {
+            Text("Continue")
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 320, heightDp = 320)
+@Composable
+fun OnboardingPreview() {
+    MaterialTheme { OnboardingScreen(onContinueClicked = {}) }
+}</code></pre></div></div>
+<h3 class="v2-h3">Step 3: The expandable greeting card</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.padding(vertical = 4.dp, horizontal = 8.dp)) {
+        CardContent(name)
+    }
+}
+
+@Composable
+private fun CardContent(name: String) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .padding(12.dp)
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(12.dp)
+        ) {
+            Text(text = "Hello,")
+            Text(
+                text = name,
+                style = MaterialTheme.typography.headlineMedium
+            )
+            if (expanded) {
+                Text(
+                    text = "Composem ipsum color sit lazy, padding theme elit, sed do bouncy. ".repeat(4)
+                )
+            }
+        }
+        ElevatedButton(onClick = { expanded = !expanded }) {
+            Text(if (expanded) "Show less" else "Show more")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Notice how <code>expanded</code> belongs to <strong>each card</strong>: because it is created with <code>remember</code> inside <code>CardContent</code>, every card in the list has its own independent flag. Expanding one does not expand the others.</p>
+<p class="v2-p">In a long list, <code>rememberSaveable</code> state is stored against the item's position in the composition. In a <code>LazyColumn</code>, scrolling an item away and back keeps <code>rememberSaveable</code> values (plain <code>remember</code> would reset them when the item leaves the composition). Lesson 39 explains keys, which make this robust when the list changes.</p>
+<h3 class="v2-h3">Step 4: The list</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Greetings(
+    modifier: Modifier = Modifier,
+    names: List&lt;String&gt; = List(1000) { "$it" }
+) {
+    LazyColumn(modifier = modifier.padding(vertical = 4.dp)) {
+        items(items = names) { name -&gt;
+            Greeting(name = name)
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 320)
+@Composable
+fun GreetingsPreview() {
+    MaterialTheme { Greetings() }
+}</code></pre></div></div>
+<p class="v2-p"><code>List(1000) { "$it" }</code> creates a thousand strings, <code>"0"</code> to <code>"999"</code>. A <code>Column</code> would struggle; <code>LazyColumn</code> composes only what is visible (lesson 21). Run the app: tap Continue, scroll, expand a card (watch the springy animation from <code>animateContentSize</code>), rotate the phone (the expanded cards and the screen choice survive).</p>
+<h3 class="v2-h3">What you just used</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Concept</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Declarative UI</td>
+<td>Each screen is a description of state</td>
+</tr>
+<tr>
+<td>Hoisted state</td>
+<td><code>OnboardingScreen(onContinueClicked)</code></td>
+</tr>
+<tr>
+<td><code>remember</code> / <code>rememberSaveable</code></td>
+<td>Per-card <code>expanded</code>; screen flag</td>
+</tr>
+<tr>
+<td>Lazy list</td>
+<td><code>LazyColumn</code></td>
+</tr>
+<tr>
+<td>Modifier chain</td>
+<td><code>padding</code>, <code>weight</code>, <code>animateContentSize</code></td>
+</tr>
+<tr>
+<td>Previews</td>
+<td>Three <code>@Preview</code> functions</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Your First Compose Essentials App</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Reading the Phases in the Layout Inspector</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Run the app, then open <strong>Tools &gt; Layout Inspector</strong> (lesson 44 covers it fully). In the options, enable <strong>Show recomposition counts</strong>. Tap "Show more" on one card and watch the counts: only that card's subtree recomposes, not its neighbours. That is skipping in action, and an early taste of how you will verify performance with data instead of guesses.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading the Phases in the Layout Inspector</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Spot the problems</strong></p>
+<p class="v2-p">List every problem with this composable and rewrite it correctly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Timer() {
+    val start = System.currentTimeMillis()
+    var seconds = 0
+    Text("Started at $start, ${seconds}s elapsed")
+    Button(onClick = { seconds++ }) { Text("+1") }
+}</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Problems:</p>
+<ol class="v2-ol">
+<li><code>System.currentTimeMillis()</code> in the body is <strong>not idempotent</strong>: every recomposition shows a different "start", which is meaningless.</li>
+<li><code>var seconds = 0</code> is a plain variable: the button changes it but nothing tells Compose to recompose, so the text never updates, and it would reset to 0 anyway.</li>
+<li>The "start" is not remembered, so it cannot be a stable fact about the screen.</li>
+</ol>
+<p class="v2-p">Correct version:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Timer() {
+    val start = rememberSaveable { System.currentTimeMillis() }   // computed once, survives rotation
+    var seconds by rememberSaveable { mutableIntStateOf(0) }
+
+    Column {
+        Text("Started at $start, ${seconds}s elapsed")
+        Button(onClick = { seconds++ }) { Text("+1") }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>remember { }</code> runs its block once, in the first composition, and stores the result. Using the current time inside it is acceptable because it is evaluated a single time. In a real app the start time would come from a ViewModel. Also wrap the two elements in a <code>Column</code>; otherwise their placement is unspecified.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Move the read to the right phase</strong></p>
+<p class="v2-p">A <code>Box</code> should fade in and out following a <code>Float</code> animation value <code>alpha</code> (0f to 1f) that changes every frame. The first version uses <code>Modifier.alpha(alpha)</code>. Rewrite it so the change does not recompose the composable, and explain the phases involved.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.graphics.graphicsLayer
+
+@Composable
+fun FadingBox(alpha: State&lt;Float&gt;) {
+    Box(
+        Modifier
+            .size(100.dp)
+            .graphicsLayer { this.alpha = alpha.value }    // read inside the draw/layer phase
+            .background(Color.Blue)
+    )
+}</code></pre></div></div>
+<p class="v2-p">With <code>Modifier.alpha(alpha.value)</code> the state is read in <strong>composition</strong>, so each frame re-runs composition, layout and drawing. In the <code>graphicsLayer { }</code> lambda the state is read when the layer is drawn, so a change only invalidates the <strong>drawing</strong> phase: composition and layout are skipped. For an animation that changes sixty times a second, that is a big saving. (<code>animateFloatAsState</code> in lesson 41 returns a <code>State&lt;Float&gt;</code> exactly for this use.) Note that <code>.size()</code> and <code>.background()</code> are unaffected by the alpha.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Extend the app</strong></p>
+<p class="v2-p">Add a third feature to the Basics app: a <strong>favourite</strong> star on each card that toggles on tap and survives rotation, and a counter at the top of the list showing how many cards are favourites. Decide where the favourites state must live and why.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The counter needs to know about every card's favourite flag, so the state must live <strong>above</strong> both the cards and the counter: in <code>Greetings</code> (or better, a ViewModel). Per-card <code>remember</code> would hide it from the counter.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Greetings(modifier: Modifier = Modifier, names: List&lt;String&gt; = List(1000) { "$it" }) {
+    var favourites by rememberSaveable { mutableStateOf(setOf&lt;String&gt;()) }
+
+    Column(modifier) {
+        Text("Favourites: ${favourites.size}", modifier = Modifier.padding(16.dp))
+        LazyColumn {
+            items(names, key = { it }) { name -&gt;
+                val isFavourite = name in favourites
+                Greeting(
+                    name = name,
+                    isFavourite = isFavourite,
+                    onToggleFavourite = {
+                        favourites = if (isFavourite) favourites - name else favourites + name
+                    }
+                )
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>Greeting</code> now receives <code>isFavourite</code> and <code>onToggleFavourite</code> and draws an <code>IconButton</code> with a star icon. A <code>Set&lt;String&gt;</code> is saveable on most Compose versions through the default saver only if it is a <code>Serializable</code> or <code>Parcelable</code>; if your build complains, store a <code>List&lt;String&gt;</code> or move the state into a ViewModel (lesson 24), which is where it belongs in a real app anyway. The data is immutable: we create a <strong>new</strong> set with <code>+</code> and <code>-</code>, which is what triggers recomposition.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">In the Layout Inspector with recomposition counts enabled, toggle a card's expansion ten times and note the counts for that card and for its neighbours. Then change <code>expanded</code> from <code>rememberSaveable</code> to a plain variable <code>var expanded = false</code> and observe what happens. Describe it in two sentences.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Side effects in the body.</strong> <em>What happens:</em> actions repeat unpredictably (extra network calls, duplicate analytics). <em>The fix:</em> event handlers or effect APIs (lesson 55).</p>
+<p class="v2-p"><strong>Mistake #2: <code>mutableStateOf</code> without <code>remember</code>.</strong> <em>What happens:</em> the state resets on every recomposition. <em>The fix:</em> <code>remember { mutableStateOf(...) }</code>, or <code>rememberSaveable</code>.</p>
+<p class="v2-p"><strong>Mistake #3: A plain <code>var</code>.</strong> <em>What happens:</em> the UI never updates. <em>The fix:</em> Compose state.</p>
+<p class="v2-p"><strong>Mistake #4: Doing heavy work in a composable.</strong> <em>What happens:</em> janky scrolling and animation. <em>The fix:</em> compute in the ViewModel, or use <code>remember(key) { ... }</code> or <code>derivedStateOf</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Reading fast-changing state in composition.</strong> <em>What happens:</em> unnecessary recompositions. <em>The fix:</em> the lambda versions of modifiers (<code>offset { }</code>, <code>graphicsLayer { }</code>) or <code>drawBehind</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Writing state while composing (backwards write).</strong> <em>What happens:</em> an infinite loop warning. <em>The fix:</em> write state only in callbacks and effects.</p>
+<p class="v2-p"><strong>Mistake #7: Making every composable depend on the whole UI state.</strong> <em>What happens:</em> everything recomposes on any change. <em>The fix:</em> pass only what each composable needs.</p>
+<p class="v2-p"><strong>Mistake #8: Forgetting the <code>modifier</code> parameter.</strong> <em>What happens:</em> callers cannot position or size your composable. <em>The fix:</em> <code>modifier: Modifier = Modifier</code> as the first optional parameter, applied to the root element.</p>
+<p class="v2-p"><strong>Mistake #9: Prematurely optimising.</strong> <em>What happens:</em> complicated code with no measured benefit. <em>The fix:</em> measure with the Layout Inspector and the profiler first (lessons 44 and 59).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between declarative and imperative UI?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Imperative UI mutates widgets step by step (<code>label.text = ...</code>). Declarative UI describes what the screen should look like for the current state, and the framework updates it when state changes.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why must a composable be idempotent and free of side effects?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Compose may call it many times, skip it, run it in any order or on other threads. Side effects or hidden inputs would then occur unpredictably and produce inconsistent results.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What are the three phases of a frame?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Composition (what to show), layout (measure and place) and drawing (render to the canvas).</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is <code>Modifier.offset { }</code> with a lambda faster than <code>Modifier.offset(x = ...)</code> for a rapidly changing value?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The lambda reads the state during the layout phase, so a change skips composition and only re-runs layout and drawing. The non-lambda form reads the state during composition and triggers all three phases.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does it mean for Compose to skip a composable?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">When a composable's inputs have not changed (and are stable or identical), Compose reuses its previous output instead of running it again.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose for Android developers (course)</a></li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1" rel="noopener noreferrer">Pathway 1: Compose essentials</a>: <em>Thinking in Compose</em>, <em>Composable functions</em>, <em>Write your first Compose app</em>, <em>Compose phases</em>.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-basics" rel="noopener noreferrer">Jetpack Compose basics codelab</a></li>
+<li><a href="https://developer.android.com/develop/ui/compose/architecture" rel="noopener noreferrer">Compose architecture</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Habit Cards</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a <strong>habit tracker</strong> screen using only this lesson's ideas: declarative UI, hoisted state, per-item state and phase-aware code.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A list of at least six habits (names you choose). Each habit card shows its name, a streak count (starts at 0) and a <strong>Done today</strong> button.</li>
+<li>Pressing the button increments that habit's streak and disables the button for that habit until the next day (for this exercise, a <strong>Reset day</strong> button at the top re-enables all buttons).</li>
+<li>A header composable reading <strong>Completed today: X of N</strong>. Because it needs data from all cards, hoist the state accordingly.</li>
+<li>A card can expand to show a short note, animated with <code>animateContentSize</code>.</li>
+<li>State survives rotation (<code>rememberSaveable</code>) and every composable has a <code>modifier</code> parameter and a preview.</li>
+<li>One element animates with a read deferred to the draw phase: a progress bar under the header drawn with <code>drawBehind</code> from the completed fraction.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> open the Layout Inspector and record recomposition counts before and after pressing one habit's button; write down the numbers and explain them.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">HabitCards.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.habits
+
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+val habits = listOf("Drink water", "Read 10 pages", "Walk 20 minutes", "Practise Kotlin", "Sleep by 11pm", "Call family")
+
+@Composable
+fun HabitsScreen(modifier: Modifier = Modifier) {
+    // Hoisted: the header and every card need these.
+    var done by rememberSaveable { mutableStateOf(setOf&lt;String&gt;()) }
+    var streaks by rememberSaveable { mutableStateOf(List(habits.size) { 0 }) }
+
+    val fraction = done.size / habits.size.toFloat()
+
+    Column(modifier) {
+        Text(
+            "Completed today: ${done.size} of ${habits.size}",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(16.dp)
+        )
+        ProgressBar(fractionProvider = { fraction })
+        OutlinedButton(onClick = { done = emptySet() }, modifier = Modifier.padding(16.dp)) {
+            Text("Reset day")
+        }
+        LazyColumn {
+            items(habits.size, key = { habits[it] }) { index -&gt;
+                val name = habits[index]
+                HabitCard(
+                    name = name,
+                    streak = streaks[index],
+                    isDone = name in done,
+                    onDone = {
+                        done = done + name
+                        streaks = streaks.toMutableList().also { it[index] = it[index] + 1 }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ProgressBar(fractionProvider: () -&gt; Float, modifier: Modifier = Modifier) {
+    Row(
+        modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .height(8.dp)
+            .drawBehind {
+                drawRect(Color.LightGray)
+                // The state is read here, in the draw phase: composition is skipped on change.
+                drawRect(Color(0xFF3DDC84), size = Size(size.width * fractionProvider(), size.height))
+            }
+    ) {}
+}
+
+@Composable
+fun HabitCard(
+    name: String,
+    streak: Int,
+    isDone: Boolean,
+    onDone: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by rememberSaveable(name) { mutableStateOf(false) }
+
+    Card(modifier.padding(horizontal = 16.dp, vertical = 4.dp).animateContentSize()) {
+        Column(Modifier.padding(16.dp)) {
+            Text(name, style = MaterialTheme.typography.titleMedium)
+            Text("Streak: $streak")
+            Row {
+                Button(onClick = onDone, enabled = !isDone) { Text(if (isDone) "Done" else "Done today") }
+                OutlinedButton(onClick = { expanded = !expanded }, modifier = Modifier.padding(start = 8.dp)) {
+                    Text(if (expanded) "Hide note" else "Note")
+                }
+            }
+            if (expanded) Text("Small, repeatable steps beat big, rare ones.", modifier = Modifier.padding(top = 8.dp))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the progress bar takes a <strong>lambda</strong> (<code>fractionProvider</code>) rather than a <code>Float</code>, so the value is read inside <code>drawBehind</code>, in the draw phase, which is the technique from the lesson. In a real app both <code>done</code> and <code>streaks</code> would live in a ViewModel (lesson 24); they are in the screen composable here to keep the exercise focused on the lesson's ideas. A <code>Set&lt;String&gt;</code> and a <code>List&lt;Int&gt;</code> inside <code>rememberSaveable</code> rely on your Compose version's default saver accepting them; if your build rejects them, convert to <code>ArrayList</code>s or move the state into a ViewModel. The header and the cards agree by construction, since both derive from the same <code>done</code> set.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 37 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-37-thinking-in-compose-composable-functions-a</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 37 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Declarative UI</li><li>✅ Step-by-Step Build 1: The Contract of a Composable</li><li>✅ Step-by-Step Build 2: Recomposition and Skipping</li><li>✅ Step-by-Step Build 3: The Three Phases of a Frame</li><li>✅ Step-by-Step Build 4: Your First Compose Essentials App</li><li>✅ Reading the Phases in the Layout Inspector</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_36.html" class="ln-btn">&#8592; Lesson 36</a><a href="lesson_38.html" class="ln-btn primary">Lesson 38 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 37 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

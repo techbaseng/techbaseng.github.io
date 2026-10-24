@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 32: Introduction to Databases and SQL — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l32">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 32 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 32</div>
+      <h1>Introduction to Databases and SQL</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Library Database on Paper (and in SQLite)</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 32</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Learn relational database concepts and the SQL you need for Room: tables, keys, SELECT, INSERT, UPDATE, DELETE and JOIN.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Library Database on Paper (and in SQLite)</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">So far, when you close your app, your data disappears. The posts you downloaded in lesson 29 are fetched again every time, and a to-do item you typed in lesson 24 vanishes when the process dies. To keep data on the phone you need a <strong>database</strong>.</p>
+<p class="v2-p">Android has a database built in, called <strong>SQLite</strong>, and you talk to it using a language called <strong>SQL</strong>. In lesson 34 you will use a library named <strong>Room</strong> that writes much of the plumbing for you, but Room's annotations are built on SQL. If you do not understand tables, keys and queries, Room feels like magic. If you do, it feels like a convenience.</p>
+<p class="v2-p">This lesson is deliberately <strong>pure SQL</strong>, with no Android code until the very end, so you can practise on any computer. It covers the two Unit 6 items of Pathway 1 in the official <strong>Android Basics with Compose</strong> course: <em>Introduction to Databases and SQL</em> and <em>Use SQL to read and write to a database</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what a relational database, a table, a row, a column and a key are.</li>
+<li>Choose column types and constraints.</li>
+<li>Write <code>SELECT</code> queries with <code>WHERE</code>, <code>ORDER BY</code> and <code>LIMIT</code>.</li>
+<li>Add, change and remove rows with <code>INSERT</code>, <code>UPDATE</code> and <code>DELETE</code>.</li>
+<li>Count and summarise with aggregate functions and <code>GROUP BY</code> / <code>HAVING</code>.</li>
+<li>Combine tables with <code>JOIN</code>, and explain a one-to-many relationship with a <strong>foreign key</strong>.</li>
+<li>Explain what an <strong>index</strong> is and when normalisation helps.</li>
+<li>Map SQL ideas to Room annotations.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a database is a set of tables, and SQL is how you ask questions about them. You describe <em>what</em> you want, not <em>how</em> to loop for it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Data classes</strong> (lesson 11). A row in a table will become a data class.</li>
+<li><strong>Why persistence matters</strong> (lessons 23 and 24). The ViewModel does not survive process death, and <code>rememberSaveable</code> is only for small values.</li>
+<li><strong>Where to practise.</strong> You need an SQLite tool. Any of these works: the free <strong>DB Browser for SQLite</strong> desktop app, the <code>sqlite3</code> command-line program (already installed on many computers), or an online SQLite playground. Android Studio itself does not give you a standalone SQL console; its <strong>Database Inspector</strong> (lesson 44) lets you run queries against your running app's database.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: Tables, Rows, Columns and Keys</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Think of a school register. It is a grid. Each <strong>column</strong> is one kind of fact (name, age, state). Each <strong>row</strong> is one student. That grid is a <strong>table</strong>. A <strong>relational database</strong> is a collection of tables that can refer to each other.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>students                          &lt;- table name
++----+-------+-----+---------+
+| id | name  | age | state   |     &lt;- column names (the table's "schema")
++----+-------+-----+---------+
+|  1 | Ada   |  15 | Oyo     |     &lt;- one row = one student
+|  2 | Tunde |  16 | Lagos   |
+|  3 | Chika |  15 | Enugu   |
++----+-------+-----+---------+</code></pre></div></div>
+<h3 class="v2-h3">Primary keys</h3>
+<p class="v2-p">Every row needs a way to be identified <strong>uniquely</strong>. Two students could both be named Ada, so we add an <code>id</code> column that is different for every row. This is the <strong>primary key</strong>. It must be unique and never <code>NULL</code>. Most apps let the database generate it automatically.</p>
+<h3 class="v2-h3">Column types</h3>
+<p class="v2-p">SQLite uses a flexible type system with five <strong>storage classes</strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>Stores</th>
+<th>Kotlin equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>INTEGER</code></td>
+<td>Whole numbers (also booleans as 0 and 1)</td>
+<td><code>Int</code>, <code>Long</code>, <code>Boolean</code></td>
+</tr>
+<tr>
+<td><code>REAL</code></td>
+<td>Decimal numbers</td>
+<td><code>Double</code></td>
+</tr>
+<tr>
+<td><code>TEXT</code></td>
+<td>Strings</td>
+<td><code>String</code></td>
+</tr>
+<tr>
+<td><code>BLOB</code></td>
+<td>Raw bytes</td>
+<td><code>ByteArray</code></td>
+</tr>
+<tr>
+<td><code>NULL</code></td>
+<td>"No value"</td>
+<td>nullable types</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Dates are usually stored as <code>INTEGER</code> (milliseconds since 1970) or <code>TEXT</code> in ISO format. Money is best stored as an integer in the smallest unit (kobo or cents) so you never meet floating-point rounding errors.</p>
+<h3 class="v2-h3">Constraints</h3>
+<p class="v2-p">Constraints are rules the database enforces for you:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PRIMARY KEY</code></td>
+<td>Unique identity for each row</td>
+</tr>
+<tr>
+<td><code>NOT NULL</code></td>
+<td>This column must have a value</td>
+</tr>
+<tr>
+<td><code>UNIQUE</code></td>
+<td>No two rows may have the same value here</td>
+</tr>
+<tr>
+<td><code>DEFAULT value</code></td>
+<td>Use this when no value is given</td>
+</tr>
+<tr>
+<td><code>REFERENCES other(id)</code></td>
+<td>A <strong>foreign key</strong>: must match a row in another table</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Foreign keys make <strong>relationships</strong> possible. In the next section a <code>results</code> table points at <code>students</code> through <code>student_id</code>. One student has many results (a <strong>one-to-many</strong> relationship). Note: SQLite does not enforce foreign keys unless you turn them on with <code>PRAGMA foreign_keys = ON;</code> on each connection. Room turns this on for you when you declare foreign keys.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Tables, Rows, Columns and Keys</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Step-by-Step Build 1: Create the Sample Database</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Everything in this lesson uses one small database of students and exam results. Open your SQLite tool and run this script. Read it line by line first.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>CREATE TABLE students (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT    NOT NULL,
+    age   INTEGER NOT NULL,
+    state TEXT    NOT NULL
+);
+
+CREATE TABLE results (
+    id         INTEGER PRIMARY KEY,
+    student_id INTEGER NOT NULL REFERENCES students(id),
+    subject    TEXT    NOT NULL,
+    score      INTEGER NOT NULL
+);
+
+INSERT INTO students (id, name, age, state) VALUES
+    (1, 'Ada',   15, 'Oyo'),
+    (2, 'Tunde', 16, 'Lagos'),
+    (3, 'Chika', 15, 'Enugu'),
+    (4, 'Bola',  17, 'Oyo'),
+    (5, 'Emeka', 16, 'Anambra');
+
+INSERT INTO results (id, student_id, subject, score) VALUES
+    (1, 1, 'Maths',   78),
+    (2, 1, 'English', 64),
+    (3, 2, 'Maths',   55),
+    (4, 2, 'English', 70),
+    (5, 3, 'Maths',   91),
+    (6, 4, 'English', 48),
+    (7, 4, 'Maths',   60);</code></pre></div></div>
+<p class="v2-p">Here is the data you just created:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>students                              results
+id | name  | age | state              id | student_id | subject | score
+ 1 | Ada   | 15  | Oyo                 1 |     1      | Maths   |  78
+ 2 | Tunde | 16  | Lagos               2 |     1      | English |  64
+ 3 | Chika | 15  | Enugu               3 |     2      | Maths   |  55
+ 4 | Bola  | 17  | Oyo                 4 |     2      | English |  70
+ 5 | Emeka | 16  | Anambra             5 |     3      | Maths   |  91
+                                       6 |     4      | English |  48
+                                       7 |     4      | Maths   |  60</code></pre></div></div>
+<p class="v2-p">Observe: Emeka (id 5) has <strong>no results</strong>. Keep that in mind; it matters when we reach joins. SQL keywords are not case sensitive (<code>select</code> equals <code>SELECT</code>), but writing them in capitals makes queries easier to read. Every statement ends with a semicolon.</p>
+<p class="v2-p"><code>CREATE TABLE</code> defines the schema once. <code>INSERT INTO ... VALUES</code> adds rows. Text values are in <strong>single quotes</strong>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Create the Sample Database</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Reading Data: SELECT</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p"><code>SELECT</code> asks a question and returns a result table. Its general shape:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT columns
+FROM table
+WHERE condition
+ORDER BY column
+LIMIT count;</code></pre></div></div>
+<h3 class="v2-h3">All columns, specific columns</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT * FROM students;</code></pre></div></div>
+<p class="v2-p">returns every column and every row. The <code>*</code> means "all columns". Avoid <code>*</code> in app code, because it breaks when columns are added; name the columns you need:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT name, age FROM students;</code></pre></div></div>
+<h3 class="v2-h3">Filtering with WHERE</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT name, age FROM students WHERE state = 'Oyo';</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name | age<br/>Ada | 15<br/>Bola | 17</p>
+</blockquote>
+<p class="v2-p">Comparison operators: <code>=</code>, <code>&lt;&gt;</code> (not equal), <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>. Combine conditions with <code>AND</code>, <code>OR</code> and <code>NOT</code>, and group with parentheses:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT name FROM students WHERE name LIKE 'A%' OR age &gt; 16 ORDER BY name;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name<br/>Ada<br/>Bola</p>
+</blockquote>
+<p class="v2-p"><code>LIKE</code> matches patterns: <code>%</code> stands for any run of characters, <code>_</code> for exactly one. <code>'A%'</code> means "starts with A". Other useful tests are <code>BETWEEN 15 AND 16</code>, <code>IN ('Oyo','Lagos')</code>, and <code>IS NULL</code> (never <code>= NULL</code>, which is never true).</p>
+<h3 class="v2-h3">Sorting and limiting</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT name, age FROM students ORDER BY age DESC, name LIMIT 2;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name | age<br/>Bola | 17<br/>Emeka | 16</p>
+</blockquote>
+<p class="v2-p"><code>ORDER BY age DESC</code> sorts oldest first; ties on age (Tunde and Emeka are both 16) are broken by <code>name</code> alphabetically, so Emeka comes before Tunde. <code>LIMIT 2</code> keeps only the first two rows. Without <code>ORDER BY</code>, <strong>the order of rows is not guaranteed</strong>, so always sort when order matters. <code>LIMIT 10 OFFSET 20</code> skips the first 20 rows, which is how <strong>paging</strong> works.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading Data: SELECT</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Changing Data: INSERT, UPDATE, DELETE</div><div class="pc" id="chk6"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>INSERT INTO students (id, name, age, state) VALUES (6, 'Funke', 16, 'Ogun');</code></pre></div></div>
+<p class="v2-p">If you leave out <code>id</code> on an <code>INTEGER PRIMARY KEY</code> column, SQLite picks the next free number for you. That is how apps normally add rows.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>UPDATE results SET score = score + 5 WHERE student_id = 4 AND subject = 'English';</code></pre></div></div>
+<p class="v2-p">After this, Bola's English score changes from 48 to 53. Always include a <code>WHERE</code> on <code>UPDATE</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>DELETE FROM results WHERE id = 3;</code></pre></div></div>
+<p class="v2-p">This removes Tunde's Maths result. Always include a <code>WHERE</code> on <code>DELETE</code>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Danger:</strong> <code>UPDATE results SET score = 0;</code> with no <code>WHERE</code> changes <strong>every row</strong>. <code>DELETE FROM results;</code> empties the table. Many real outages started with a missing <code>WHERE</code>. Run the matching <code>SELECT</code> first, check the rows, then change the verb.</p>
+</blockquote>
+<p class="v2-p">Make changes to a copy of the data while you practise. You can rebuild the sample database at any time by re-running the script from Build 1 on a fresh database.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Changing Data: INSERT, UPDATE, DELETE</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Summaries: Aggregate Functions, GROUP BY, HAVING</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">An <strong>aggregate function</strong> squeezes many rows into one value:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COUNT(*)</code></td>
+<td>Number of rows</td>
+</tr>
+<tr>
+<td><code>SUM(col)</code></td>
+<td>Total</td>
+</tr>
+<tr>
+<td><code>AVG(col)</code></td>
+<td>Average</td>
+</tr>
+<tr>
+<td><code>MIN(col)</code>, <code>MAX(col)</code></td>
+<td>Smallest, largest</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Using the original data (before the update and delete above):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT COUNT(*), SUM(score), AVG(score), MIN(score), MAX(score) FROM results;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">COUNT | SUM | AVG | MIN | MAX<br/>7 | 466 | 66.571... | 48 | 91</p>
+</blockquote>
+<p class="v2-p">Check by hand: 78 + 64 + 55 + 70 + 91 + 48 + 60 = 466, and 466 / 7 = 66.57. </p>
+<p class="v2-p"><code>GROUP BY</code> makes one group per value and applies the aggregate to each group:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT subject, ROUND(AVG(score), 2) AS average, COUNT(*) AS entries
+FROM results
+GROUP BY subject
+ORDER BY subject;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">subject | average | entries<br/>English | 60.67 | 3<br/>Maths | 71.0 | 4</p>
+</blockquote>
+<p class="v2-p">Check: English is (64 + 70 + 48) / 3 = 60.67; Maths is (78 + 55 + 91 + 60) / 4 = 71. <code>AS</code> gives a column a friendlier name.</p>
+<p class="v2-p"><code>WHERE</code> filters <strong>rows before</strong> grouping. <code>HAVING</code> filters <strong>groups after</strong> grouping:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT student_id, AVG(score) AS average
+FROM results
+GROUP BY student_id
+HAVING AVG(score) &gt;= 65;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">student_id | average<br/>1 | 71.0<br/>3 | 91.0</p>
+</blockquote>
+<p class="v2-p">Students 2 (62.5) and 4 (54) are excluded.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Summaries: Aggregate Functions, GROUP BY, HAVING</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Combining Tables: JOIN</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The results table shows <code>student_id</code> numbers, which are not friendly. A <code>JOIN</code> lines up rows from two tables using the key relationship:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT s.name, r.subject, r.score
+FROM students AS s
+INNER JOIN results AS r ON r.student_id = s.id
+WHERE r.score &gt;= 70
+ORDER BY r.score DESC;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name | subject | score<br/>Chika | Maths | 91<br/>Ada | Maths | 78<br/>Tunde | English | 70</p>
+</blockquote>
+<p class="v2-p">How to read it: for each student, find the results whose <code>student_id</code> matches the student's <code>id</code>, keep only scores of 70 or more, and sort them highest first. <code>s</code> and <code>r</code> are <strong>aliases</strong> (short nicknames) so you do not type the long table names.</p>
+<h3 class="v2-h3">INNER JOIN versus LEFT JOIN</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>INNER JOIN  = only rows that have a match on both sides
+LEFT JOIN   = every row from the left table, with NULLs where no match exists</code></pre></div></div>
+<p class="v2-p">Who has no results? An inner join silently drops Emeka. A left join keeps him:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT s.name, COUNT(r.id) AS results_count
+FROM students AS s
+LEFT JOIN results AS r ON r.student_id = s.id
+GROUP BY s.id
+ORDER BY s.id;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name | results_count<br/>Ada | 2<br/>Tunde | 2<br/>Chika | 1<br/>Bola | 2<br/>Emeka | 0</p>
+</blockquote>
+<p class="v2-p"><code>COUNT(r.id)</code> counts only non-NULL values, so Emeka gets 0. (<code>COUNT(*)</code> would wrongly say 1 for him, because his joined row exists with NULLs.) Another way to find students with no results is a <strong>subquery</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>SELECT name FROM students WHERE id NOT IN (SELECT student_id FROM results);</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name<br/>Emeka</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Combining Tables: JOIN</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Design: Why Two Tables?</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">You could have stored everything in one wide table: <code>name, age, state, subject, score</code>, repeating Ada's name, age and state on each of her results. That causes three kinds of trouble:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Problem</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Redundancy</strong></td>
+<td>Ada's age is stored twice.</td>
+</tr>
+<tr>
+<td><strong>Update anomaly</strong></td>
+<td>If Ada's state changes, you must update every copy, and missing one creates conflicting data.</td>
+</tr>
+<tr>
+<td><strong>Delete anomaly</strong></td>
+<td>Deleting Chika's only result also deletes the fact that Chika exists.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Splitting data so that each fact is stored <strong>once</strong>, and linking tables with keys, is called <strong>normalisation</strong>. A good rule for beginners: <em>one table per kind of thing; refer to other things by their ID</em>. Do not take normalisation to extremes on a phone app; sometimes a little duplication keeps queries simple and fast, but start normalised.</p>
+<h3 class="v2-h3">Indexes</h3>
+<p class="v2-p">If a table has a million rows and you search <code>WHERE state = 'Oyo'</code>, SQLite must read every row. An <strong>index</strong> is like the index at the back of a book: a sorted list that lets the database jump to the right rows.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>CREATE INDEX idx_students_state ON students(state);</code></pre></div></div>
+<p class="v2-p">Indexes make reads faster but writes slower and use more space, so add them for columns you search or join on often, not everywhere. Primary keys are indexed automatically. Room lets you declare indexes in annotations.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Design: Why Two Tables?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">From SQL to Android: SQLite and Room</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">SQLite is a small database engine that lives inside every Android phone. Each app gets its own database file in its private storage, which other apps cannot read. Room is a Jetpack library that sits on top. Here is how the ideas you just learned map over (preview of lesson 34):</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>SQL idea</th>
+<th>Room</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Table</td>
+<td>A <code>data class</code> marked <code>@Entity</code></td>
+</tr>
+<tr>
+<td>Column</td>
+<td>A property of the class</td>
+</tr>
+<tr>
+<td>Primary key</td>
+<td><code>@PrimaryKey(autoGenerate = true)</code></td>
+</tr>
+<tr>
+<td><code>SELECT ...</code></td>
+<td>A <code>@Query("SELECT ...")</code> function in a <code>@Dao</code> interface</td>
+</tr>
+<tr>
+<td><code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code></td>
+<td><code>@Insert</code>, <code>@Update</code>, <code>@Delete</code> functions</td>
+</tr>
+<tr>
+<td>Foreign key</td>
+<td><code>@ForeignKey</code> in the entity</td>
+</tr>
+<tr>
+<td>Index</td>
+<td><code>indices</code> in <code>@Entity</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A taste of what is coming:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.room.Dao
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Entity(tableName = "students")
+data class Student(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val age: Int,
+    val state: String
+)
+
+@Dao
+interface StudentDao {
+    @Query("SELECT * FROM students WHERE state = :state ORDER BY name")
+    fun studentsIn(state: String): Flow&lt;List&lt;Student&gt;&gt;
+}</code></pre></div></div>
+<p class="v2-p">The SQL you wrote today goes <strong>inside</strong> that annotation, character for character. Room checks it at <strong>build time</strong>, so a typo in a column name stops the build instead of crashing the app on a user's phone.</p>
+<h3 class="v2-h3">Never build SQL with string concatenation</h3>
+<p class="v2-p">If you ever run raw SQL, <strong>never</strong> assemble it by gluing user input into the string:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// DANGEROUS: SQL injection
+val sql = "SELECT * FROM students WHERE name = '" + userInput + "'"</code></pre></div></div>
+<p class="v2-p">If the user types <code>x' OR '1'='1</code>, the condition becomes always true and returns everything; worse input can delete data. Always use <strong>parameters</strong> (<code>:state</code> above, or <code>?</code> placeholders), which the database treats strictly as values, never as SQL code. Room's <code>:name</code> syntax is parameterised by design.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>From SQL to Android: SQLite and Room</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Use the original sample data for these (re-create the database if you changed it). The answers show the exact output so you can check yourself.</p>
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Basic queries</strong></p>
+<p class="v2-p">Write queries that return:</p>
+<ol class="v2-ol">
+<li>The names of students from states other than Oyo.</li>
+<li>The names of students aged 16, sorted alphabetically.</li>
+<li>How many students live in each state, most students first, ties alphabetical.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>-- 1
+SELECT name FROM students WHERE state &lt;&gt; 'Oyo';
+-- Tunde, Chika, Emeka
+
+-- 2
+SELECT name FROM students WHERE age = 16 ORDER BY name;
+-- Emeka, Tunde
+
+-- 3
+SELECT state, COUNT(*) AS total
+FROM students
+GROUP BY state
+ORDER BY total DESC, state;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">state | total<br/>Oyo | 2<br/>Anambra | 1<br/>Enugu | 1<br/>Lagos | 1</p>
+</blockquote></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Joins and summaries</strong></p>
+<p class="v2-p">Write queries that return:</p>
+<ol class="v2-ol">
+<li>Each student's name with the <strong>total</strong> of all their scores, highest total first (only students who have results).</li>
+<li>The name and subject of every result below 60.</li>
+<li>The subject with the highest average score.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>-- 1
+SELECT s.name, SUM(r.score) AS total
+FROM students AS s
+JOIN results AS r ON r.student_id = s.id
+GROUP BY s.id
+ORDER BY total DESC;</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">name | total<br/>Ada | 142<br/>Tunde | 125<br/>Bola | 108<br/>Chika | 91</p>
+</blockquote>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>-- 2
+SELECT s.name, r.subject, r.score
+FROM students AS s JOIN results AS r ON r.student_id = s.id
+WHERE r.score &lt; 60;
+-- Tunde Maths 55, Bola English 48
+
+-- 3
+SELECT subject, AVG(score) AS average
+FROM results
+GROUP BY subject
+ORDER BY average DESC
+LIMIT 1;
+-- Maths | 71.0</code></pre></div></div>
+<p class="v2-p">Check (1): Ada 78 + 64 = 142, Tunde 55 + 70 = 125, Bola 48 + 60 = 108, Chika 91.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Change data safely</strong></p>
+<ol class="v2-ol">
+<li>Give every Maths score a 3-mark bonus, but never above 100.</li>
+<li>Delete all results belonging to Bola, then delete Bola.</li>
+<li>Explain what would go wrong if you deleted Bola <strong>first</strong> with foreign keys enabled.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>-- 1
+UPDATE results
+SET score = MIN(score + 3, 100)
+WHERE subject = 'Maths';
+
+-- 2 (children first, then the parent)
+DELETE FROM results  WHERE student_id = 4;
+DELETE FROM students WHERE id = 4;</code></pre></div></div>
+<p class="v2-p">In SQLite, <code>MIN(a, b)</code> with two arguments returns the smaller value, which is a neat way to cap a number.</p>
+<p class="v2-p"><strong>3:</strong> with <code>PRAGMA foreign_keys = ON</code>, deleting the student first fails, because two result rows still point to student 4 (the database refuses to leave <strong>orphans</strong>). Without enforcement it would succeed and leave results pointing at a student who no longer exists. Declaring <code>ON DELETE CASCADE</code> on the foreign key makes the database delete the child rows for you (Room supports this in <code>@ForeignKey(onDelete = CASCADE)</code>).</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Install DB Browser for SQLite (or use the <code>sqlite3</code> command), rebuild the sample database and run every query in this lesson. For each one, write your <strong>prediction</strong> before you run it. Count how many you got right.</p></div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: <code>UPDATE</code> or <code>DELETE</code> without <code>WHERE</code>.</strong> <em>What happens:</em> every row is changed or removed. <em>The fix:</em> write the <code>SELECT</code> with the same <code>WHERE</code> first.</p>
+<p class="v2-p"><strong>Mistake #2: <code>= NULL</code>.</strong> <em>What happens:</em> returns nothing. <em>The fix:</em> <code>IS NULL</code> and <code>IS NOT NULL</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting <code>ORDER BY</code>.</strong> <em>What happens:</em> rows come back in an unpredictable order that happens to look right until it does not. <em>The fix:</em> always sort when order matters.</p>
+<p class="v2-p"><strong>Mistake #4: Double quotes for text.</strong> <em>What happens:</em> <code>"Oyo"</code> may be treated as a column name. <em>The fix:</em> single quotes for string values.</p>
+<p class="v2-p"><strong>Mistake #5: Using <code>WHERE</code> for an aggregate.</strong> <em>The wrong code:</em> <code>WHERE AVG(score) &gt; 65</code>. <em>What happens:</em> an error. <em>The fix:</em> <code>HAVING</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Inner join drops rows with no match.</strong> <em>What happens:</em> Emeka disappears from a report. <em>The fix:</em> <code>LEFT JOIN</code>, and count a column from the right table.</p>
+<p class="v2-p"><strong>Mistake #7: Counting with <code>COUNT(*)</code> after a left join.</strong> <em>The fix:</em> <code>COUNT(right_table.id)</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Building SQL from user text.</strong> <em>What happens:</em> SQL injection. <em>The fix:</em> parameters.</p>
+<p class="v2-p"><strong>Mistake #9: Floating-point money.</strong> <em>What happens:</em> <code>0.1 + 0.2</code> rounding oddities. <em>The fix:</em> integers in kobo or cents.</p>
+<p class="v2-p"><strong>Mistake #10: Storing lists in one column.</strong> <em>The wrong design:</em> <code>subjects = 'Maths,English'</code>. <em>What happens:</em> you cannot query or join it properly. <em>The fix:</em> a separate table with one row per item.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is a primary key?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A column (or set of columns) whose value uniquely identifies each row. It must be unique and not null.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the difference between <code>WHERE</code> and <code>HAVING</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>WHERE</code> filters individual rows before grouping; <code>HAVING</code> filters groups after aggregation, so it can use aggregate functions.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why use a foreign key?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It links a row to a row in another table and lets the database keep the relationship valid, for example stopping you from creating a result for a student who does not exist.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> When does an <code>INNER JOIN</code> return fewer rows than a <code>LEFT JOIN</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">When some rows in the left table have no matching rows in the right table: the inner join drops them while the left join keeps them with NULLs.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why must queries never be built by concatenating user input?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It allows SQL injection: crafted input can change the meaning of the query, exposing or destroying data. Parameters keep input as data only.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-6-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 6, Pathway 1: Introduction to databases and SQL</a>: the official pathway for this lesson.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer" rel="noopener noreferrer">Data layer guide</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Library Database on Paper (and in SQLite)</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Design and query a small database for a <strong>school library</strong>, using only SQL. You will use these same tables as Room entities in lesson 34.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Tables: <code>members(id, name, class)</code>, <code>books(id, title, author, copies)</code>, <code>loans(id, member_id, book_id, loaned_on, returned_on)</code>. Use primary keys, <code>NOT NULL</code> and foreign keys. <code>returned_on</code> is <code>NULL</code> while a book is still out.</li>
+<li>Insert 4 members, 5 books and at least 8 loans (some returned, some not).</li>
+<li>Write queries for: (a) books currently on loan, with the member's name; (b) members who have never borrowed anything; (c) the three most borrowed books with their loan counts; (d) how many copies of each book are available right now (<code>copies</code> minus unreturned loans).</li>
+<li>Create an index that would help query (a), and explain why.</li>
+<li>Write one <code>UPDATE</code> that marks a loan as returned today, and prove with a <code>SELECT</code> that only that row changed.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> write the matching Room <code>@Entity</code> classes (without running them).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>CREATE TABLE members (
+    id    INTEGER PRIMARY KEY,
+    name  TEXT NOT NULL,
+    class TEXT NOT NULL
+);
+
+CREATE TABLE books (
+    id     INTEGER PRIMARY KEY,
+    title  TEXT NOT NULL,
+    author TEXT NOT NULL,
+    copies INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE loans (
+    id          INTEGER PRIMARY KEY,
+    member_id   INTEGER NOT NULL REFERENCES members(id),
+    book_id     INTEGER NOT NULL REFERENCES books(id),
+    loaned_on   TEXT    NOT NULL,        -- ISO date, e.g. '2026-10-01'
+    returned_on TEXT                     -- NULL while the book is out
+);
+
+CREATE INDEX idx_loans_returned ON loans(returned_on);
+CREATE INDEX idx_loans_book     ON loans(book_id);</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">sql</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>-- (a) books currently on loan, with the member
+SELECT b.title, m.name, l.loaned_on
+FROM loans AS l
+JOIN books   AS b ON b.id = l.book_id
+JOIN members AS m ON m.id = l.member_id
+WHERE l.returned_on IS NULL
+ORDER BY l.loaned_on;
+
+-- (b) members who never borrowed
+SELECT name FROM members
+WHERE id NOT IN (SELECT member_id FROM loans);
+
+-- (c) three most borrowed books
+SELECT b.title, COUNT(*) AS times_borrowed
+FROM loans AS l JOIN books AS b ON b.id = l.book_id
+GROUP BY b.id
+ORDER BY times_borrowed DESC, b.title
+LIMIT 3;
+
+-- (d) copies available right now
+SELECT b.title,
+       b.copies - COUNT(l.id) AS available
+FROM books AS b
+LEFT JOIN loans AS l
+       ON l.book_id = b.id AND l.returned_on IS NULL
+GROUP BY b.id;
+
+-- 5: mark one loan returned
+UPDATE loans SET returned_on = date('now') WHERE id = 3;
+SELECT * FROM loans WHERE id = 3;           -- shows the new date
+SELECT COUNT(*) FROM loans WHERE returned_on = date('now');   -- should be 1 if nothing else was set today</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the index on <code>returned_on</code> helps query (a) because the <code>WHERE returned_on IS NULL</code> filter can use it instead of scanning every loan; on a tiny sample database the difference is invisible, but on thousands of loans it matters. In query (d) the condition <code>l.returned_on IS NULL</code> sits in the <code>ON</code> clause, <strong>not</strong> in <code>WHERE</code>, on purpose: putting it in <code>WHERE</code> would remove books that have no active loans, hiding fully available books (the same left-join trap from the lesson). Because you invented the data, predicted results are yours to check by hand. For the stretch goal, <code>Member</code>, <code>Book</code> and <code>Loan</code> become <code>@Entity</code> data classes, with <code>Loan</code> declaring two <code>@ForeignKey</code> entries and <code>returned_on</code> as a nullable <code>String?</code> or <code>Long?</code> property.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 32 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-32-introduction-to-databases-and-sql</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 32 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Tables, Rows, Columns and Keys</li><li>✅ Step-by-Step Build 1: Create the Sample Database</li><li>✅ Reading Data: SELECT</li><li>✅ Changing Data: INSERT, UPDATE, DELETE</li><li>✅ Summaries: Aggregate Functions, GROUP BY, HAVING</li><li>✅ Combining Tables: JOIN</li><li>✅ Design: Why Two Tables?</li><li>✅ From SQL to Android: SQLite and Room</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_31.html" class="ln-btn">&#8592; Lesson 31</a><a href="lesson_33.html" class="ln-btn primary">Lesson 33 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 32 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

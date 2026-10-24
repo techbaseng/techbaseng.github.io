@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 49: Prepare Your App for Release — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l49">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 49 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 49</div>
+      <h1>Prepare Your App for Release</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Release Pipeline for Class Register</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 49</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Get a release build ready: application ID, versioning, signing, Play App Signing, App Bundles, R8 and testing tracks.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Release Pipeline for Class Register</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">An app that runs on your emulator is not yet an app that people can install. Between "it works on my laptop" and "it is on Google Play" there is a set of steps: choose a permanent identity, set version numbers, shrink and protect your code, <strong>sign</strong> the app with a key only you hold, build an <strong>Android App Bundle</strong>, and test it with real users before the world sees it. Mistakes here are expensive. A lost signing key can mean you can never update your app, and a debug build uploaded by accident can leak secrets.</p>
+<p class="v2-p">This lesson is the foundation for the <strong>Google Play Store Listing Certificate</strong> modules in lessons 50–53 and covers the <em>Preparing and publishing an app</em> material from the Android developer documentation (https://developer.android.com/studio/publish). It also follows the final steps of the <em>Android Basics with Compose</em> programme.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the difference between <strong>debug</strong> and <strong>release</strong> builds.</li>
+<li>Set and understand <code>applicationId</code>, <code>versionCode</code> and <code>versionName</code>.</li>
+<li>Create an <strong>upload key</strong>, store it safely, and configure Gradle to sign a release build without putting passwords in source control.</li>
+<li>Explain <strong>Play App Signing</strong> and why Google holds the app signing key.</li>
+<li>Build an <strong>Android App Bundle (AAB)</strong> and explain how it differs from an APK.</li>
+<li>Turn on <strong>R8</strong> (shrinking, obfuscation and optimisation) and write keep rules.</li>
+<li>Meet Google Play's <strong>target API level</strong> requirement.</li>
+<li>Test with <strong>internal, closed, open</strong> tracks and read the <strong>pre-launch report</strong>.</li>
+<li>Run through a <strong>release checklist</strong>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a release is a <strong>process</strong>, not a button. Make it repeatable, write it down, and never depend on one person's memory or one person's laptop.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Gradle files, Kotlin DSL and version catalogs</strong> (lessons 3 and 5).</li>
+<li><strong>Build variants</strong> <code>debug</code> and <code>release</code> (lesson 5).</li>
+<li><strong>Manifest permissions</strong> (lesson 29).</li>
+<li><strong>Running on a physical device</strong> (lesson 5).</li>
+<li><strong>Android Studio tools</strong> (lesson 44).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: The Journey from Code to Store</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> source code
+     |
+     |  Gradle build (release variant)
+     v
+ compile -&gt; R8 shrink/obfuscate/optimise -&gt; package -&gt; SIGN (upload key)
+     |
+     v
+ app bundle (.aab)  ---- upload ----&gt;  Google Play Console
+                                            |
+                                  Play re-signs with the app signing key
+                                            |
+                                  generates optimised APKs per device
+                                            |
+                                            v
+                                     user's phone installs</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>APK</strong></td>
+<td>Android Package: the installable file. One APK contains everything for all devices</td>
+</tr>
+<tr>
+<td><strong>AAB</strong> (Android App Bundle)</td>
+<td>The <strong>publishing format</strong> you upload to Play. Google builds device-specific APKs from it, so downloads are smaller</td>
+</tr>
+<tr>
+<td><strong>Upload key</strong></td>
+<td>The key <strong>you</strong> keep and use to sign the file you upload</td>
+</tr>
+<tr>
+<td><strong>App signing key</strong></td>
+<td>The key Google Play uses to sign APKs delivered to users (managed by Play App Signing)</td>
+</tr>
+<tr>
+<td><strong>Keystore</strong></td>
+<td>A file that holds one or more keys, protected by passwords</td>
+</tr>
+<tr>
+<td><strong>Alias</strong></td>
+<td>The name of a key inside a keystore</td>
+</tr>
+<tr>
+<td><strong>Track</strong></td>
+<td>A release channel in Play Console: internal, closed, open, production</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Journey from Code to Store</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Step-by-Step Build 1: Application ID and Version Numbers</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">applicationId: your app's permanent identity</h3>
+<p class="v2-p">Open <code>app/build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    namespace = "com.techbase.classregister"
+
+    defaultConfig {
+        applicationId = "com.techbase.classregister"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Use the <code>targetSdk</code> and <code>minSdk</code> that Android Studio's current template chooses and that Google Play requires: see the target API section below. The numbers above are an example.)</p>
+<ul class="v2-ul">
+<li><strong><code>namespace</code></strong> is the package used for the generated <code>R</code> class and your Kotlin code organisation. It is <em>not</em> what users see.</li>
+<li><strong><code>applicationId</code></strong> is the <strong>unique identifier of your app on the device and on Google Play</strong>. It must be unique across all of Google Play, uses lowercase letters, digits, underscores and dots, has at least two segments, and <strong>can never be changed after you publish</strong>, because a different ID means a different app. Choose it carefully, typically a reversed domain you control: <code>com.techbase.classregister</code>. Do not use <code>com.example</code>, which Google Play rejects.</li>
+<li>If the namespace and applicationId differ, that is fine and common.</li>
+</ul>
+<h3 class="v2-h3">versionCode and versionName</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Who sees it</th>
+<th>Rules</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>versionCode</code></td>
+<td>Integer</td>
+<td>Android and Play (not users)</td>
+<td>Must <strong>increase</strong> with every upload. 1, 2, 3... A higher number means newer. Maximum 2,100,000,000</td>
+</tr>
+<tr>
+<td><code>versionName</code></td>
+<td>String</td>
+<td>Users</td>
+<td>Free text such as "1.0.0" or "2.3 beta"</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Google Play <strong>rejects</strong> an upload whose <code>versionCode</code> is not higher than all previous uploads of that app on any track. A tidy approach is to derive the version from a single place, for example <code>gradle.properties</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">gradle.properties</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>APP_VERSION_CODE=7
+APP_VERSION_NAME=1.2.0</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    defaultConfig {
+        versionCode = (project.property("APP_VERSION_CODE") as String).toInt()
+        versionName = project.property("APP_VERSION_NAME") as String
+    }
+}</code></pre></div></div>
+<p class="v2-p">Use <strong>semantic versioning</strong> for <code>versionName</code>: MAJOR.MINOR.PATCH. Increase MAJOR for big or breaking changes, MINOR for new features, PATCH for fixes. Bigger teams generate <code>versionCode</code> from the CI build number so that it increases automatically.</p>
+<h3 class="v2-h3">The app name and icon</h3>
+<p class="v2-p">Set <code>android:label="@string/app_name"</code> in the manifest, and make a proper <strong>adaptive icon</strong> (lesson 21, Image Asset Studio). Check the name looks right on a home screen where it is truncated to roughly 12 characters.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Application ID and Version Numbers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Step-by-Step Build 2: Build Types and What Release Changes</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Gradle has two default build types. You can add more (for example <code>staging</code>).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>android {
+    buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+            isDebuggable = true
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            // signingConfig is added in the signing section below
+        }
+    }
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Setting</th>
+<th>Debug</th>
+<th>Release</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Debuggable</td>
+<td>Yes</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td>Code shrinking / obfuscation (R8)</td>
+<td>Off</td>
+<td><strong>On</strong></td>
+</tr>
+<tr>
+<td>Signed with</td>
+<td>An automatic debug key</td>
+<td><strong>Your upload key</strong></td>
+</tr>
+<tr>
+<td>Logging</td>
+<td>Verbose</td>
+<td>Minimal; remove sensitive logs</td>
+</tr>
+<tr>
+<td>Server URLs / API keys</td>
+<td>Test</td>
+<td>Production</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Optimised</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>applicationIdSuffix = ".debug"</code> lets a debug and a release build be installed on the <strong>same phone</strong> at the same time because they have different IDs. Use <code>BuildConfig</code> fields (enable with <code>buildFeatures { buildConfig = true }</code>) and per-build-type resources to switch environments, <strong>not</strong> <code>if (BuildConfig.DEBUG)</code> scattered through code.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Never ship a debuggable build.</strong> Play rejects an uploaded bundle with <code>debuggable=true</code>, and it is a security risk.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Build Types and What Release Changes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Step-by-Step Build 3: Signing</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Why apps are signed</h3>
+<p class="v2-p">Android requires every installed app to be <strong>digitally signed</strong>. The signature proves two things: the update came from the same publisher as the original, and the file was not changed after signing. Lose the key, or let someone steal it, and you lose control of your app.</p>
+<h3 class="v2-h3">Play App Signing: the modern model</h3>
+<p class="v2-p">With <strong>Play App Signing</strong> (required for new apps on Google Play):</p>
+<ol class="v2-ol">
+<li><strong>Google</strong> holds the <strong>app signing key</strong> in its secure infrastructure and signs the APKs delivered to users.</li>
+<li><strong>You</strong> create an <strong>upload key</strong> and use it to sign your AAB before upload. Google verifies the upload signature, strips it and re-signs with the app signing key.</li>
+<li>If you <strong>lose your upload key</strong>, you can <strong>request a reset</strong> from Google, because the app signing key (which users' phones trust) is safe. In the old model, losing the only key meant you could never update the app again.</li>
+</ol>
+<p class="v2-p">Even so: guard the upload key carefully, because anyone with it could upload an update to your app (if they also have Console access).</p>
+<h3 class="v2-h3">Create an upload keystore in Android Studio</h3>
+<ol class="v2-ol">
+<li><strong>Build → Generate Signed App Bundle / APK…</strong></li>
+<li>Choose <strong>Android App Bundle</strong>, then <strong>Next</strong>.</li>
+<li>Under <strong>Key store path</strong> click <strong>Create new…</strong>.</li>
+<li>Choose a location <strong>outside your project folder</strong> (for example <code>~/keys/techbase-upload.jks</code>), set a strong <strong>keystore password</strong>, an <strong>alias</strong> (for example <code>upload</code>), a <strong>key password</strong>, a <strong>validity of at least 25 years</strong> (Google requires the key to be valid beyond October 2033; 25+ years is the usual guidance) and fill the certificate fields (name, organisation, country code <code>NG</code>).</li>
+<li>Click <strong>OK</strong>, then continue the wizard.</li>
+</ol>
+<p class="v2-p">Or from the command line (the <code>keytool</code> that ships with the JDK):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>keytool -genkeypair -v \
+  -keystore ~/keys/techbase-upload.jks \
+  -alias upload \
+  -keyalg RSA -keysize 2048 \
+  -validity 10000</code></pre></div></div>
+<p class="v2-p"><code>-validity 10000</code> is in <strong>days</strong> (about 27 years). The tool asks for passwords and details.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Back up the keystore and write the passwords in a password manager</strong>, in at least two secure places (for example an encrypted drive and your organisation's password manager). <strong>Never commit the keystore or its passwords to Git.</strong> Add <code>*.jks</code>, <code>*.keystore</code> and <code>keystore.properties</code> to <code>.gitignore</code>.</p>
+</blockquote>
+<h3 class="v2-h3">Configure Gradle to sign without exposing secrets</h3>
+<p class="v2-p">Create a file <code>keystore.properties</code> in the <strong>project root</strong> (and add it to <code>.gitignore</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">keystore.properties</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>storeFile=/home/you/keys/techbase-upload.jks
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=upload
+keyPassword=YOUR_KEY_PASSWORD</code></pre></div></div>
+<p class="v2-p">Then read it in <code>app/build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import java.io.FileInputStream
+import java.util.Properties
+
+val keystoreProperties = Properties().apply {
+    val file = rootProject.file("keystore.properties")
+    if (file.exists()) load(FileInputStream(file))
+}
+
+android {
+    signingConfigs {
+        create("release") {
+            if (keystoreProperties.isNotEmpty()) {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The <code>if (keystoreProperties.isNotEmpty())</code> guard lets teammates and CI jobs without the key still <em>sync</em> the project (they just cannot produce a signed release). In CI, supply the same values through <strong>encrypted secrets</strong> and write the file at build time, or read environment variables (<code>System.getenv("STORE_PASSWORD")</code>).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Signing</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Step-by-Step Build 4: App Bundles and Testing the Release Build</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Build the bundle</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew bundleRelease</code></pre></div></div>
+<p class="v2-p">The output is <code>app/build/outputs/bundle/release/app-release.aab</code>. For a quick on-device APK test of the <strong>release variant</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew assembleRelease</code></pre></div></div>
+<p class="v2-p">producing <code>app/build/outputs/apk/release/app-release.apk</code> (signed with your release config). In Android Studio use the <strong>Build Variants</strong> panel to switch the active variant to <code>release</code> and run it on a device, which is the correct way to test what users will really get.</p>
+<h3 class="v2-h3">Why AAB?</h3>
+<p class="v2-p">An APK must contain resources for every screen density, every CPU architecture and every language. An <strong>App Bundle</strong> contains all of them <em>separately</em>, and Play assembles a <strong>split APK set</strong> just for each user's phone. Typical results: noticeably smaller downloads and installs, which matters a great deal for users on limited data plans or low-storage phones. AAB is <strong>required</strong> for new apps on Google Play.</p>
+<p class="v2-p">You can test how Play will split your bundle locally with <strong>bundletool</strong> (a command-line tool from Google):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># Build a set of APKs for a connected device from the bundle
+java -jar bundletool.jar build-apks \
+  --bundle=app/build/outputs/bundle/release/app-release.aab \
+  --output=app.apks \
+  --ks=/home/you/keys/techbase-upload.jks --ks-key-alias=upload
+
+# Install exactly what that device would receive
+java -jar bundletool.jar install-apks --apks=app.apks</code></pre></div></div>
+<p class="v2-p">(Download <code>bundletool</code> from its official GitHub releases page; the exact command options are documented there.)</p>
+<h3 class="v2-h3">Inspect the final APK</h3>
+<p class="v2-p"><strong>Build → Analyze APK…</strong> opens a release APK or AAB and shows what takes space: <code>classes.dex</code>, resources, native libraries, assets. Large images and unused libraries are the common culprits. Consider WebP images, vector drawables and removing unused dependencies.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: App Bundles and Testing the Release Build</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Step-by-Step Build 5: R8 Shrinking, Obfuscation and Keep Rules</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><code>isMinifyEnabled = true</code> turns on <strong>R8</strong>, Android's code shrinker. It does three things:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Feature</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shrinking</strong></td>
+<td>Removes classes and methods your app never uses</td>
+</tr>
+<tr>
+<td><strong>Obfuscation</strong></td>
+<td>Renames classes and members to short names (<code>a</code>, <code>b</code>) to make reverse engineering harder and code smaller</td>
+</tr>
+<tr>
+<td><strong>Optimisation</strong></td>
+<td>Rewrites code for speed (inlining and more)</td>
+</tr>
+<tr>
+<td><code>isShrinkResources = true</code></td>
+<td>Also removes unused resources (layouts, images, strings)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Because R8 analyses code statically, it can <strong>remove or rename things your app uses indirectly</strong> (via reflection, JSON field names, native code). The usual symptoms: the release app <strong>crashes</strong> with <code>ClassNotFoundException</code> or <code>NoSuchMethodException</code>, or JSON parsing silently returns empty fields, while the debug app works. The cure is a <strong>keep rule</strong> in <code>proguard-rules.pro</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">proguard-rules.pro</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code># Keep the data classes used with Gson/Moshi reflection
+-keep class com.techbase.classregister.data.remote.dto.** { *; }
+
+# Keep enum names used in serialisation
+-keepclassmembers enum * { *; }
+
+# Keep line numbers in stack traces (helps Play crash reports)
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile</code></pre></div></div>
+<p class="v2-p">Good news: modern libraries (Room, Retrofit with kotlinx.serialization, Hilt, WorkManager, Compose) ship their <strong>own consumer rules</strong> and need little or none from you. Most keep rules you will write are for <strong>your own classes accessed by reflection</strong>. Always <strong>read the library's documentation</strong> for required rules and <strong>test the release build thoroughly</strong>.</p>
+<h3 class="v2-h3">Mapping file</h3>
+<p class="v2-p">R8 produces a <strong>mapping file</strong> (<code>app/build/outputs/mapping/release/mapping.txt</code>) that translates obfuscated stack traces back to readable names. When you upload a bundle built with R8, Android Studio's bundle and Play Console accept the mapping automatically in modern setups (it is included in the bundle's metadata); keep a copy of the mapping file for each released version anyway, since you cannot reconstruct it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: R8 Shrinking, Obfuscation and Keep Rules</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Step-by-Step Build 6: Policy, Target API and Other Requirements</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Google Play has rules that change, so <strong>always read the current Help pages</strong>.</p>
+<h3 class="v2-h3">Target API level</h3>
+<p class="v2-p">At the time of writing (October 2026), the official page states that from <strong>August 31, 2026</strong>, <strong>new apps and app updates</strong> must target <strong>Android 16 (API level 36) or higher</strong> (with lower requirements for Wear OS, Automotive, TV and XR), and existing apps must target at least Android 15 (API 35) to stay available to new users on newer devices. A one-time extension to November 1, 2026 can be requested in Play Console. Check the current page before every release: https://developer.android.com/google/play/requirements/target-sdk.</p>
+<p class="v2-p">In Gradle, <code>targetSdk</code> tells Android <em>which behaviour changes your app has been tested against</em>; <code>compileSdk</code> is the SDK you compile with (should be at least <code>targetSdk</code>); <code>minSdk</code> is the oldest Android version you support. Raising <code>targetSdk</code> opts you into new behaviour (for example edge-to-edge, notification and background restrictions), so <strong>read the behaviour changes</strong> for each API level and test.</p>
+<h3 class="v2-h3">Other items to check before publishing</h3>
+<ul class="v2-ul">
+<li><strong>Permissions:</strong> request only what you need; explain why (lesson 29 for <code>INTERNET</code>). Sensitive permissions (SMS, call logs, background location) need a Play Console declaration and may be refused.</li>
+<li><strong>Data safety form and privacy policy:</strong> describe what data you collect and share. If your app handles personal data you need a <strong>privacy policy URL</strong>.</li>
+<li><strong>Content rating questionnaire:</strong> completed in Play Console.</li>
+<li><strong>Ads, in-app purchases, subscriptions:</strong> policies apply.</li>
+<li><strong>Family and children's apps:</strong> stricter rules.</li>
+<li><strong>App access:</strong> if reviewers need a login, provide test credentials.</li>
+<li><strong>64-bit and 16 KB page-size requirements:</strong> native libraries must meet current requirements. If your app has no native code (pure Kotlin/Compose) this is automatic; check the documentation if you include native libraries.</li>
+<li><strong>Developer verification:</strong> Google is introducing verification requirements for developers; check the current Play and Android developer-verification announcements.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Policy, Target API and Other Requirements</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Step-by-Step Build 7: Testing Tracks and the Pre-Launch Report</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Never go straight from your laptop to everyone. Play Console offers <strong>tracks</strong>:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Track</th>
+<th>Audience</th>
+<th>Use it for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Internal testing</strong></td>
+<td>Up to 100 testers you list by email</td>
+<td>Quick checks of every build; available within minutes</td>
+</tr>
+<tr>
+<td><strong>Closed testing</strong></td>
+<td>Invited testers (email lists or Google Groups)</td>
+<td>Beta with friends, classmates, a client</td>
+</tr>
+<tr>
+<td><strong>Open testing</strong></td>
+<td>Anyone can join from the store listing</td>
+<td>Public beta</td>
+</tr>
+<tr>
+<td><strong>Production</strong></td>
+<td>Everyone, optionally with <strong>staged rollout</strong> (for example 10% of users)</td>
+<td>The real release</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">New <strong>personal</strong> developer accounts (created after November 13, 2023) must run a <strong>closed test with at least 12 testers opted in continuously for 14 days</strong> before they can apply for production access, according to Play Console Help at the time of writing. Organisation accounts are treated differently. Check the current rule in Help before planning your launch date.</p>
+<h3 class="v2-h3">The pre-launch report</h3>
+<p class="v2-p">When you upload to a testing track, Google can automatically install your app on a set of real devices and <strong>crawl</strong> it, then produce a <strong>pre-launch report</strong> with crashes, performance, accessibility checks (the Accessibility Scanner-style findings of lesson 48), security vulnerabilities and screenshots of devices. Read it before you promote a release.</p>
+<h3 class="v2-h3">Staged rollout and monitoring</h3>
+<p class="v2-p">In production choose a <strong>staged rollout</strong> percentage, watch <strong>Android vitals</strong> (crash rate, ANR rate) and reviews, then increase. If something is wrong, <strong>halt the rollout</strong>. You cannot "un-publish" an update for users who already have it, so you need to release a fix with a higher <code>versionCode</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Testing Tracks and the Pre-Launch Report</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Step-by-Step Build 8: The Release Checklist</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">Copy this into your repository as <code>RELEASE.md</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>BEFORE BUILD
+[ ] applicationId final and unique (not com.example)
+[ ] versionCode increased; versionName updated; changelog written
+[ ] targetSdk meets the current Play requirement; tested on that API
+[ ] minSdk decision documented
+[ ] All debug code, test endpoints and logs with sensitive data removed
+[ ] API keys not hard-coded in source (use secrets plugin or server-side keys)
+[ ] Permissions reviewed; unused ones removed
+[ ] Strings translated or reviewed; no placeholder text
+
+BUILD
+[ ] Release variant selected; isMinifyEnabled and isShrinkResources true
+[ ] keystore.properties present; keystore NOT in version control
+[ ] ./gradlew clean bundleRelease succeeds
+[ ] Release APK tested on at least 2 real devices (one low-end)
+[ ] Core flows tested after R8 (login, save, network, rotate, back)
+[ ] mapping.txt archived with the version
+
+PLAY CONSOLE
+[ ] Upload AAB to internal track first
+[ ] Data safety, content rating, privacy policy and app access complete
+[ ] Pre-launch report reviewed
+[ ] Store listing complete (lessons 50-53)
+[ ] Staged rollout configured
+
+AFTER
+[ ] Tag the commit: git tag v1.2.0
+[ ] Watch Android vitals and reviews for 48 hours</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: The Release Checklist</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Make a release build</strong></p>
+<p class="v2-p">Take any project from this course (for example the Class Register or Naija Snacks). Choose a real <code>applicationId</code>, set version 1/1.0.0, create an upload keystore <strong>outside</strong> the project, add <code>keystore.properties</code> to <code>.gitignore</code>, configure the signing, and produce a signed <code>app-release.aab</code>. List the commands and files involved.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">Steps and artefacts:</p>
+<ol class="v2-ol">
+<li><code>applicationId = "com.yourname.classregister"</code>, <code>versionCode = 1</code>, <code>versionName = "1.0.0"</code> in <code>defaultConfig</code>.</li>
+<li><code>keytool -genkeypair -v -keystore ~/keys/upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000</code>.</li>
+<li>Create <code>keystore.properties</code> at the root with <code>storeFile</code>, <code>storePassword</code>, <code>keyAlias</code> and <code>keyPassword</code>; add these lines to <code>.gitignore</code>:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>keystore.properties
+*.jks
+*.keystore</code></pre></div></div>
+<ol class="v2-ol" start="4">
+<li>Add the <code>signingConfigs.create("release") { ... }</code> block reading the properties and set <code>signingConfig = signingConfigs.getByName("release")</code> in the <code>release</code> build type.</li>
+<li><code>./gradlew clean bundleRelease</code>.</li>
+<li>Find <code>app/build/outputs/bundle/release/app-release.aab</code>.</li>
+<li>Check with <code>git status</code> that no key file or properties file appears as untracked.</li>
+</ol></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix a release-only crash</strong></p>
+<p class="v2-p">Your debug app parses JSON into a <code>data class Student(val name: String, val score: Int)</code> using a reflection-based library. The release build shows empty names. Explain why, and give two fixes.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">R8 <strong>renamed</strong> the fields of <code>Student</code> (<code>name</code> became <code>a</code>), so reflection-based JSON mapping no longer finds the JSON keys. Fix 1: add a keep rule for the data classes, such as <code>-keep class com.yourname.app.data.remote.dto.** { *; }</code>. Fix 2: use a serialisation approach that does not rely on field names at runtime: <code>kotlinx.serialization</code> with <code>@Serializable</code> generates code at compile time (and annotate names with <code>@SerialName</code>), so R8 can safely rename the fields. Then re-test the release build, not only the debug build.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Version numbers</strong></p>
+<p class="v2-p">Your last upload was <code>versionCode = 12</code>, <code>versionName = "1.3.0"</code>. You fix a crash. What should the new values be, and what happens if you upload <code>versionCode = 12</code> again?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">New values: <code>versionCode = 13</code> (any higher integer) and <code>versionName = "1.3.1"</code> (a patch release). Uploading <code>versionCode = 12</code> again is rejected by Play Console with an error saying the version code has already been used (or is not higher than the existing one); <code>versionCode</code> must increase on every upload to any track.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Keeping <code>com.example</code> as the application ID.</strong> <em>Symptom:</em> Play rejects the upload. <em>Fix:</em> choose a real, unique ID before the first release.</p>
+<p class="v2-p"><strong>Mistake #2: Committing the keystore or passwords.</strong> <em>Symptom:</em> anyone with repository access can sign as you. <em>Fix:</em> <code>.gitignore</code>, secrets in CI, rotate if leaked (upload key reset through Play Console).</p>
+<p class="v2-p"><strong>Mistake #3: Losing the only copy of the keystore.</strong> <em>Fix:</em> back up; Play App Signing allows an upload-key reset, but it takes time.</p>
+<p class="v2-p"><strong>Mistake #4: Forgetting to raise <code>versionCode</code>.</strong> <em>Symptom:</em> upload rejected. <em>Fix:</em> automate it.</p>
+<p class="v2-p"><strong>Mistake #5: Only testing the debug build.</strong> <em>Symptom:</em> release-only R8 crashes. <em>Fix:</em> test the release variant on real devices.</p>
+<p class="v2-p"><strong>Mistake #6: Uploading an APK instead of an AAB.</strong> <em>Symptom:</em> not accepted for new apps. <em>Fix:</em> <code>bundleRelease</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Hard-coding API keys in source.</strong> <em>Symptom:</em> extractable from the APK. <em>Fix:</em> keep real secrets on a server; for client-side keys, use restrictions (package name and signing certificate) in the provider's console.</p>
+<p class="v2-p"><strong>Mistake #8: Ignoring the target API deadline.</strong> <em>Symptom:</em> cannot publish updates. <em>Fix:</em> track the requirement and test on the new API early.</p>
+<p class="v2-p"><strong>Mistake #9: Shipping with logging of personal data.</strong> <em>Fix:</em> strip or avoid sensitive logs.</p>
+<p class="v2-p"><strong>Mistake #10: Releasing to 100% immediately.</strong> <em>Fix:</em> internal, closed, then staged production rollout.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between <code>versionCode</code> and <code>versionName</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>versionCode</code> is an integer used by Android and Play to order versions; it must increase with each upload. <code>versionName</code> is a human-readable string shown to users, such as "1.3.1".</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does Play App Signing do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Google stores and uses the app signing key to sign the APKs delivered to users, while you sign uploads with a separate upload key that can be reset if lost.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why does the release build sometimes crash when the debug build does not?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">R8 shrinks and obfuscates code in release builds and can remove or rename classes and fields used through reflection. Missing keep rules cause crashes or missing data. Debug builds do not run R8.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is an Android App Bundle and why is it used?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It is the publishing format that contains all code and resources; Google Play builds optimised, smaller APKs for each user's device from it, so downloads are smaller.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why use testing tracks before production?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">They let you check a build with limited audiences and automated tests (the pre-launch report) and fix problems before everyone sees it, and a staged production rollout limits the damage of any remaining bug.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/studio/publish" rel="noopener noreferrer">Prepare your app for release (Android Studio docs)</a></li>
+<li><a href="https://developer.android.com/google/play/requirements/target-sdk" rel="noopener noreferrer">Target API level requirements</a></li>
+<li><a href="https://support.google.com/googleplay/android-developer" rel="noopener noreferrer">Google Play Console Help</a></li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Release Pipeline for Class Register</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Take the <strong>Class Register</strong> (or any app you built) from debug-only to a <strong>repeatable, signed, shrunk release</strong>, with documentation another developer could follow.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A real <code>applicationId</code>, <code>versionCode</code>/<code>versionName</code> driven from <code>gradle.properties</code>.</li>
+<li>An upload keystore <strong>outside</strong> the repo, <code>keystore.properties</code> ignored by Git, and a signing config that tolerates its absence.</li>
+<li><code>release</code> with R8 and resource shrinking, and a <code>proguard-rules.pro</code> with at least the line-number rules.</li>
+<li>A <code>debug</code> build type with an <code>applicationIdSuffix</code> so both builds can be installed together.</li>
+<li><code>./gradlew bundleRelease</code> produces a signed AAB; a release APK built with <code>assembleRelease</code> is installed and the core flows tested.</li>
+<li>A <code>RELEASE.md</code> checklist in the repo.</li>
+<li>Record in a short note: AAB size, APK size and what Analyze APK showed as the biggest item.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> write a GitHub Actions workflow that builds the bundle in CI using encrypted secrets for the keystore (base64-encoded and decoded at build time).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p"><code>gradle.properties</code> additions:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">gradle.properties</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>APP_VERSION_CODE=1
+APP_VERSION_NAME=1.0.0</code></pre></div></div>
+<p class="v2-p"><code>app/build.gradle.kts</code> (key parts):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import java.io.FileInputStream
+import java.util.Properties
+
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+}
+
+val keystoreProperties = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) load(FileInputStream(f))
+}
+
+android {
+    namespace = "com.yourname.classregister"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.yourname.classregister"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = (project.property("APP_VERSION_CODE") as String).toInt()
+        versionName = project.property("APP_VERSION_NAME") as String
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystoreProperties.isNotEmpty()) {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>.gitignore</code> lines:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>keystore.properties
+*.jks
+*.keystore
+local.properties</code></pre></div></div>
+<p class="v2-p"><code>proguard-rules.pro</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">proguard-rules.pro</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile</code></pre></div></div>
+<p class="v2-p">Commands:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew clean bundleRelease
+./gradlew assembleRelease
+adb install -r app/build/outputs/apk/release/app-release.apk</code></pre></div></div>
+<p class="v2-p"><strong>Optional CI workflow</strong> (<code>.github/workflows/release.yml</code>):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">yaml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>name: Release bundle
+on:
+  push:
+    tags: ["v*"]
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Restore keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d &gt; "$RUNNER_TEMP/upload.jks"
+          cat &gt; keystore.properties &lt;&lt;EOF
+          storeFile=$RUNNER_TEMP/upload.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+      - run: ./gradlew bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aab
+          path: app/build/outputs/bundle/release/*.aab</code></pre></div></div>
+<p class="v2-p">Check the current versions of the actions and the Java version your Android Gradle Plugin requires. <strong>Expected result:</strong> the signed <code>.aab</code> appears in <code>app/build/outputs/bundle/release/</code>, the release APK installs next to the debug build (different IDs), and nothing secret is tracked by Git. Your note should record the two sizes and the largest item from Analyze APK (commonly <code>classes.dex</code> or images).</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 49 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-49-prepare-your-app-for-release</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 49 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Journey from Code to Store</li><li>✅ Step-by-Step Build 1: Application ID and Version Numbers</li><li>✅ Step-by-Step Build 2: Build Types and What Release Changes</li><li>✅ Step-by-Step Build 3: Signing</li><li>✅ Step-by-Step Build 4: App Bundles and Testing the Release Build</li><li>✅ Step-by-Step Build 5: R8 Shrinking, Obfuscation and Keep Rules</li><li>✅ Step-by-Step Build 6: Policy, Target API and Other Requirements</li><li>✅ Step-by-Step Build 7: Testing Tracks and the Pre-Launch Report</li><li>✅ Step-by-Step Build 8: The Release Checklist</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_48.html" class="ln-btn">&#8592; Lesson 48</a><a href="lesson_50.html" class="ln-btn primary">Lesson 50 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 49 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>
