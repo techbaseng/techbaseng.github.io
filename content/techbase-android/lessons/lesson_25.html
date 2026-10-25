@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 25: UI State, StateFlow and Unit-Testing the ViewModel — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l25">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 25 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 25</div>
+      <h1>UI State, StateFlow and Unit-Testing the ViewModel</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Tested Score Keeper</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 25</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Model screens with a UI state class, expose it with StateFlow, and write unit tests for ViewModel logic. Includes the Dessert Clicker ViewModel practice.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Tested Score Keeper</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 24 you moved Dessert Clicker's state into a ViewModel. That was the first half of the job. The second half is the payoff: because the logic now lives in a plain Kotlin class, you can <strong>test it automatically</strong> in milliseconds, with no emulator, no phone and no tapping.</p>
+<p class="v2-p">In this lesson you will look more closely at <strong>UI state</strong> and <code>StateFlow</code>, learn what <code>SavedStateHandle</code> adds, and write real <strong>unit tests</strong> for a ViewModel using JUnit and the coroutines test library. You will finish the Unit 4 ViewModel work with the practice exercise of adding a ViewModel to an app that does not have one.</p>
+<p class="v2-p">This lesson covers two items from Unit 4 of the official <strong>Android Basics with Compose</strong> course: <em>Write unit tests to test the ViewModel</em> and <em>Practice: Add a ViewModel to Dessert Clicker</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Design a UI state class and update it with <code>MutableStateFlow.update</code>.</li>
+<li>Explain what a <code>StateFlow</code> is: always has a value, replays the latest to new collectors, ignores equal values.</li>
+<li>Keep small essential state across process death with <code>SavedStateHandle</code>.</li>
+<li>Write local unit tests (<code>src/test</code>) with JUnit 4 and assertions.</li>
+<li>Test code that launches coroutines with <code>runTest</code> and a test dispatcher.</li>
+<li>Explain why a <code>Dispatchers.Main</code> replacement is needed in ViewModel tests, and install one with a JUnit rule.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a test is an executable specification. Writing "after 5 taps the dessert is a Donut" as a test means you never have to re-tap by hand again.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>ViewModel and <code>MutableStateFlow</code></strong> (lesson 24).</li>
+<li><strong>Data classes and <code>copy</code></strong> (lesson 11).</li>
+<li><strong>Why test?</strong> In lesson 20 you wrote tests for a function and a composable. Today's tests target logic that has no UI at all.</li>
+<li><strong>Local versus instrumented tests.</strong> Android Studio gives you two test folders:</li>
+</ul>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Folder</th>
+<th>Runs on</th>
+<th>Speed</th>
+<th>Use for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>app/src/test</code></td>
+<td>Your computer's JVM</td>
+<td>Very fast (milliseconds)</td>
+<td>Logic: ViewModels, repositories, utilities</td>
+</tr>
+<tr>
+<td><code>app/src/androidTest</code></td>
+<td>An emulator or device</td>
+<td>Slow (seconds to minutes)</td>
+<td>UI tests, database tests that need Android</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">ViewModel logic with no Android classes belongs in <code>src/test</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: StateFlow in Depth</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p"><code>StateFlow</code> is a <strong>hot</strong>, <strong>state-holding</strong> flow:</p>
+<ul class="v2-ul">
+<li>It <strong>always has a current value</strong> (<code>.value</code>). You must give it an initial value when you create it.</li>
+<li>A new collector immediately receives the <strong>latest</strong> value.</li>
+<li>It <strong>conflates</strong>: if you set many values quickly, a slow collector may only see the latest.</li>
+<li>It ignores a new value that is <strong>equal</strong> (<code>==</code>) to the current one. This is why immutable data classes work so well: set an equal state and nothing recomposes.</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>MutableStateFlow(initial)           StateFlow (read-only view)
+  .value = new      ───────────▶     .value   (read the latest)
+  .update { old -&gt; new }             .collect { }  (observe changes)</code></pre></div></div>
+<h3 class="v2-h3">Three ways to change a <code>MutableStateFlow</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>_uiState.value = UiState()                       // 1: replace outright
+_uiState.value = _uiState.value.copy(count = 1)  // 2: read then write (NOT thread-safe)
+_uiState.update { it.copy(count = it.count + 1) } // 3: atomic read-modify-write</code></pre></div></div>
+<p class="v2-p">Option 3 is safest. If two coroutines both run option 2 at the same moment they can read the same old value and one change gets lost. <code>update</code> retries until the swap succeeds. Use it whenever the new value depends on the old one.</p>
+<h3 class="v2-h3">Designing a UI state class</h3>
+<p class="v2-p">Ask: "what does the screen need to draw?" Put exactly that in the class. Good UI state is:</p>
+<ul class="v2-ul">
+<li><strong>Immutable</strong> (<code>val</code> properties).</li>
+<li><strong>Complete</strong>: the screen can render purely from it.</li>
+<li><strong>Free of impossible combinations</strong> where possible. For a screen that loads data, a <code>sealed interface</code> often beats several booleans:</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>sealed interface NewsUiState {
+    data object Loading : NewsUiState
+    data class Success(val headlines: List&lt;String&gt;) : NewsUiState
+    data class Error(val message: String) : NewsUiState
+}</code></pre></div></div>
+<p class="v2-p">With three booleans (<code>isLoading</code>, <code>hasError</code>, <code>hasData</code>) there are eight combinations and most are nonsense. With the sealed type there are exactly three, and Kotlin's <code>when</code> forces you to handle each one. You will use this pattern in lesson 29.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: StateFlow in Depth</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Surviving Process Death with SavedStateHandle</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">In lesson 24 you saw that a ViewModel does not survive process death. <code>SavedStateHandle</code> is a small key-value map that <strong>does</strong>, because it is backed by the same saved instance state as <code>rememberSaveable</code>. The ViewModel receives it through its constructor.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.StateFlow
+
+class CounterViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
+
+    val count: StateFlow&lt;Int&gt; = savedStateHandle.getStateFlow("count", 0)
+
+    fun increment() {
+        savedStateHandle["count"] = count.value + 1
+    }
+}</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>getStateFlow(key, initialValue)</code> gives a <code>StateFlow</code> that is always in sync with the saved value.</li>
+<li><code>savedStateHandle[key] = value</code> writes the value, and it is stored for process death.</li>
+</ul>
+<p class="v2-p">With the plain <code>viewModel()</code> function in Compose, the default factory supplies the <code>SavedStateHandle</code> automatically for ViewModels whose constructor takes only a <code>SavedStateHandle</code> (or has no parameters). Anything more complex needs a factory, which lesson 30 covers.</p>
+<p class="v2-p">Keep it to small things: the selected tab, a search query, an item ID. Big data belongs in storage. The same 1 MB Bundle limit from lesson 23 applies.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Surviving Process Death with SavedStateHandle</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 1: A Testable ViewModel</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">To make testing straightforward, we will use a slightly extended Dessert Clicker ViewModel. Start from lesson 24's code. For clarity, here is the full ViewModel once more, plus one new rule: the reset function.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DessertViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker.ui
+
+import androidx.lifecycle.ViewModel
+import com.example.dessertclicker.desserts
+import com.example.dessertclicker.determineDessertIndex
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+class DessertViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(DessertUiState())
+    val uiState: StateFlow&lt;DessertUiState&gt; = _uiState.asStateFlow()
+
+    fun onDessertClicked() {
+        _uiState.update { current -&gt;
+            val sold = current.dessertsSold + 1
+            val index = determineDessertIndex(sold)
+            current.copy(
+                revenue = current.revenue + desserts[current.currentDessertIndex].price,
+                dessertsSold = sold,
+                currentDessertIndex = index,
+                currentDessertName = desserts[index].name
+            )
+        }
+    }
+
+    fun onReset() {
+        _uiState.value = DessertUiState()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Nothing in it knows about Android's UI. That is exactly why we can test it on the JVM.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: A Testable ViewModel</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 2: Your First ViewModel Test</div><div class="pc" id="chk6"></div></div><div class="pb2"><h3 class="v2-h3">Check the test dependencies</h3>
+<p class="v2-p">A new project already has JUnit 4 (<code>testImplementation(libs.junit)</code>) in <code>app/build.gradle.kts</code>. For coroutine tests you also need the coroutines test library. Add this line and sync (look up the latest stable version on the kotlinx.coroutines releases page, and use the same version as your coroutines library; the Compose and lifecycle libraries pull in coroutines for you):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    testImplementation(libs.junit)
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:&lt;same version as coroutines&gt;")
+}</code></pre></div></div>
+<p class="v2-p">(A version-catalog entry is tidier; lesson 28 shows both styles.)</p>
+<h3 class="v2-h3">The test class</h3>
+<p class="v2-p">Right-click <code>app/src/test/java/com/example/dessertclicker</code>, choose <strong>New &gt; Kotlin Class/File</strong>, and name it <code>DessertViewModelTest</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">DessertViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker
+
+import com.example.dessertclicker.ui.DessertUiState
+import com.example.dessertclicker.ui.DessertViewModel
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+
+class DessertViewModelTest {
+
+    private lateinit var viewModel: DessertViewModel
+
+    @Before
+    fun setUp() {
+        viewModel = DessertViewModel()
+    }
+
+    @Test
+    fun initialState_isCupcakeWithZeroSales() {
+        val state = viewModel.uiState.value
+        assertEquals(0, state.dessertsSold)
+        assertEquals(0, state.revenue)
+        assertEquals("Cupcake", state.currentDessertName)
+    }
+
+    @Test
+    fun oneClick_sellsOneCupcake() {
+        viewModel.onDessertClicked()
+
+        val state = viewModel.uiState.value
+        assertEquals(1, state.dessertsSold)
+        assertEquals(5, state.revenue)          // a cupcake costs 5
+        assertEquals("Cupcake", state.currentDessertName)
+    }
+
+    @Test
+    fun fiveClicks_unlockDonut() {
+        repeat(5) { viewModel.onDessertClicked() }
+
+        val state = viewModel.uiState.value
+        assertEquals(5, state.dessertsSold)
+        assertEquals(25, state.revenue)         // five cupcakes at 5 each
+        assertEquals("Donut", state.currentDessertName)
+    }
+
+    @Test
+    fun reset_returnsToInitialState() {
+        repeat(8) { viewModel.onDessertClicked() }
+
+        viewModel.onReset()
+
+        assertEquals(DessertUiState(), viewModel.uiState.value)
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">Understanding the test</h3>
+<ul class="v2-ul">
+<li><code>@Test</code> marks a function JUnit should run. Each test gets a <strong>fresh instance</strong> of the test class.</li>
+<li><code>@Before</code> runs before <strong>every</strong> test, so each starts from a new ViewModel. Tests must never depend on each other or on order.</li>
+<li><code>assertEquals(expected, actual)</code> fails the test if the values differ. Note the argument order: <strong>expected first</strong>.</li>
+<li>The test names describe behaviour (<code>fiveClicks_unlockDonut</code>). A good name tells you what broke without opening the file.</li>
+<li><code>assertEquals(DessertUiState(), viewModel.uiState.value)</code> compares whole data classes. This works because data classes generate <code>equals</code> for you.</li>
+</ul>
+<p class="v2-p">Check the arithmetic for <code>fiveClicks_unlockDonut</code>. Click 1 to 4 sell cupcakes (index 0, price 5) each, 20 in revenue. At click 5 the sold count reaches 5 <strong>after</strong> the click, but the price comes from the dessert shown <strong>before</strong> that click, which is still the cupcake, so revenue is 25. Then the index becomes 1 (Donut). The test asserts 25, matching that reasoning.</p>
+<h3 class="v2-h3">Running the tests</h3>
+<p class="v2-p">Click the green arrow beside the class name, and choose <strong>Run 'DessertViewModelTest'</strong>. A green tick means pass. Or use the terminal:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew test</code></pre></div></div>
+<p class="v2-p">Break something on purpose (change the cupcake price in <code>desserts</code>) and watch the test turn red with a message saying <code>expected:&lt;25&gt; but was:&lt;...&gt;</code>. A test you have never seen fail is a test you cannot fully trust.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Your First ViewModel Test</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 3: Testing Coroutines and Dispatchers</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Soon your ViewModels will launch coroutines with <code>viewModelScope.launch</code> (lesson 28). Consider a version that delays before applying a "bonus":</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+class BonusViewModel : ViewModel() {
+    private val _bonus = MutableStateFlow(0)
+    val bonus: StateFlow&lt;Int&gt; = _bonus.asStateFlow()
+
+    fun claimBonus() {
+        viewModelScope.launch {
+            delay(2_000)               // pretend a server call takes two seconds
+            _bonus.update { it + 100 }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Testing this naively has two problems:</p>
+<ol class="v2-ol">
+<li><code>viewModelScope</code> runs on <code>Dispatchers.Main</code>, which does <strong>not exist</strong> in a plain JVM unit test, because there is no Android main thread. The test crashes with <em>Module with the Main dispatcher had failed to initialize</em>.</li>
+<li>A real two-second <code>delay</code> would make the test slow.</li>
+</ol>
+<p class="v2-p">The solution is the <strong>coroutines test library</strong>:</p>
+<ul class="v2-ul">
+<li><code>Dispatchers.setMain(testDispatcher)</code> replaces the Main dispatcher for the test, and <code>Dispatchers.resetMain()</code> restores it afterwards.</li>
+<li><code>runTest { }</code> runs a coroutine with a <strong>virtual clock</strong>. A <code>delay(2_000)</code> inside it completes instantly, because the test scheduler skips ahead.</li>
+</ul>
+<p class="v2-p">A reusable <strong>JUnit rule</strong> installs and removes the dispatcher for every test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainDispatcherRule.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class MainDispatcherRule(
+    val testDispatcher: TestDispatcher = StandardTestDispatcher()
+) : TestWatcher() {
+
+    override fun starting(description: Description) {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    override fun finished(description: Description) {
+        Dispatchers.resetMain()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>setMain</code> and <code>resetMain</code> are marked experimental in the library, hence the <code>@OptIn</code>. Now the test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">BonusViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker
+
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+
+class BonusViewModelTest {
+
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    @Test
+    fun claimBonus_addsOneHundredAfterDelay() = runTest {
+        val viewModel = BonusViewModel()
+
+        viewModel.claimBonus()
+        assertEquals(0, viewModel.bonus.value)        // the two seconds have not passed yet
+
+        advanceUntilIdle()                            // run pending coroutines, skipping the delay
+        assertEquals(100, viewModel.bonus.value)
+    }
+}</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>@get:Rule</code> applies the rule to each test. (The <code>get:</code> is Kotlin syntax so JUnit sees the annotation on the getter.)</li>
+<li><code>StandardTestDispatcher</code> does <strong>not</strong> run launched coroutines immediately. They are queued until you advance the scheduler, which lets you assert on the "before" state.</li>
+<li><code>advanceUntilIdle()</code> runs all queued work. In Kotlin coroutines tests the <code>runTest</code> scheduler and the rule's dispatcher must <strong>share a scheduler</strong>. When you create the ViewModel inside <code>runTest</code> after <code>setMain</code>, <code>runTest</code> picks up the Main test dispatcher's scheduler automatically, so they cooperate.</li>
+</ul>
+<p class="v2-p">For the more complete treatment of flows and testing them, see lesson 33.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Testing Coroutines and Dispatchers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Testing a Flow Value Over Time</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><code>StateFlow</code> exposes <code>.value</code>, so most tests simply read it. To check the <strong>sequence</strong> of emissions you can collect into a list:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Test
+fun uiState_emitsEveryChange() = runTest {
+    val viewModel = DessertViewModelFake()
+    val seen = mutableListOf&lt;Int&gt;()
+
+    val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+        viewModel.uiState.toList(seen.let { mutableListOf() }.also { }) // placeholder
+    }
+    job.cancel()
+}</code></pre></div></div>
+<p class="v2-p">That example is deliberately <strong>not</strong> what you should write, and it is a good reminder: do not make tests clever. A StateFlow conflates updates, so collecting a list can miss intermediate values and produce flaky tests. Prefer asserting on <code>viewModel.uiState.value</code> after each action. For genuine sequences, use <code>first()</code> or the library approach shown in lesson 33.</p>
+<p class="v2-p">(That dead-end snippet is here so you learn to recognise over-engineering. Delete it from your own file.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Testing a Flow Value Over Time</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: The practice, Add a ViewModel</strong></p>
+<p class="v2-p">Take the lesson 23 Dessert Clicker <strong>before</strong> it had a ViewModel (state in <code>remember</code>), and apply the full migration yourself with only this checklist:</p>
+<ol class="v2-ol">
+<li>Create <code>DessertUiState</code>.</li>
+<li>Create <code>DessertViewModel</code> with <code>onDessertClicked</code>.</li>
+<li>Make <code>DessertClickerScreen</code> stateless.</li>
+<li>Connect through <code>viewModel()</code> and <code>collectAsStateWithLifecycle()</code>.</li>
+<li>Delete the <code>remember</code> state.</li>
+<li>Verify the rotation test passes.</li>
+</ol>
+<p class="v2-p">Then write three new tests: ten clicks give 60 revenue, twenty clicks unlock Eclair, and reset at 2 clicks gives zero.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">The migration is exactly the code in lesson 24, Builds 2 to 4. For the tests:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun tenClicks_giveSixtyRevenue() {
+    repeat(10) { viewModel.onDessertClicked() }
+    // clicks 1-5 sell cupcakes at 5 = 25; clicks 6-10 sell donuts at 10 = 50. Click 5 sells the cupcake that was on screen.
+    assertEquals(75, viewModel.uiState.value.revenue)
+}</code></pre></div></div>
+<p class="v2-p">Careful: this exercise statement said <strong>60</strong>, but the arithmetic shows <strong>75</strong>. Clicks 1 to 5 each sell the dessert shown <em>before</em> the click, which is a cupcake for clicks 1 to 5 (the donut appears after the fifth sale), so that is 5 x 5 = 25. Clicks 6 to 10 sell donuts: 5 x 10 = 50. Total 75. This is a deliberate lesson: <strong>when a test disagrees with your expectation, work through the arithmetic before touching either</strong>. The test is right and the number in the exercise was wrong. Use 75.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun twentyClicks_unlockEclair() {
+    repeat(20) { viewModel.onDessertClicked() }
+    assertEquals("Eclair", viewModel.uiState.value.currentDessertName)
+}
+
+@Test
+fun resetAfterTwoClicks_givesZero() {
+    repeat(2) { viewModel.onDessertClicked() }
+    viewModel.onReset()
+    assertEquals(0, viewModel.uiState.value.revenue)
+    assertEquals(0, viewModel.uiState.value.dessertsSold)
+}</code></pre></div></div></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Test a validation rule</strong></p>
+<p class="v2-p">Write a <code>PasswordViewModel</code> with <code>onPasswordChange(text)</code> and a UI state exposing <code>isValid</code> (true only when the password is at least 8 characters and contains a digit). Then write tests covering: empty, seven characters with a digit, eight letters without a digit, and a valid password.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class PasswordUiState(val password: String = "") {
+    val isValid: Boolean
+        get() = password.length &gt;= 8 &amp;&amp; password.any { it.isDigit() }
+}
+
+class PasswordViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(PasswordUiState())
+    val uiState: StateFlow&lt;PasswordUiState&gt; = _uiState.asStateFlow()
+
+    fun onPasswordChange(text: String) = _uiState.update { it.copy(password = text) }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+class PasswordViewModelTest {
+    private lateinit var vm: PasswordViewModel
+
+    @Before fun setUp() { vm = PasswordViewModel() }
+
+    @Test fun empty_isInvalid() = assertFalse(vm.uiState.value.isValid)
+
+    @Test fun sevenCharsWithDigit_isInvalid() {
+        vm.onPasswordChange("abcdef1")
+        assertFalse(vm.uiState.value.isValid)
+    }
+
+    @Test fun eightLettersNoDigit_isInvalid() {
+        vm.onPasswordChange("abcdefgh")
+        assertFalse(vm.uiState.value.isValid)
+    }
+
+    @Test fun eightCharsWithDigit_isValid() {
+        vm.onPasswordChange("abcdefg1")
+        assertTrue(vm.uiState.value.isValid)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why these four:</strong> they test the <strong>boundaries</strong> of each rule, which is where bugs hide.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Add a failing test on purpose, read the failure message, then fix the test. Then deliberately break the ViewModel and see which tests catch it. Count how many of your tests fail when you change one price.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Tests that depend on each other.</strong> <em>What happens:</em> test B only passes after test A ran. <em>The fix:</em> create a fresh ViewModel in <code>@Before</code>, and never share mutable state between tests.</p>
+<p class="v2-p"><strong>Mistake #2: Forgetting to replace <code>Dispatchers.Main</code>.</strong> <em>Symptom:</em> <em>Module with the Main dispatcher had failed to initialize.</em> <em>The fix:</em> use a <code>MainDispatcherRule</code> as shown.</p>
+<p class="v2-p"><strong>Mistake #3: <code>Thread.sleep</code> in tests.</strong> <em>What happens:</em> slow and flaky tests. <em>The fix:</em> <code>runTest</code> with the virtual clock and <code>advanceUntilIdle()</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Swapping expected and actual in <code>assertEquals</code>.</strong> <em>What happens:</em> the failure message is misleading. <em>The fix:</em> expected first, always.</p>
+<p class="v2-p"><strong>Mistake #5: Reading <code>.value</code> before the coroutine ran.</strong> <em>What happens:</em> the assertion sees the old state. <em>The fix:</em> advance the test scheduler before asserting.</p>
+<p class="v2-p"><strong>Mistake #6: Testing implementation, not behaviour.</strong> <em>The wrong test:</em> checking that a private function was called. <em>The fix:</em> assert on the state the user would see.</p>
+<p class="v2-p"><strong>Mistake #7: Putting Android classes in a local test.</strong> <em>Symptom:</em> <em>Method ... not mocked.</em> <em>The fix:</em> keep the ViewModel free of Android classes, or move that test to <code>androidTest</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Trusting an exercise instead of the arithmetic.</strong> <em>What happens:</em> you "fix" correct code to match a wrong expectation. <em>The fix:</em> calculate by hand, then decide which side is wrong.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Why does <code>MutableStateFlow</code> require an initial value?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>StateFlow</code> always holds a current value, so new collectors can receive the latest state immediately. There is no "empty" state.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why use <code>update { }</code> instead of <code>value = value.copy(...)</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>update</code> performs an atomic read-modify-write. Concurrent updates cannot overwrite each other with a stale value, which can happen with separate read and write steps.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Where do local unit tests live and what do they run on?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">In <code>app/src/test</code>, running on the JVM of your development machine. They are fast and cannot use Android framework classes without special libraries.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why do ViewModel tests that use <code>viewModelScope</code> need <code>Dispatchers.setMain</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>viewModelScope</code> uses <code>Dispatchers.Main</code>, which does not exist in a plain JVM test. A test dispatcher must replace it, and be reset afterwards.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>SavedStateHandle</code> add to a ViewModel?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It stores small pieces of state in a map backed by saved instance state, so those values survive process death as well as configuration changes.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-4-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 4, Pathway 1</a>: <em>Write unit tests to test the ViewModel</em> and the Dessert Clicker practice.</li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/state-production" rel="noopener noreferrer">UI layer: state production</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/events" rel="noopener noreferrer">UI events</a></li>
+<li><a href="https://developer.android.com/kotlin/coroutines" rel="noopener noreferrer">Kotlin coroutines on Android</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Tested Score Keeper</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a two-team <strong>scoreboard</strong> (for a football match or an ayo tournament) with full test coverage of its ViewModel.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li><code>ScoreUiState(teamA: Int, teamB: Int, history: List&lt;String&gt;)</code> plus a computed <code>leader: String</code> returning <code>Team A</code>, <code>Team B</code> or <code>Draw</code>.</li>
+<li><code>ScoreViewModel</code> with <code>onScore(team, points)</code>, <code>onUndo()</code> and <code>onReset()</code>. Points must be positive. Undo removes the last entry from the history and reverses its effect.</li>
+<li>A stateless screen and a connected top-level composable.</li>
+<li>At least <strong>six</strong> unit tests, including undo and the draw case.</li>
+<li>Persist the current scores across process death with <code>SavedStateHandle</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show the history in a <code>LazyColumn</code>.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ScoreViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.scorekeeper
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class ScoreUiState(
+    val teamA: Int = 0,
+    val teamB: Int = 0,
+    val history: List&lt;String&gt; = emptyList()
+) {
+    val leader: String
+        get() = when {
+            teamA &gt; teamB -&gt; "Team A"
+            teamB &gt; teamA -&gt; "Team B"
+            else -&gt; "Draw"
+        }
+}
+
+class ScoreViewModel(private val handle: SavedStateHandle = SavedStateHandle()) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(
+        ScoreUiState(
+            teamA = handle["a"] ?: 0,
+            teamB = handle["b"] ?: 0,
+            history = handle["history"] ?: emptyList()
+        )
+    )
+    val uiState: StateFlow&lt;ScoreUiState&gt; = _uiState.asStateFlow()
+
+    fun onScore(team: Char, points: Int) {
+        if (points &lt;= 0 || (team != 'A' &amp;&amp; team != 'B')) return
+        _uiState.update { s -&gt;
+            val entry = "$team+$points"
+            if (team == 'A') s.copy(teamA = s.teamA + points, history = s.history + entry)
+            else s.copy(teamB = s.teamB + points, history = s.history + entry)
+        }
+        save()
+    }
+
+    fun onUndo() {
+        _uiState.update { s -&gt;
+            val last = s.history.lastOrNull() ?: return@update s
+            val team = last[0]
+            val points = last.substring(2).toInt()
+            val rest = s.history.dropLast(1)
+            if (team == 'A') s.copy(teamA = s.teamA - points, history = rest)
+            else s.copy(teamB = s.teamB - points, history = rest)
+        }
+        save()
+    }
+
+    fun onReset() {
+        _uiState.value = ScoreUiState()
+        save()
+    }
+
+    private fun save() {
+        val s = _uiState.value
+        handle["a"] = s.teamA
+        handle["b"] = s.teamB
+        handle["history"] = ArrayList(s.history)
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ScoreViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.scorekeeper
+
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+
+class ScoreViewModelTest {
+    private lateinit var vm: ScoreViewModel
+
+    @Before fun setUp() { vm = ScoreViewModel() }
+
+    @Test fun initial_isDraw() = assertEquals("Draw", vm.uiState.value.leader)
+
+    @Test fun scoring_updatesTeamA() {
+        vm.onScore('A', 3)
+        assertEquals(3, vm.uiState.value.teamA)
+        assertEquals("Team A", vm.uiState.value.leader)
+    }
+
+    @Test fun scoring_updatesTeamB() {
+        vm.onScore('B', 2)
+        assertEquals("Team B", vm.uiState.value.leader)
+    }
+
+    @Test fun equalScores_areDraw() {
+        vm.onScore('A', 2); vm.onScore('B', 2)
+        assertEquals("Draw", vm.uiState.value.leader)
+    }
+
+    @Test fun undo_reversesLastScore() {
+        vm.onScore('A', 3); vm.onScore('B', 1)
+        vm.onUndo()
+        assertEquals(0, vm.uiState.value.teamB)
+        assertEquals(3, vm.uiState.value.teamA)
+        assertEquals(1, vm.uiState.value.history.size)
+    }
+
+    @Test fun negativePoints_areIgnored() {
+        vm.onScore('A', -5)
+        assertEquals(0, vm.uiState.value.teamA)
+    }
+
+    @Test fun undoOnEmptyHistory_doesNothing() {
+        vm.onUndo()
+        assertEquals(ScoreUiState(), vm.uiState.value)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the default argument <code>SavedStateHandle()</code> lets tests build the ViewModel with no framework help, while the real app receives a handle from the system. The history is stored as an <code>ArrayList&lt;String&gt;</code> because a <code>SavedStateHandle</code> accepts only Bundle-compatible types, and a Kotlin <code>List</code> implementation is not guaranteed to be one. In a local unit test <code>SavedStateHandle()</code> works because it is a plain class backed by a map.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 25 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-25-ui-state-stateflow-and-unit-testing-the-vi</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 25 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: StateFlow in Depth</li><li>✅ Surviving Process Death with SavedStateHandle</li><li>✅ Step-by-Step Build 1: A Testable ViewModel</li><li>✅ Step-by-Step Build 2: Your First ViewModel Test</li><li>✅ Step-by-Step Build 3: Testing Coroutines and Dispatchers</li><li>✅ Testing a Flow Value Over Time</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_24.html" class="ln-btn">&#8592; Lesson 24</a><a href="lesson_26.html" class="ln-btn primary">Lesson 26 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 25 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

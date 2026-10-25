@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 55: Navigation Compose in Depth — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l55">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 55 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 55</div>
+      <h1>Navigation Compose in Depth</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Techbase Library: Navigation Showcase</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 55</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Go beyond basics: type-safe routes, arguments, deep links, nested graphs, bottom navigation, multi-module graphs and testing.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Techbase Library: Navigation Showcase</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 26 you built a four-screen flow with <code>NavHost</code> and <code>navigate</code>. Real apps have far more: a <strong>bottom bar</strong> whose tabs each remember their own history, screens that take <strong>arguments</strong>, <strong>deep links</strong> from a notification or a web page, <strong>login flows</strong> that must not be reachable by pressing Back, and graphs split across <strong>modules</strong>. This lesson teaches the navigation features that separate a demo from a shippable app.</p>
+<p class="v2-p">It covers <em>Navigation best practices</em> and the official <em>Navigation in Jetpack Compose</em> codelab from Pathway 3 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-3), and the codelab at https://developer.android.com/codelabs/jetpack-compose-navigation. We use our own example app, <strong>Techbase Library</strong>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Define <strong>type-safe routes</strong> with arguments, defaults and optional values, and read them with <code>toRoute()</code>.</li>
+<li>Build a <strong>bottom navigation bar</strong> that preserves each tab's back stack and state.</li>
+<li>Create <strong>nested navigation graphs</strong> (for example an auth flow).</li>
+<li>Handle <strong>deep links</strong>: declare them in code and the manifest, and test them with <code>adb</code>.</li>
+<li>Control the <strong>back stack</strong>: <code>popUpTo</code>, <code>launchSingleTop</code>, <code>restoreState</code>, <code>inclusive</code>.</li>
+<li>Share a ViewModel across screens of a <strong>graph</strong>.</li>
+<li>Structure navigation for <strong>multi-module</strong> apps.</li>
+<li>Test navigation, and know where <strong>Navigation 3</strong> fits.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> navigation state is <strong>app state</strong>. Treat the back stack as data you manage deliberately, not as a side effect of button clicks.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Navigation Compose basics: <code>NavHost</code>, <code>NavController</code>, <code>navigate</code>, <code>popBackStack</code></strong> (lesson 26).</li>
+<li><strong><code>@Serializable</code> and the Kotlin serialization plugin</strong> (lesson 26).</li>
+<li><strong>ViewModel and state hoisting</strong> (lessons 24 and 54).</li>
+<li><strong>Material 3 <code>NavigationBar</code> and <code>Scaffold</code></strong> (lessons 21 and 38).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: Graphs, Destinations and the Back Stack</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A <strong>navigation graph</strong> is a map of the screens (<strong>destinations</strong>) and how you can travel between them. The <strong>back stack</strong> is the list of destinations the user has visited, with the current one on top. Back pops the top.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>NavHost (start = Home)
+
+Back stack after: Home -&gt; Catalogue -&gt; Book(7)
+
+   [Book(7)]   &lt;- top: what the user sees
+   [Catalogue]
+   [Home]</code></pre></div></div>
+<p class="v2-p">The principles from the official <em>navigation principles</em> guidance:</p>
+<ol class="v2-ol">
+<li><strong>Fixed start destination.</strong> Every app has one start destination, the first screen of the app, and Back eventually ends there.</li>
+<li><strong>Navigation state is a stack.</strong> Back pops, Up and Back behave consistently.</li>
+<li><strong>Up and Back are the same inside your app</strong> (Up is not "browser back" to a previous app).</li>
+<li><strong>Deep links</strong> should recreate a sensible stack: tapping a notification for Book 7 should show Book 7 <em>with Home underneath it</em>, so Back goes somewhere meaningful.</li>
+<li><strong>Use destinations, not strings,</strong> and pass <strong>IDs</strong>, not objects.</li>
+</ol>
+<h3 class="v2-h3">A sealed structure for routes</h3>
+<p class="v2-p">Keep all routes in one file, as <code>@Serializable</code> types, grouped by graph:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Routes.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import kotlinx.serialization.Serializable
+
+// Top-level destinations (bottom bar tabs)
+@Serializable data object Home
+@Serializable data object Catalogue
+@Serializable data object Profile
+
+// Detail with an argument
+@Serializable data class BookDetail(val bookId: Int, val highlight: String? = null)
+
+// A nested graph and its screens
+@Serializable data object AuthGraph
+@Serializable data object Login
+@Serializable data object Register</code></pre></div></div>
+<p class="v2-p">Why <code>data object</code> rather than <code>object</code>? A <code>data object</code> has a proper <code>toString</code>, <code>equals</code> and <code>hashCode</code>, which makes logs and tests readable. Both work as routes.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Graphs, Destinations and the Back Stack</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Step-by-Step Build 1: A NavHost with Arguments</div><div class="pc" id="chk4"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AppNavHost.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Home,
+        modifier = modifier
+    ) {
+        composable&lt;Home&gt; {
+            HomeScreen(onOpenBook = { id -&gt; navController.navigate(BookDetail(id)) })
+        }
+        composable&lt;Catalogue&gt; {
+            CatalogueScreen(
+                onOpenBook = { id -&gt; navController.navigate(BookDetail(bookId = id, highlight = "new")) }
+            )
+        }
+        composable&lt;BookDetail&gt; { backStackEntry -&gt;
+            val args: BookDetail = backStackEntry.toRoute()
+            BookDetailScreen(
+                bookId = args.bookId,
+                highlight = args.highlight,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable&lt;Profile&gt; { ProfileScreen() }
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">How arguments work</h3>
+<ul class="v2-ul">
+<li><code>navigate(BookDetail(7))</code> <strong>serialises</strong> the route object into the destination's URL-like route string (internally something like <code>.../7</code>).</li>
+<li><code>backStackEntry.toRoute&lt;BookDetail&gt;()</code> rebuilds the object. If the screen has a ViewModel, read the same object from its <strong><code>SavedStateHandle</code></strong>:</li>
+</ul>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">BookDetailViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
+
+class BookDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
+    private val route: BookDetail = savedStateHandle.toRoute()
+    val bookId: Int = route.bookId
+    val highlight: String? = route.highlight
+    // load the book by bookId from a repository...
+}</code></pre></div></div>
+<p class="v2-p">That is the recommended way: the <strong>ViewModel</strong> gets the ID from the saved state handle, loads the data itself, and the composable only receives UI state (lesson 61). Do not read <code>backStackEntry</code> deep in composables.</p>
+<h3 class="v2-h3">Supported argument types</h3>
+<p class="v2-p">Primitives, <code>String</code>, enums, <code>@Serializable</code> classes in some versions, lists/arrays of primitives and <code>Parcelable</code> or custom types <strong>with a custom <code>NavType</code></strong>. Rules:</p>
+<ul class="v2-ul">
+<li><strong>Default values</strong> make an argument optional (<code>highlight: String? = null</code>).</li>
+<li><strong>Nullable</strong> types are allowed with <code>String?</code> etc.</li>
+<li><strong>Do not send large or complex objects.</strong> Send the ID, and let the destination load the object. Reasons: the route string has size limits, objects can go stale, and process death restores arguments only from the saved state.</li>
+</ul>
+<p class="v2-p">If you really must pass a custom type, register a <code>typeMap</code> for it (this requires a <code>NavType</code> implementation, documented in the official type-safety guide). Prefer avoiding it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: A NavHost with Arguments</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Step-by-Step Build 2: Bottom Navigation with Preserved State</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Users expect each tab to <strong>remember where they were</strong>. If they scroll down in Catalogue, open a book, switch to Profile and return, they should still be on the book. This needs the <strong>save and restore state</strong> options.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainScaffold.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import kotlin.reflect.KClass
+
+private data class TopLevel&lt;T : Any&gt;(val name: String, val route: T, val icon: ImageVector)
+
+private val topLevelItems = listOf(
+    TopLevel("Home", Home, Icons.Filled.Home),
+    TopLevel("Catalogue", Catalogue, Icons.Filled.Menu),
+    TopLevel("Profile", Profile, Icons.Filled.Person)
+)
+
+@Composable
+fun MainScaffold() {
+    val navController = rememberNavController()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                topLevelItems.forEach { item -&gt;
+                    val selected = currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+                    NavigationBarItem(
+                        selected = selected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(item.icon, contentDescription = null) },
+                        label = { Text(item.name) }
+                    )
+                }
+            }
+        }
+    ) { innerPadding -&gt;
+        AppNavHost(navController, Modifier.padding(innerPadding))
+    }
+}</code></pre></div></div>
+<p class="v2-p">The three lines inside <code>navigate { ... }</code> are the <strong>bottom navigation recipe</strong>; learn them by heart:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Option</th>
+<th>What it does</th>
+<th>Without it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>popUpTo(startDestination) { saveState = true }</code></td>
+<td>Pops back to the start, <strong>saving</strong> the state of the screens it removes</td>
+<td>Tabs pile up on the back stack; Back cycles through every tab you tapped</td>
+</tr>
+<tr>
+<td><code>launchSingleTop = true</code></td>
+<td>Reuses the top destination if you tap the same tab again</td>
+<td>Tapping a tab twice creates duplicate screens</td>
+</tr>
+<tr>
+<td><code>restoreState = true</code></td>
+<td><strong>Restores</strong> the state saved earlier for that tab</td>
+<td>Every tab switch resets the tab to its first screen</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><code>hierarchy.any { it.hasRoute(...) }</code> marks a tab as selected when the current destination is the tab <strong>or any destination nested under it</strong> (important once tabs contain nested graphs). Use <code>hasRoute(KClass)</code> with type-safe routes. If you want to hide the bottom bar on detail screens, test the current destination: <code>val showBar = currentDestination?.hasRoute&lt;BookDetail&gt;() != true</code>.</p>
+<p class="v2-p">The <code>NavigationSuiteScaffold</code> in lesson 58 switches between bottom bar, rail and drawer according to screen size, using the same navigation calls.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Bottom Navigation with Preserved State</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Step-by-Step Build 3: Nested Navigation Graphs</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A <strong>nested graph</strong> groups destinations that belong together (login, register, forgot password) behind <strong>one entry point</strong>. Benefits: a clear start destination for the group, a place to scope a shared ViewModel, and the ability to <strong>pop the whole group</strong> when finished.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AuthGraph.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+
+fun NavGraphBuilder.authGraph(navController: NavHostController, onLoggedIn: () -&gt; Unit) {
+    navigation&lt;AuthGraph&gt;(startDestination = Login) {
+        composable&lt;Login&gt; {
+            LoginScreen(
+                onLoggedIn = onLoggedIn,
+                onRegister = { navController.navigate(Register) }
+            )
+        }
+        composable&lt;Register&gt; {
+            RegisterScreen(
+                onRegistered = onLoggedIn,
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Use it as an extension of <code>NavGraphBuilder</code> so that each feature owns its graph, and call it inside the host:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>NavHost(navController, startDestination = AuthGraph) {
+    authGraph(
+        navController,
+        onLoggedIn = {
+            navController.navigate(Home) {
+                popUpTo(AuthGraph) { inclusive = true }   // remove the whole auth flow
+            }
+        }
+    )
+    composable&lt;Home&gt; { /* ... */ }
+}</code></pre></div></div>
+<p class="v2-p"><code>popUpTo(AuthGraph) { inclusive = true }</code> pops <strong>everything up to and including</strong> the auth graph, so pressing Back on Home exits the app instead of returning to Login. That is the correct behaviour for sign-in, onboarding and splash screens.</p>
+<h3 class="v2-h3">A conditional start destination</h3>
+<p class="v2-p">Choose the start destination based on whether the user is signed in:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val start: Any = if (isSignedIn) Home else AuthGraph
+NavHost(navController, startDestination = start) { /* ... */ }</code></pre></div></div>
+<p class="v2-p">The start destination is read <strong>once</strong> when the graph is created; do not try to change it later. To react to sign-out, <code>navigate(AuthGraph) { popUpTo(0) }</code> (clearing the whole stack). Show a brief splash while you read the signed-in state asynchronously (from DataStore, lesson 35) before building the <code>NavHost</code>, to avoid flashing the wrong screen.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Nested Navigation Graphs</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Step-by-Step Build 4: Back Stack Control</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Need</th>
+<th>Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Go back one</td>
+<td><code>navController.popBackStack()</code> or <code>navigateUp()</code></td>
+</tr>
+<tr>
+<td>Go back to a specific destination</td>
+<td><code>popBackStack&lt;Home&gt;(inclusive = false)</code></td>
+</tr>
+<tr>
+<td>Navigate and remove the current screen (e.g. splash)</td>
+<td><code>navigate(Home) { popUpTo&lt;Splash&gt; { inclusive = true } }</code></td>
+</tr>
+<tr>
+<td>Clear everything and start fresh</td>
+<td><code>navigate(Home) { popUpTo(0) { inclusive = true } }</code></td>
+</tr>
+<tr>
+<td>Avoid duplicates at the top</td>
+<td><code>launchSingleTop = true</code></td>
+</tr>
+<tr>
+<td>Send a result back to the previous screen</td>
+<td><code>navController.previousBackStackEntry?.savedStateHandle?.set("key", value)</code> then <code>popBackStack()</code></td>
+</tr>
+<tr>
+<td>Intercept Back</td>
+<td><code>BackHandler(enabled = hasUnsavedChanges) { showDiscardDialog() }</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Returning a result</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// ChooseGenreScreen: set the result and go back
+navController.previousBackStackEntry?.savedStateHandle?.set("genre", "Fiction")
+navController.popBackStack()
+
+// AddBookScreen: observe the result
+val genre by navController.currentBackStackEntry
+    ?.savedStateHandle
+    ?.getStateFlow&lt;String?&gt;("genre", null)
+    ?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(null) }</code></pre></div></div>
+<p class="v2-p">Needs <code>import androidx.lifecycle.compose.collectAsStateWithLifecycle</code> and the usual state imports. Keep results small and serialisable (strings, numbers, IDs).</p>
+<h3 class="v2-h3">BackHandler</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.Composable
+
+@Composable
+fun EditorScreen(hasChanges: Boolean, onDiscardRequest: () -&gt; Unit) {
+    BackHandler(enabled = hasChanges) {
+        onDiscardRequest()          // show "Discard changes?" instead of leaving
+    }
+}</code></pre></div></div>
+<p class="v2-p">Predictive back (the system's back-gesture preview) works with Navigation Compose in current versions; use the standard components and <code>BackHandler</code>, and test on a recent Android version.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Back Stack Control</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Step-by-Step Build 5: Deep Links</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">A <strong>deep link</strong> takes the user directly to a destination from outside the app: a web link, a notification, another app, or an <code>adb</code> command. There are two links to make: the <strong>navigation graph</strong> knows which destination handles which URL, and the <strong>manifest</strong> tells Android that your app can open that URL.</p>
+<h3 class="v2-h3">In the graph</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
+
+composable&lt;BookDetail&gt;(
+    deepLinks = listOf(
+        navDeepLink&lt;BookDetail&gt;(basePath = "https://library.techbase.ng/book"),
+        navDeepLink&lt;BookDetail&gt;(basePath = "techbaselib://book")
+    )
+) { backStackEntry -&gt;
+    val args: BookDetail = backStackEntry.toRoute()
+    BookDetailScreen(args.bookId, args.highlight, onBack = { navController.popBackStack() })
+}</code></pre></div></div>
+<p class="v2-p">With <code>navDeepLink&lt;BookDetail&gt;(basePath = ...)</code>, the library builds the URI pattern from the route's properties: required properties become <strong>path segments</strong> (<code>.../book/7</code>) and optional (default) ones become <strong>query parameters</strong> (<code>.../book/7?highlight=new</code>). Check the generated pattern in the documentation for your version and test it.</p>
+<h3 class="v2-h3">In the manifest</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AndroidManifest.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;activity
+    android:name=".MainActivity"
+    android:exported="true"&gt;
+
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.MAIN" /&gt;
+        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+
+    &lt;!-- Custom scheme: works anywhere, no verification --&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="techbaselib" android:host="book" /&gt;
+    &lt;/intent-filter&gt;
+
+    &lt;!-- Web links: verified App Links --&gt;
+    &lt;intent-filter android:autoVerify="true"&gt;
+        &lt;action android:name="android.intent.action.VIEW" /&gt;
+        &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+        &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
+        &lt;data android:scheme="https" android:host="library.techbase.ng" android:pathPrefix="/book" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;</code></pre></div></div>
+<p class="v2-p">Notes:</p>
+<ul class="v2-ul">
+<li>Android Studio's <strong>App Links Assistant</strong> (Tools menu) helps create filters and the verification file.</li>
+<li><strong>App Links</strong> (<code>https</code> with <code>autoVerify</code>) open your app <strong>directly</strong> without a chooser, but require you to host a <strong>Digital Asset Links</strong> file at <code>https://yourdomain/.well-known/assetlinks.json</code> that lists your package name and signing certificate fingerprint. Custom schemes need no verification but any app can claim them and users may get a chooser.</li>
+<li>Set <code>launchMode</code> carefully; a <code>singleTop</code> Activity receives the new intent in <code>onNewIntent</code>, and Navigation Compose handles it for you when the <code>NavController</code> is set up in the Activity.</li>
+</ul>
+<h3 class="v2-h3">Test with adb</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb shell am start -W -a android.intent.action.VIEW \
+  -d "techbaselib://book/7" com.techbase.library
+
+adb shell am start -W -a android.intent.action.VIEW \
+  -d "https://library.techbase.ng/book/7?highlight=new" com.techbase.library</code></pre></div></div>
+<p class="v2-p">Expected: the app opens on Book 7. For the https link on a device where verification has not been established, you may see a chooser. You can check or force link handling with <code>adb shell pm get-app-links com.techbase.library</code> and <code>adb shell pm set-app-links ...</code> (see the official App Links documentation for the options on your Android version).</p>
+<h3 class="v2-h3">Backstack from a deep link</h3>
+<p class="v2-p">Navigation Compose builds a <strong>synthetic back stack</strong> for a deep link when its destination is in a nested graph: the start destination of the graph is placed under it. For a sensible Back, put the destination inside a graph whose start destination is a meaningful parent (for example, Catalogue), or handle the intent yourself.</p>
+<h3 class="v2-h3">Pending intents for notifications</h3>
+<p class="v2-p">When your app posts a notification (lesson 36), use <code>NavDeepLinkBuilder</code> or a <code>TaskStackBuilder</code> with the deep link URI so the tap lands on the right screen with a proper back stack:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.app.PendingIntent
+import android.content.Context
+import androidx.core.net.toUri
+import androidx.navigation.NavDeepLinkBuilder
+
+fun bookPendingIntent(context: Context, bookId: Int): PendingIntent =
+    NavDeepLinkBuilder(context)
+        .setGraph(R.navigation.main_graph)   // for XML graphs
+        .setDestination(R.id.bookDetailFragment)
+        .createPendingIntent()</code></pre></div></div>
+<p class="v2-p">For Compose-only apps the simplest approach is an explicit <code>Intent(ACTION_VIEW, "techbaselib://book/$bookId".toUri())</code> with <code>setPackage(context.packageName)</code> wrapped in <code>PendingIntent.getActivity(...)</code> with <code>FLAG_IMMUTABLE</code>. Always set <code>FLAG_IMMUTABLE</code> unless you need mutable behaviour.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Deep Links</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Step-by-Step Build 6: Sharing a ViewModel Across a Graph</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">A multi-step flow (checkout: address → payment → confirm) needs <strong>shared state</strong> across several destinations, which should die when the flow ends. Scope a ViewModel to the <strong>nested graph's back stack entry</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.composable
+
+navigation&lt;CheckoutGraph&gt;(startDestination = Address) {
+    composable&lt;Address&gt; { entry -&gt;
+        val parentEntry = remember(entry) { navController.getBackStackEntry&lt;CheckoutGraph&gt;() }
+        val vm: CheckoutViewModel = viewModel(parentEntry)
+        AddressScreen(vm, onNext = { navController.navigate(Payment) })
+    }
+    composable&lt;Payment&gt; { entry -&gt;
+        val parentEntry = remember(entry) { navController.getBackStackEntry&lt;CheckoutGraph&gt;() }
+        val vm: CheckoutViewModel = viewModel(parentEntry)   // the SAME instance
+        PaymentScreen(vm, onPay = { navController.navigate(Confirm) })
+    }
+}</code></pre></div></div>
+<p class="v2-p">Both screens call <code>viewModel(parentEntry)</code> with the <strong>graph's entry</strong> as the owner, so they get the same instance. It is created when the user enters the graph and cleared when the graph is popped off the back stack. With Hilt, use <code>hiltViewModel(parentEntry)</code> (lesson 65). <code>remember(entry)</code> ensures the parent entry is looked up again when the child entry changes, which avoids a crash on the exit animation.</p>
+<p class="v2-p"><strong>Be careful</strong> with shared ViewModels: do not make them a dumping ground for the whole app. Share only what the flow really needs.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Sharing a ViewModel Across a Graph</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Step-by-Step Build 7: Multi-Module Navigation and Best Practices</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">In a <strong>multi-module</strong> app (lesson 65), feature modules should not depend on each other. Navigation therefore needs a <strong>contract</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>:app                 -&gt; depends on all feature modules; owns the NavHost
+:feature:catalogue   -&gt; exposes  fun NavGraphBuilder.catalogueGraph(onOpenBook: (Int) -&gt; Unit)
+:feature:book        -&gt; exposes  fun NavGraphBuilder.bookGraph(onBack: () -&gt; Unit)
+:core:navigation     -&gt; (optional) shared route types used by more than one module</code></pre></div></div>
+<p class="v2-p">Each feature module exposes an <strong>extension on <code>NavGraphBuilder</code></strong> and takes <strong>callbacks</strong> for navigation it does not own. The <code>:app</code> module wires the callbacks to <code>navController.navigate(...)</code>. Features never receive the <code>NavController</code> itself (that would let any screen navigate anywhere). If two features need the same route type, put it in a small shared <code>:core:navigation</code> (or <code>:api</code>) module.</p>
+<h3 class="v2-h3">Best-practice checklist (from the official guidance, in our words)</h3>
+<ul class="v2-ul">
+<li>One <code>NavHost</code> (or one per top-level surface), hoisted <strong>above</strong> screens.</li>
+<li><strong>Do not pass <code>NavController</code></strong> down to leaf composables. Pass lambdas such as <code>onOpenBook: (Int) -&gt; Unit</code>. This keeps screens testable and previewable.</li>
+<li><strong>Navigate from event handlers</strong>, not during composition. If a ViewModel decides to navigate, expose it as <strong>state</strong> (an event the UI consumes), not a <code>NavController</code> reference.</li>
+<li><strong>IDs, not objects.</strong> The destination loads its own data.</li>
+<li><strong>Name the start destination</strong> and keep it stable.</li>
+<li><strong>Handle the same destination appearing twice</strong> (<code>launchSingleTop</code>).</li>
+<li><strong>Avoid navigating twice on a fast double tap</strong>: check <code>lifecycle.currentState == RESUMED</code> or debounce clicks.</li>
+<li><strong>One source of truth for the selected tab</strong>: the back stack, not a separate variable.</li>
+</ul>
+<h3 class="v2-h3">The double-tap guard</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+
+fun NavBackStackEntry.lifecycleIsResumed() = lifecycle.currentState == Lifecycle.State.RESUMED
+
+fun NavController.navigateOnce(from: NavBackStackEntry, route: Any) {
+    if (from.lifecycleIsResumed()) navigate(route)
+}</code></pre></div></div>
+<p class="v2-p">Use it in screens as <code>onOpenBook = { navController.navigateOnce(backStackEntry, BookDetail(it)) }</code>. During the transition animation the old entry is no longer <code>RESUMED</code>, so a second tap is ignored.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Multi-Module Navigation and Best Practices</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Step-by-Step Build 8: Testing Navigation and a Note on Navigation 3</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">You tested navigation in lesson 26 with <code>TestNavHostController</code>. For deeper flows, add assertions on the <strong>back stack</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.testing.TestNavHostController
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+
+class NavigationTest {
+    @get:Rule val rule = createComposeRule()
+    private lateinit var navController: TestNavHostController
+
+    @Test
+    fun catalogueOpensBookDetail() {
+        rule.setContent {
+            navController = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+            }
+            AppNavHost(navController)
+        }
+        navController.navigate(Catalogue)
+        rule.onNodeWithText("Things Fall Apart").performClick()
+        assertTrue(navController.currentBackStackEntry?.destination?.hasRoute&lt;BookDetail&gt;() == true)
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>hasRoute&lt;BookDetail&gt;()</code> is the reified overload from <code>androidx.navigation.NavDestination.Companion</code>.) Also test: the back button returns to the right screen (<code>navController.popBackStack()</code>), tabs restore their state, and the deep link path with <code>navController.handleDeepLink(Intent(...))</code> (a test-only helper in the testing artifact).</p>
+<h3 class="v2-h3">Navigation 3</h3>
+<p class="v2-p">Google has released <strong>Navigation 3</strong>, a newer navigation library for Compose in which <strong>your app owns the back stack as a list</strong> (<code>SnapshotStateList</code>/<code>NavBackStack</code>) and renders it with a <code>NavDisplay</code>. The idea is simple: <em>the back stack is state you hold, and the UI is a function of that state</em>, consistent with everything in Compose. Navigation Compose (the library you learned in this lesson) remains widely used and supported, and is what almost all existing projects use. For a new project, read the current Navigation 3 documentation and decide; the concepts here (routes as types, scoped ViewModels, deep links, bottom bars with saved state, back stack control) transfer directly. APIs and stability may differ from what we show, so check the release status before adopting.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: Testing Navigation and a Note on Navigation 3</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Bottom bar with state</strong></p>
+<p class="v2-p">Create an app with three tabs (Home, Search, Settings). On the Search tab, a button opens <code>Result(query: String)</code>. Show that after switching to Settings and back, the Search tab is still on the result screen. Write the key navigation call.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Serializable data object Home
+@Serializable data object Search
+@Serializable data class Result(val query: String)
+@Serializable data object Settings
+
+// In the bottom bar:
+navController.navigate(item.route) {
+    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+    launchSingleTop = true
+    restoreState = true
+}</code></pre></div></div>
+<p class="v2-p">For the Search tab to restore its <strong>nested</strong> state, group <code>Search</code> and <code>Result</code> in a nested graph (<code>navigation&lt;SearchGraph&gt;(startDestination = Search) { composable&lt;Search&gt;{...}; composable&lt;Result&gt;{...} }</code>) and make the tab navigate to <code>SearchGraph</code>. <code>saveState</code>/<code>restoreState</code> save the back stack of that graph, so returning to the tab shows <code>Result</code> again. Mark the tab selected with <code>hierarchy.any { it.hasRoute(SearchGraph::class) }</code>.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Deep link design</strong></p>
+<p class="v2-p">Design deep links for an e-commerce app: product page, order tracking and a promotion with an optional coupon. Give the routes, the URL patterns, two <code>adb</code> test commands and the sensible back stack for each.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Routes: <code>@Serializable data class Product(val id: Int)</code>, <code>@Serializable data class Order(val orderId: String)</code>, <code>@Serializable data class Promo(val code: String? = null)</code>. URLs: <code>https://shop.example.ng/product/{id}</code>, <code>https://shop.example.ng/order/{orderId}</code>, <code>https://shop.example.ng/promo?code=NAIJA10</code>. Tests: <code>adb shell am start -W -a android.intent.action.VIEW -d "https://shop.example.ng/product/42" com.example.shop</code> and <code>... -d "https://shop.example.ng/promo?code=NAIJA10" com.example.shop</code>. Back stacks: Product opens over Home (or the Catalogue graph's start), Order opens over the Orders list, Promo over Home. Put each destination inside the graph whose start destination is its logical parent, so Back goes to a sensible screen and not out of the app.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Find the navigation bugs</strong></p>
+<p class="v2-p">(a) Tapping Home five times shows five Home screens. (b) After login, Back returns to Login. (c) A product detail crashes after process death because the whole <code>Product</code> object was passed. (d) A button navigates twice on a quick double tap. Give the one-line fix for each.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>launchSingleTop = true</code>. (b) <code>popUpTo(AuthGraph) { inclusive = true }</code> when navigating to Home. (c) Pass only <code>productId</code> in the route and let the ViewModel load the product (via <code>SavedStateHandle.toRoute()</code>). (d) Ignore clicks unless the back stack entry is <code>RESUMED</code> (<code>navigateOnce</code>), or disable the button after the first click.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Passing <code>NavController</code> to every composable.</strong> <em>Symptom:</em> untestable, tightly coupled screens. <em>Fix:</em> pass lambdas.</p>
+<p class="v2-p"><strong>Mistake #2: Passing whole objects.</strong> <em>Symptom:</em> crashes after process death, size limits. <em>Fix:</em> IDs and a repository.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting <code>saveState</code>/<code>restoreState</code> on tabs.</strong> <em>Symptom:</em> tabs reset. <em>Fix:</em> the three-option recipe.</p>
+<p class="v2-p"><strong>Mistake #4: Not clearing the login screens from the back stack.</strong> <em>Fix:</em> <code>popUpTo(...) { inclusive = true }</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Using <code>popUpTo(0)</code> unintentionally.</strong> <em>Symptom:</em> back stack wiped. <em>Fix:</em> only for sign-out or reset.</p>
+<p class="v2-p"><strong>Mistake #6: Deep link without the manifest filter.</strong> <em>Symptom:</em> adb command does nothing. <em>Fix:</em> add both graph and manifest entries.</p>
+<p class="v2-p"><strong>Mistake #7: Not verifying App Links.</strong> <em>Symptom:</em> chooser dialog. <em>Fix:</em> <code>assetlinks.json</code> and <code>autoVerify</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Navigating during composition.</strong> <em>Symptom:</em> repeated navigation, loops. <em>Fix:</em> in event handlers or <code>LaunchedEffect</code> keyed on a consumed event.</p>
+<p class="v2-p"><strong>Mistake #9: Sharing one giant ViewModel across the app.</strong> <em>Fix:</em> scope to the graph that needs it.</p>
+<p class="v2-p"><strong>Mistake #10: Changing start destination dynamically.</strong> <em>Fix:</em> decide before building the graph.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What do <code>saveState</code>, <code>restoreState</code> and <code>launchSingleTop</code> do on a bottom bar?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>saveState</code> stores the back stack state of the tab you leave, <code>restoreState</code> restores it when you return, and <code>launchSingleTop</code> prevents duplicate copies of the same destination at the top.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> How does a ViewModel read a type-safe route argument?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">With <code>savedStateHandle.toRoute&lt;RouteType&gt;()</code> (<code>SavedStateHandle</code> is injected into the ViewModel by the navigation entry's factory).</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>popUpTo(AuthGraph) { inclusive = true }</code> achieve after login?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It removes the whole authentication graph from the back stack so that pressing Back on the home screen does not return to login.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What two places must declare a deep link for it to work?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The navigation graph (<code>navDeepLink</code> on the destination) and the Android manifest (an <code>intent-filter</code> for the URI scheme/host/path on the Activity).</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why should feature modules not receive a <code>NavController</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Passing it lets any screen navigate anywhere, creating coupling between features. Features should expose graph builders with callbacks, and the app module wires navigation.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-3" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 3</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-navigation" rel="noopener noreferrer">Jetpack Compose navigation codelab</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-4-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 4 Pathway 1</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Techbase Library: Navigation Showcase</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a <strong>library app</strong> whose navigation uses every concept in this lesson.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Three bottom tabs (Home, Catalogue, Profile) with preserved state.</li>
+<li>A <code>BookDetail(bookId, highlight?)</code> destination, with its ViewModel reading the route via <code>SavedStateHandle.toRoute()</code>.</li>
+<li>An <code>AuthGraph</code> (Login, Register) shown first when signed out and removed from the back stack after login.</li>
+<li>Two deep links (custom scheme and https) for <code>BookDetail</code>, with the manifest filters, and <code>adb</code> commands in your README.</li>
+<li>A <code>BackHandler</code> on a "write a review" screen that asks before discarding.</li>
+<li>A shared <code>CheckoutViewModel</code> across <code>Address</code> → <code>Payment</code> → <code>Confirm</code> scoped to a <code>CheckoutGraph</code>.</li>
+<li>A <code>TestNavHostController</code> test for the tab navigation and one for the deep link.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> split the catalogue into a separate Gradle module exposing <code>NavGraphBuilder.catalogueGraph(onOpenBook)</code>.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p"><code>Routes.kt</code> and the host were shown in the lesson. The extra pieces:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">AppNavHost.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
+
+@Serializable data object CheckoutGraph
+@Serializable data object Address
+@Serializable data object Payment
+@Serializable data object Confirm
+@Serializable data object ReviewEditor
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    signedIn: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = if (signedIn) Home else AuthGraph,
+        modifier = modifier
+    ) {
+        authGraph(navController, onLoggedIn = {
+            navController.navigate(Home) { popUpTo(AuthGraph) { inclusive = true } }
+        })
+
+        composable&lt;Home&gt; { HomeScreen { id -&gt; navController.navigate(BookDetail(id)) } }
+        composable&lt;Catalogue&gt; { CatalogueScreen { id -&gt; navController.navigate(BookDetail(id, "new")) } }
+        composable&lt;Profile&gt; { ProfileScreen() }
+
+        composable&lt;BookDetail&gt;(
+            deepLinks = listOf(
+                navDeepLink&lt;BookDetail&gt;(basePath = "https://library.techbase.ng/book"),
+                navDeepLink&lt;BookDetail&gt;(basePath = "techbaselib://book")
+            )
+        ) { entry -&gt;
+            val args: BookDetail = entry.toRoute()
+            BookDetailScreen(args.bookId, args.highlight,
+                onBack = { navController.popBackStack() },
+                onWriteReview = { navController.navigate(ReviewEditor) },
+                onBuy = { navController.navigate(CheckoutGraph) })
+        }
+
+        composable&lt;ReviewEditor&gt; { ReviewEditorScreen(onDone = { navController.popBackStack() }) }
+
+        navigation&lt;CheckoutGraph&gt;(startDestination = Address) {
+            composable&lt;Address&gt; { entry -&gt;
+                val parent = remember(entry) { navController.getBackStackEntry&lt;CheckoutGraph&gt;() }
+                val vm: CheckoutViewModel = viewModel(parent)
+                AddressScreen(vm) { navController.navigate(Payment) }
+            }
+            composable&lt;Payment&gt; { entry -&gt;
+                val parent = remember(entry) { navController.getBackStackEntry&lt;CheckoutGraph&gt;() }
+                val vm: CheckoutViewModel = viewModel(parent)
+                PaymentScreen(vm) { navController.navigate(Confirm) }
+            }
+            composable&lt;Confirm&gt; { entry -&gt;
+                val parent = remember(entry) { navController.getBackStackEntry&lt;CheckoutGraph&gt;() }
+                val vm: CheckoutViewModel = viewModel(parent)
+                ConfirmScreen(vm) {
+                    navController.navigate(Home) { popUpTo(CheckoutGraph) { inclusive = true } }
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>ReviewEditorScreen</code> uses <code>BackHandler(enabled = text.isNotBlank()) { showDiscardDialog = true }</code>. The tab test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">NavigationTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.library.nav
+
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.testing.TestNavHostController
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
+
+class NavigationTest {
+    @get:Rule val rule = createComposeRule()
+
+    @Test
+    fun navigatesToCatalogueThenBackToHome() {
+        lateinit var nav: TestNavHostController
+        rule.setContent {
+            nav = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+            }
+            AppNavHost(nav)
+        }
+        rule.runOnIdle { nav.navigate(Catalogue) }
+        rule.runOnIdle { assertTrue(nav.currentBackStackEntry?.destination?.hasRoute&lt;Catalogue&gt;() == true) }
+        rule.runOnIdle { nav.popBackStack() }
+        rule.runOnIdle { assertTrue(nav.currentBackStackEntry?.destination?.hasRoute&lt;Home&gt;() == true) }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>README</code> deep-link commands: <code>adb shell am start -W -a android.intent.action.VIEW -d "techbaselib://book/7" com.techbase.library</code> and the https equivalent. <strong>Check:</strong> after login, Back exits the app; switching tabs keeps each tab's history; the checkout ViewModel keeps the address when you go forward and back, and is gone after confirming.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 55 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-55-navigation-compose-in-depth</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 55 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Graphs, Destinations and the Back Stack</li><li>✅ Step-by-Step Build 1: A NavHost with Arguments</li><li>✅ Step-by-Step Build 2: Bottom Navigation with Preserved State</li><li>✅ Step-by-Step Build 3: Nested Navigation Graphs</li><li>✅ Step-by-Step Build 4: Back Stack Control</li><li>✅ Step-by-Step Build 5: Deep Links</li><li>✅ Step-by-Step Build 6: Sharing a ViewModel Across a Graph</li><li>✅ Step-by-Step Build 7: Multi-Module Navigation and Best Practices</li><li>✅ Step-by-Step Build 8: Testing Navigation and a Note on Navigation 3</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_54.html" class="ln-btn">&#8592; Lesson 54</a><a href="lesson_56.html" class="ln-btn primary">Lesson 56 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 55 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

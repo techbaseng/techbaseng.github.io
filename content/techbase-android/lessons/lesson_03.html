@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 03: Create Your First Android App — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l03">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 03 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 03</div>
+      <h1>Create Your First Android App</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Project Anatomy Report</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 03</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Use the New Project wizard, understand every file in the project and learn how Gradle builds your app.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Project Anatomy Report</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome back! In lesson 02 you installed Android Studio and took a tour of the IDE. Today you stop being a visitor and become a builder: you will create your very first Android app, open every folder the wizard generates, read the important files line by line, and learn what Gradle actually does when you press the green button.</p>
+<p class="v2-p">Many beginners treat a new project like a locked room: "Android Studio made a hundred files, I will touch only the one I am told to touch." That works for a day and then becomes painful, because the first time something breaks (a red error in <code>build.gradle.kts</code>, a "Gradle sync failed" banner, an app that will not install) you need to know which file is responsible. This lesson gives you that map.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Create a new project with the <strong>New Project</strong> wizard and the <strong>Empty Activity</strong> template, and explain each field in the wizard.</li>
+<li>Explain the difference between <strong>Package name</strong>, <strong>namespace</strong> and <strong>application ID</strong>.</li>
+<li>Switch between the <strong>Android</strong> view and the <strong>Project</strong> view and find any file on disk.</li>
+<li>Read <code>AndroidManifest.xml</code> and explain the application element, the activity element and the launcher intent filter.</li>
+<li>Read <code>MainActivity.kt</code> and the generated Compose theme files.</li>
+<li>Read the two <code>build.gradle.kts</code> files, <code>settings.gradle.kts</code>, <code>gradle.properties</code>, and the version catalog <code>libs.versions.toml</code>.</li>
+<li>Explain what <strong>Gradle sync</strong> does and what a <strong>build</strong> does, step by step.</li>
+<li>Build an APK from the command line and find it on disk.</li>
+<li>Fix the most common first-project errors.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson matches the <em>Create your first Android app</em> codelab in Unit 1 (the <em>Set up Android Studio</em> pathway) of Google's official <strong>Android Basics with Compose</strong> course. We follow the same steps, then go much deeper into the files the wizard creates. You will find the official pathway in the resources at the end.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">You need only a handful of ideas. If any feels shaky, follow the lesson reference.</p>
+<h3 class="v2-h3">1. Android Studio is installed and a device is not yet needed</h3>
+<p class="v2-p">You installed Android Studio and at least one SDK platform in lesson 02. Creating a project needs <strong>no phone and no emulator</strong>. Running it does, and we do that in lesson 04 (emulator) and lesson 05 (real phone). Today you will build the app and look at the result on disk.</p>
+<h3 class="v2-h3">2. What a package name looks like</h3>
+<p class="v2-p">A package name is a "reverse domain" style label such as <code>com.techbase.myfirstapp</code>. Android uses it as a unique identity for your app, much like a national ID number is unique to one person. Two apps on a phone cannot share the same application ID.</p>
+<h3 class="v2-h3">3. A little Kotlin</h3>
+<p class="v2-p">You do not need to understand every line of Kotlin today. Lessons 06 to 14 teach the language properly. If you have not started them yet, read <code>fun greet(name: String)</code> as "a recipe called greet that needs a piece of text called name".</p>
+<h3 class="v2-h3">4. What Jetpack Compose is, in one sentence</h3>
+<p class="v2-p"><strong>Jetpack Compose</strong> is Android's modern toolkit for describing screens in Kotlin code: you write functions that say what the screen should look like, and Compose draws it. Lessons 15 to 22 build real screens with it.</p>
+<h3 class="v2-h3">5. What a build tool is</h3>
+<p class="v2-p">Source code is not what a phone runs. Something has to compile it, package images and text, and sign the result. That "something" is a <strong>build tool</strong>. On Android it is <strong>Gradle</strong>, driven by the <strong>Android Gradle Plugin</strong> (usually shortened to AGP). Think of Gradle as a factory manager who reads a work order (your build files) and runs the right machines in the right order.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: Anatomy of an Android Project</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Before we click anything, here is the picture to keep in your head.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Project  (the whole folder you open in Android Studio)
+ |
+ |-- settings.gradle.kts      "which modules exist, where do plugins come from"
+ |-- build.gradle.kts         project-level: which plugins are available
+ |-- gradle/libs.versions.toml  version catalog: one list of versions
+ |
+ `-- app/                     a MODULE (this one makes the installable app)
+      |-- build.gradle.kts    module-level: SDK numbers, dependencies
+      `-- src/
+           |-- main/          code and resources that ship in the app
+           |-- test/          local unit tests (run on your computer)
+           `-- androidTest/   instrumented tests (run on a device)</code></pre></div></div>
+<h3 class="v2-h3">Key vocabulary</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Project</strong></td>
+<td>The top-level folder with all your code and build settings.</td>
+<td>A school compound.</td>
+</tr>
+<tr>
+<td><strong>Module</strong></td>
+<td>A unit of code that builds into one output (an app, or a library). A new project has one module called <code>app</code>.</td>
+<td>One classroom block inside the compound.</td>
+</tr>
+<tr>
+<td><strong>Source set</strong></td>
+<td>A folder of sources for a purpose: <code>main</code>, <code>test</code>, <code>androidTest</code>.</td>
+<td>Shelves labelled "for the shop", "for practice", "for inspection".</td>
+</tr>
+<tr>
+<td><strong>Resource</strong></td>
+<td>Non-code files: images, text strings, colours, XML.</td>
+<td>The decorations and signs, as opposed to the machines.</td>
+</tr>
+<tr>
+<td><strong>Manifest</strong></td>
+<td><code>AndroidManifest.xml</code>, the app's identity card and declaration of its parts.</td>
+<td>The registration form an app hands to Android.</td>
+</tr>
+<tr>
+<td><strong>Gradle</strong></td>
+<td>The build tool.</td>
+<td>The factory manager.</td>
+</tr>
+<tr>
+<td><strong>Version catalog</strong></td>
+<td><code>libs.versions.toml</code>, a central list of library and plugin versions.</td>
+<td>The price list pinned on one wall rather than scribbled on every shelf.</td>
+</tr>
+<tr>
+<td><strong>APK</strong></td>
+<td>The installable file the build produces (see lesson 01).</td>
+<td>The packed carton leaving the factory.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Names that confuse everyone: three kinds of "name"</h3>
+<p class="v2-p">When you fill the wizard you type one <strong>Package name</strong>, but it becomes more than one thing. This table saves hours of confusion later.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Where it lives</th>
+<th>What it is for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Package name</strong> (wizard field)</td>
+<td>The folder structure under <code>java/</code> (for example <code>com/techbase/myfirstapp</code>) and the first line of each Kotlin file (<code>package com.techbase.myfirstapp</code>)</td>
+<td>Organises your Kotlin classes.</td>
+</tr>
+<tr>
+<td><strong>namespace</strong></td>
+<td><code>android { namespace = "..." }</code> in the module's <code>build.gradle.kts</code></td>
+<td>Tells the build where generated code such as the <code>R</code> resource class lives.</td>
+</tr>
+<tr>
+<td><strong>applicationId</strong></td>
+<td><code>defaultConfig { applicationId = "..." }</code> in the module's <code>build.gradle.kts</code></td>
+<td>The unique identity on a device and on Google Play.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The wizard sets all three to the same value, which is why beginners think they are one thing. Later you may change one without the others. The one that must stay stable once you publish is the <strong>applicationId</strong>: Google Play treats a different applicationId as a different app.</p>
+<h3 class="v2-h3">What the New Project wizard asks</h3>
+<p class="v2-p">The official documentation describes the wizard's fields like this (labels move slightly between releases, so match by meaning if yours differ):</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Field</th>
+<th>What to enter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Template</strong></td>
+<td>Choose <strong>Empty Activity</strong> (phone and tablet). The official guide recommends it as the starting point for Compose projects because it includes the Compose dependencies and Material Design setup.</td>
+</tr>
+<tr>
+<td><strong>Name</strong></td>
+<td>A human name such as <code>My First App</code>. Shown under the icon on the phone.</td>
+</tr>
+<tr>
+<td><strong>Package name</strong></td>
+<td>Becomes your namespace and application ID. Android Studio proposes one based on a placeholder company domain.</td>
+</tr>
+<tr>
+<td><strong>Save location</strong></td>
+<td>A folder on your disk. Avoid very deep paths and, on Windows, paths with unusual characters.</td>
+</tr>
+<tr>
+<td><strong>Language</strong></td>
+<td>Kotlin.</td>
+</tr>
+<tr>
+<td><strong>Minimum API level</strong></td>
+<td>The oldest Android version your app will install on. A lower number reaches more phones but gives you fewer modern features. The <strong>Help me choose</strong> link shows what share of devices each level covers.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Think about it:</strong> If you set the minimum API level very low to reach every old phone, what do you lose? (Newer APIs are not available without extra code, and you have more combinations to test.)</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Anatomy of an Android Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step: Create the Project with the Wizard</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Follow along on your own computer. Menu names can differ slightly between Android Studio versions; if an item is not exactly where we say, look for the nearest match.</p>
+<h3 class="v2-h3">Step 1: Start the wizard</h3>
+<p class="v2-p">On the <strong>Welcome</strong> screen click <strong>New Project</strong>. If a project is already open, use <strong>File &gt; New &gt; New Project</strong> from the main menu.</p>
+<h3 class="v2-h3">Step 2: Choose a template</h3>
+<p class="v2-p">The left side lists device types (Phone and Tablet, Wear OS, Television, and so on). Keep <strong>Phone and Tablet</strong> and pick <strong>Empty Activity</strong>. Be careful: there are other templates with similar names, such as ones for Views-based projects. The Compose one is the Empty Activity whose description mentions Jetpack Compose. Click <strong>Next</strong>.</p>
+<h3 class="v2-h3">Step 3: Configure the project</h3>
+<p class="v2-p">Fill in the fields like this:</p>
+<ol class="v2-ol">
+<li><strong>Name:</strong> <code>Hello Techbase</code></li>
+<li><strong>Package name:</strong> <code>com.techbase.hellotechbase</code> (use your own name or company domain in real projects).</li>
+<li><strong>Save location:</strong> a short, simple path such as <code>C:\Users\You\AndroidStudioProjects\HelloTechbase</code> or <code>~/AndroidStudioProjects/HelloTechbase</code>.</li>
+<li><strong>Language:</strong> Kotlin.</li>
+<li><strong>Minimum API level:</strong> keep the suggested default for now. Click <strong>Help me choose</strong> to see the device-coverage chart.</li>
+</ol>
+<p class="v2-p">Click <strong>Finish</strong>.</p>
+<h3 class="v2-h3">Step 4: Wait, and do not panic</h3>
+<p class="v2-p">The first time, Android Studio does a lot of work:</p>
+<ul class="v2-ul">
+<li>It downloads the <strong>Gradle</strong> distribution named in the wrapper settings.</li>
+<li>It downloads libraries (Compose, AndroidX) from Google's Maven repository.</li>
+<li>It indexes your project so code completion works.</li>
+</ul>
+<p class="v2-p">The progress shows at the bottom of the window. On a slow connection or an older laptop this can take several minutes the very first time and may download several hundred megabytes. Later projects reuse the downloads (they are cached in the <code>.gradle</code> folder in your user directory), so they are much faster. <strong>Do not close Android Studio while it is syncing.</strong> If you are on a metered data plan, do this on Wi-Fi and plan for it.</p>
+<p class="v2-p">When the <strong>Build</strong> tool window says the sync finished and the project tree is visible, you are ready.</p>
+<h3 class="v2-h3">What a finished project looks like</h3>
+<p class="v2-p">In the <strong>Project</strong> tool window (left side), with the <strong>Android</strong> view selected, you will see something like this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>app
+  manifests
+    AndroidManifest.xml
+  kotlin+java
+    com.techbase.hellotechbase
+      MainActivity
+      ui.theme
+        Color.kt
+        Theme.kt
+        Type.kt
+    com.techbase.hellotechbase (androidTest)
+      ExampleInstrumentedTest
+    com.techbase.hellotechbase (test)
+      ExampleUnitTest
+  res
+    drawable, mipmap-*, values, xml
+Gradle Scripts
+  build.gradle.kts (Project: Hello_Techbase)
+  build.gradle.kts (Module :app)
+  gradle-wrapper.properties
+  libs.versions.toml
+  proguard-rules.pro
+  gradle.properties
+  local.properties
+  settings.gradle.kts</code></pre></div></div>
+<p class="v2-p">Your tree may differ in small ways (for example the group might be labelled <code>java</code> or <code>kotlin+java</code>, and the Gradle Scripts list changes between versions). The names and ideas stay the same.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step: Create the Project with the Wizard</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">The Two Views: Android and Project</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">The <strong>Project</strong> tool window can show your files in more than one way. The selector is at the top of the tool window.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>View</th>
+<th>What it shows</th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Android</strong></td>
+<td>A tidy, grouped view: manifests, source code, resources and a <strong>Gradle Scripts</strong> group. It hides folders you rarely need and groups related files.</td>
+<td>Everyday work. This is the default.</td>
+</tr>
+<tr>
+<td><strong>Project</strong></td>
+<td>The real folders exactly as they exist on disk, including <code>build/</code> and <code>.gradle/</code>.</td>
+<td>You need to find a generated file (such as an APK) or want to see the true layout.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Switch to <strong>Project</strong> view now and expand the folders. This is the real disk layout:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>HelloTechbase/
+|-- .gradle/                    Gradle's cache for this project (do not edit)
+|-- .idea/                      IDE settings (usually not committed)
+|-- app/
+|   |-- build/                  everything the build produced (APK lives here)
+|   |-- libs/                   private library files, rarely used
+|   |-- src/
+|   |   |-- androidTest/        tests that run on a device
+|   |   |-- main/
+|   |   |   |-- AndroidManifest.xml
+|   |   |   |-- java/com/techbase/hellotechbase/   Kotlin sources
+|   |   |   `-- res/                               resources
+|   |   `-- test/               tests that run on your computer
+|   |-- build.gradle.kts        module build file
+|   `-- proguard-rules.pro      rules for code shrinking (lesson 49)
+|-- build/                      project-level build output
+|-- gradle/
+|   |-- libs.versions.toml      version catalog
+|   `-- wrapper/
+|       `-- gradle-wrapper.properties   which Gradle version to use
+|-- build.gradle.kts            project build file
+|-- gradle.properties           Gradle and project settings
+|-- gradlew, gradlew.bat        wrapper scripts (macOS/Linux, Windows)
+|-- local.properties            this computer's SDK path (never share)
+`-- settings.gradle.kts         names modules, sets repositories</code></pre></div></div>
+<p class="v2-p">Notice that Kotlin source files may live under a folder named <code>java</code>, even though they are Kotlin. That is a long-standing convention: the folder name is <code>java</code>, but it holds both languages. A <code>kotlin</code> folder is also accepted.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Why this matters:</strong> An APK you want to share will be found under <code>app/build/outputs/apk/debug/</code>. The Android view hides that folder, but the Project view shows it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Two Views: Android and Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Reading AndroidManifest.xml</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Open <code>app/src/main/AndroidManifest.xml</code>. The manifest declares to Android everything the system must know <em>before</em> it runs any of your code: the app's parts, permissions it needs, and what to show in the launcher.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"&gt;
+
+    &lt;application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.HelloTechbase"&gt;
+
+        &lt;activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.HelloTechbase"&gt;
+            &lt;intent-filter&gt;
+                &lt;action android:name="android.intent.action.MAIN" /&gt;
+                &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+    &lt;/application&gt;
+
+&lt;/manifest&gt;</code></pre></div></div>
+<p class="v2-p">The exact attributes in your file may differ a little between Android Studio versions, but the structure is stable.</p>
+<h3 class="v2-h3">Block-by-block explanation</h3>
+<ul class="v2-ul">
+<li><strong><code>manifest</code></strong> is the root element. The <code>xmlns:</code> lines declare XML namespaces so that names such as <code>android:label</code> are understood. You never edit them.</li>
+<li><strong><code>application</code></strong> describes the whole app. <code>android:icon</code> and <code>android:roundIcon</code> point at the launcher icons in the <code>mipmap</code> folders. <code>android:label</code> is the name shown under the icon, read from <code>strings.xml</code>. <code>android:theme</code> is the starting look. <code>android:supportsRtl="true"</code> allows right-to-left languages such as Arabic. <code>allowBackup</code>, <code>dataExtractionRules</code> and <code>fullBackupContent</code> control cloud backup and device-transfer of app data.</li>
+<li><strong><code>activity</code></strong> declares one screen entry point. An <strong>Activity</strong> is one of Android's building blocks that shows a window. <code>android:name=".MainActivity"</code> means the class <code>MainActivity</code> in your package (the leading dot means "in my package").</li>
+<li><strong><code>android:exported="true"</code></strong> says other apps, including the launcher, may start this activity. Modern Android requires you to state this explicitly for any component that has an intent filter.</li>
+<li><strong><code>intent-filter</code></strong> tells Android what this activity can respond to. The pair <code>MAIN</code> plus <code>LAUNCHER</code> means: "this is the main entry point, and it should appear in the app launcher". Remove it and the app installs but has no icon to tap.</li>
+</ul>
+<p class="v2-p">Later lessons add things to this file: <strong>permissions</strong> such as internet access (lesson 29), more activities, services, and so on. For now, remember: <em>if a component is not declared here, Android does not know it exists.</em></p>
+<h3 class="v2-h3">A tiny experiment: change the app name</h3>
+<p class="v2-p">Open <code>app/src/main/res/values/strings.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Hello Techbase&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p">Because the manifest uses <code>@string/app_name</code>, changing this text changes the name under the icon with no code edits. Keeping words in <code>strings.xml</code> instead of hard-coding them is also how apps are translated into other languages (for example Yoruba or Hausa) later.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading AndroidManifest.xml</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Reading MainActivity.kt and the Theme Files</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Open <code>MainActivity.kt</code> (under <code>java/com/techbase/hellotechbase</code>). Current templates generate something very close to this:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.hellotechbase
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.techbase.hellotechbase.ui.theme.HelloTechbaseTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            HelloTechbaseTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -&gt;
+                    Greeting(
+                        name = "Android",
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name!",
+        modifier = modifier
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    HelloTechbaseTheme {
+        Greeting("Android")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Your generated file may differ slightly (for example it may not call <code>enableEdgeToEdge()</code> in older versions). Do not worry about details; read it in blocks.</p>
+<h3 class="v2-h3">Block-by-block explanation</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Part</th>
+<th>Plain-English meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>package ...</code></td>
+<td>The folder this file belongs to. Matches the folders on disk.</td>
+</tr>
+<tr>
+<td><code>import ...</code></td>
+<td>Brings in tools you use. Without imports Kotlin does not know where <code>Text</code> or <code>Modifier</code> come from.</td>
+</tr>
+<tr>
+<td><code>class MainActivity : ComponentActivity()</code></td>
+<td>Your screen. <code>ComponentActivity</code> is a ready-made base class from AndroidX that knows how to host Compose.</td>
+</tr>
+<tr>
+<td><code>override fun onCreate(...)</code></td>
+<td>Android calls this when it creates the screen. It is the equivalent of <code>main</code> for a screen. Lesson 23 explains the lifecycle in full.</td>
+</tr>
+<tr>
+<td><code>enableEdgeToEdge()</code></td>
+<td>Lets your app draw behind the status bar and navigation bar for a modern look. The <code>Scaffold</code> padding keeps content clear of them.</td>
+</tr>
+<tr>
+<td><code>setContent { ... }</code></td>
+<td>"Here is what the screen shows", written with Compose instead of an XML layout.</td>
+</tr>
+<tr>
+<td><code>HelloTechbaseTheme { ... }</code></td>
+<td>Your Material 3 theme wrapper. Everything inside gets its colours and fonts.</td>
+</tr>
+<tr>
+<td><code>Scaffold</code></td>
+<td>A Material layout skeleton that handles things like top bars. Here it supplies <code>innerPadding</code>.</td>
+</tr>
+<tr>
+<td><code>@Composable fun Greeting</code></td>
+<td>A <strong>composable function</strong>: a function that describes a piece of UI.</td>
+</tr>
+<tr>
+<td><code>@Preview</code></td>
+<td>Shows the composable inside Android Studio without running the app.</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">The ui/theme folder</h3>
+<p class="v2-p">Open the <code>ui/theme</code> package. Three files live there:</p>
+<ul class="v2-ul">
+<li><code>Color.kt</code> defines colour values.</li>
+<li><code>Type.kt</code> defines text styles (fonts, sizes).</li>
+<li><code>Theme.kt</code> defines <code>HelloTechbaseTheme</code>, which combines colours, typography and shapes into a Material 3 theme.</li>
+</ul>
+<p class="v2-p">Lesson 22 (Material Theming) and lesson 40 (Material Design 3) go deep on these. For now, know where they are.</p>
+<h3 class="v2-h3">See it in the Preview (no emulator needed)</h3>
+<p class="v2-p">Open <code>MainActivity.kt</code> and look for the <strong>Code / Split / Design</strong> buttons at the top right of the editor. Choose <strong>Split</strong>. Android Studio renders <code>GreetingPreview</code> beside your code and shows a white card saying "Hello Android!". If you see "Build &amp; Refresh" or a banner saying the preview is out of date, click it. Previews are the quickest way to see Compose changes, and they need far less RAM than an emulator.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading MainActivity.kt and the Theme Files</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Reading the Gradle Files</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">This is the part beginners skip and later regret. Open each file as we go. Remember that the numbers (SDK levels and library versions) change with each Android Studio release, so we show the <em>shape</em> and tell you how to read the numbers.</p>
+<h3 class="v2-h3">settings.gradle.kts</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "Hello Techbase"
+include(":app")</code></pre></div></div>
+<p class="v2-p">This file runs first. It answers three questions: <em>Where do build plugins come from?</em> (<code>pluginManagement</code>), <em>Where do libraries come from?</em> (<code>dependencyResolutionManagement</code>: Google's repository and Maven Central), and <em>What is in this project?</em> (<code>include(":app")</code> adds the <code>app</code> module). If you add a module later, you add an <code>include</code> line here (Android Studio does it for you).</p>
+<h3 class="v2-h3">Project-level build.gradle.kts</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Top-level build file where you can add configuration options common to all sub-projects/modules.
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+}</code></pre></div></div>
+<p class="v2-p">This file is short on purpose. It declares which plugins the <em>modules</em> may use, with <code>apply false</code> meaning "make it available, but do not apply it to the root project itself". Notice <code>alias(libs.plugins.…)</code>: the plugin IDs and versions are not written here but looked up in the version catalog. Depending on your Android Studio and AGP version you may also see a Kotlin Android plugin line; newer AGP releases build Kotlin support in. Do not delete lines you do not recognise.</p>
+<h3 class="v2-h3">Module-level app/build.gradle.kts</h3>
+<p class="v2-p">This is the file you will edit most. A representative version:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.compose)
+}
+
+android {
+    namespace = "com.techbase.hellotechbase"
+    compileSdk = 36   // illustrative: yours may be higher
+
+    defaultConfig {
+        applicationId = "com.techbase.hellotechbase"
+        minSdk = 24       // illustrative: from the wizard
+        targetSdk = 36    // illustrative
+        versionCode = 1
+        versionName = "1.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        compose = true
+    }
+}
+
+dependencies {
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
+}</code></pre></div></div>
+<p class="v2-p">Your generated file may be organised a little differently (for example newer templates set <code>compileSdk</code> through a block and may include a <code>kotlin { }</code> block for the JVM target). Treat the following as the permanent ideas.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Setting</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>plugins { ... }</code></td>
+<td>Switches on the Android application plugin and the <strong>Compose compiler plugin</strong> (<code>org.jetbrains.kotlin.plugin.compose</code>), which is what makes <code>@Composable</code> work.</td>
+</tr>
+<tr>
+<td><code>namespace</code></td>
+<td>Where generated code such as <code>R</code> lives.</td>
+</tr>
+<tr>
+<td><code>compileSdk</code></td>
+<td>The Android SDK version your code is <strong>compiled against</strong>. It decides which APIs you can <em>call</em>. Use the newest stable.</td>
+</tr>
+<tr>
+<td><code>minSdk</code></td>
+<td>The oldest Android <strong>API level</strong> the app installs on.</td>
+</tr>
+<tr>
+<td><code>targetSdk</code></td>
+<td>The Android version you have <strong>tested</strong> the app's behaviour against. Google Play requires recent values for new apps and updates (lesson 49).</td>
+</tr>
+<tr>
+<td><code>applicationId</code></td>
+<td>Your app's unique identity.</td>
+</tr>
+<tr>
+<td><code>versionCode</code></td>
+<td>A whole number that must <strong>go up</strong> with every release you upload. Users never see it.</td>
+</tr>
+<tr>
+<td><code>versionName</code></td>
+<td>The human-friendly version such as <code>1.0</code>.</td>
+</tr>
+<tr>
+<td><code>buildTypes</code></td>
+<td><code>debug</code> (for you, automatic) and <code>release</code> (for the Play Store).</td>
+</tr>
+<tr>
+<td><code>buildFeatures { compose = true }</code></td>
+<td>Turns on Compose build support (older templates also set <code>composeOptions</code>).</td>
+</tr>
+<tr>
+<td><code>dependencies</code></td>
+<td>The libraries your app uses.</td>
+</tr>
+</tbody>
+</table></div>
+<h4 class="v2-h4">Reading dependency lines</h4>
+<ul class="v2-ul">
+<li><code>implementation(...)</code> adds a library to your app's main code.</li>
+<li><code>testImplementation(...)</code> adds it only to local unit tests.</li>
+<li><code>androidTestImplementation(...)</code> adds it only to device tests.</li>
+<li><code>debugImplementation(...)</code> adds it only to debug builds (for tooling you do not ship).</li>
+<li><code>platform(libs.androidx.compose.bom)</code> imports a <strong>BOM</strong> (bill of materials): one version number that keeps all Compose libraries on versions that work together. That is why the other Compose lines have no version.</li>
+</ul>
+<h3 class="v2-h3">gradle/libs.versions.toml: the version catalog</h3>
+<p class="v2-p">Open <code>gradle/libs.versions.toml</code> (visible in the Android view under <strong>Gradle Scripts</strong>). It centralises versions in one place:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+agp = "x.y.z"            # Android Gradle Plugin version (yours is generated)
+kotlin = "x.y.z"
+coreKtx = "x.y.z"
+composeBom = "yyyy.mm.dd"
+junit = "x.y.z"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }</code></pre></div></div>
+<p class="v2-p">We wrote <code>x.y.z</code> because the real numbers are generated for you and change often. <strong>Never type old version numbers from a blog post; use the ones Android Studio generated, and update them with the IDE's suggestions.</strong></p>
+<p class="v2-p">How the names connect:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>In the TOML file</th>
+<th>In a build file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>androidx-core-ktx</code> under <code>[libraries]</code></td>
+<td><code>libs.androidx.core.ktx</code></td>
+</tr>
+<tr>
+<td><code>android-application</code> under <code>[plugins]</code></td>
+<td><code>alias(libs.plugins.android.application)</code></td>
+</tr>
+<tr>
+<td><code>junit</code> under <code>[libraries]</code></td>
+<td><code>libs.junit</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Dashes in the TOML name become dots in code. The <code>[versions]</code> table avoids repeating a number: change <code>composeBom</code> once and every Compose library moves together. A fourth section, <code>[bundles]</code>, lets you group several libraries under one name; you will meet it in later lessons.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>To add a library later,</strong> you add a line under <code>[libraries]</code>, then add <code>implementation(libs.your.name)</code> in <code>app/build.gradle.kts</code>, then sync. Android Studio's <strong>File &gt; Project Structure &gt; Dependencies</strong> screen can also do this for you.</p>
+</blockquote>
+<h3 class="v2-h3">The remaining files</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gradle.properties</code></td>
+<td>Settings for Gradle itself, such as how much memory the Gradle JVM may use and whether to use AndroidX. Shared with your team.</td>
+</tr>
+<tr>
+<td><code>local.properties</code></td>
+<td>Contains your computer's SDK path, for example <code>sdk.dir=...</code>. <strong>Machine-specific. Never commit it or share it.</strong></td>
+</tr>
+<tr>
+<td><code>gradle/wrapper/gradle-wrapper.properties</code></td>
+<td>Names the exact Gradle version to download. This is why you never install Gradle yourself.</td>
+</tr>
+<tr>
+<td><code>gradlew</code> and <code>gradlew.bat</code></td>
+<td>The <strong>Gradle Wrapper</strong> scripts. Running <code>./gradlew</code> (macOS/Linux) or <code>gradlew.bat</code> (Windows) uses the right Gradle version automatically.</td>
+</tr>
+<tr>
+<td><code>proguard-rules.pro</code></td>
+<td>Rules for code shrinking in release builds (lesson 49).</td>
+</tr>
+<tr>
+<td><code>.gitignore</code></td>
+<td>Tells Git which files not to track (<code>build/</code>, <code>local.properties</code>, and so on).</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reading the Gradle Files</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Gradle Sync and What a Build Does</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Gradle sync</h3>
+<p class="v2-p">When you open a project or edit a build file, Android Studio shows a banner saying <strong>Sync Now</strong>, or starts a sync automatically. <strong>Gradle sync</strong> does <em>not</em> build your app. It reads the build files, works out the modules, plugins and dependencies, downloads whatever is missing, and then tells the IDE what the project looks like so it can offer code completion and error checking.</p>
+<p class="v2-p">Think of sync as a builder reading the plan and checking the materials are in stock. Construction (the build) is a separate step. Whenever you change anything in a <code>.gradle.kts</code> file or <code>libs.versions.toml</code>, sync again. The elephant icon in the toolbar (labelled <strong>Sync Project with Gradle Files</strong>) does it.</p>
+<h3 class="v2-h3">The three phases of a Gradle run</h3>
+<ol class="v2-ol">
+<li><strong>Initialisation:</strong> Gradle reads <code>settings.gradle.kts</code> to find out which modules exist.</li>
+<li><strong>Configuration:</strong> Gradle reads each <code>build.gradle.kts</code> and builds a graph of <strong>tasks</strong> (small jobs) and their order.</li>
+<li><strong>Execution:</strong> Gradle runs the tasks that are needed, skipping any whose inputs have not changed. That skipping is why the second build is much quicker than the first.</li>
+</ol>
+<h3 class="v2-h3">What actually happens when you build an app</h3>
+<p class="v2-p">Here is the simplified production line for a debug build:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Kotlin sources (.kt)  --kotlinc--&gt;  .class files (JVM bytecode)
+Resources (res/)      --aapt2---&gt;   compiled resources + R class
+Manifest              --merge---&gt;   one final manifest (with libraries' manifests)
+.class + libraries    --D8------&gt;   classes.dex  (Android's bytecode)
+dex + resources       --package-&gt;   unsigned APK
+unsigned APK          --sign----&gt;   debug-signed APK  (app-debug.apk)</code></pre></div></div>
+<p class="v2-p">The tools in the middle have names worth recognising: <strong>kotlinc</strong> compiles Kotlin, <strong>AAPT2</strong> processes resources, <strong>D8</strong> converts Java bytecode to <strong>DEX</strong> (the format ART runs, from lesson 01), and the final step signs the package with an automatically created <strong>debug key</strong>. Release builds add shrinking with <strong>R8</strong> and use your own signing key (lesson 49).</p>
+<h3 class="v2-h3">Build from the command line</h3>
+<p class="v2-p">You can run the same factory without clicking. Open the <strong>Terminal</strong> tool window at the bottom of Android Studio (it opens in your project root) and run:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew assembleDebug</code></pre></div></div>
+<p class="v2-p">On Windows use:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>gradlew.bat assembleDebug</code></pre></div></div>
+<p class="v2-p">A successful run ends with a message like this (task counts and times will differ):</p>
+<blockquote class="v2-bq">
+<p class="v2-p">BUILD SUCCESSFUL in 1m 12s<br/>33 actionable tasks: 33 executed</p>
+</blockquote>
+<p class="v2-p">Then look in the <strong>Project</strong> view:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>app/build/outputs/apk/debug/app-debug.apk</code></pre></div></div>
+<p class="v2-p">That file is a real, installable Android app. Other handy tasks:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew tasks            # list available tasks
+./gradlew clean            # delete the build/ folders
+./gradlew installDebug     # build and install on a connected device or emulator
+./gradlew test             # run local unit tests</code></pre></div></div>
+<p class="v2-p">From the IDE, <strong>Build &gt; Make Project</strong> compiles, <strong>Build &gt; Clean Project</strong> deletes build outputs, and <strong>Build &gt; Build Bundle(s) / APK(s)</strong> produces packages. The Run button builds <em>and</em> installs <em>and</em> launches.</p>
+<h3 class="v2-h3">Debug and release, briefly</h3>
+<p class="v2-p">The <code>debug</code> build type is signed automatically and is not optimised, so it is easy to debug but larger and slower. The <code>release</code> build type is what you upload to Google Play after shrinking and signing with your own key. You will build one in lesson 49.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Gradle Sync and What a Build Does</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Change the greeting and the app name</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Prove you can edit code and resources and see the result in the Preview.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Open <code>strings.xml</code> and change <code>app_name</code> to <code>Greeter</code>.</li>
+<li>In <code>MainActivity.kt</code>, change the <code>name</code> passed to <code>Greeting</code> from <code>"Android"</code> to your own first name.</li>
+<li>Change the text so it reads <code>Welcome, &lt;name&gt;!</code> (with your actual name) instead of <code>Hello &lt;name&gt;!</code>.</li>
+<li>Check the result in <strong>Split</strong> view without running the app.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>strings.xml</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Greeter&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p"><code>Greeting</code> with a string template (see lesson 06):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Welcome, $name!",
+        modifier = modifier
+    )
+}</code></pre></div></div>
+<p class="v2-p">And in <code>setContent</code>, pass your name:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Greeting(
+    name = "Tunde",
+    modifier = Modifier.padding(innerPadding)
+)</code></pre></div></div>
+<p class="v2-p">The preview function <code>GreetingPreview</code> still passes <code>"Android"</code>, so the Preview shows <code>Welcome, Android!</code>. Change it too if you want it to match.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Add a library using the version catalog</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Practise the three-file workflow (catalog, build file, sync) using a library that is safe to add.</p>
+<p class="v2-p">Add the AndroidX <strong>Core SplashScreen</strong> library, or any small AndroidX library of your choice, using the version catalog. First look up the latest stable version on the library's official page (search for "androidx core splashscreen release notes" on developer.android.com) and never guess it. Describe where each of the three edits goes.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><ol class="v2-ol">
+<li>In <code>gradle/libs.versions.toml</code>, add a version and a library (use the real latest stable version number in place of <code>x.y.z</code>):</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+splashscreen = "x.y.z"
+
+[libraries]
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }</code></pre></div></div>
+<ol class="v2-ol" start="2">
+<li>In <code>app/build.gradle.kts</code>, inside <code>dependencies</code>:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>implementation(libs.androidx.core.splashscreen)</code></pre></div></div>
+<ol class="v2-ol" start="3">
+<li>Click <strong>Sync Now</strong> in the banner. If the sync succeeds, the dependency is available. If it fails with "could not resolve", the version number you typed does not exist, so check it against the official page.</li>
+</ol>
+<p class="v2-p">You edited exactly three things: the catalog, the module build file, and then you ran a sync. The dash-to-dot rule turned <code>androidx-core-splashscreen</code> into <code>libs.androidx.core.splashscreen</code>.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Build an APK from the terminal and inspect it</strong></p>
+<p class="v2-p">Open the Terminal tool window, build the debug APK with Gradle, then answer: Where is the file? What is its approximate size? Why is it larger than a hand-written "Hello" app from the 2010s? (Think about what libraries Compose brings.)</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Run:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>./gradlew assembleDebug</code></pre></div></div>
+<p class="v2-p">(<code>gradlew.bat assembleDebug</code> on Windows.) The file is at <code>app/build/outputs/apk/debug/app-debug.apk</code>. In the <strong>Project</strong> view you can right-click it and choose <strong>Reveal in Finder / Show in Explorer / Open in Files</strong> to see the size. A fresh Compose debug APK is typically several megabytes. Exact numbers vary with versions, so do not memorise one.</p>
+<p class="v2-p">It is large for a "Hello" app because a debug build is not shrunk, and it includes the Compose runtime, Material 3 and AndroidX libraries. Release builds with R8 shrinking are much smaller (lesson 49).</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Switch the Project tool window to <strong>Project</strong> view and write down the full path to three things: your <code>MainActivity.kt</code>, your <code>AndroidManifest.xml</code>, and the folder where the APK is created. Then switch back to the <strong>Android</strong> view and note where the same files appear. Being able to translate between the two views is a skill you will use daily.</p></div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Editing a build file and forgetting to sync.</strong> <em>The wrong action:</em> adding <code>implementation(libs.something)</code> and then seeing red text in Kotlin code. <em>The problem:</em> the IDE has not learned about the new library yet. <em>The fix:</em> click <strong>Sync Now</strong> (or the elephant icon) and wait for it to finish.</p>
+<p class="v2-p"><strong>Mistake #2: Typing a version that does not exist.</strong> <em>The wrong code:</em> <code>composeBom = "2020.01.01"</code> copied from an old blog. <em>The problem:</em> old or invented versions fail to resolve or clash with the Kotlin and AGP versions. <em>The fix:</em> use versions Android Studio generated, or look them up on the library's official release page.</p>
+<p class="v2-p"><strong>Mistake #3: Deleting <code>exported</code> or the intent filter.</strong> <em>The wrong code:</em> removing the <code>intent-filter</code> block "to clean up". <em>The problem:</em> the app installs but there is no launcher icon, and an app that targets Android 12 or higher will not install if an activity has an intent filter but no <code>android:exported</code> value. <em>The fix:</em> restore the <code>MAIN</code> and <code>LAUNCHER</code> filter and <code>android:exported="true"</code> on the launcher activity.</p>
+<p class="v2-p"><strong>Mistake #4: Renaming the package by hand in the file explorer.</strong> <em>The wrong action:</em> renaming folders in your operating system. <em>The problem:</em> the <code>package</code> line at the top of every file, the manifest, <code>namespace</code> and <code>applicationId</code> all go out of date, producing a flood of errors. <em>The fix:</em> rename through Android Studio's <strong>Refactor &gt; Rename</strong> on the package, and then update <code>namespace</code> and <code>applicationId</code> deliberately. Or, create a fresh project with the right name while you are still learning.</p>
+<p class="v2-p"><strong>Mistake #5: Committing <code>local.properties</code>.</strong> <em>The wrong action:</em> sharing the file with the project. <em>The problem:</em> it contains your computer's SDK path, which is wrong on every other machine. <em>The fix:</em> leave it out of version control; the generated <code>.gitignore</code> already does.</p>
+<p class="v2-p"><strong>Mistake #6: Treating a Gradle sync failure as a disaster.</strong> <em>The symptom:</em> a red banner. <em>The fix:</em> open the <strong>Build</strong> tool window and read the <strong>first</strong> error line. The usual causes are: no internet while downloading, a typo in a catalog name, or a Java/Gradle version mismatch. Try <strong>File &gt; Sync Project with Gradle Files</strong> after fixing, and as a last resort <strong>Build &gt; Clean Project</strong> or <strong>File &gt; Invalidate Caches</strong> (menu names move; look for the nearest match).</p>
+<p class="v2-p"><strong>Mistake #7: Choosing the wrong template.</strong> <em>The symptom:</em> the project has no <code>@Composable</code> code and no Compose lines in <code>dependencies</code>. <em>The fix:</em> you picked a Views-based template. Start again and choose the Empty Activity template that mentions Jetpack Compose.</p>
+<p class="v2-p"><strong>Mistake #8: Running out of disk space or memory.</strong> <em>The symptom:</em> sync or indexing takes forever or fails. <em>The fix:</em> free several gigabytes of disk, close browsers and other heavy programs, and make sure the project is on a normal drive, not a network folder. See the performance tips in lesson 02.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head (or on paper), then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What are the three different "names" created from the wizard's Package name, and which one must stay the same after you publish?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">The package (folder and <code>package</code> line in Kotlin files), the <code>namespace</code> (where generated code such as <code>R</code> lives) and the <code>applicationId</code> (the app's unique identity on devices and Google Play). The <code>applicationId</code> must stay the same after you publish, because Google Play treats a new ID as a new app.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> In <code>AndroidManifest.xml</code>, which element combination makes an activity appear as the launcher icon's target?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">An <code>intent-filter</code> containing the action <code>android.intent.action.MAIN</code> and the category <code>android.intent.category.LAUNCHER</code>, on an activity that also has <code>android:exported="true"</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>compileSdk</code>, <code>minSdk</code> and <code>targetSdk</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>compileSdk</code> is the SDK version your code is compiled against (which APIs you can call). <code>minSdk</code> is the oldest Android API level your app installs on. <code>targetSdk</code> is the Android version whose behaviour you have tested and opted into.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What does Gradle sync do, and what does it <em>not</em> do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Sync reads the build files, resolves modules, plugins and dependencies, downloads what is missing, and updates the IDE's understanding of the project. It does not compile or package your app; that is the build.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> In a version catalog, what does <code>androidx-core-ktx</code> under <code>[libraries]</code> become in a build file, and why use a catalog at all?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It becomes <code>libs.androidx.core.ktx</code> (dashes become dots). A catalog keeps every version in one file, so you change a number once instead of hunting through build files, and it gives you code completion for dependencies and plugins.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-1-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 1: Set up Android Studio</a>: the official pathway this lesson is based on (it includes the <em>Create your first Android app</em> codelab).</li>
+<li><a href="https://developer.android.com/studio/projects/create-project" rel="noopener noreferrer">Create a project</a>: the official New Project wizard guide.</li>
+<li><a href="https://developer.android.com/studio/projects" rel="noopener noreferrer">Projects overview</a>: modules, Android view versus Project view, and key files.</li>
+<li><a href="https://developer.android.com/build/migrate-to-catalogs" rel="noopener noreferrer">Migrate your build to version catalogs</a>: the official guide to <code>libs.versions.toml</code>.</li>
+<li><a href="https://developer.android.com/studio/intro" rel="noopener noreferrer">Introduction to Android Studio</a>: the official IDE overview.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Project Anatomy Report</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Create a fresh Android project and produce a short written "anatomy report" that proves you understand every important file. Then make three small changes and build the APK from the terminal. You will show that you can navigate, edit and build a project, not merely run it.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a project named <code>Anatomy Lab</code> with the Empty Activity (Compose) template and the package name <code>com.techbase.anatomylab</code>.</li>
+<li>Create a text file (in any note app) with these headings and fill each with one or two sentences in your own words: <strong>Manifest</strong>, <strong>MainActivity</strong>, <strong>Module build.gradle.kts</strong>, <strong>Project build.gradle.kts</strong>, <strong>settings.gradle.kts</strong>, <strong>libs.versions.toml</strong>, <strong>local.properties</strong>.</li>
+<li>Record these values from your project: <code>namespace</code>, <code>applicationId</code>, <code>minSdk</code>, <code>targetSdk</code>, <code>compileSdk</code>, <code>versionCode</code>, <code>versionName</code>.</li>
+<li>Make three changes: change the app name in <code>strings.xml</code>; change the text in <code>Greeting</code>; change <code>versionName</code> to <code>"0.1-lab"</code> and <code>versionCode</code> to <code>2</code>.</li>
+<li>Sync, then run <code>./gradlew assembleDebug</code> (or <code>gradlew.bat assembleDebug</code>) in the Terminal tool window.</li>
+<li>Write down the path and size of the APK that was created.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a second composable function <code>Farewell(name: String)</code> that shows <code>Goodbye, &lt;name&gt;!</code> and display both greetings in a <code>Column</code>. Check both in the Preview.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A sample anatomy report (your values will differ because they depend on your Android Studio version):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>ANATOMY LAB REPORT
+
+Manifest: declares the application, the MainActivity entry point, and the
+MAIN + LAUNCHER intent filter that gives the app its icon.
+MainActivity: a ComponentActivity whose onCreate calls setContent to show
+the Compose UI wrapped in AnatomyLabTheme.
+Module build.gradle.kts: SDK numbers, version info, build types, Compose
+switch and the dependency list.
+Project build.gradle.kts: makes the plugins available to modules (apply false).
+settings.gradle.kts: where plugins and libraries are downloaded from, and
+which modules are included (:app).
+libs.versions.toml: the central list of versions, libraries and plugins.
+local.properties: this computer's SDK path. Never committed.
+
+Recorded values:
+  namespace      com.techbase.anatomylab
+  applicationId  com.techbase.anatomylab
+  minSdk         (from your wizard choice)
+  targetSdk      (generated)
+  compileSdk     (generated)
+  versionCode    1  -&gt;  2
+  versionName    "1.0" -&gt; "0.1-lab"
+
+APK: app/build/outputs/apk/debug/app-debug.apk  (several MB)</code></pre></div></div>
+<p class="v2-p">The three edits:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Anatomy Lab&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Welcome to the lab, $name!",
+        modifier = modifier
+    )
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>defaultConfig {
+    applicationId = "com.techbase.anatomylab"
+    versionCode = 2
+    versionName = "0.1-lab"
+    // other lines unchanged
+}</code></pre></div></div>
+<p class="v2-p">Stretch goal solution in <code>MainActivity.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.anatomylab
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.techbase.anatomylab.ui.theme.AnatomyLabTheme
+
+@Composable
+fun Farewell(name: String, modifier: Modifier = Modifier) {
+    Text(text = "Goodbye, $name!", modifier = modifier)
+}
+
+@Composable
+fun GreetingPair(name: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Greeting(name = name)
+        Farewell(name = name)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GreetingPairPreview() {
+    AnatomyLabTheme {
+        GreetingPair("Tunde")
+    }
+}</code></pre></div></div>
+<p class="v2-p">In <code>setContent</code>, replace the <code>Greeting(...)</code> call with <code>GreetingPair(name = "Tunde", modifier = Modifier.padding(innerPadding))</code>. The Preview shows two lines stacked vertically.</p>
+<p class="v2-p"><strong>Expected terminal result:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">BUILD SUCCESSFUL in 45s<br/>33 actionable tasks: 33 executed</p>
+</blockquote><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 03 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-03-create-your-first-android-app</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 03 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Anatomy of an Android Project</li><li>✅ Step-by-Step: Create the Project with the Wizard</li><li>✅ The Two Views: Android and Project</li><li>✅ Reading AndroidManifest.xml</li><li>✅ Reading MainActivity.kt and the Theme Files</li><li>✅ Reading the Gradle Files</li><li>✅ Gradle Sync and What a Build Does</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_02.html" class="ln-btn">&#8592; Lesson 02</a><a href="lesson_04.html" class="ln-btn primary">Lesson 04 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 03 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

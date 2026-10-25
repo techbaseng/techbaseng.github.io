@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 68: Add Kotlin Multiplatform to Your Android Project — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l68">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 68 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 68</div>
+      <h1>Add Kotlin Multiplatform to Your Android Project</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Share FeeTracker&#x27;s Core</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 68</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Extract a shared module from an existing Android app and call platform-specific APIs with expect/actual and interfaces.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Share FeeTracker&#x27;s Core</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Most developers meet Kotlin Multiplatform with an Android app that already exists, not a blank project. The good news is that you do not have to start again. You add a <strong>shared module</strong> beside your app, move the portable code into it, and let the Android app depend on it like any other library. If an iPhone version comes later, that module is ready.</p>
+<p class="v2-p">This lesson covers <em>Add Kotlin Multiplatform to your project</em>, <em>Use platform-specific APIs</em> and <em>Platform-specific APIs in practice</em> from the <strong>Kotlin Multiplatform</strong> programme (https://developer.android.com/courses/pathways/kotlin-multiplatform), following Google's guide <strong>Add Kotlin Multiplatform to an existing project</strong> (https://developer.android.com/kotlin/multiplatform/migrate) and the JetBrains guide to connecting to platform APIs (https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-connect-to-apis.html).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Create a <strong>shared module</strong> in an existing project with Android Studio.</li>
+<li><strong>Link</strong> it to the Android app and verify the link.</li>
+<li><strong>Move code safely</strong> in small steps, with tests guarding each step.</li>
+<li>Replace JVM-only code with <strong>multiplatform alternatives</strong>.</li>
+<li>Reach <strong>platform APIs</strong> with <strong><code>expect</code>/<code>actual</code></strong> and <strong>interfaces</strong>, and choose between them.</li>
+<li>Wire <strong>platform implementations</strong> into shared code (manual injection, and notes on Hilt).</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> migrate <strong>upwards from the bottom</strong>. Share the code with the fewest dependencies first (models, rules), then widen the circle, running your tests after every move.</p>
+<p class="v2-p"><strong>Honesty note:</strong> the New Module wizard, template names and Gradle plugins change between Android Studio releases. Google's page says the shared-module template needs a recent Android Studio and AGP; the steps below match that page at the time of writing, but menus may differ in your version. Setup that depends on a Mac (anything iOS) is covered in lesson 69. Everything in this lesson works on the Android side without a Mac.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Why KMP, <code>expect</code>/<code>actual</code> and interfaces</strong> (lesson 66).</li>
+<li><strong>Targets and source sets, the shared module's Gradle file</strong> (lesson 67).</li>
+<li><strong>Layers, use cases and repositories</strong> (lessons 60 to 63).</li>
+<li><strong>Hilt and modules</strong> (lesson 65).</li>
+<li><strong>Unit tests and fakes</strong> (lessons 20 and 62).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: The Migration Plan</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Migrating a real app is a <strong>sequence of safe steps</strong>, not a rewrite.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Step 0  Make sure the Android app builds and its tests pass (your safety net).
+Step 1  Create an empty :shared module and link it. Prove the link works.
+Step 2  Move plain models and pure rules. Fix imports. Tests green.
+Step 3  Replace JVM-only types (java.time, Gson, Retrofit) with multiplatform ones.
+Step 4  Move repositories. Platform needs go behind interfaces or expect/actual.
+Step 5  Optionally move state holders. Keep platform UI and services native.
+Step 6  Add iOS targets and an Xcode app (lesson 69).</code></pre></div></div>
+<p class="v2-p">At every step the Android app keeps building. If something breaks, you know it was the last move, and you can undo it.</p>
+<h3 class="v2-h3">What the dependencies tell you</h3>
+<p class="v2-p">Before moving code, look at its imports. They reveal how hard the move is:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Imports in the file</th>
+<th>Difficulty</th>
+<th>Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Only Kotlin stdlib</td>
+<td>Trivial</td>
+<td>Move as is</td>
+</tr>
+<tr>
+<td><code>java.util</code>, <code>java.time</code>, <code>java.io</code></td>
+<td>Easy to medium</td>
+<td>Replace with <code>kotlin.*</code>, <code>kotlinx-datetime</code>, <code>okio</code>, or an interface</td>
+</tr>
+<tr>
+<td>Retrofit, Gson, Moshi</td>
+<td>Medium</td>
+<td>Ktor client and kotlinx.serialization</td>
+</tr>
+<tr>
+<td>Room 2.x entities or DAOs</td>
+<td>Medium</td>
+<td>Room KMP (lesson 70)</td>
+</tr>
+<tr>
+<td><code>android.*</code>, <code>Context</code>, <code>Activity</code></td>
+<td>Not shareable</td>
+<td>Interface in common, implementation in <code>androidMain</code> or the app</td>
+</tr>
+<tr>
+<td>Compose UI</td>
+<td>Stays native</td>
+<td>Unless you adopt Compose Multiplatform</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Migration Plan</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step Build 1: Create the Shared Module</div><div class="pc" id="chk4"></div></div><div class="pb2"><ol class="v2-ol">
+<li><strong>Make a restore point</strong>: commit your work in Git. You can always go back.</li>
+<li>In Android Studio choose <strong>File → New → New Module</strong>.</li>
+<li>Select the <strong>Kotlin Multiplatform Shared Module</strong> template.</li>
+<li>Set a <strong>module name</strong>, for example <code>shared</code>. This is both the Gradle module name and the default name of the iOS framework. Pick a <strong>package name</strong>, such as <code>com.example.fees.shared</code>.</li>
+<li>Choose <strong>Finish</strong> and let Gradle sync.</li>
+</ol>
+<p class="v2-p">Google's page states that this template requires a recent Android Studio and a minimum Android Gradle Plugin version (at the time of the page: Meerkat and AGP 8.8.0), generates placeholder functions and tests so the module compiles, and creates a source set for each platform. Check the current page for updated minimums.</p>
+<h3 class="v2-h3">Look at what the wizard made</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>shared/
+ ├─ build.gradle.kts
+ └─ src/
+     ├─ commonMain/kotlin/.../Greeting.kt, Platform.kt
+     ├─ commonTest/kotlin/.../SharedCommonTest.kt
+     ├─ androidMain/kotlin/.../Platform.android.kt
+     └─ iosMain/kotlin/.../Platform.ios.kt</code></pre></div></div>
+<p class="v2-p">Read <code>shared/build.gradle.kts</code> with lesson 67 in mind: find the plugins, the targets, the iOS framework and the dependency blocks. The wizard-generated <code>Greeting</code> and <code>Platform</code> classes are placeholders that prove the <code>expect</code>/<code>actual</code> mechanism works; you will delete them later.</p>
+<h3 class="v2-h3">Link the app to the module</h3>
+<p class="v2-p">The wizard does <strong>not</strong> add the dependency for you. In the Android app module's build file:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// app/build.gradle.kts
+dependencies {
+    implementation(project(":shared"))        // or projects.shared with type-safe accessors
+    // ... your other dependencies
+}</code></pre></div></div>
+<p class="v2-p">Sync, then <strong>prove</strong> the link by calling the placeholder from the app:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// in MainActivity.kt
+import com.example.fees.shared.Greeting
+
+setContent {
+    AppTheme { Text(Greeting().greet()) }     // shows "Hello, Android N!" style text
+}</code></pre></div></div>
+<p class="v2-p">If it runs, the plumbing is right. If not, fix it <strong>now</strong>, before you move real code.</p>
+<h3 class="v2-h3">If the new plugin rejects your app module</h3>
+<p class="v2-p">Google's documentation notes that the dedicated Android library plugin for KMP has <strong>no direct replacement for the application plugin</strong>. That is fine: your existing <code>app</code> module stays an ordinary application module, and <code>shared</code> is a library beside it. If your <strong>existing app</strong> uses build types, product flavours, view binding or <code>BuildConfig</code>, those stay in the app module; only the shared module has the limitations (no flavours, no <code>BuildConfig</code> there).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Create the Shared Module</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step Build 2: Move Models and Rules</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Start with <code>Payment</code>, <code>Student</code>, <code>FeeSummary</code> and <code>CalculateFeeSummary</code> from lessons 60 and 63.</p>
+<ol class="v2-ol">
+<li>In Android Studio, select the file, choose <strong>Refactor → Move</strong>, and pick <code>shared/src/commonMain/kotlin/...</code> as the target directory.</li>
+<li>Let the IDE update imports across the app.</li>
+<li>Compile the shared module for all targets (<strong>Build → Make Module</strong> or <code>./gradlew :shared:build</code> without iOS if you are not on a Mac; see the note below). The compiler tells you what is not portable.</li>
+</ol>
+<p class="v2-p">Typical errors and their fixes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Before: JVM-only
+import java.time.Instant
+data class Payment(val id: Int, val studentName: String, val amountNaira: Long, val paidAt: Instant)
+
+// After: multiplatform (add kotlinx-datetime to commonMain)
+import kotlinx.datetime.Instant
+data class Payment(val id: Int, val studentName: String, val amountNaira: Long, val paidAt: Instant)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Before
+val text = String.format("%,d", amount)               // JVM only
+
+// After: write a tiny helper in common code
+fun Long.withThousandsSeparators(): String =
+    toString().reversed().chunked(3).joinToString(",").reversed()</code></pre></div></div>
+<p class="v2-p">(Kotlin's newer <code>kotlin.time.Instant</code> and <code>kotlin.uuid.Uuid</code> are moving into the standard library. Check which your Kotlin version provides before adding a library; the principle is "prefer standard library, then a multiplatform library".)</p>
+<p class="v2-p"><strong>Run your tests after the move.</strong> Tests of moved classes should move too. JUnit tests need rewriting for <code>kotlin.test</code> (mostly changing imports: <code>@Test</code>, <code>assertEquals</code> have the same names):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/commonTest/...
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class CalculateFeeSummaryTest {
+    @Test
+    fun balance_is_term_fee_minus_payments() {
+        assertEquals(50, CalculateFeeSummary(100)(listOf(30L, 20L)).balance)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Tests that used Mockito or MockK will not compile in common code, since mocking libraries depend on the JVM. This is another reason the course taught <strong>fakes</strong> (lesson 62): they work everywhere.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Move Models and Rules</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step Build 3: Platform-Specific APIs</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Shared code often needs something only the platform has. You now have two tools. Choose by what the need looks like.</p>
+<h3 class="v2-h3">Tool A: <code>expect</code>/<code>actual</code> for small, stateless facts</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+expect fun currentTimeMillis(): Long</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidMain
+actual fun currentTimeMillis(): Long = System.currentTimeMillis()</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// iosMain
+import platform.Foundation.NSDate
+import platform.Foundation.timeIntervalSince1970
+
+actual fun currentTimeMillis(): Long = (NSDate().timeIntervalSince1970 * 1000).toLong()</code></pre></div></div>
+<p class="v2-p">Good for: platform name, a clock, a UUID generator, a log function, a file path to the app's data directory.</p>
+<h3 class="v2-h3">Tool B: interfaces for services</h3>
+<p class="v2-p">For anything with state, lifecycle or UI (secure storage, notifications, biometrics, connectivity), define an interface in common code, implement it per platform, and <strong>pass it in</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+interface ConnectivityMonitor {
+    val isOnline: Flow&lt;Boolean&gt;
+}
+
+class SyncPolicy(private val connectivity: ConnectivityMonitor) {
+    fun shouldSync(): Flow&lt;Boolean&gt; = connectivity.isOnline.distinctUntilChanged()
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidMain (or in the Android app)
+class AndroidConnectivityMonitor(context: Context) : ConnectivityMonitor {
+    private val manager = context.getSystemService(ConnectivityManager::class.java)
+
+    override val isOnline: Flow&lt;Boolean&gt; = callbackFlow {
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) { trySend(true) }
+            override fun onLost(network: Network) { trySend(false) }
+        }
+        manager.registerDefaultNetworkCallback(callback)
+        trySend(manager.activeNetwork != null)
+        awaitClose { manager.unregisterNetworkCallback(callback) }
+    }.distinctUntilChanged()
+}</code></pre></div></div>
+<p class="v2-p">On iOS the equivalent uses Apple's <code>NWPathMonitor</code>, written in Kotlin in <code>iosMain</code> or in Swift in the iOS app.</p>
+<h3 class="v2-h3">Choosing between them</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Question</th>
+<th><code>expect</code>/<code>actual</code></th>
+<th>Interface</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is it a tiny, pure function or constant?</td>
+<td><strong>Yes</strong></td>
+<td>Overkill</td>
+</tr>
+<tr>
+<td>Does it hold state or have a lifecycle?</td>
+<td>Awkward</td>
+<td><strong>Yes</strong></td>
+</tr>
+<tr>
+<td>Do you want to fake it in tests?</td>
+<td>Hard</td>
+<td><strong>Easy</strong></td>
+</tr>
+<tr>
+<td>Must the platform app supply it (it needs <code>Context</code>, Keychain objects)?</td>
+<td>Hard</td>
+<td><strong>Yes</strong></td>
+</tr>
+<tr>
+<td>Do you want the compiler to force every platform to implement it?</td>
+<td><strong>Yes</strong></td>
+<td>Yes (an unimplemented interface fails to compile in the app)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The guidance in JetBrains' "connect to platform-specific APIs" page is similar: use <code>expect</code>/<code>actual</code> for functions, properties and classes that have a natural platform implementation, and prefer interfaces when you need more flexibility or when the platform side must provide the instance.</p>
+<h3 class="v2-h3">Android-only dependencies inside shared code</h3>
+<p class="v2-p">The Android source set may use Android libraries freely:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/build.gradle.kts
+kotlin {
+    sourceSets {
+        androidMain.dependencies {
+            implementation("androidx.datastore:datastore-preferences:&lt;latest stable&gt;")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Anything in <code>androidMain</code> stays Android-only; <code>commonMain</code> cannot see it. This lets you migrate incrementally without losing Android-specific features.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Platform-Specific APIs</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step Build 4: Platform Implementations in Practice</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">How does the shared <code>SyncPolicy</code> receive an <code>AndroidConnectivityMonitor</code>? Several options, from simplest to most scalable.</p>
+<h3 class="v2-h3">Option 1: Manual wiring in the app</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidApp
+class FeeApplication : Application() {
+    val container by lazy { AppContainer(this) }
+}
+
+class AppContainer(context: Context) {
+    val connectivity: ConnectivityMonitor = AndroidConnectivityMonitor(context)
+    val syncPolicy = SyncPolicy(connectivity)
+}</code></pre></div></div>
+<h3 class="v2-h3">Option 2: Hilt in the Android app</h3>
+<p class="v2-p">Hilt is Android-only, so it lives in the <strong>app</strong> module and provides the platform implementations to shared classes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@InstallIn(SingletonComponent::class)
+object SharedModule {
+
+    @Provides @Singleton
+    fun provideConnectivity(@ApplicationContext context: Context): ConnectivityMonitor =
+        AndroidConnectivityMonitor(context)
+
+    @Provides @Singleton
+    fun provideSyncPolicy(connectivity: ConnectivityMonitor): SyncPolicy = SyncPolicy(connectivity)
+
+    @Provides @Singleton
+    fun providePaymentsRepository(client: HttpClient, dao: PaymentDao): PaymentsRepository =
+        DefaultPaymentsRepository(client, dao)
+}</code></pre></div></div>
+<p class="v2-p">Shared classes have <strong>no</strong> Hilt annotations (Hilt does not work in common code); the app's module tells Hilt how to construct them. This keeps <code>commonMain</code> free of Android DI.</p>
+<h3 class="v2-h3">Option 3: A multiplatform DI library</h3>
+<p class="v2-p">If you want DI inside shared code, libraries such as <strong>Koin</strong> or <strong>kotlin-inject</strong> work on all targets. They are an alternative, not a requirement; Hilt in the app and plain constructors in shared code is a perfectly good setup.</p>
+<h3 class="v2-h3">Ktor instead of Retrofit</h3>
+<p class="v2-p">Shared repositories need a multiplatform HTTP client. The conversion is mechanical:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Before (Android only)
+interface PaymentApi {
+    @GET("payments") suspend fun getPayments(): List&lt;PaymentDto&gt;
+}
+
+// After (commonMain)
+class PaymentApi(private val client: HttpClient, private val baseUrl: String) {
+    suspend fun getPayments(): List&lt;PaymentDto&gt; =
+        client.get("$baseUrl/payments").body()
+}</code></pre></div></div>
+<p class="v2-p">with the imports <code>io.ktor.client.request.get</code> and <code>io.ktor.client.call.body</code>, and <code>@Serializable</code> DTOs (lesson 29). Error handling from lesson 62 still applies, with Ktor's exceptions (for example <code>ResponseException</code>) instead of Retrofit's <code>HttpException</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Platform Implementations in Practice</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build 5: Using Shared Code in the Android UI</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Your ViewModel stays an Android ViewModel for now and simply calls shared classes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltViewModel
+class FeeViewModel @Inject constructor(
+    observeSummary: ObserveFeeSummary          // class from :shared
+) : ViewModel() {
+
+    val uiState: StateFlow&lt;FeeUiState&gt; = observeSummary()
+        .map&lt;FeeSummary, FeeUiState&gt; { FeeUiState.Success(it) }
+        .catch { emit(FeeUiState.Error("Could not load fees")) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FeeUiState.Loading)
+}</code></pre></div></div>
+<p class="v2-p">(<code>ObserveFeeSummary</code> has no <code>@Inject</code> annotation because it is in shared code; supply it with a <code>@Provides</code> function as in Option 2.)</p>
+<p class="v2-p">The Android app now contains <strong>only</strong> UI, DI wiring and Android services. Everything else is shared. You have not changed what the user sees, which is the point of a good migration.</p>
+<h3 class="v2-h3">What about shared ViewModels?</h3>
+<p class="v2-p">The AndroidX Lifecycle ViewModel library has multiplatform support, so a ViewModel can live in <code>commonMain</code> and be used from Compose Multiplatform or from SwiftUI wrappers. That is a later step; check the current Lifecycle documentation for the supported targets and artifacts. A common intermediate position is to share the <strong>use cases and repositories</strong>, and keep a thin native ViewModel per platform.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Using Shared Code in the Android UI</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Step-by-Step Build 6: Keep It Healthy</div><div class="pc" id="chk9"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Run all tests in CI</strong> for every target you support.</li>
+<li><strong>Watch build time.</strong> Multiplatform builds are slower; enable the Gradle build cache and configuration cache (lesson 3), and build only the targets you need locally.</li>
+<li><strong>Review the public API</strong> of <code>shared</code>: types visible to Swift should be simple. Prefer concrete classes, <code>Flow</code>s that you can wrap, and avoid exposing complex generics.</li>
+<li><strong>Document the module</strong> in a README: what it contains, how to add a platform implementation, how to run tests.</li>
+<li><strong>Keep the dependency rule</strong>: <code>shared</code> must never depend on the Android app.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Keep It Healthy</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Triage the imports</strong></p>
+<p class="v2-p">For each file say whether you would move it now, move it after changes, or leave it: (a) <code>PaymentMapper.kt</code> (pure Kotlin); (b) <code>DateFormatter.kt</code> using <code>java.text.SimpleDateFormat</code>; (c) <code>SessionStore.kt</code> using <code>EncryptedSharedPreferences</code>; (d) <code>FeeScreen.kt</code> (Compose).</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(a) Move now. (b) Move after changes: replace with <code>kotlinx-datetime</code> formatting or an <code>expect</code>/<code>actual</code> formatter, because <code>SimpleDateFormat</code> is JVM-only. (c) Keep the implementation in Android; move an interface (<code>SessionStore</code>) to common and implement it with <code>EncryptedSharedPreferences</code> on Android and the Keychain on iOS. (d) Leave it in the Android app (unless you adopt Compose Multiplatform).</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Choose a mechanism</strong></p>
+<p class="v2-p">Decide <code>expect</code>/<code>actual</code> or interface, and say why: (a) <code>fun randomId(): String</code>; (b) a service that schedules local notifications; (c) the path of the app's private data directory.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>expect</code>/<code>actual</code> (tiny, stateless) or Kotlin's standard UUID where available. (b) Interface: it has state and lifecycle, needs <code>Context</code> or <code>UNUserNotificationCenter</code>, and should be fakeable. (c) <code>expect</code>/<code>actual</code> function (stateless), or pass the path in from each platform app when constructing the shared database (this is how Room KMP does it, lesson 70).</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Tests that break</strong></p>
+<p class="v2-p">After moving a class to <code>commonMain</code>, its old test (JUnit plus MockK) fails to compile in <code>commonTest</code>. Explain why and how to fix it.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">JUnit and MockK are JVM libraries; <code>commonTest</code> compiles for iOS too, so they are unavailable. Switch to <code>kotlin.test</code> and replace mocks with hand-written fakes. If a test truly needs JVM-only tools, move it to <code>androidHostTest</code>, but prefer portable tests so they run on every target.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Moving everything in one go.</strong> <em>Fix:</em> move in small steps and run tests after each.</p>
+<p class="v2-p"><strong>Mistake #2: Not proving the link first.</strong> <em>Fix:</em> call the wizard's <code>Greeting</code> from the app before moving code.</p>
+<p class="v2-p"><strong>Mistake #3: Moving code that imports <code>android.*</code>.</strong> <em>Fix:</em> hide it behind an interface.</p>
+<p class="v2-p"><strong>Mistake #4: Leaving Retrofit and Gson in shared code.</strong> <em>Fix:</em> use Ktor and kotlinx.serialization.</p>
+<p class="v2-p"><strong>Mistake #5: Putting Hilt annotations in <code>commonMain</code>.</strong> <em>Fix:</em> provide shared classes from the app's Hilt module.</p>
+<p class="v2-p"><strong>Mistake #6: Using <code>expect</code>/<code>actual</code> for complex services.</strong> <em>Fix:</em> use interfaces and injection.</p>
+<p class="v2-p"><strong>Mistake #7: Keeping mocks in common tests.</strong> <em>Fix:</em> use fakes and <code>kotlin.test</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Exposing complicated generic types to Swift.</strong> <em>Fix:</em> keep the public API simple.</p>
+<p class="v2-p"><strong>Mistake #9: Letting <code>shared</code> depend on the app.</strong> <em>Fix:</em> dependencies go from the app to <code>shared</code> only.</p>
+<p class="v2-p"><strong>Mistake #10: Not committing before the migration.</strong> <em>Fix:</em> commit first so you can compare and roll back.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> Which template creates a shared module in Android Studio?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">The <strong>Kotlin Multiplatform Shared Module</strong> template, under File, New, New Module.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What must you do after the wizard creates the module?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Add <code>implementation(project(":shared"))</code> to the Android app's dependencies, because the wizard does not do it.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why migrate models and pure rules first?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">They have the fewest dependencies, so they move easily, give early wins and exercise the build setup before harder code.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> When do you prefer an interface to <code>expect</code>/<code>actual</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">For services with state, lifecycle or platform-supplied objects, and whenever you want to fake them in tests.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Where does Hilt belong in a KMP project?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">In the Android app module, where its modules provide shared classes and platform implementations; it is not available in common code.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/kotlin-multiplatform" rel="noopener noreferrer">Kotlin Multiplatform programme</a></li>
+<li><a href="https://developer.android.com/kotlin/multiplatform/migrate" rel="noopener noreferrer">Add Kotlin Multiplatform to an existing project</a></li>
+<li><a href="https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-connect-to-apis.html" rel="noopener noreferrer">Connect to platform-specific APIs (JetBrains)</a></li>
+<li><a href="https://developer.android.com/kotlin/multiplatform" rel="noopener noreferrer">Kotlin Multiplatform on Android Developers</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Share FeeTracker&#x27;s Core</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Migrate the domain and data logic of FeeTracker into a shared module, with the Android app still working at every step.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Commit your project and make sure its tests pass.</li>
+<li>Create the <code>:shared</code> module with the wizard; link it; prove the link with the placeholder.</li>
+<li>Move <code>Payment</code>, <code>Student</code>, <code>FeeSummary</code>, <code>CalculateFeeSummary</code> and <code>GetStudentBalancesUseCase</code> into <code>commonMain</code>. Replace any JVM-only types.</li>
+<li>Move their tests to <code>commonTest</code> using <code>kotlin.test</code> and fakes.</li>
+<li>Define a <code>ConnectivityMonitor</code> interface in common code and implement it for Android.</li>
+<li>Convert the Retrofit service to a Ktor-based <code>PaymentApi</code> in common code, with the OkHttp engine on Android.</li>
+<li>Provide the shared classes to the app through a Hilt module.</li>
+<li>Verify that the app behaves exactly as before and all tests pass.</li>
+<li>Write a migration log: each step, what broke, how you fixed it.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> make the iOS targets compile (<code>./gradlew :shared:compileKotlinIosSimulatorArm64</code> on a Mac) and list every place that needed an <code>iosMain</code> implementation.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A condensed migration log (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>1. Commit baseline. 42 unit tests green.
+2. Create :shared via wizard. Added implementation(project(":shared")). Greeting shows. OK.
+3. Moved Payment/Student/FeeSummary/CalculateFeeSummary.
+   Broke: java.time.Instant -&gt; replaced with kotlinx.datetime.Instant (added dependency).
+   Broke: String.format -&gt; replaced with a helper. 
+4. Moved tests; JUnit -&gt; kotlin.test; no mocks were used. 14 tests in commonTest green.
+5. ConnectivityMonitor interface in commonMain; AndroidConnectivityMonitor in androidMain.
+6. PaymentApi: Retrofit -&gt; Ktor client; DTOs annotated @Serializable;
+   added ktor-client-okhttp to androidMain. HttpException -&gt; ResponseException in runCatchingNetwork.
+7. SharedModule (Hilt) provides HttpClient, PaymentApi, repositories, use cases.
+8. App behaves the same. 42 + 14 tests green.
+9. iOS compile not attempted (no Mac).</code></pre></div></div>
+<p class="v2-p">A Ktor client built in common code with a per-platform engine:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+fun createHttpClient(): HttpClient = HttpClient {
+    install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
+    install(HttpTimeout) { requestTimeoutMillis = 30_000 }
+}</code></pre></div></div>
+<p class="v2-p">The Hilt module in the app:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@InstallIn(SingletonComponent::class)
+object SharedModule {
+    @Provides @Singleton fun client(): HttpClient = createHttpClient()
+    @Provides @Singleton fun api(client: HttpClient) = PaymentApi(client, "https://api.example.com")
+}</code></pre></div></div>
+<p class="v2-p">Every step left the Android app working, which is what makes the migration low-risk.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 68 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-68-add-kotlin-multiplatform-to-your-android-p</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 68 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Migration Plan</li><li>✅ Step-by-Step Build 1: Create the Shared Module</li><li>✅ Step-by-Step Build 2: Move Models and Rules</li><li>✅ Step-by-Step Build 3: Platform-Specific APIs</li><li>✅ Step-by-Step Build 4: Platform Implementations in Practice</li><li>✅ Step-by-Step Build 5: Using Shared Code in the Android UI</li><li>✅ Step-by-Step Build 6: Keep It Healthy</li><li>✅ Guided Practice Exercises</li><li>✅ Common Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_67.html" class="ln-btn">&#8592; Lesson 67</a><a href="lesson_69.html" class="ln-btn primary">Lesson 69 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 68 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

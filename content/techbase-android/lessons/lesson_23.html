@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 23: The Activity Lifecycle — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l23">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 23 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 23</div>
+      <h1>The Activity Lifecycle</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Lifecycle-Safe Habit Tracker</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 23</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Understand how Android creates, pauses and destroys your screens, and keep state safe across configuration changes with the Dessert Clicker app.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Lifecycle-Safe Habit Tracker</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome to the <strong>Intermediate</strong> level. Up to now your apps have been small and forgiving. From here on you build apps that behave like the real ones on a phone: they survive a screen rotation, they cope when the user switches to WhatsApp and comes back, and they do not lose a half-typed message because the system needed memory.</p>
+<p class="v2-p">All of that depends on one idea: the <strong>Activity lifecycle</strong>. In this lesson you will learn what happens between the moment the user taps your icon and the moment the system destroys your screen, and you will prove it by building <strong>Dessert Clicker</strong>, an app that counts how many desserts you have sold and shows a different dessert as sales grow.</p>
+<p class="v2-p">This lesson covers the first two items of Unit 4 of Google's official <strong>Android Basics with Compose</strong> course: <em>Welcome to Unit 4</em> and <em>Stages of the Activity lifecycle</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Name the lifecycle callbacks of an Activity and say when each runs.</li>
+<li>Log lifecycle events with <code>Log.d</code> and read them in Logcat.</li>
+<li>Explain what a <strong>configuration change</strong> is and why it restarts your Activity.</li>
+<li>Use <code>rememberSaveable</code> to keep state through rotation.</li>
+<li>Explain <strong>process death</strong> and how it differs from rotation.</li>
+<li>Describe how lifecycle-aware code (collecting data only while the screen is visible) saves battery and data.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> your app does not control when it starts, pauses or dies. The system does. Your job is to respond to these events correctly and to keep important state somewhere safe.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>State and recomposition</strong> (lessons 17 and 18). A composable that reads state redraws when the state changes. <code>remember</code> keeps a value across recompositions but <strong>not</strong> across the Activity being destroyed.</li>
+<li><strong><code>MainActivity</code> and <code>setContent</code></strong> (lesson 15). The Activity is the Android component that hosts your Compose UI.</li>
+<li><strong>Logging.</strong> <code>Log.d("TAG", "message")</code> writes a debug line you can read in the <strong>Logcat</strong> window. Android Studio filters it by tag, package and level. You will learn the Logcat window properly in lesson 43, but you only need to type a filter today.</li>
+<li><strong>Kotlin lambdas</strong> (lesson 12). Compose callbacks are lambdas.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: The Life of a Screen</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">An <strong>Activity</strong> is one screen of your app that the system can create, show, hide and destroy. Because phones have little memory and users jump between apps all the time, the system moves your Activity through a set of <strong>states</strong>. Each move triggers a <strong>callback</strong>, a function you can override to react.</p>
+<p class="v2-p">Think of a shop assistant in a busy market stall. When a customer arrives, the stall is opened (<code>onCreate</code>). The assistant stands ready (<code>onStart</code>), then actively serves (<code>onResume</code>). If another customer walks in front, the assistant pauses (<code>onPause</code>), steps back out of view (<code>onStop</code>) and might eventually be sent home if space is needed (<code>onDestroy</code>).</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>          app launched
+               |
+          [ onCreate ]      Activity is created. Build UI, set content.
+               |
+          [ onStart ]       Visible, but the user cannot interact yet.
+               |
+          [ onResume ]      In the foreground. Interactive. "Resumed".
+               |
+   another app / dialog covers part of the screen
+               |
+          [ onPause ]       Partly visible, not focused.
+               |
+   completely hidden (user pressed Home, opened another app)
+               |
+          [ onStop ]        Not visible. Release what you do not need.
+               |
+        +------+-------------------------+
+        |                                |
+   user returns                    finish() / system kills
+        |                                |
+   [ onRestart ]                    [ onDestroy ]
+        |                                
+   back to onStart</code></pre></div></div>
+<h3 class="v2-h3">The callbacks at a glance</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Callback</th>
+<th>When it runs</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>onCreate</code></td>
+<td>Activity is first created</td>
+<td>Call <code>setContent</code>, set up one-time things</td>
+</tr>
+<tr>
+<td><code>onStart</code></td>
+<td>Activity becomes visible</td>
+<td>Start things that only matter while visible</td>
+</tr>
+<tr>
+<td><code>onResume</code></td>
+<td>Activity gets focus</td>
+<td>Resume animations, camera, sensors</td>
+</tr>
+<tr>
+<td><code>onPause</code></td>
+<td>Activity loses focus (may still be visible)</td>
+<td>Pause what must not continue; keep it fast</td>
+</tr>
+<tr>
+<td><code>onStop</code></td>
+<td>Activity is no longer visible</td>
+<td>Release heavy resources, save lightweight data</td>
+</tr>
+<tr>
+<td><code>onRestart</code></td>
+<td>Coming back from stopped</td>
+<td>Rarely overridden</td>
+</tr>
+<tr>
+<td><code>onDestroy</code></td>
+<td>Activity is finishing or being destroyed</td>
+<td>Final cleanup</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Two helpful pairs to remember:</p>
+<ul class="v2-ul">
+<li><code>onCreate</code> / <code>onDestroy</code> bracket the <strong>entire life</strong> of the Activity.</li>
+<li><code>onStart</code> / <code>onStop</code> bracket the time it is <strong>visible</strong>.</li>
+<li><code>onResume</code> / <code>onPause</code> bracket the time it is <strong>in the foreground and interactive</strong>.</li>
+</ul>
+<p class="v2-p">On a modern phone with multi-window mode (two apps side by side), an Activity can be visible but not focused, which is exactly why <code>onStart</code> and <code>onResume</code> are separate.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Life of a Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Log Every Lifecycle Event</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">You will not memorise the diagram by reading it. You learn it by watching it happen. Create a new <strong>Empty Activity</strong> project called <code>Dessert Clicker</code> (package <code>com.example.dessertclicker</code>).</p>
+<p class="v2-p">Open <code>MainActivity.kt</code> and replace its contents with the following. It overrides every callback and logs one line for each.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.Text
+
+private const val TAG = "MainActivity"
+
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate called")
+        setContent {
+            Text("Dessert Clicker")
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart called")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume called")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause called")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop called")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG, "onRestart called")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy called")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Every override calls <code>super</code> first. That is mandatory: the parent class does essential work and Android throws an exception if you forget.</p>
+<h3 class="v2-h3">Reading the Logcat</h3>
+<ol class="v2-ol">
+<li>Run the app on an emulator or a phone.</li>
+<li>Open <strong>View &gt; Tool Windows &gt; Logcat</strong> (it is usually a tab at the bottom).</li>
+<li>In the filter box type <code>tag:MainActivity</code> (the exact query syntax changes between Android Studio versions, but typing the tag usually works).</li>
+</ol>
+<h3 class="v2-h3">Experiments</h3>
+<p class="v2-p">Perform each action and write down what you see:</p>
+<ol class="v2-ol">
+<li><strong>Launch the app.</strong> You should see <code>onCreate</code>, <code>onStart</code>, <code>onResume</code> in that order.</li>
+<li><strong>Press Home.</strong> You should see <code>onPause</code> then <code>onStop</code>. The app is not destroyed; it sits in the background.</li>
+<li><strong>Reopen it from recents.</strong> You should see <code>onRestart</code>, <code>onStart</code>, <code>onResume</code>. Note there is <strong>no</strong> <code>onCreate</code>: the same Activity instance came back.</li>
+<li><strong>Press Back</strong> on the main screen. You should see <code>onPause</code>, <code>onStop</code>, <code>onDestroy</code>. The Activity is finished.</li>
+<li><strong>Rotate the device</strong> (on the emulator use the rotate buttons in the side panel). You will see the full tear-down <strong>and</strong> a fresh start: <code>onPause</code>, <code>onStop</code>, <code>onDestroy</code>, then <code>onCreate</code>, <code>onStart</code>, <code>onResume</code>.</li>
+</ol>
+<p class="v2-p">That fifth result surprises most beginners. Rotating the phone <strong>destroys and recreates</strong> your Activity. We will fix the consequences shortly.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Experiment:</strong> pull down the notification shade without covering the app completely. On many versions you will see only <code>onPause</code> but no <code>onStop</code>, because the app is still partly visible. Compare that to opening a full-screen dialog.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Log Every Lifecycle Event</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: The Dessert Clicker Screen</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">The official course gives you the starting art and layout. We will build our own simple version with text only, so you do not need any downloads.</p>
+<p class="v2-p">The rules of the app:</p>
+<ul class="v2-ul">
+<li>A big button shows the current dessert's name.</li>
+<li>Each tap sells one dessert and earns the dessert's price.</li>
+<li>As the number sold passes certain thresholds, the dessert changes.</li>
+</ul>
+<h3 class="v2-h3">The data</h3>
+<p class="v2-p">Create <code>Dessert.kt</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Dessert.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.dessertclicker
+
+data class Dessert(
+    val name: String,
+    val price: Int,
+    val startProductionAmount: Int
+)
+
+val desserts = listOf(
+    Dessert("Cupcake", price = 5, startProductionAmount = 0),
+    Dessert("Donut", price = 10, startProductionAmount = 5),
+    Dessert("Eclair", price = 15, startProductionAmount = 20),
+    Dessert("Froyo", price = 30, startProductionAmount = 50),
+    Dessert("Gingerbread", price = 50, startProductionAmount = 100)
+)
+
+fun determineDessertToShow(dessertsSold: Int): Dessert {
+    var dessertToShow = desserts.first()
+    for (dessert in desserts) {
+        if (dessertsSold &gt;= dessert.startProductionAmount) {
+            dessertToShow = dessert
+        } else {
+            break
+        }
+    }
+    return dessertToShow
+}</code></pre></div></div>
+<p class="v2-p"><code>determineDessertToShow</code> walks the list; the last dessert whose <code>startProductionAmount</code> has been reached wins. With <code>dessertsSold = 7</code> the answer is <code>Donut</code>. With <code>dessertsSold = 120</code> it is <code>Gingerbread</code>.</p>
+<h3 class="v2-h3">The screen</h3>
+<p class="v2-p">Now write the composable. It keeps two numbers in state:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun DessertClickerScreen(modifier: Modifier = Modifier) {
+    var revenue by remember { mutableIntStateOf(0) }
+    var dessertsSold by remember { mutableIntStateOf(0) }
+
+    val currentDessert = determineDessertToShow(dessertsSold)
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(
+            onClick = {
+                revenue += currentDessert.price
+                dessertsSold++
+            }
+        ) {
+            Text(
+                text = currentDessert.name,
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
+        Text(
+            text = "Desserts sold: $dessertsSold",
+            modifier = Modifier.padding(top = 24.dp),
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = "Total revenue: ₦$revenue",
+            style = MaterialTheme.typography.titleLarge
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">Call it in <code>setContent</code>, inside your theme and a <code>Scaffold</code> as in lesson 21:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>setContent {
+    DessertClickerTheme {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding -&gt;
+            DessertClickerScreen(modifier = Modifier.padding(innerPadding))
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Use your own theme name if you named the project differently, and add the <code>Scaffold</code> imports from lesson 21.)</p>
+<p class="v2-p">Run it. Tap the button seven times. The button should read <code>Donut</code> and the counter <code>7</code>.</p>
+<p class="v2-p">Now <strong>rotate the phone</strong>. Everything resets to zero. Revenue and sales are gone, and the button says <code>Cupcake</code> again.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Dessert Clicker Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">The Problem: Configuration Changes</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A <strong>configuration change</strong> is something about the device or environment that changes while your app is running, such as:</p>
+<ul class="v2-ul">
+<li>screen rotation</li>
+<li>switching between light and dark theme</li>
+<li>changing the system language or font size</li>
+<li>plugging in a keyboard</li>
+<li>changing the window size in split-screen or on a foldable</li>
+</ul>
+<p class="v2-p">By default, Android <strong>destroys and recreates</strong> the Activity so it can reload resources suited to the new configuration, for example a different layout for landscape. All your <code>remember</code>ed values disappear with the old Activity. This default exists for good reasons, but it hurts if you do not plan for it.</p>
+<p class="v2-p">Why does <code>remember</code> fail? <code>remember</code> stores a value in the <strong>composition</strong>, and the composition belongs to the Activity instance. A new Activity instance means a new, empty composition.</p>
+<h3 class="v2-h3">The fix for simple values: <code>rememberSaveable</code></h3>
+<p class="v2-p"><code>rememberSaveable</code> works like <code>remember</code>, but it also stores the value in the <strong>saved instance state</strong>, a small <code>Bundle</code> that Android keeps for you across recreation. Change the two lines:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.saveable.rememberSaveable
+
+var revenue by rememberSaveable { mutableIntStateOf(0) }
+var dessertsSold by rememberSaveable { mutableIntStateOf(0) }</code></pre></div></div>
+<p class="v2-p">Run, tap seven times, rotate. The counters now survive. The Activity still goes through <code>onDestroy</code> and <code>onCreate</code>, but the numbers are restored.</p>
+<h3 class="v2-h3">What can <code>rememberSaveable</code> store?</h3>
+<p class="v2-p">Anything that can go into a <code>Bundle</code>: numbers, strings, booleans, lists of those, and classes marked <code>Parcelable</code> or <code>Serializable</code>. For other types you write a custom <strong>saver</strong> (lesson 54). <code>mutableIntStateOf</code> is handled automatically.</p>
+<p class="v2-p">Because a <code>Bundle</code> is held by the system, keep it <strong>small</strong>. The limit is around 1 MB for all saved state across the whole app and a transaction that is too large throws <code>TransactionTooLargeException</code>. Never put a bitmap or a 5,000-item list in saved state. Save an ID or a search query and reload the rest.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>The Problem: Configuration Changes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Process Death: The Other Way to Lose State</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Rotation is not the only danger. Suppose the user opens Dessert Clicker, taps a few times, then switches to Facebook, YouTube and a game. The system is low on memory, so it <strong>kills your whole app process</strong> while it is in the background. Your Activity gets no <code>onDestroy</code> call in that case, because the process is simply removed.</p>
+<p class="v2-p">When the user returns, Android recreates the Activity and hands back the <strong>saved instance state</strong>, so values saved with <code>rememberSaveable</code> return, but anything held only in <code>remember</code> or in ordinary variables is gone.</p>
+<h3 class="v2-h3">Testing process death</h3>
+<p class="v2-p">You can simulate it without waiting for low memory:</p>
+<ol class="v2-ol">
+<li>Run the app and tap a few times.</li>
+<li>Press Home.</li>
+<li>In Android Studio's <strong>Logcat</strong> or <strong>Running Devices</strong> toolbar, use <strong>Terminate Application</strong> (the red square), or run this in the terminal:</li>
+</ol>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>adb shell am kill com.example.dessertclicker</code></pre></div></div>
+<ol class="v2-ol" start="4">
+<li>Reopen the app from the launcher or recents.</li>
+</ol>
+<p class="v2-p"><code>adb shell am kill</code> only kills a <strong>background</strong> process, which is what makes it a realistic simulation. If the app is in the foreground it does nothing.</p>
+<p class="v2-p">The summary:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Event</th>
+<th>Activity destroyed?</th>
+<th><code>remember</code> survives?</th>
+<th><code>rememberSaveable</code> survives?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recomposition</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Rotation (configuration change)</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Process death</td>
+<td>Process killed</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>User presses Back / swipes the app away</td>
+<td>Yes, finished</td>
+<td>No</td>
+<td>No (intentional)</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The last row matters: saved state is for <strong>system-initiated</strong> recreation. If the user deliberately closes the app, they expect a fresh start.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Process Death: The Other Way to Lose State</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Lifecycle-Aware Work</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Some things should only happen <strong>while the screen is visible</strong>: listening to location updates, refreshing a live score, playing a video. If you start them in <code>onCreate</code> and forget to stop them, they keep draining battery and mobile data in the background.</p>
+<p class="v2-p">You will use two tools for this throughout the course:</p>
+<ol class="v2-ol">
+<li><strong>Lifecycle callbacks.</strong> Start in <code>onStart</code>, stop in <code>onStop</code>.</li>
+<li><strong>Lifecycle-aware components.</strong> Objects that watch the lifecycle for you.</li>
+</ol>
+<p class="v2-p">In Compose, the simplest lifecycle-aware tool for data streams is <code>collectAsStateWithLifecycle()</code>, which collects a Kotlin <code>Flow</code> only while the screen is at least started:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
+val uiState by viewModel.uiState.collectAsStateWithLifecycle()</code></pre></div></div>
+<p class="v2-p">You will use it in lessons 24 and 25. It stops collecting when the app goes to the background (below the <code>STARTED</code> state) and resumes when it returns. Plain <code>collectAsState()</code> keeps collecting even when the app is hidden. For streams that touch the network, database or sensors, prefer the lifecycle-aware version.</p>
+<p class="v2-p">For imperative code you can observe the lifecycle from a composable with <code>LifecycleEventEffect</code>, which runs a block when a given lifecycle event occurs:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import android.util.Log
+
+@Composable
+fun LifecycleLogger() {
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        Log.d("LifecycleLogger", "Screen became visible")
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        Log.d("LifecycleLogger", "Screen is hidden")
+    }
+}</code></pre></div></div>
+<p class="v2-p">This needs the <code>androidx.lifecycle:lifecycle-runtime-compose</code> dependency, which the Empty Activity template normally already includes through version-catalog entries. If Android Studio cannot resolve the import, add it (look up the latest stable version rather than copying a number from a tutorial, and see lesson 28 for how to add dependencies).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lifecycle-Aware Work</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Log the whole story</strong></p>
+<p class="v2-p">Add <code>Log.d</code> calls to <code>DessertClickerScreen</code> so that you can see, in Logcat:</p>
+<ol class="v2-ol">
+<li>a line when the screen first enters composition (<code>Composable entered composition</code>);</li>
+<li>a line when it leaves composition (<code>Composable left composition</code>);</li>
+<li>a line every time the button is tapped, showing <code>dessertsSold</code>.</li>
+</ol>
+<p class="v2-p">Then rotate the phone and describe the order of the Activity and composable log lines.</p>
+<p class="v2-p">Hint: use <code>DisposableEffect</code> for entering and leaving.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.util.Log
+import androidx.compose.runtime.DisposableEffect
+
+private const val TAG = "DessertClicker"
+
+@Composable
+fun DessertClickerScreen(modifier: Modifier = Modifier) {
+    var revenue by rememberSaveable { mutableIntStateOf(0) }
+    var dessertsSold by rememberSaveable { mutableIntStateOf(0) }
+
+    DisposableEffect(Unit) {
+        Log.d(TAG, "Composable entered composition")
+        onDispose {
+            Log.d(TAG, "Composable left composition")
+        }
+    }
+
+    val currentDessert = determineDessertToShow(dessertsSold)
+
+    Column(
+        modifier = modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(onClick = {
+            revenue += currentDessert.price
+            dessertsSold++
+            Log.d(TAG, "Tapped. dessertsSold = $dessertsSold")
+        }) {
+            Text(currentDessert.name)
+        }
+        Text("Desserts sold: $dessertsSold")
+        Text("Total revenue: ₦$revenue")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What you should observe on rotation:</strong> <code>onPause</code>, <code>onStop</code>, then <code>Composable left composition</code>, <code>onDestroy</code>, then <code>onCreate</code>, <code>onStart</code>, <code>onResume</code>, <code>Composable entered composition</code> (the exact interleaving of the composable lines with the Activity lines can vary). The point is that the composable is torn down and rebuilt along with the Activity, and <code>rememberSaveable</code> restores the counters.</p>
+<p class="v2-p"><code>DisposableEffect(Unit)</code> runs its block once when the composable enters the composition and runs <code>onDispose</code> when it leaves. You will study effects fully in lesson 55.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Add a share button</strong></p>
+<p class="v2-p">Dessert Clicker's official version lets the user share a message about their sales. Add a <code>Share</code> button that sends the text <code>I have sold X desserts and made ₦Y!</code> using an implicit intent.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
+private fun shareSoldDessertsInformation(context: Context, sold: Int, revenue: Int) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, "I have sold $sold desserts and made ₦$revenue!")
+    }
+    try {
+        context.startActivity(Intent.createChooser(intent, "Share your sales"))
+    } catch (e: android.content.ActivityNotFoundException) {
+        Toast.makeText(context, "No app can share this", Toast.LENGTH_LONG).show()
+    }
+}
+
+// Inside DessertClickerScreen:
+val context = LocalContext.current
+Button(onClick = { shareSoldDessertsInformation(context, dessertsSold, revenue) }) {
+    Text("Share")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Why:</strong> an <strong>implicit intent</strong> asks Android for any app that can do <code>ACTION_SEND</code> with plain text. <code>createChooser</code> shows the system sharing sheet. We catch <code>ActivityNotFoundException</code> because on an emulator without sharing apps nothing may respond, and the app should not crash. <code>LocalContext.current</code> gives a composable access to the Android <code>Context</code> it needs.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Rotate the device <strong>without</strong> <code>rememberSaveable</code> and then with it. Press Home and use <code>adb shell am kill</code> with and without it. Fill in a four-cell table of what survived.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Using <code>remember</code> for important state.</strong> <em>What happens:</em> counters, typed text and the selected tab reset on rotation. <em>The fix:</em> <code>rememberSaveable</code> for small simple values, or a ViewModel (lesson 24) for larger screen state.</p>
+<p class="v2-p"><strong>Mistake #2: Forgetting <code>super</code>.</strong> <em>The wrong code:</em> an <code>onStart</code> override without <code>super.onStart()</code>. <em>What happens:</em> the app crashes with <code>SuperNotCalledException</code>. <em>The fix:</em> call <code>super</code> first in every lifecycle override.</p>
+<p class="v2-p"><strong>Mistake #3: Doing slow work in <code>onPause</code>.</strong> <em>What happens:</em> the next screen appears late, because <code>onPause</code> must finish before the next Activity can resume. <em>The fix:</em> keep <code>onPause</code> fast. Do heavier clean-up in <code>onStop</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Assuming <code>onDestroy</code> always runs.</strong> <em>What happens:</em> saving data only in <code>onDestroy</code> loses it when the process is killed. <em>The fix:</em> save important data early (as the user works, or in <code>onStop</code>) and use saved instance state for UI state.</p>
+<p class="v2-p"><strong>Mistake #5: Putting large objects in saved state.</strong> <em>What happens:</em> <code>TransactionTooLargeException</code>. <em>The fix:</em> save small identifiers and reload.</p>
+<p class="v2-p"><strong>Mistake #6: Locking the orientation to avoid the problem.</strong> <em>What happens:</em> setting <code>screenOrientation="portrait"</code> hides rotation bugs, but font-size, language, dark-mode and window-resize changes still recreate the Activity, and on large screens the setting may be ignored. <em>The fix:</em> handle recreation properly.</p>
+<p class="v2-p"><strong>Mistake #7: Starting work in <code>onCreate</code> and never stopping it.</strong> <em>What happens:</em> a location or network listener runs while the app is hidden, draining battery. <em>The fix:</em> tie work to <code>onStart</code>/<code>onStop</code>, use lifecycle-aware collection, or a <code>LifecycleEventEffect</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Testing only on a fast emulator with plenty of memory.</strong> <em>What happens:</em> process death never occurs while you test, and the bug appears on a budget phone. <em>The fix:</em> test with <code>adb shell am kill</code> and the <em>Don't keep activities</em> developer option (Settings &gt; Developer options), which destroys each Activity as soon as you leave it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> In what order do the callbacks run when an app is launched?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>onCreate</code>, <code>onStart</code>, <code>onResume</code>.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> The user presses Home. Which callbacks run, and is the Activity destroyed?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>onPause</code> then <code>onStop</code>. The Activity is not destroyed; it stays in memory in the stopped state unless the system later needs the memory.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why does rotating the phone reset a counter stored with <code>remember</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Rotation is a configuration change, so Android destroys and recreates the Activity. <code>remember</code> stores values in the composition owned by the old Activity instance, so the new instance starts empty.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is the difference between rotation and process death for state saved with <code>rememberSaveable</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">In both cases <code>rememberSaveable</code> values are restored from the saved instance state. A plain <code>remember</code> value is lost in both. Process death differs because the whole app process is killed (usually in the background) and <code>onDestroy</code> may never run.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why is <code>collectAsStateWithLifecycle()</code> preferred over <code>collectAsState()</code> for Android data streams?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It stops collecting when the UI is not at least in the started state (for example when the app is in the background) and restarts when it returns, which saves battery, data and memory. <code>collectAsState()</code> keeps collecting while the app is hidden.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-4-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 4, Pathway 1: Architecture and the ViewModel</a>: the official pathway containing <em>Welcome to Unit 4</em> and <em>Stages of the Activity lifecycle</em>.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a>: all units.</li>
+<li><a href="https://developer.android.com/topic/architecture" rel="noopener noreferrer">App architecture guide</a>: where lifecycle-aware design leads, which you will use in lessons 24 and 25.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Lifecycle-Safe Habit Tracker</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a one-screen <strong>water tracker</strong> that counts glasses of water drunk today and logs every lifecycle event. It must survive rotation and process death.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A large <code>+1 glass</code> button and a <code>Reset</code> button.</li>
+<li>Display <code>Glasses today: N</code> and a message that changes at 4 glasses (<code>Good start</code>), 8 glasses (<code>Goal reached!</code>) and anything beyond (<code>Great, but do not overdo it</code>).</li>
+<li>The count survives rotation and <code>adb shell am kill</code>.</li>
+<li>Log <code>onCreate</code>, <code>onStart</code>, <code>onResume</code>, <code>onPause</code>, <code>onStop</code> and <code>onDestroy</code> with tag <code>WaterTracker</code>.</li>
+<li>Write a short paragraph (in a code comment or a README) describing what you saw in Logcat after one rotation.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show a third counter, <code>Times the app was opened</code>, that increments in <code>onCreate</code> using <code>savedInstanceState == null</code> to avoid counting rotations. Explain why that test works.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.watertracker
+
+import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+private const val TAG = "WaterTracker"
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate, fresh launch = ${savedInstanceState == null}")
+        setContent {
+            MaterialTheme {
+                WaterScreen()
+            }
+        }
+    }
+
+    override fun onStart() { super.onStart(); Log.d(TAG, "onStart") }
+    override fun onResume() { super.onResume(); Log.d(TAG, "onResume") }
+    override fun onPause() { super.onPause(); Log.d(TAG, "onPause") }
+    override fun onStop() { super.onStop(); Log.d(TAG, "onStop") }
+    override fun onDestroy() { super.onDestroy(); Log.d(TAG, "onDestroy") }
+}
+
+@Composable
+fun WaterScreen(modifier: Modifier = Modifier) {
+    var glasses by rememberSaveable { mutableIntStateOf(0) }
+
+    val message = when {
+        glasses &gt;= 9 -&gt; "Great, but do not overdo it"
+        glasses &gt;= 8 -&gt; "Goal reached!"
+        glasses &gt;= 4 -&gt; "Good start"
+        else -&gt; "Let us begin"
+    }
+
+    Column(
+        modifier = modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Glasses today: $glasses", style = MaterialTheme.typography.headlineMedium)
+        Text(message, modifier = Modifier.padding(vertical = 16.dp))
+        Button(onClick = { glasses++ }) { Text("+1 glass") }
+        OutlinedButton(
+            onClick = { glasses = 0 },
+            modifier = Modifier.padding(top = 8.dp)
+        ) { Text("Reset") }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected Logcat after one rotation:</strong> <code>onPause</code>, <code>onStop</code>, <code>onDestroy</code>, then <code>onCreate, fresh launch = false</code>, <code>onStart</code>, <code>onResume</code>. The <code>false</code> proves that the system handed back a saved-state <code>Bundle</code>.</p>
+<p class="v2-p"><strong>Stretch goal answer:</strong> <code>savedInstanceState</code> is <code>null</code> only when the Activity is created from scratch. After rotation or process death it is non-null, so <code>if (savedInstanceState == null) { opens++ }</code> counts real launches only. Persist the opened-count somewhere permanent (lesson 35, DataStore) for it to survive the user closing the app.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 23 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-23-the-activity-lifecycle</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 23 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Life of a Screen</li><li>✅ Step-by-Step Build 1: Log Every Lifecycle Event</li><li>✅ Step-by-Step Build 2: The Dessert Clicker Screen</li><li>✅ The Problem: Configuration Changes</li><li>✅ Process Death: The Other Way to Lose State</li><li>✅ Lifecycle-Aware Work</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_22.html" class="ln-btn">&#8592; Lesson 22</a><a href="lesson_24.html" class="ln-btn primary">Lesson 24 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 23 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

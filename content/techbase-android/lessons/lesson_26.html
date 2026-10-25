@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 26: Navigation in Jetpack Compose: The Cupcake App — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l26">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 26 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 26</div>
+      <h1>Navigation in Jetpack Compose: The Cupcake App</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: Three-Screen Quiz App</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 26</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Build a multi-screen app with NavHost and NavController, pass data between screens, share content, and test navigation.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ Three-Screen Quiz App</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">So far every app you built has one screen. Real apps have many: a login screen, a list, a detail page, a settings page, a checkout. Moving between them, and remembering where the user came from so that <strong>Back</strong> works, is called <strong>navigation</strong>.</p>
+<p class="v2-p">In this lesson you build <strong>Cupcake</strong>, a bakery ordering app with four screens: start, choose flavour, choose pickup date, and order summary. You will learn the Navigation component for Compose (<code>NavHost</code>, <code>NavController</code>, routes), pass data between screens through a shared ViewModel, add a top app bar with an Up button, share the order using an Android intent, and write a test that checks navigation.</p>
+<p class="v2-p">This lesson covers the four items of Pathway 2, Unit 4 of Google's <strong>Android Basics with Compose</strong> course: <em>Introduction to Navigation and Cupcake App</em>, <em>Navigate between screens with Compose</em>, <em>Test the Cupcake app</em> and <em>Practice: Add navigation</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the <strong>back stack</strong> and why navigation is not "just show another composable".</li>
+<li>Set up a <code>NavHost</code> with a <code>NavController</code> and define routes.</li>
+<li>Use <strong>type-safe routes</strong> (<code>@Serializable</code> objects) and know the older string routes you will meet in existing code.</li>
+<li>Navigate forward, pop back, and clear the back stack to the start.</li>
+<li>Share state between screens with a ViewModel.</li>
+<li>Show a <code>TopAppBar</code> that adapts its back button to the current screen.</li>
+<li>Launch a share sheet with <code>Intent.ACTION_SEND</code>.</li>
+<li>Test that tapping a button lands on the right screen.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> navigation is a <strong>stack of destinations</strong>. Going forward pushes a screen on the stack, and Back pops it off. The <code>NavController</code> owns the stack, and the <code>NavHost</code> draws whichever destination is on top.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>ViewModel, UI state and <code>StateFlow</code></strong> (lessons 24 and 25). Cupcake keeps its order in one ViewModel.</li>
+<li><strong>Lambdas as callbacks</strong> (lesson 12). Screens receive <code>onNextButtonClicked: () -&gt; Unit</code> instead of knowing about navigation.</li>
+<li><strong>State hoisting</strong> (lesson 24). The navigation host is the top-level state owner.</li>
+<li><strong>Gradle dependencies</strong> (lesson 24 showed the pattern; lesson 28 explains it). You will add <code>navigation-compose</code> and the serialization plugin.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: The Back Stack</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Think of a pile of plates in a canteen. A new plate goes on <strong>top</strong> (you navigated forward). Taking the top plate away reveals the previous one (you pressed Back). You can only touch the top.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> User taps Start       Taps Flavour        Taps Next        Presses Back
+ +-----------+        +-----------+       +-----------+     +-----------+
+ |           |        |           |       |  Pickup   |     |           |
+ |           |        |  Flavour  |       |  Flavour  |     |  Flavour  |
+ |   Start   |        |   Start   |       |   Start   |     |   Start   |
+ +-----------+        +-----------+       +-----------+     +-----------+
+   back stack           back stack          back stack        back stack</code></pre></div></div>
+<p class="v2-p">Three terms:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Destination</strong></td>
+<td>One screen the user can be on, such as the flavour screen.</td>
+</tr>
+<tr>
+<td><strong>Route</strong></td>
+<td>The identity of a destination. It is how you tell the controller where to go.</td>
+</tr>
+<tr>
+<td><strong>Back stack</strong></td>
+<td>The list of destinations the user has visited, most recent on top.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Three components do the work:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Component</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NavController</code></td>
+<td>Holds the back stack and exposes <code>navigate()</code> and <code>popBackStack()</code>.</td>
+</tr>
+<tr>
+<td><code>NavHost</code></td>
+<td>A composable that shows the destination currently on top of the stack.</td>
+</tr>
+<tr>
+<td><strong>Navigation graph</strong></td>
+<td>The set of all destinations, defined inside the <code>NavHost</code> lambda.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">You create the controller with <code>rememberNavController()</code>, which keeps it across recompositions and rotation.</p>
+<h3 class="v2-h3">Why not just use <code>if</code> statements?</h3>
+<p class="v2-p">You could write <code>if (screen == "flavour") FlavourScreen() else ...</code> with a <code>var screen</code>. It works, until: the system Back button does nothing sensible, rotation loses the position, deep links cannot reach a screen, and screens cannot be animated or tested in isolation. The Navigation library handles all of those.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Back Stack</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step Build 1: Set Up Navigation</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a new <strong>Empty Activity</strong> project called <code>Cupcake</code> (package <code>com.example.cupcake</code>).</p>
+<h3 class="v2-h3">Add the dependencies</h3>
+<p class="v2-p">You need the Navigation Compose library and Kotlin serialization (for type-safe routes). In <code>gradle/libs.versions.toml</code> add entries following this shape, looking up the latest stable versions from the official release pages (https://developer.android.com/jetpack/androidx/releases/navigation and https://github.com/Kotlin/kotlinx.serialization/releases):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+navigationCompose = "&lt;latest stable&gt;"
+kotlinxSerializationJson = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }</code></pre></div></div>
+<p class="v2-p">Your catalog already defines a <code>kotlin</code> version used by the Compose compiler plugin, so <code>version.ref = "kotlin"</code> reuses it. If your catalog names it differently, use that name. Then apply the plugin and libraries.</p>
+<p class="v2-p">In the <strong>root</strong> <code>build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.kotlin.serialization) apply false
+}</code></pre></div></div>
+<p class="v2-p">In <code>app/build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.kotlin.serialization)
+}
+
+dependencies {
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
+}</code></pre></div></div>
+<p class="v2-p">Click <strong>Sync Now</strong>. The exact layout of the root file differs between Android Studio versions, so match the existing lines in your project.</p>
+<h3 class="v2-h3">Define the routes</h3>
+<p class="v2-p">A <strong>route</strong> names a destination. In current Navigation Compose you define routes as <strong>serializable Kotlin types</strong>, which the compiler checks for you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Routes.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.cupcake
+
+import kotlinx.serialization.Serializable
+
+@Serializable object StartRoute
+@Serializable object FlavorRoute
+@Serializable object PickupRoute
+@Serializable object SummaryRoute</code></pre></div></div>
+<p class="v2-p"><code>@Serializable object</code> is a singleton route with no arguments. If a destination needs data, you use a <code>data class</code> instead (shown later).</p>
+<p class="v2-p">Older tutorials, and the official Cupcake codelab in some versions, use <strong>string routes</strong> such as <code>"start"</code>. They still work and you will meet them in older code, so here is the contrast:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Style</th>
+<th>Define</th>
+<th>Navigate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type-safe (preferred now)</td>
+<td><code>@Serializable object FlavorRoute</code></td>
+<td><code>navController.navigate(FlavorRoute)</code></td>
+</tr>
+<tr>
+<td>String route</td>
+<td><code>const val FLAVOR = "flavor"</code></td>
+<td><code>navController.navigate("flavor")</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A typo in a string is a runtime crash. A typo in a type name does not compile. If your Android Studio is older and the type-safe overload is not found, update the Navigation library to a recent stable release (type-safe navigation arrived in Navigation 2.8).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Set Up Navigation</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step Build 2: The Order State</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Create a data class and a ViewModel that every screen shares.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">OrderUiState.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.cupcake
+
+data class OrderUiState(
+    val quantity: Int = 0,
+    val flavor: String = "",
+    val date: String = "",
+    val price: Double = 0.0,
+    val pickupOptions: List&lt;String&gt; = emptyList()
+)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">OrderViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.cupcake
+
+import androidx.lifecycle.ViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+private const val PRICE_PER_CUPCAKE = 500.0       // naira
+private const val PRICE_FOR_SAME_DAY_PICKUP = 300.0
+
+class OrderViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(OrderUiState(pickupOptions = pickupOptions()))
+    val uiState: StateFlow&lt;OrderUiState&gt; = _uiState.asStateFlow()
+
+    fun setQuantity(numberCupcakes: Int) {
+        _uiState.update { it.copy(
+            quantity = numberCupcakes,
+            price = calculatePrice(quantity = numberCupcakes)
+        ) }
+    }
+
+    fun setFlavor(desiredFlavor: String) {
+        _uiState.update { it.copy(flavor = desiredFlavor) }
+    }
+
+    fun setDate(pickupDate: String) {
+        _uiState.update { it.copy(
+            date = pickupDate,
+            price = calculatePrice(pickupDate = pickupDate)
+        ) }
+    }
+
+    fun resetOrder() {
+        _uiState.value = OrderUiState(pickupOptions = pickupOptions())
+    }
+
+    private fun calculatePrice(
+        quantity: Int = _uiState.value.quantity,
+        pickupDate: String = _uiState.value.date
+    ): Double {
+        var total = quantity * PRICE_PER_CUPCAKE
+        if (pickupOptions()[0] == pickupDate) total += PRICE_FOR_SAME_DAY_PICKUP
+        return total
+    }
+
+    private fun pickupOptions(): List&lt;String&gt; {
+        val formatter = SimpleDateFormat("E MMM d", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+        return List(4) {
+            formatter.format(calendar.time).also { calendar.add(Calendar.DATE, 1) }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Points worth noting:</p>
+<ul class="v2-ul">
+<li>Prices are in naira and kept as <code>Double</code> for simplicity. Money in a real shop app should use whole kobo in a <code>Long</code>, or <code>BigDecimal</code>, to avoid floating-point surprises.</li>
+<li><code>pickupOptions()</code> builds four dates starting today: <code>List(4) { ... }</code> runs the lambda four times.</li>
+<li><code>calculatePrice</code> adds a same-day surcharge when the chosen date is the first option (today).</li>
+<li>The function uses default parameters that read the current state, so each setter recalculates cleanly.</li>
+<li>Nothing here knows about navigation. It only holds order data.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Order State</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step Build 3: The Four Screens</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Each screen is <strong>stateless</strong> and gets callbacks. They know nothing about the NavController, which keeps them reusable and testable. To keep this lesson focused we use simple, plain screens.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Screens.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.cupcake
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.layout.Row
+
+@Composable
+fun StartScreen(
+    quantityOptions: List&lt;Pair&lt;String, Int&gt;&gt;,
+    onNextButtonClicked: (Int) -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Order Cupcakes", style = MaterialTheme.typography.headlineMedium)
+        Text("How many would you like?", modifier = Modifier.padding(vertical = 16.dp))
+        quantityOptions.forEach { (label, count) -&gt;
+            Button(
+                onClick = { onNextButtonClicked(count) },
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+            ) { Text(label) }
+        }
+    }
+}
+
+@Composable
+fun ChoiceScreen(
+    title: String,
+    options: List&lt;String&gt;,
+    selected: String,
+    onSelectionChanged: (String) -&gt; Unit,
+    subtotal: Double,
+    onNextButtonClicked: () -&gt; Unit,
+    onCancelButtonClicked: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        Text(title, style = MaterialTheme.typography.titleLarge)
+        options.forEach { item -&gt;
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = selected == item,
+                        onClick = { onSelectionChanged(item) }
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(selected = selected == item, onClick = null)
+                Text(item, modifier = Modifier.padding(start = 8.dp))
+            }
+        }
+        Text("Subtotal: ₦%.0f".format(subtotal), modifier = Modifier.padding(vertical = 16.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = onCancelButtonClicked) { Text("Cancel") }
+            Button(onClick = onNextButtonClicked, enabled = selected.isNotEmpty()) { Text("Next") }
+        }
+    }
+}
+
+@Composable
+fun SummaryScreen(
+    orderUiState: OrderUiState,
+    onSendButtonClicked: (subject: String, summary: String) -&gt; Unit,
+    onCancelButtonClicked: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    val summary = "Quantity: ${orderUiState.quantity}\n" +
+        "Flavor: ${orderUiState.flavor}\n" +
+        "Pickup: ${orderUiState.date}\n" +
+        "Total: ₦%.0f".format(orderUiState.price)
+
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        Text("Order summary", style = MaterialTheme.typography.titleLarge)
+        Text(summary, modifier = Modifier.padding(vertical = 16.dp))
+        Button(
+            onClick = { onSendButtonClicked("New cupcake order", summary) },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("Send order") }
+        OutlinedButton(
+            onClick = onCancelButtonClicked,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        ) { Text("Cancel") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Two things to notice:</p>
+<ul class="v2-ul">
+<li><code>RadioButton(selected = ..., onClick = null)</code> with the click handled on the whole <code>Row</code> through <code>selectable</code>. This makes the entire row tappable and is better for accessibility (lesson 46) because the row is one element for a screen reader.</li>
+<li><code>"Total: ₦%.0f".format(...)</code> binds to the whole string literal here. It works because <code>format</code> is called on the last string in the concatenation. When you chain several strings with <code>+</code>, remember that <code>.format()</code> applies only to the string right before it. For clarity in your own code, build the summary with a template or <code>buildString</code>.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The Four Screens</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step Build 4: The NavHost</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">The top-level composable owns the controller and wires everything. First, the top bar. A <strong>TopAppBar</strong> shows the title and an <strong>Up</strong> arrow when there is somewhere to go back to:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CupcakeApp.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.cupcake
+
+import android.content.Context
+import android.content.Intent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CupcakeAppBar(
+    title: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(title) },
+        modifier = modifier,
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+            }
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">(<code>Icons.AutoMirrored.Filled.ArrowBack</code> comes from the <code>material-icons-core</code> artifact that Compose BOM-based projects include; it flips automatically in right-to-left languages such as Arabic.)</p>
+<p class="v2-p">Now the host itself, in the same file:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun CupcakeApp(
+    viewModel: OrderViewModel = viewModel(),
+    navController: NavHostController = rememberNavController()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Is there a screen behind this one?
+    val canNavigateBack = navController.previousBackStackEntry != null
+
+    Scaffold(
+        topBar = {
+            CupcakeAppBar(
+                title = "Cupcake",
+                canNavigateBack = canNavigateBack,
+                navigateUp = { navController.navigateUp() }
+            )
+        }
+    ) { innerPadding -&gt;
+        NavHost(
+            navController = navController,
+            startDestination = StartRoute,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable&lt;StartRoute&gt; {
+                StartScreen(
+                    quantityOptions = listOf("One cupcake" to 1, "Six cupcakes" to 6, "Twelve cupcakes" to 12),
+                    onNextButtonClicked = {
+                        viewModel.setQuantity(it)
+                        navController.navigate(FlavorRoute)
+                    }
+                )
+            }
+            composable&lt;FlavorRoute&gt; {
+                ChoiceScreen(
+                    title = "Choose flavor",
+                    options = listOf("Vanilla", "Chocolate", "Red velvet", "Coffee"),
+                    selected = uiState.flavor,
+                    onSelectionChanged = viewModel::setFlavor,
+                    subtotal = uiState.price,
+                    onNextButtonClicked = { navController.navigate(PickupRoute) },
+                    onCancelButtonClicked = { cancelOrderAndNavigateToStart(viewModel, navController) }
+                )
+            }
+            composable&lt;PickupRoute&gt; {
+                ChoiceScreen(
+                    title = "Choose pickup date",
+                    options = uiState.pickupOptions,
+                    selected = uiState.date,
+                    onSelectionChanged = viewModel::setDate,
+                    subtotal = uiState.price,
+                    onNextButtonClicked = { navController.navigate(SummaryRoute) },
+                    onCancelButtonClicked = { cancelOrderAndNavigateToStart(viewModel, navController) }
+                )
+            }
+            composable&lt;SummaryRoute&gt; {
+                val context = LocalContext.current
+                SummaryScreen(
+                    orderUiState = uiState,
+                    onSendButtonClicked = { subject, summary -&gt;
+                        shareOrder(context, subject, summary)
+                    },
+                    onCancelButtonClicked = { cancelOrderAndNavigateToStart(viewModel, navController) }
+                )
+            }
+        }
+    }
+}
+
+private fun cancelOrderAndNavigateToStart(
+    viewModel: OrderViewModel,
+    navController: NavHostController
+) {
+    viewModel.resetOrder()
+    navController.popBackStack(StartRoute, inclusive = false)
+}
+
+private fun shareOrder(context: Context, subject: String, summary: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, summary)
+    }
+    context.startActivity(Intent.createChooser(intent, "New cupcake order"))
+}</code></pre></div></div>
+<p class="v2-p">Call <code>CupcakeApp()</code> from <code>setContent</code>, inside your theme.</p>
+<h3 class="v2-h3">Reading the code</h3>
+<ul class="v2-ul">
+<li><code>rememberNavController()</code> creates the controller. Giving it as a default parameter lets tests pass their own.</li>
+<li><code>previousBackStackEntry != null</code> is true when there is a screen behind the current one, so the Up arrow appears on every screen except the start. (A common alternative is to observe <code>currentBackStackEntryAsState()</code> so the app bar recomposes with the route; for this simple case the property read works because navigation changes cause the host to recompose, but when you start showing route-specific titles use the observed form.)</li>
+<li><code>NavHost(startDestination = StartRoute)</code> picks the first screen.</li>
+<li><code>composable&lt;StartRoute&gt; { ... }</code> registers a destination. The lambda is the screen.</li>
+<li><code>navController.navigate(FlavorRoute)</code> pushes a new destination.</li>
+<li><code>navController.popBackStack(StartRoute, inclusive = false)</code> pops everything above the start screen but keeps the start screen. <code>inclusive = true</code> would remove the start too.</li>
+<li>The ViewModel is created once at the top and shared by every destination, so the order survives moving between screens and rotation.</li>
+<li>Screens receive only data and lambdas. They have no <code>NavController</code> parameter.</li>
+</ul>
+<p class="v2-p">Run it. Pick six cupcakes, choose a flavour, a date, see the summary, tap Send to open the share sheet, then Cancel to return to the start with a reset order.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: The NavHost</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Passing Data Through the Route</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">Sharing a ViewModel is the right tool for data <strong>created by the user</strong> across the flow. For data that <strong>identifies</strong> the destination, such as "show product 42", put it in the route. With type-safe routes, use a <code>data class</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Serializable data class ProductRoute(val productId: Int)
+
+NavHost(navController, startDestination = StartRoute) {
+    composable&lt;ProductRoute&gt; { backStackEntry -&gt;
+        val route: ProductRoute = backStackEntry.toRoute()
+        ProductScreen(productId = route.productId)
+    }
+}
+
+// somewhere else
+navController.navigate(ProductRoute(productId = 42))</code></pre></div></div>
+<p class="v2-p"><code>toRoute()</code> is imported from <code>androidx.navigation.toRoute</code>. Keep arguments small and simple (IDs, short strings). Never pass whole objects or large lists through the route. Pass the ID and let the destination's ViewModel load the data (lesson 30).</p>
+<p class="v2-p">With the older string-route style the same example reads <code>composable("product/{id}", arguments = listOf(navArgument("id") { type = NavType.IntType }))</code> and <code>navigate("product/42")</code>. It is more error-prone, which is why new code uses the type-safe form.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Passing Data Through the Route</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Testing the Navigation</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">You test navigation in <code>app/src/androidTest</code> using a <code>TestNavHostController</code>, a version of the controller meant for tests.</p>
+<h3 class="v2-h3">Add the dependency</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    androidTestImplementation(libs.androidx.navigation.testing)
+}</code></pre></div></div>
+<p class="v2-p">with a catalog entry <code>androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationCompose" }</code> (it shares the Navigation version).</p>
+<h3 class="v2-h3">The test</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CupcakeNavigationTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.cupcake
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.testing.TestNavHostController
+import androidx.navigation.toRoute
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+
+class CupcakeNavigationTest {
+
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    private lateinit var navController: TestNavHostController
+
+    @Before
+    fun setupCupcakeNavHost() {
+        composeTestRule.setContent {
+            navController = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+            }
+            CupcakeApp(navController = navController)
+        }
+    }
+
+    @Test
+    fun navHost_verifyStartDestination() {
+        composeTestRule.onNodeWithText("Order Cupcakes").assertExists()
+    }
+
+    @Test
+    fun navHost_clickOneCupcake_navigatesToFlavorScreen() {
+        composeTestRule.onNodeWithText("One cupcake").performClick()
+        composeTestRule.onNodeWithText("Choose flavor").assertExists()
+    }
+
+    @Test
+    fun navHost_clickCancelOnFlavor_returnsToStart() {
+        composeTestRule.onNodeWithText("One cupcake").performClick()
+        composeTestRule.onNodeWithText("Cancel").performClick()
+        composeTestRule.onNodeWithText("Order Cupcakes").assertExists()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>assertExists()</code> is a member function of the node, so it needs no import. The <code>toRoute</code> and <code>assertEquals</code> imports are only needed for tests that inspect <code>navController.currentBackStackEntry</code>; you can delete them from the file above if you do not use them. The tests assert on what the <strong>user sees</strong> (screen text), which is sturdier than asserting on internal route names.</p>
+<p class="v2-p">Run it with the green arrow beside the class. It needs an emulator or device, because it is an instrumented test.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Testing the Navigation</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Add a Settings destination (the practice)</strong></p>
+<p class="v2-p">Add a fifth screen, <code>SettingsRoute</code>, reachable from a settings icon on the top bar of the Start screen only. It shows a <code>Switch</code> labelled <code>Express pickup by default</code>. The back arrow must work. Do not add it to the cupcake order flow's back stack beyond one entry.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// Routes.kt
+@Serializable object SettingsRoute
+
+// In CupcakeAppBar, add an actions parameter
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CupcakeAppBar(
+    title: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -&gt; Unit,
+    onSettingsClick: (() -&gt; Unit)? = null,
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        title = { Text(title) },
+        modifier = modifier,
+        navigationIcon = { /* as before */ },
+        actions = {
+            if (onSettingsClick != null) {
+                IconButton(onClick = onSettingsClick) {
+                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                }
+            }
+        }
+    )
+}
+
+// In CupcakeApp: only show the action on the start destination
+val backStackEntry by navController.currentBackStackEntryAsState()
+val onStart = backStackEntry?.destination?.hasRoute&lt;StartRoute&gt;() == true
+
+CupcakeAppBar(
+    title = "Cupcake",
+    canNavigateBack = canNavigateBack,
+    navigateUp = { navController.navigateUp() },
+    onSettingsClick = if (onStart) { { navController.navigate(SettingsRoute) } } else null
+)
+
+// In the NavHost
+composable&lt;SettingsRoute&gt; {
+    var express by rememberSaveable { mutableStateOf(false) }
+    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("Express pickup by default", modifier = Modifier.weight(1f))
+        Switch(checked = express, onCheckedChange = { express = it })
+    }
+}</code></pre></div></div>
+<p class="v2-p">Imports needed: <code>androidx.compose.material.icons.filled.Settings</code> (from <code>material-icons-extended</code>? <code>Settings</code> is in the core set, so <code>material-icons-core</code> is enough), <code>androidx.navigation.compose.currentBackStackEntryAsState</code>, <code>androidx.navigation.hasRoute</code>, <code>androidx.compose.material3.Switch</code>, <code>androidx.compose.foundation.layout.Row</code>, <code>androidx.compose.runtime.mutableStateOf</code>, <code>androidx.compose.runtime.saveable.rememberSaveable</code>.</p>
+<p class="v2-p"><strong>Why:</strong> <code>currentBackStackEntryAsState()</code> converts the back stack's current entry into Compose state, so the bar updates when the destination changes. <code>hasRoute&lt;StartRoute&gt;()</code> is the type-safe way to ask "am I on this screen?". The setting persists only for this session. To keep it permanently you would use DataStore (lesson 35).</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Clear the whole flow after ordering</strong></p>
+<p class="v2-p">After the user taps <strong>Send order</strong> and the share sheet closes, the Back button should not return to the summary. Make the app return to the Start screen with a clean order immediately after sending, using <code>popBackStack</code> inside the share callback.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>onSendButtonClicked = { subject, summary -&gt;
+    shareOrder(context, subject, summary)
+    viewModel.resetOrder()
+    navController.popBackStack(StartRoute, inclusive = false)
+}</code></pre></div></div>
+<p class="v2-p"><code>popBackStack(route, inclusive)</code> removes entries until it reaches the given route. With <code>inclusive = false</code> the Start destination itself stays. Resetting the ViewModel first guarantees the next order starts empty. A product decision to consider: the user may want to see the confirmation, so many apps show a "Thank you" screen first and clear the stack from there.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Draw the back stack on paper after each of these actions, starting from the app launch: choose six cupcakes, pick Vanilla, press the system Back, pick Chocolate, press Cancel. How many entries remain at each step?</p></div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Passing the <code>NavController</code> into every screen.</strong> <em>What happens:</em> screens cannot be previewed or tested without a controller. <em>The fix:</em> give screens lambdas such as <code>onNextButtonClicked</code> and keep navigation in the host.</p>
+<p class="v2-p"><strong>Mistake #2: Calling <code>navigate()</code> during composition.</strong> <em>The wrong code:</em> <code>navController.navigate(FlavorRoute)</code> as a bare statement in a composable. <em>What happens:</em> it runs again on every recomposition, causing repeated navigation or crashes. <em>The fix:</em> navigate only inside event callbacks (<code>onClick</code>). Lesson 55 covers <code>LaunchedEffect</code> for the rare cases that must navigate in response to state.</p>
+<p class="v2-p"><strong>Mistake #3: Stacking duplicate destinations.</strong> <em>What happens:</em> tapping a bottom-bar item twice builds a growing stack of the same screen. <em>The fix:</em> <code>navigate(route) { launchSingleTop = true }</code> (lesson 27 uses this with bars).</p>
+<p class="v2-p"><strong>Mistake #4: Forgetting to reset state on cancel.</strong> <em>What happens:</em> the next order starts with the old flavour. <em>The fix:</em> reset the ViewModel before or after popping.</p>
+<p class="v2-p"><strong>Mistake #5: Putting big objects in routes.</strong> <em>What happens:</em> crashes or silent truncation, and state that cannot be restored. <em>The fix:</em> pass an ID and load data in the destination.</p>
+<p class="v2-p"><strong>Mistake #6: Creating a new ViewModel per screen when you wanted to share.</strong> <em>What happens:</em> each screen sees an empty order. <em>The fix:</em> create the ViewModel once in the host and pass it, or scope it to a navigation graph with <code>hiltViewModel</code>/<code>viewModel(parentEntry)</code> (lesson 63).</p>
+<p class="v2-p"><strong>Mistake #7: A <code>String.format</code> surprise.</strong> <em>What happens:</em> <code>"a" + "b%d".format(1)</code> formats only the last literal. <em>The fix:</em> use string templates or <code>buildString</code> and format the finished text.</p>
+<p class="v2-p"><strong>Mistake #8: Testing route strings instead of visible behaviour.</strong> <em>What happens:</em> tests break when you rename a route. <em>The fix:</em> assert on screen content (<code>onNodeWithText</code>) or on <code>hasRoute</code> when you must check the destination.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the back stack?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">The ordered list of destinations the user has visited. Navigating forward pushes a destination, and Back pops the top one.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What are the roles of <code>NavController</code> and <code>NavHost</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The <code>NavController</code> owns the back stack and performs <code>navigate</code> and <code>popBackStack</code>. The <code>NavHost</code> is the composable that displays the destination currently on top and holds the navigation graph.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why are type-safe routes preferred over string routes?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">The compiler checks them, so typos and wrong argument types are caught at build time instead of crashing at runtime. They also make passing arguments simpler.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> How does <code>popBackStack(StartRoute, inclusive = false)</code> behave?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It removes all destinations above <code>StartRoute</code> and keeps <code>StartRoute</code> itself. With <code>inclusive = true</code> the start destination would be removed too.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>TestNavHostController</code> let you do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It is a controller designed for tests, letting you run the real navigation graph in a Compose UI test and verify that interactions lead to the expected destination.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-4-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 4, Pathway 2: Navigation</a>: the official Cupcake pathway.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-navigation" rel="noopener noreferrer">Jetpack Compose codelab: Navigation</a></li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Three-Screen Quiz App</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a small <strong>quiz</strong> with Start, Question and Result screens, sharing a ViewModel, with a working Up button, a <strong>Play again</strong> button that clears the stack, and one navigation test.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Routes: <code>StartRoute</code>, <code>QuestionRoute</code>, <code>ResultRoute</code> (all type-safe).</li>
+<li>A ViewModel holding five questions, the current index and the score.</li>
+<li>The Question screen shows one question with four answers. Choosing an answer scores it and moves on. After the last question, navigate to the Result screen.</li>
+<li>On the Result screen, <code>Play again</code> resets the ViewModel and pops back to Start. The Back button on Result must also go to Start, not into the questions.</li>
+<li>A test that taps <code>Start</code> and expects to see <code>Question 1</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> show a progress indicator (<code>LinearProgressIndicator</code>) on the Question screen.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">QuizApp.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.quiz
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.serialization.Serializable
+
+@Serializable object StartRoute
+@Serializable object QuestionRoute
+@Serializable object ResultRoute
+
+data class Question(val text: String, val answers: List&lt;String&gt;, val correctIndex: Int)
+
+val questions = listOf(
+    Question("Capital of Nigeria?", listOf("Lagos", "Abuja", "Ibadan", "Kano"), 1),
+    Question("Which language builds modern Android apps?", listOf("Kotlin", "COBOL", "Pascal", "Perl"), 0),
+    Question("2 + 2 x 3 = ?", listOf("12", "8", "10", "6"), 1),
+    Question("How many states does Nigeria have?", listOf("30", "34", "36", "40"), 2),
+    Question("HTML is a...", listOf("Database", "Markup language", "Compiler", "Browser"), 1)
+)
+
+data class QuizUiState(val index: Int = 0, val score: Int = 0)
+
+class QuizViewModel : ViewModel() {
+    private val _state = MutableStateFlow(QuizUiState())
+    val state: StateFlow&lt;QuizUiState&gt; = _state.asStateFlow()
+
+    /** Returns true when that was the last question. */
+    fun answer(choice: Int): Boolean {
+        val current = questions[_state.value.index]
+        val finished = _state.value.index == questions.lastIndex
+        _state.update { s -&gt;
+            s.copy(
+                score = if (choice == current.correctIndex) s.score + 1 else s.score,
+                index = if (finished) s.index else s.index + 1
+            )
+        }
+        return finished
+    }
+
+    fun reset() { _state.value = QuizUiState() }
+}
+
+@Composable
+fun QuizApp(
+    viewModel: QuizViewModel = viewModel(),
+    navController: NavHostController = rememberNavController()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    NavHost(navController, startDestination = StartRoute) {
+        composable&lt;StartRoute&gt; {
+            Column(Modifier.padding(24.dp)) {
+                Text("Quiz time")
+                Button(onClick = { navController.navigate(QuestionRoute) }) { Text("Start") }
+            }
+        }
+        composable&lt;QuestionRoute&gt; {
+            val q = questions[state.index]
+            Column(Modifier.padding(24.dp)) {
+                Text("Question ${state.index + 1}")
+                LinearProgressIndicator(
+                    progress = { (state.index + 1) / questions.size.toFloat() },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+                )
+                Text(q.text)
+                q.answers.forEachIndexed { i, answer -&gt;
+                    Button(
+                        onClick = {
+                            if (viewModel.answer(i)) {
+                                navController.navigate(ResultRoute) {
+                                    popUpTo(StartRoute)      // drop the question screen
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                    ) { Text(answer) }
+                }
+            }
+        }
+        composable&lt;ResultRoute&gt; {
+            BackHandler {
+                viewModel.reset()
+                navController.popBackStack(StartRoute, inclusive = false)
+            }
+            Column(Modifier.padding(24.dp)) {
+                Text("Score: ${state.score} / ${questions.size}")
+                Button(onClick = {
+                    viewModel.reset()
+                    navController.popBackStack(StartRoute, inclusive = false)
+                }) { Text("Play again") }
+            }
+        }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">QuizNavigationTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.quiz
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import org.junit.Rule
+import org.junit.Test
+
+class QuizNavigationTest {
+    @get:Rule val rule = createComposeRule()
+
+    @Test
+    fun tappingStart_showsQuestionOne() {
+        rule.setContent { QuizApp() }
+        rule.onNodeWithText("Start").performClick()
+        rule.onNodeWithText("Question 1").assertExists()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>popUpTo(StartRoute)</code> in the navigate options removes everything above Start before pushing the Result, so Back from the result goes to Start instead of re-answering questions. The <code>BackHandler</code> is a belt-and-braces measure that also resets the quiz. The test uses the default <code>rememberNavController()</code>; the lesson's <code>TestNavHostController</code> version is needed only when you want to inspect the controller itself. As the question screen index never goes past the last question (the ViewModel clamps it), there is no out-of-range crash after the final answer while navigation is in flight.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 26 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-26-navigation-in-jetpack-compose-the-cupcake</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 26 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Back Stack</li><li>✅ Step-by-Step Build 1: Set Up Navigation</li><li>✅ Step-by-Step Build 2: The Order State</li><li>✅ Step-by-Step Build 3: The Four Screens</li><li>✅ Step-by-Step Build 4: The NavHost</li><li>✅ Passing Data Through the Route</li><li>✅ Testing the Navigation</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_25.html" class="ln-btn">&#8592; Lesson 25</a><a href="lesson_27.html" class="ln-btn primary">Lesson 27 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 26 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 22: Material Theming and Simple Animation: Superheroes and 30 Days — Techbase Android</title>
+</head>
+<body data-total="10" data-key="techbase_android_l22">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 22 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 22</div>
+      <h1>Material Theming and Simple Animation: Superheroes and 30 Days</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: 30 Days of Coding</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 22</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Make apps beautiful with Material Design 3 colours, typography and shapes, add simple animation, and finish with the 30 Days project.</p></div><div class="wm"><span>📚 10 phases</span><span>🏗️ 30 Days of Coding</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">You can now build lists, grids and interactive screens. But if you hand your phone to a friend, the first thing they will judge is not your code. It is how the app <strong>looks and feels</strong>. Today you learn how to make an app look like it belongs on a modern phone, and how to make it feel alive with small, tasteful animations.</p>
+<p class="v2-p">Think of a restaurant. The food (your features) matters most, but the plates, the lighting, the uniforms and the way the waiter brings dishes to the table all shape the experience. <strong>Material Design 3</strong> is Google's complete design kit for apps: colours, type, shapes and motion that work together. <strong>Theming</strong> means defining those choices <em>once</em> so that every screen of your app uses them automatically.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain Material Design 3 and the idea of a <strong>theme</strong>.</li>
+<li>Define a <code>ColorScheme</code> with <code>lightColorScheme</code> and <code>darkColorScheme</code> and understand colour roles such as <code>primary</code> and <code>onPrimary</code>.</li>
+<li>Turn on <strong>dynamic colour</strong> safely on Android 12 and above.</li>
+<li>Support <strong>dark theme</strong> with <code>isSystemInDarkTheme()</code>.</li>
+<li>Define custom <code>Typography</code> and <code>Shapes</code> and use them through <code>MaterialTheme</code>.</li>
+<li>Apply <strong>edge-to-edge</strong> basics with <code>Scaffold</code> insets.</li>
+<li>Animate size, colour and visibility with <code>animateContentSize</code>, <code>animateDpAsState</code>, <code>animateColorAsState</code> and <code>AnimatedVisibility</code>.</li>
+<li>Build an <strong>expand and collapse card</strong>.</li>
+<li>Complete the <em>Superheroes</em> practice app and the <em>30 Days</em> project.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson follows Unit 3, Pathway 3 of Google's <strong>Android Basics with Compose</strong> course. It covers <em>Intro to Material Design with Compose</em>, <em>Material Theming with Jetpack Compose</em>, <em>Simple animation with Jetpack Compose</em>, <em>Practice: Build Superheroes app</em> and <em>Project: Create a 30 Days App</em>. Our apps are original, so we use fictional heroes and our own 30-day plan. Lesson 40 revisits theming in much more depth and lesson 41 does the same for animation.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><h3 class="v2-h3">1. Composables, modifiers and layouts (lessons 15 and 16)</h3>
+<p class="v2-p">You will use <code>Row</code>, <code>Column</code>, <code>Card</code>, <code>Text</code>, <code>Image</code> and <code>Modifier</code> chains.</p>
+<h3 class="v2-h3">2. State (lessons 17 and 19)</h3>
+<p class="v2-p">An animation needs a <strong>state</strong> to react to. A card has an <code>expanded</code> state, a <code>Boolean</code>. When it flips, the animation runs from the old look to the new one. If <code>remember</code> and <code>mutableStateOf</code> feel unfamiliar, revisit lesson 17.</p>
+<h3 class="v2-h3">3. Lazy lists and resources (lesson 21)</h3>
+<p class="v2-p">The Superheroes app is a <code>LazyColumn</code> of cards driven by a data class with <code>@StringRes</code> and <code>@DrawableRes</code> ids, exactly as in the Affirmations app.</p>
+<h3 class="v2-h3">4. Lambdas and function parameters with defaults (lessons 08 and 12)</h3>
+<p class="v2-p">Our theme function takes defaults like <code>darkTheme: Boolean = isSystemInDarkTheme()</code> and a <code>content</code> lambda.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Conceptual Understanding: Material Design 3 and Themes</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">What is Material Design?</h3>
+<p class="v2-p"><strong>Material Design</strong> is Google's design system: a shared set of rules, components and tools for building consistent, good-looking apps. <strong>Material 3</strong> (often written M3 or Material You) is the current generation, and <code>androidx.compose.material3</code> is its Compose library. Every <code>Button</code>, <code>Card</code> and <code>TopAppBar</code> you have used already comes from it.</p>
+<p class="v2-p">A design system saves you from re-deciding things. You do not choose a new shade of blue for every button. You say "use the primary colour", and the system gives the same one everywhere.</p>
+<h3 class="v2-h3">The three pillars of a theme</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>MaterialTheme(
+    colorScheme = ...,   // which colours, and what each is for
+    typography  = ...,   // which text styles (sizes, weights, fonts)
+    shapes      = ...    // how rounded the corners are
+) {
+    // your whole app lives here
+}</code></pre></div></div>
+<p class="v2-p">Anything inside reads the values through <code>MaterialTheme.colorScheme</code>, <code>MaterialTheme.typography</code> and <code>MaterialTheme.shapes</code>. Change the theme in one place and the entire app changes.</p>
+<h3 class="v2-h3">Colour roles</h3>
+<p class="v2-p">A <strong>colour scheme</strong> is not a list of colours. It is a list of <em>jobs</em>, and each job has a colour. This is why dark mode is easy: you simply provide a second set of colours for the same jobs.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Role</th>
+<th>Meaning</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>primary</code></td>
+<td>Your brand's main colour</td>
+<td>Filled buttons, active controls</td>
+</tr>
+<tr>
+<td><code>onPrimary</code></td>
+<td>Text and icons drawn <strong>on</strong> primary</td>
+<td>Label inside a filled button</td>
+</tr>
+<tr>
+<td><code>primaryContainer</code></td>
+<td>A softer version of primary</td>
+<td>Highlighted cards, chips</td>
+</tr>
+<tr>
+<td><code>onPrimaryContainer</code></td>
+<td>Content drawn on the container</td>
+<td>Text on a highlighted card</td>
+</tr>
+<tr>
+<td><code>secondary</code>, <code>tertiary</code></td>
+<td>Supporting accents</td>
+<td>Less important actions, contrast</td>
+</tr>
+<tr>
+<td><code>background</code> and <code>surface</code></td>
+<td>The page and card colours</td>
+<td>Screen and card backgrounds</td>
+</tr>
+<tr>
+<td><code>onBackground</code>, <code>onSurface</code></td>
+<td>Content drawn on those</td>
+<td>Ordinary text</td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>Warnings</td>
+<td>Error messages</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The golden rule: <strong>always pair a colour with its "on" colour.</strong> Text on a <code>primary</code> background must use <code>onPrimary</code>. The pair has been chosen to have enough <strong>contrast</strong>, so people with weak eyesight and people in bright sunlight can still read it (lessons 46 and 47 measure contrast).</p>
+<h3 class="v2-h3">Where do the colours come from?</h3>
+<p class="v2-p">Designers create schemes from a single <strong>seed colour</strong> using the <em>Material Theme Builder</em> tool, which can export Kotlin code. You can also write them by hand, as we will. Choose a primary that suits your app, then derive lighter and darker tones.</p>
+<h3 class="v2-h3">Dynamic colour</h3>
+<p class="v2-p">On <strong>Android 12 (API 31) and above</strong>, the phone can build a colour scheme from the user's <strong>wallpaper</strong>. Your app then matches the user's personalised look. You ask for it with <code>dynamicLightColorScheme(context)</code> or <code>dynamicDarkColorScheme(context)</code>. On older phones those functions do not exist, so you must check the version and fall back to your own colours.</p>
+<h3 class="v2-h3">Dark theme</h3>
+<p class="v2-p">Many people prefer dark screens, especially at night, and on OLED phones dark screens can save some battery. Android tells you whether the user chose dark through <code>isSystemInDarkTheme()</code>. Your theme then picks <code>darkColorScheme</code> or <code>lightColorScheme</code>. A well-themed app needs <strong>no per-screen dark mode code at all</strong>.</p>
+<h3 class="v2-h3">Typography and shapes</h3>
+<p class="v2-p">M3 gives you a <strong>type scale</strong>, named styles that you use rather than hard-coding sizes: <code>displayLarge</code>, <code>headlineSmall</code>, <code>titleMedium</code>, <code>bodyLarge</code>, <code>labelMedium</code> and so on, fifteen in all. Use a style by name: <code>Text("Hello", style = MaterialTheme.typography.headlineSmall)</code>. Shapes work likewise: <code>small</code>, <code>medium</code> and <code>large</code> (and two more, <code>extraSmall</code> and <code>extraLarge</code>) describe corner radii, and components pick the right one for their size.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Material Design 3 and Themes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Step-by-Step Build: Creating a Theme</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">We will theme the <strong>Superheroes</strong> app. Create a project <code>Superheroes</code> with package <code>com.techbase.superheroes</code>. If the wizard created a <code>ui/theme</code> folder with <code>Color.kt</code>, <code>Theme.kt</code> and <code>Type.kt</code>, we will replace their contents. If your Android Studio version names things differently, create the files yourself in a package <code>com.techbase.superheroes.ui.theme</code>. Any theme named <code>SuperheroesTheme</code>, or whatever the wizard generated from your project name, will do; just be consistent.</p>
+<h3 class="v2-h3">Step 1: Colours</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Color.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.superheroes.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+// Light theme
+val LightPrimary = Color(0xFF006B5A)
+val LightOnPrimary = Color(0xFFFFFFFF)
+val LightPrimaryContainer = Color(0xFF9CF2DC)
+val LightOnPrimaryContainer = Color(0xFF00201A)
+val LightSecondary = Color(0xFF8A5100)
+val LightOnSecondary = Color(0xFFFFFFFF)
+val LightSecondaryContainer = Color(0xFFFFDCBA)
+val LightBackground = Color(0xFFFBFDF9)
+val LightOnBackground = Color(0xFF191C1B)
+val LightSurface = Color(0xFFFBFDF9)
+val LightOnSurface = Color(0xFF191C1B)
+
+// Dark theme
+val DarkPrimary = Color(0xFF80D5C0)
+val DarkOnPrimary = Color(0xFF00382E)
+val DarkPrimaryContainer = Color(0xFF005143)
+val DarkOnPrimaryContainer = Color(0xFF9CF2DC)
+val DarkSecondary = Color(0xFFFFB86C)
+val DarkOnSecondary = Color(0xFF4A2800)
+val DarkSecondaryContainer = Color(0xFF693C00)
+val DarkBackground = Color(0xFF191C1B)
+val DarkOnBackground = Color(0xFFE0E3E0)
+val DarkSurface = Color(0xFF191C1B)
+val DarkOnSurface = Color(0xFFE0E3E0)</code></pre></div></div>
+<p class="v2-p"><code>Color(0xFF006B5A)</code> reads as: <code>0x</code> means hexadecimal, <code>FF</code> is full opacity, and <code>006B5A</code> are the red, green and blue amounts (so here, a deep teal). Notice the pattern: in light mode the primary is <em>dark</em> with <em>white</em> text on it; in dark mode the primary becomes <em>light</em> with <em>dark</em> text. That inversion is what keeps contrast strong in both.</p>
+<p class="v2-p">These values are an original palette made for this lesson. For your own app, try the Material Theme Builder at <em>m3.material.io</em> to generate a palette from your brand colour.</p>
+<h3 class="v2-h3">Step 2: Typography</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Type.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.superheroes.ui.theme
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+
+val AppTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
+        fontSize = 36.sp,
+        lineHeight = 44.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        lineHeight = 30.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 18.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp
+    )
+)</code></pre></div></div>
+<p class="v2-p">You only list the styles you want to change; the remaining styles in the type scale keep Material's defaults. Sizes are in <strong>sp</strong> (scale-independent pixels), which grow when the user raises the phone's font size. Always use <code>sp</code> for text and <code>dp</code> for everything else (lesson 15).</p>
+<p class="v2-p"><code>FontFamily.Default</code> is the phone's normal font. To use a custom font, you place a font file in <code>res/font</code>, then write <code>FontFamily(Font(R.font.my_font))</code>. Fonts can also be <em>downloaded</em> on demand. Lesson 40 covers custom, downloadable and variable fonts. Remember that fonts have <strong>licences</strong> and add to your app size.</p>
+<h3 class="v2-h3">Step 3: Shapes</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Shape.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.superheroes.ui.theme
+
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.dp
+
+val AppShapes = Shapes(
+    small = RoundedCornerShape(50),
+    medium = RoundedCornerShape(bottomStart = 16.dp, topEnd = 16.dp)
+)</code></pre></div></div>
+<p class="v2-p"><code>RoundedCornerShape(50)</code> means 50 percent: fully round ends, which gives a square image a perfect circle, or a rectangle a "pill" look. <code>RoundedCornerShape(bottomStart = 16.dp, topEnd = 16.dp)</code> rounds just two corners, which gives cards a distinctive leaf-like shape. Shapes you do not specify keep the defaults.</p>
+<h3 class="v2-h3">Step 4: The theme function</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Theme.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.superheroes.ui.theme
+
+import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+
+private val LightColors = lightColorScheme(
+    primary = LightPrimary,
+    onPrimary = LightOnPrimary,
+    primaryContainer = LightPrimaryContainer,
+    onPrimaryContainer = LightOnPrimaryContainer,
+    secondary = LightSecondary,
+    onSecondary = LightOnSecondary,
+    secondaryContainer = LightSecondaryContainer,
+    background = LightBackground,
+    onBackground = LightOnBackground,
+    surface = LightSurface,
+    onSurface = LightOnSurface
+)
+
+private val DarkColors = darkColorScheme(
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    primaryContainer = DarkPrimaryContainer,
+    onPrimaryContainer = DarkOnPrimaryContainer,
+    secondary = DarkSecondary,
+    onSecondary = DarkOnSecondary,
+    secondaryContainer = DarkSecondaryContainer,
+    background = DarkBackground,
+    onBackground = DarkOnBackground,
+    surface = DarkSurface,
+    onSurface = DarkOnSurface
+)
+
+@Composable
+fun SuperheroesTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -&gt; Unit
+) {
+    val colorScheme = when {
+        dynamicColor &amp;&amp; Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S -&gt; {
+            val context = LocalContext.current
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        }
+        darkTheme -&gt; DarkColors
+        else -&gt; LightColors
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
+        content = content
+    )
+}</code></pre></div></div>
+<p class="v2-p">How it works:</p>
+<ul class="v2-ul">
+<li><code>lightColorScheme(...)</code> and <code>darkColorScheme(...)</code> build a scheme; roles you leave out use sensible defaults.</li>
+<li><code>private val</code> keeps the two schemes inside this file. Only the theme function is public.</li>
+<li>The <code>when</code> has three branches, tried in order: use dynamic colour if wanted <strong>and</strong> the phone is Android 12 or newer (<code>Build.VERSION_CODES.S</code> is API 31); otherwise dark colours if the user is in dark mode; otherwise light colours.</li>
+<li><code>dynamicColor</code> defaults to <code>false</code> here so that you can see your own palette while learning. The Android Studio template turns it on by default. Try <code>dynamicColor = true</code> on an Android 12+ emulator and change the wallpaper to see the colours follow.</li>
+<li><code>content: @Composable () -&gt; Unit</code> is the screen the theme wraps. <code>MaterialTheme(..., content = content)</code> passes it along.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: Creating a Theme</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Step-by-Step Build: The Superheroes Practice App</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">The official <em>Practice: Build Superheroes app</em> asks for a scrolling list of heroes with a name, a description and a picture, themed with Material 3. Here is our version, with fictional heroes of our own invention.</p>
+<h3 class="v2-h3">The look we want</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>+------------------------------------------+
+|        Superheroes   (top app bar)       |
++------------------------------------------+
+| +--------------------------------------+ |
+| | Captain Danfo                  [ o ] | |
+| | Drives through any traffic jam       | |
+| +--------------------------------------+ |
+| +--------------------------------------+ |
+| | Lady Jollof                    [ o ] | |
+| | Feeds a whole street from one pot    | |
+| +--------------------------------------+ |
++------------------------------------------+</code></pre></div></div>
+<p class="v2-p">Each card has text on the left and a round picture, 72 dp wide, on the right.</p>
+<h3 class="v2-h3">Resources</h3>
+<p class="v2-p">Add these strings:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">strings.xml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>&lt;resources&gt;
+    &lt;string name="app_name"&gt;Superheroes&lt;/string&gt;
+    &lt;string name="hero1_name"&gt;Captain Danfo&lt;/string&gt;
+    &lt;string name="hero1_description"&gt;Drives through any traffic jam and never loses the way.&lt;/string&gt;
+    &lt;string name="hero2_name"&gt;Lady Jollof&lt;/string&gt;
+    &lt;string name="hero2_description"&gt;Feeds a whole street from one enormous pot.&lt;/string&gt;
+    &lt;string name="hero3_name"&gt;Professor Generator&lt;/string&gt;
+    &lt;string name="hero3_description"&gt;Keeps the lights on when everyone else is in darkness.&lt;/string&gt;
+    &lt;string name="hero4_name"&gt;The Mighty Umbrella&lt;/string&gt;
+    &lt;string name="hero4_description"&gt;Stops the rain, shades the sun and still fits in a bag.&lt;/string&gt;
+    &lt;string name="hero5_name"&gt;Agent Network&lt;/string&gt;
+    &lt;string name="hero5_description"&gt;Finds one bar of signal anywhere in the city.&lt;/string&gt;
+&lt;/resources&gt;</code></pre></div></div>
+<p class="v2-p">For the pictures, create three vector drawables <code>hero1.xml</code>, <code>hero2.xml</code> and <code>hero3.xml</code> with the same simple circle design you used in lesson 21 (any square viewport, a coloured background and a lighter circle). Replace them with real artwork for a finished app. Heroes 4 and 5 reuse <code>hero1</code> and <code>hero2</code>.</p>
+<h3 class="v2-h3">The data</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Hero.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.superheroes.model
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import com.techbase.superheroes.R
+
+data class Hero(
+    @StringRes val nameRes: Int,
+    @StringRes val descriptionRes: Int,
+    @DrawableRes val imageRes: Int
+)
+
+val heroes = listOf(
+    Hero(R.string.hero1_name, R.string.hero1_description, R.drawable.hero1),
+    Hero(R.string.hero2_name, R.string.hero2_description, R.drawable.hero2),
+    Hero(R.string.hero3_name, R.string.hero3_description, R.drawable.hero3),
+    Hero(R.string.hero4_name, R.string.hero4_description, R.drawable.hero1),
+    Hero(R.string.hero5_name, R.string.hero5_description, R.drawable.hero2)
+)</code></pre></div></div>
+<h3 class="v2-h3">The screen</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.superheroes
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.techbase.superheroes.model.Hero
+import com.techbase.superheroes.model.heroes
+import com.techbase.superheroes.ui.theme.SuperheroesTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            SuperheroesTheme {
+                SuperheroesApp()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SuperheroesApp() {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                }
+            )
+        }
+    ) { innerPadding -&gt;
+        HeroList(heroes = heroes, contentPadding = innerPadding)
+    }
+}
+
+@Composable
+fun HeroList(
+    heroes: List&lt;Hero&gt;,
+    contentPadding: PaddingValues,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = contentPadding.calculateTopPadding() + 8.dp,
+            bottom = contentPadding.calculateBottomPadding() + 8.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(heroes, key = { it.nameRes }) { hero -&gt;
+            HeroItem(hero)
+        }
+    }
+}
+
+@Composable
+fun HeroItem(hero: Hero, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(hero.nameRes),
+                    style = MaterialTheme.typography.displayMedium
+                )
+                Text(
+                    text = stringResource(hero.descriptionRes),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Image(
+                painter = painterResource(hero.imageRes),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(MaterialTheme.shapes.small),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SuperheroesLightPreview() {
+    SuperheroesTheme(darkTheme = false) {
+        SuperheroesApp()
+    }
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun SuperheroesDarkPreview() {
+    SuperheroesTheme(darkTheme = true) {
+        SuperheroesApp()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> a centred title bar reading <code>Superheroes</code>, then five cards. Each card has a bold name, a description, and on the right a circular picture (because <code>shapes.small</code> is a 50-percent rounded corner). Switch the emulator to dark mode (<strong>Settings &gt; Display &gt; Dark theme</strong>) and the colours change to the dark scheme, with no extra code in the screen.</p>
+<p class="v2-p">Points to understand:</p>
+<ul class="v2-ul">
+<li><strong><code>enableEdgeToEdge()</code></strong> (from <code>androidx.activity</code>) lets the app draw behind the status and navigation bars, as modern apps do. It also makes the system bar icons readable against your colours. New projects from the wizard usually include this call already; if yours does, you do not need to add it twice. It is available in recent versions of the <code>activity</code> library; if it is red, update the dependency.</li>
+<li><strong>Insets</strong>: because content may now sit under the system bars, <code>Scaffold</code> passes <code>innerPadding</code> describing how much space the top bar and system bars take. We add it to the list's <code>contentPadding</code>, so the first card starts below the top bar, the last card clears the navigation bar, and the list <strong>still scrolls behind them</strong>. That is why we use <code>contentPadding</code> and not <code>Modifier.padding</code>.</li>
+<li><strong><code>@OptIn(ExperimentalMaterial3Api::class)</code></strong>: some Material 3 components are labelled experimental, meaning their API may change. The <code>OptIn</code> annotation tells the compiler you accept that. Whether <code>CenterAlignedTopAppBar</code> still needs it depends on your library version; leaving it in is harmless.</li>
+<li><strong><code>Modifier.weight(1f)</code></strong> inside a <code>Row</code> gives the text column all the space the picture does not use, so a long description wraps instead of pushing the picture off screen.</li>
+<li><strong><code>clip(MaterialTheme.shapes.small)</code></strong> cuts the image to the theme's small shape. Change <code>AppShapes</code> and every clipped image changes. That is the point of a theme.</li>
+<li><strong>Two previews</strong>, one light and one dark, let you check both modes without running the app. <code>uiMode = UI_MODE_NIGHT_YES</code> asks the preview for night mode.</li>
+</ul>
+<h3 class="v2-h3">Check the contrast</h3>
+<p class="v2-p">Try this once: in <code>Color.kt</code> change <code>LightOnPrimary</code> to a dark colour and look at a filled button or the title bar. Text on <code>primary</code> becomes hard to read. That is why role pairs exist.</p>
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Change the primary colour of your light theme to something you like (for example <code>0xFF1E88E5</code>). Then change the heroes' picture shape by editing only <code>AppShapes.small</code>, for instance to <code>RoundedCornerShape(8.dp)</code>. Notice that no screen code needed to change.</p></div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Step-by-Step Build: Simple Animation</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Motion makes an interface understandable. When a card grows smoothly, you see <em>what</em> changed. When it just jumps, your eyes must work out what happened. Compose makes simple animations a one-line change.</p>
+<h3 class="v2-h3">The idea: animate from state</h3>
+<p class="v2-p">You never say "move this by 5 pixels per frame". Instead you describe the <strong>target</strong> for each state, and Compose animates between them whenever the state changes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code> expanded = false  ------ state flips ------&gt;  expanded = true
+ padding 8 dp                                   padding 24 dp
+ colour  primaryContainer                       colour secondaryContainer
+ Compose draws every frame in between, smoothly.</code></pre></div></div>
+<h3 class="v2-h3">Tool 1: <code>animateContentSize</code></h3>
+<p class="v2-p">The simplest tool. Add it to a modifier, and <strong>any change to the size of that composable's content is animated</strong>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Column(
+    modifier = Modifier
+        .animateContentSize()
+        .padding(16.dp)
+) { /* content that can grow or shrink */ }</code></pre></div></div>
+<p class="v2-p">Import <code>androidx.compose.animation.animateContentSize</code>. Place it <strong>before</strong> the padding in the chain so the padding is included in the animated size.</p>
+<h3 class="v2-h3">Tool 2: <code>animateDpAsState</code></h3>
+<p class="v2-p">Animates a <code>Dp</code> value, such as padding, size or elevation.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val extraPadding by animateDpAsState(
+    targetValue = if (expanded) 24.dp else 0.dp,
+    label = "extraPadding"
+)</code></pre></div></div>
+<p class="v2-p"><code>by</code> works here for the same reason it did in lesson 17. <code>animateDpAsState</code> returns a <em>state</em>: its value moves step by step to the target. Imports: <code>androidx.compose.animation.core.animateDpAsState</code> and <code>androidx.compose.runtime.getValue</code>. The <code>label</code> is a name that animation tools use when inspecting your app (lesson 44).</p>
+<h3 class="v2-h3">Tool 3: <code>animateColorAsState</code></h3>
+<p class="v2-p">Animates between two colours:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val containerColor by animateColorAsState(
+    targetValue = if (expanded) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.primaryContainer
+    },
+    label = "containerColor"
+)</code></pre></div></div>
+<p class="v2-p">Because the colours come from the theme, the animation works in dark mode too.</p>
+<h3 class="v2-h3">Tool 4: <code>AnimatedVisibility</code></h3>
+<p class="v2-p">Fades and slides content in and out when a condition changes, instead of popping it in:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>AnimatedVisibility(visible = expanded) {
+    Text("More details appear here")
+}</code></pre></div></div>
+<p class="v2-p">Import <code>androidx.compose.animation.AnimatedVisibility</code>.</p>
+<h3 class="v2-h3">Controlling the feel: <code>spring</code> and <code>tween</code></h3>
+<p class="v2-p"><code>animateContentSize</code> and the <code>animate*AsState</code> functions take an <code>animationSpec</code>. Two common ones:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Spec</th>
+<th>Behaviour</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spring(dampingRatio, stiffness)</code></td>
+<td>Like a spring: it may overshoot and bounce, and speed depends on stiffness.</td>
+<td><code>spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)</code></td>
+</tr>
+<tr>
+<td><code>tween(durationMillis, easing)</code></td>
+<td>A fixed duration with a smooth curve.</td>
+<td><code>tween(durationMillis = 300)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Keep animations <strong>short and subtle</strong>. A card that bounces for two seconds becomes annoying quickly, and some users have turned animations off in their phone's settings for comfort. Lesson 41 covers the whole animation toolbox.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: Simple Animation</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Step-by-Step Build: The Expandable Hero Card</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Now we combine everything: a card that expands to show more, with animated colour and spacing. We upgrade the <code>Hero</code> data to include a longer story, and add a state to each card.</p>
+<p class="v2-p">Add a field <code>@StringRes val storyRes: Int</code> to <code>Hero</code>, give each hero a long <code>heroN_story</code> string in <code>strings.xml</code>, and add the extra argument in each <code>Hero(...)</code> line, for instance <code>Hero(R.string.hero1_name, R.string.hero1_description, R.drawable.hero1, R.string.hero1_story)</code>. (The solution at the end of the lesson avoids the extra resources for brevity.)</p>
+<p class="v2-p">Then replace <code>HeroItem</code> with:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
+@Composable
+fun HeroItem(hero: Hero, modifier: Modifier = Modifier) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val containerColor by animateColorAsState(
+        targetValue = if (expanded) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.primaryContainer
+        },
+        label = "containerColor"
+    )
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = containerColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+                .padding(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(hero.nameRes),
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                    Text(
+                        text = stringResource(hero.descriptionRes),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Image(
+                    painter = painterResource(hero.imageRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(MaterialTheme.shapes.small),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            AnimatedVisibility(visible = expanded) {
+                Text(
+                    text = stringResource(hero.storyRes),
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(if (expanded) "Show less" else "Show more")
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> each card has a <code>Show more</code> text button. Tapping it flips <code>expanded</code>. The card's background shifts smoothly from the primary container colour to the secondary container colour, the story text fades and slides in, and the card grows to fit it with a slightly springy motion. Tapping <code>Show less</code> plays the same animation in reverse.</p>
+<p class="v2-p">Details worth knowing:</p>
+<ul class="v2-ul">
+<li><code>expanded</code> is plain state per card. Because <code>HeroItem</code> is called once per hero, each hero has its <strong>own</strong> <code>expanded</code>. (If you want the open/closed state to survive rotation, use <code>rememberSaveable</code>, lesson 19. And because lazy items scroll out of composition, <code>rememberSaveable</code> keeps the state when the item returns to the screen; plain <code>remember</code> does not.)</li>
+<li><code>!expanded</code> flips a Boolean: <code>true</code> becomes <code>false</code> and <code>false</code> becomes <code>true</code>.</li>
+<li>The button text is hard-coded here to keep the example short. In your finished app, put <code>Show more</code> and <code>Show less</code> in <code>strings.xml</code>.</li>
+<li>If you want an accessibility improvement, replace the text button with an icon button that carries a <code>contentDescription</code> of "Expand" or "Collapse" (lesson 47).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build: The Expandable Hero Card</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Pulse on tap</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Use <code>animateDpAsState</code>.</p>
+<p class="v2-p">Make a square <code>Box</code> (80 dp) with a coloured background that is clickable. Each tap toggles between 80 dp and 160 dp, animated with <code>animateDpAsState</code> and a <code>spring</code>. Use <code>Modifier.size(size)</code> with the animated value and <code>Modifier.clickable { ... }</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun PulseBox(modifier: Modifier = Modifier) {
+    var big by remember { mutableStateOf(false) }
+    val boxSize by animateDpAsState(
+        targetValue = if (big) 160.dp else 80.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "boxSize"
+    )
+
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(boxSize)
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable { big = !big }
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">The target depends on <code>big</code>. Each tap changes <code>big</code>, and <code>animateDpAsState</code> moves <code>boxSize</code> towards the new target through a bouncy spring, so the square slightly overshoots before settling. The outer <code>Box</code> centres the square on the screen.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Dark-mode-ready theme for a church noticeboard</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Build a complete theme from your own palette.</p>
+<p class="v2-p">Create <code>NoticeTheme</code> with a light and a dark <code>ColorScheme</code> of your own choice (at least <code>primary</code>, <code>onPrimary</code>, <code>background</code>, <code>onBackground</code>, <code>surface</code> and <code>onSurface</code>), a typography with a bold <code>headlineMedium</code>, and a <code>Shapes</code> with a medium corner of 20 dp. Write one screen with a title, a card and a button that uses these styles by role, and two <code>@Preview</code> functions (light and dark).</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+private val NoticeLight = lightColorScheme(
+    primary = Color(0xFF5E35B1),
+    onPrimary = Color.White,
+    background = Color(0xFFFFFBFF),
+    onBackground = Color(0xFF1C1B1F),
+    surface = Color(0xFFFFFBFF),
+    onSurface = Color(0xFF1C1B1F)
+)
+
+private val NoticeDark = darkColorScheme(
+    primary = Color(0xFFD0BCFF),
+    onPrimary = Color(0xFF381E72),
+    background = Color(0xFF1C1B1F),
+    onBackground = Color(0xFFE6E1E5),
+    surface = Color(0xFF1C1B1F),
+    onSurface = Color(0xFFE6E1E5)
+)
+
+private val NoticeTypography = Typography(
+    headlineMedium = TextStyle(fontWeight = FontWeight.Bold, fontSize = 28.sp)
+)
+
+private val NoticeShapes = Shapes(medium = RoundedCornerShape(20.dp))
+
+@Composable
+fun NoticeTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -&gt; Unit
+) {
+    MaterialTheme(
+        colorScheme = if (darkTheme) NoticeDark else NoticeLight,
+        typography = NoticeTypography,
+        shapes = NoticeShapes,
+        content = content
+    )
+}
+
+@Composable
+fun NoticeScreen() {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Text("This Sunday", style = MaterialTheme.typography.headlineMedium)
+            Card(modifier = Modifier.padding(vertical = 16.dp)) {
+                Text(
+                    "Choir practice holds after the service.",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            Button(onClick = { }) { Text("I will attend") }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NoticeLightPreview() { NoticeTheme(darkTheme = false) { NoticeScreen() } }
+
+@Preview(
+    showBackground = true,
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun NoticeDarkPreview() { NoticeTheme(darkTheme = true) { NoticeScreen() } }</code></pre></div></div>
+<p class="v2-p">The screen code contains no colours at all: it uses <code>MaterialTheme.typography.headlineMedium</code> and the default component colours, which read from the theme. That is why the dark preview works without a single <code>if</code> in <code>NoticeScreen</code>. Because <code>Surface</code> uses the theme's <code>surface</code> and <code>onSurface</code>, the <code>Text</code> colour is chosen correctly in both modes.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Animated FAQ list</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Combine <code>LazyColumn</code>, state and <code>AnimatedVisibility</code>.</p>
+<p class="v2-p">Build a screen with five questions and answers (a data class <code>Faq(question: String, answer: String)</code>). Each row shows the question; tapping the row reveals or hides the answer with <code>AnimatedVisibility</code>. Only one answer should be open at a time (hold the open index in the parent).</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+data class Faq(val question: String, val answer: String)
+
+@Composable
+fun FaqList(faqs: List&lt;Faq&gt;, modifier: Modifier = Modifier) {
+    var openIndex by remember { mutableStateOf(-1) }
+
+    LazyColumn(modifier = modifier) {
+        itemsIndexed(faqs) { index, faq -&gt;
+            val isOpen = index == openIndex
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { openIndex = if (isOpen) -1 else index }
+                    .padding(16.dp)
+            ) {
+                Text(faq.question, style = MaterialTheme.typography.titleMedium)
+                AnimatedVisibility(visible = isOpen) {
+                    Text(faq.answer, modifier = Modifier.padding(top = 8.dp))
+                }
+            }
+            HorizontalDivider()
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The state is <strong>hoisted</strong> to <code>FaqList</code>: one <code>openIndex</code> for all rows, <code>-1</code> meaning "none open". Tapping an open row closes it; tapping another row moves the open index there, which closes the old one automatically, because its <code>isOpen</code> becomes <code>false</code> and <code>AnimatedVisibility</code> plays the exit animation.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Hard-coding colours in screens.</strong> <em>The wrong code:</em> <code>Text("Hi", color = Color(0xFF006B5A))</code> in many places. <em>The problem:</em> dark mode and rebranding require editing every file, and the colour may be unreadable in dark mode. <em>The fix:</em> use <code>MaterialTheme.colorScheme.primary</code> and its siblings, and define colours only in the theme.</p>
+<p class="v2-p"><strong>Mistake #2: Mismatched role pairs.</strong> <em>The wrong code:</em> text coloured <code>onSurface</code> on a <code>primary</code> background. <em>The problem:</em> low contrast, so some users cannot read it. <em>The fix:</em> pair <code>primary</code> with <code>onPrimary</code>, <code>primaryContainer</code> with <code>onPrimaryContainer</code>, and so on. <code>Card</code>, <code>Button</code> and <code>Surface</code> already choose the right content colour when you use their defaults.</p>
+<p class="v2-p"><strong>Mistake #3: Calling dynamic colour on old phones.</strong> <em>The wrong code:</em> <code>dynamicLightColorScheme(context)</code> with no version check. <em>The problem:</em> the app crashes on Android 11 or older. <em>The fix:</em> guard it with <code>Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S</code> as in our theme.</p>
+<p class="v2-p"><strong>Mistake #4: Text sizes in dp.</strong> <em>The wrong code:</em> <code>fontSize = 16.dp</code>. <em>The problem:</em> it will not compile (a <code>TextUnit</code> is expected), and where it is forced, text will ignore the user's font-size setting. <em>The fix:</em> text always uses <code>sp</code>: <code>fontSize = 16.sp</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Using <code>Modifier.padding(innerPadding)</code> on a scrolling list under a top bar.</strong> <em>The problem:</em> it works, but content cannot scroll behind the bars, so it looks cut off instead of flowing underneath. <em>The fix:</em> pass the inset values to <code>contentPadding</code>, as the Superheroes list does.</p>
+<p class="v2-p"><strong>Mistake #6: <code>animateContentSize</code> after <code>padding</code>.</strong> <em>The wrong code:</em> <code>Modifier.padding(16.dp).animateContentSize()</code>. <em>The problem:</em> the padding is outside the animated area and jumps. <em>The fix:</em> put <code>animateContentSize()</code> <strong>before</strong> the padding.</p>
+<p class="v2-p"><strong>Mistake #7: Forgetting <code>by</code> imports for animated values.</strong> <em>The symptom:</em> <code>animateDpAsState</code> returns a <code>State&lt;Dp&gt;</code> and using it as <code>Dp</code> fails. <em>The fix:</em> <code>import androidx.compose.runtime.getValue</code> and write <code>val x by animateDpAsState(...)</code>, or use <code>.value</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Over-animating.</strong> <em>The problem:</em> long, bouncy effects on every element make the app feel slow and can bother users sensitive to motion. <em>The fix:</em> animate only to explain a change, keep it brief (around 150 to 400 ms) and respect that some users disable animations.</p>
+<p class="v2-p"><strong>Mistake #9: Testing only in light mode.</strong> <em>The symptom:</em> an unreadable screen at night. <em>The fix:</em> add a dark <code>@Preview</code> for every screen and flip the emulator's dark theme switch before you finish.</p>
+<p class="v2-p"><strong>Mistake #10: Theme not wrapping the content.</strong> <em>The symptom:</em> the app ignores your colours. <em>The cause:</em> <code>setContent { SuperheroesApp() }</code> without <code>SuperheroesTheme { ... }</code> around it, so the screen uses defaults. <em>The fix:</em> wrap the root composable in the theme, and in every preview too.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Knowledge Check</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What three things does <code>MaterialTheme</code> bundle together?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A <code>colorScheme</code> (colours by role), <code>typography</code> (the text styles) and <code>shapes</code> (corner shapes). Content inside the theme reads them via <code>MaterialTheme.colorScheme</code>, <code>.typography</code> and <code>.shapes</code>.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why must you pair <code>primary</code> with <code>onPrimary</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>onPrimary</code> is the colour chosen for text and icons drawn on top of <code>primary</code>, with enough contrast to be readable. Using another colour risks unreadable content, especially in dark mode.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is dynamic colour and why do you check <code>Build.VERSION.SDK_INT</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Dynamic colour builds the colour scheme from the user's wallpaper on Android 12 (API 31) and above, using <code>dynamicLightColorScheme</code> and <code>dynamicDarkColorScheme</code>. Those functions do not work on older versions, so you must check <code>Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.S</code> and fall back to your own scheme.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Which animation tool would you use to (a) smoothly resize a card when text is added, (b) fade a text block in and out, (c) change a colour between two states?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>Modifier.animateContentSize()</code>, (b) <code>AnimatedVisibility</code>, (c) <code>animateColorAsState</code>.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why is <code>animateContentSize()</code> placed before <code>padding</code> in the modifier chain?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Modifiers apply in order. Putting <code>animateContentSize()</code> first means the size it animates includes the padding that comes after it, so the padded area changes smoothly instead of jumping.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-3-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 3: Material Design and animation</a>: the official pathway this lesson follows.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-theming" rel="noopener noreferrer">Jetpack Compose theming codelab</a>: a deeper tour of Material 3 theming.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-animation" rel="noopener noreferrer">Jetpack Compose animation codelab</a>: more animation APIs, which lesson 41 builds on.</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course overview</a>: all units.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">30 Days of Coding</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> This is the <em>Project: Create a 30 Days App</em>. Build a themed, scrolling app with <strong>30 cards</strong>, one for each day of a 30-day challenge, where each card expands to show the day's task. It is a polished portfolio piece that uses lists, theming, shapes and animation together.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a project <code>30 Days</code> with package <code>com.techbase.thirtydays</code>.</li>
+<li>Create a theme (<code>ThirtyDaysTheme</code>) with your own light and dark <code>ColorScheme</code>, a custom <code>Typography</code> that changes at least two styles, and <code>Shapes</code> with at least one custom corner.</li>
+<li>Model each day with a data class <code>Day(val number: Int, val title: String, val task: String)</code> and a list of <strong>30</strong> days about a goal you care about (learning to code, fitness, saving money, learning Yoruba, anything).</li>
+<li>Show the days in a <code>LazyColumn</code> of cards, with a <code>key</code> for each item. Each collapsed card shows <code>Day N</code> and the title.</li>
+<li>Tapping a card expands it with <code>animateContentSize</code>, shows the task with <code>AnimatedVisibility</code>, and animates the card colour with <code>animateColorAsState</code>.</li>
+<li>Use <code>Scaffold</code> with a top app bar titled <code>30 Days of Coding</code>, edge to edge with correct insets.</li>
+<li>Provide light and dark <code>@Preview</code> functions, and test on a real or emulated device in both modes.</li>
+<li>Use plain <code>String</code> fields as in the solution below, or (better) move all text to <code>strings.xml</code> with <code>@StringRes</code> ids.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a <code>LazyListState</code> and a floating action button that scrolls back to day 1 with <code>animateScrollToItem(0)</code> (this needs a coroutine scope; see lesson 28 or read ahead).</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The solution keeps the thirty days in Kotlin strings to stay readable. In a published app you would move them to <code>strings.xml</code>, as in lessons 21 and the Superheroes app.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Day.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.thirtydays
+
+data class Day(val number: Int, val title: String, val task: String)
+
+val days: List&lt;Day&gt; = listOf(
+    Day(1, "Set up", "Install Android Studio and run the default app on a device."),
+    Day(2, "Say hello", "Print your name in the Kotlin Playground three different ways."),
+    Day(3, "Variables", "Store your age and city in variables and print a sentence."),
+    Day(4, "Functions", "Write a function that returns the area of a rectangle."),
+    Day(5, "Decisions", "Write an if expression that classifies a score as pass or fail."),
+    Day(6, "Loops", "Print the 7 times table with a for loop."),
+    Day(7, "Review", "Redo days 2 to 6 without looking at your notes."),
+    Day(8, "Lists", "Make a list of five foods and print each one in capitals."),
+    Day(9, "Maps", "Store three student names with their scores in a map."),
+    Day(10, "Lambdas", "Use filter to keep only scores above 50."),
+    Day(11, "Text composable", "Show your name in a large Text on screen."),
+    Day(12, "Column and Row", "Arrange three Text items in a Column and then a Row."),
+    Day(13, "Modifiers", "Add padding and a background to a Text."),
+    Day(14, "Review", "Rebuild the birthday card from memory."),
+    Day(15, "Images", "Show a picture with a content description."),
+    Day(16, "Buttons", "Make a button that increases a counter."),
+    Day(17, "State", "Keep two counters in separate state variables."),
+    Day(18, "Text fields", "Echo what the user types into a Text below."),
+    Day(19, "Lists on screen", "Show 10 items in a LazyColumn."),
+    Day(20, "Cards", "Wrap each list item in a Card."),
+    Day(21, "Review", "Build a small contact list with cards."),
+    Day(22, "Colours", "Create a light and dark colour scheme."),
+    Day(23, "Typography", "Change the headline style of your app."),
+    Day(24, "Shapes", "Give your cards a custom corner shape."),
+    Day(25, "Animation", "Animate a card growing when tapped."),
+    Day(26, "Testing", "Write one unit test for a function of your own."),
+    Day(27, "Debugging", "Put a breakpoint in a click handler and inspect a value."),
+    Day(28, "Icon", "Create an adaptive launcher icon."),
+    Day(29, "Polish", "Test in dark mode and with a large font size."),
+    Day(30, "Share", "Show your app to a friend and ask for one improvement.")
+)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Theme.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.thirtydays.ui.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+private val LightColors = lightColorScheme(
+    primary = Color(0xFF3F51B5),
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFDDE1FF),
+    onPrimaryContainer = Color(0xFF00105C),
+    secondaryContainer = Color(0xFFFFE0B2),
+    onSecondaryContainer = Color(0xFF2B1700),
+    background = Color(0xFFFEFBFF),
+    onBackground = Color(0xFF1B1B1F),
+    surface = Color(0xFFFEFBFF),
+    onSurface = Color(0xFF1B1B1F)
+)
+
+private val DarkColors = darkColorScheme(
+    primary = Color(0xFFB9C3FF),
+    onPrimary = Color(0xFF08218A),
+    primaryContainer = Color(0xFF2A3990),
+    onPrimaryContainer = Color(0xFFDDE1FF),
+    secondaryContainer = Color(0xFF5C3F00),
+    onSecondaryContainer = Color(0xFFFFE0B2),
+    background = Color(0xFF1B1B1F),
+    onBackground = Color(0xFFE4E1E6),
+    surface = Color(0xFF1B1B1F),
+    onSurface = Color(0xFFE4E1E6)
+)
+
+private val AppTypography = Typography(
+    titleMedium = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+    labelMedium = TextStyle(fontWeight = FontWeight.Medium, fontSize = 13.sp)
+)
+
+private val AppShapes = Shapes(
+    medium = RoundedCornerShape(topStart = 4.dp, topEnd = 24.dp, bottomEnd = 4.dp, bottomStart = 24.dp)
+)
+
+@Composable
+fun ThirtyDaysTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -&gt; Unit
+) {
+    MaterialTheme(
+        colorScheme = if (darkTheme) DarkColors else LightColors,
+        typography = AppTypography,
+        shapes = AppShapes,
+        content = content
+    )
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.techbase.thirtydays
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.techbase.thirtydays.ui.theme.ThirtyDaysTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            ThirtyDaysTheme {
+                ThirtyDaysApp()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ThirtyDaysApp() {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(title = { Text("30 Days of Coding") })
+        }
+    ) { innerPadding -&gt;
+        LazyColumn(
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = innerPadding.calculateTopPadding() + 8.dp,
+                bottom = innerPadding.calculateBottomPadding() + 8.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(days, key = { it.number }) { day -&gt;
+                DayCard(day)
+            }
+        }
+    }
+}
+
+@Composable
+fun DayCard(day: Day, modifier: Modifier = Modifier) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+
+    val containerColor by animateColorAsState(
+        targetValue = if (expanded) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.primaryContainer
+        },
+        label = "dayCardColor"
+    )
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        colors = CardDefaults.cardColors(containerColor = containerColor)
+    ) {
+        Column(
+            modifier = Modifier
+                .animateContentSize()
+                .padding(16.dp)
+        ) {
+            Text(text = "Day ${day.number}", style = MaterialTheme.typography.labelMedium)
+            Text(text = day.title, style = MaterialTheme.typography.titleMedium)
+            AnimatedVisibility(visible = expanded) {
+                Text(
+                    text = day.task,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ThirtyDaysLightPreview() {
+    ThirtyDaysTheme(darkTheme = false) { ThirtyDaysApp() }
+}
+
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun ThirtyDaysDarkPreview() {
+    ThirtyDaysTheme(darkTheme = true) { ThirtyDaysApp() }
+}</code></pre></div></div>
+<p class="v2-p"><strong>What the screen shows:</strong> a centred top bar, then 30 cards titled <code>Day 1</code> / <code>Set up</code> and so on. Tapping a card changes its colour to the secondary container colour, grows it smoothly and reveals the day's task. Tapping again collapses it. The same screen works in light and dark mode because no colour appears outside the theme.</p>
+<p class="v2-p"><strong>Why it works:</strong></p>
+<ul class="v2-ul">
+<li>The whole card is <code>clickable</code>, which gives a larger touch target than a small button.</li>
+<li><code>rememberSaveable</code> holds each card's <code>expanded</code> flag across rotation and across scrolling away and back.</li>
+<li><code>items(days, key = { it.number })</code> gives each card a stable identity, and <code>Day.number</code> is unique.</li>
+<li>The text colours come from the card's default content colour, which Material 3 derives from the container colour, so contrast is maintained as the card changes colour. Check this by eye in both modes.</li>
+<li>The <code>Shapes.medium</code> corner is used by <code>Card</code> automatically, so no screen code mentions the corner shape.</li>
+</ul><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 22 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-22-material-theming-and-simple-animation-supe</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 22 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Material Design 3 and Themes</li><li>✅ Step-by-Step Build: Creating a Theme</li><li>✅ Step-by-Step Build: The Superheroes Practice App</li><li>✅ Step-by-Step Build: Simple Animation</li><li>✅ Step-by-Step Build: The Expandable Hero Card</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_21.html" class="ln-btn">&#8592; Lesson 21</a><a href="lesson_23.html" class="ln-btn primary">Lesson 23 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 22 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 34: Persist Data with Room — Techbase Android</title>
+</head>
+<body data-total="14" data-key="techbase_android_l34">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 34 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 34</div>
+      <h1>Persist Data with Room</h1>
+      <div class="l-hero-sub">14 phases &nbsp;·&nbsp; Build: Pocket Expense Tracker</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 34</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Store structured data on the device with Room entities, DAOs and databases, then read and update it in the Inventory and Bus Schedule apps.</p></div><div class="wm"><span>📚 14 phases</span><span>🏗️ Pocket Expense Tracker</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 14</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">In lesson 32 you learned SQL. Now you will use it from Kotlin. <strong>Room</strong> is the Jetpack library that gives your app a SQLite database without you writing cursor loops or SQL boilerplate. You describe your tables as Kotlin classes, your queries as annotated functions, and Room generates the code at build time and checks your SQL <strong>while you compile</strong>.</p>
+<p class="v2-p">You will build <strong>Inventory</strong>, a stock-keeping app for a small shop (think of a provision store in Bodija market): a list of items with name, price and quantity, a screen to add an item, and a screen to view, sell, edit and delete one. All data stays on the phone and survives closing the app, rebooting the phone and process death. Then you will plan the <strong>Bus Schedule</strong> practice app.</p>
+<p class="v2-p">This lesson covers the four items of Pathway 2, Unit 6 of the official <strong>Android Basics with Compose</strong> course that deal with Room: <em>Using Room Kotlin APIs</em>, <em>Persist data with Room</em>, <em>Read and update data with Room</em> and <em>Practice: Build Bus Schedule app</em>.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>A note on versions.</strong> Room has a new major version, <strong>Room 3.0</strong>, published under new names (<code>androidx.room3</code>). Room 2.x (<code>androidx.room</code>) is in maintenance mode. Older tutorials, including some Google codelabs, still show Room 2.x. This lesson teaches the current Room 3 API, shows the Room 2.x equivalent wherever it differs, and tells you which to check. <strong>Always read the official setup page for the exact current versions and imports</strong> (https://developer.android.com/training/data-storage/room), because this is a fast-moving library.</p>
+</blockquote>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Define an <strong>entity</strong>, a <strong>DAO</strong> and a <strong>database</strong> class.</li>
+<li>Add Room with KSP using the version catalog.</li>
+<li>Write <code>@Insert</code>, <code>@Update</code>, <code>@Delete</code> and <code>@Query</code> functions, using <code>suspend</code> and <code>Flow</code>.</li>
+<li>Create one database instance and expose it through a repository and the app container (lesson 30).</li>
+<li>Build ViewModels that expose database data as <code>StateFlow</code> with <code>stateIn(WhileSubscribed(5000))</code>.</li>
+<li>Validate input before saving, and format money safely.</li>
+<li>Inspect the live database with Android Studio's <strong>Database Inspector</strong>.</li>
+<li>Test a DAO with an in-memory database.</li>
+<li>Explain schema <strong>migrations</strong>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> Room turns "rows in a table" into "objects in a list", and turns "the table changed" into "the Flow emitted again". Your UI never asks "did anything change?". It just collects.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 14</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>SQL</strong> (lesson 32). You will write <code>SELECT</code>, <code>WHERE</code>, <code>ORDER BY</code> inside annotations.</li>
+<li><strong>Flow and <code>stateIn</code></strong> (lesson 33).</li>
+<li><strong>Repositories and the app container</strong> (lesson 30).</li>
+<li><strong>Coroutines and <code>suspend</code></strong> (lesson 28).</li>
+<li><strong>ViewModel, UI state, and navigation</strong> (lessons 24 to 26).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 14</div><div class="pt">Conceptual Understanding: The Three Room Pieces</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>  Kotlin data class          interface of functions        abstract class
+ +------------------+       +------------------------+    +--------------------+
+ |  @Entity  Item   | &lt;---- |  @Dao  ItemDao         | &lt;--|  @Database         |
+ |  one TABLE       |       |  @Insert @Query ...    |    |  InventoryDatabase |
+ +------------------+       +------------------------+    +--------------------+
+   describes a row           describes operations           ties it together;
+                                                            gives you the DAO</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>What it is</th>
+<th>Compares to SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Entity</strong></td>
+<td>A data class annotated <code>@Entity</code>; one instance is one row</td>
+<td><code>CREATE TABLE</code></td>
+</tr>
+<tr>
+<td><strong>DAO</strong> (data access object)</td>
+<td>An interface annotated <code>@Dao</code> whose functions are the queries</td>
+<td><code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code></td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>An abstract class annotated <code>@Database</code> that lists entities and exposes DAOs</td>
+<td>The database file</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Room generates the implementation of the DAO and the database for you at build time. Because it reads your annotations and SQL during compilation, mistakes become <strong>build errors</strong>.</p>
+<h3 class="v2-h3">Why <code>suspend</code> and <code>Flow</code>?</h3>
+<p class="v2-p">A database is slow compared with memory (it reads a file), so Room refuses to run queries on the main thread. Two ways to follow that rule:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>DAO function style</th>
+<th>Use for</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>suspend fun</code></td>
+<td>One-shot work: insert, update, delete, "get once"</td>
+<td><code>suspend fun insert(item: Item)</code></td>
+</tr>
+<tr>
+<td>Function returning <code>Flow&lt;T&gt;</code></td>
+<td><strong>Observing</strong>: emits the first result, then <strong>again whenever the table changes</strong></td>
+<td><code>fun getAllItems(): Flow&lt;List&lt;Item&gt;&gt;</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A <code>Flow</code>-returning function is <strong>not</strong> <code>suspend</code> (the flow itself is cold, lesson 33). Room runs the query on a background thread and re-runs it automatically when the underlying table is modified. That is why a list on screen updates the instant you insert a row, with no refresh code.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: The Three Room Pieces</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 14</div><div class="pt">Step-by-Step Build 1: Add Room to the Project</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a new Empty Activity project called <code>Inventory</code> (package <code>com.example.inventory</code>). Room needs <strong>KSP</strong> (Kotlin Symbol Processing) to generate code, and Room 3 supports no other processor (no KAPT).</p>
+<p class="v2-p">Look up the <strong>current</strong> versions of Room (https://developer.android.com/jetpack/androidx/releases/room3) and the KSP plugin matching your Kotlin version (https://github.com/google/ksp/releases) and fill in:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+room = "&lt;latest stable Room 3&gt;"
+ksp = "&lt;KSP version that matches your Kotlin version&gt;"
+
+[libraries]
+androidx-room-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
+
+[plugins]
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.ksp)
+}
+
+dependencies {
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+}</code></pre></div></div>
+<p class="v2-p">Also add <code>alias(libs.plugins.ksp) apply false</code> to the root <code>build.gradle.kts</code> plugin block, then <strong>Sync Now</strong>. The KSP version string starts with your Kotlin version (for example a <code>2.x.y-1.0.z</code> pattern), so choose the one for the Kotlin version in your catalog.</p>
+<p class="v2-p">You also need a <strong>SQLite driver</strong>. Room 3 is built on the <code>androidx.sqlite</code> driver APIs. For Android the simplest option is the framework driver that wraps the SQLite already on the phone; if your setup page shows <code>AndroidSQLiteDriver</code>, use that (artifact <code>androidx.sqlite:sqlite-framework</code>; check the current page for the exact coordinate). A <strong>bundled</strong> driver (<code>androidx.sqlite:sqlite-bundled</code>) ships its own SQLite so behaviour is identical on every phone, at the price of a larger app.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Room 2.x equivalents.</strong> If your project (or a tutorial) uses Room 2.x: artifacts are <code>androidx.room:room-runtime</code> and <code>androidx.room:room-compiler</code>, plus <code>androidx.room:room-ktx</code> for coroutine and Flow support in older versions; imports start <code>androidx.room.</code> (not <code>androidx.room3.</code>); <code>@TypeConverter</code> stays <code>@TypeConverter</code> (it is <code>@ColumnTypeConverter</code> in Room 3); you do not have to set a driver; and blocking DAO functions are allowed (but should never be called on the main thread). The concepts in this lesson are identical.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Add Room to the Project</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 14</div><div class="pt">Step-by-Step Build 2: The Entity</div><div class="pc" id="chk5"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Item.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.inventory.data
+
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
+
+@Entity(tableName = "items")
+data class Item(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val priceKobo: Long,
+    val quantity: Int
+)</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>@Entity(tableName = "items")</code> makes the class a table named <code>items</code> (otherwise the table takes the class name).</li>
+<li><code>@PrimaryKey(autoGenerate = true)</code> lets SQLite choose the id. The <code>= 0</code> default means "not saved yet": when you insert an <code>Item(name = ..., ...)</code> with <code>id = 0</code>, Room asks the database to generate one.</li>
+<li>Each property becomes a column of the matching type (<code>Int</code> and <code>Long</code> become <code>INTEGER</code>, <code>String</code> becomes <code>TEXT</code>).</li>
+<li><strong>Money is stored as a whole number of kobo</strong> (100 kobo = 1 naira), the integer approach from lesson 32. <code>₦1,250.50</code> is <code>125050</code>.</li>
+</ul>
+<p class="v2-p">Other annotations you will meet: <code>@ColumnInfo(name = "item_name")</code> to rename a column, <code>@Ignore</code> to skip a property, and <code>indices</code> for indexes.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: The Entity</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 14</div><div class="pt">Step-by-Step Build 3: The DAO</div><div class="pc" id="chk6"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ItemDao.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.inventory.data
+
+import androidx.room3.Dao
+import androidx.room3.Delete
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Update
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ItemDao {
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(item: Item)
+
+    @Update
+    suspend fun update(item: Item)
+
+    @Delete
+    suspend fun delete(item: Item)
+
+    @Query("SELECT * FROM items WHERE id = :id")
+    fun getItem(id: Int): Flow&lt;Item?&gt;
+
+    @Query("SELECT * FROM items ORDER BY name ASC")
+    fun getAllItems(): Flow&lt;List&lt;Item&gt;&gt;
+}</code></pre></div></div>
+<p class="v2-p">Read each one:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>What Room generates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Insert suspend fun insert(item)</code></td>
+<td>An <code>INSERT</code> statement. <code>OnConflictStrategy.IGNORE</code> ignores a row whose primary key already exists; <code>REPLACE</code> overwrites it.</td>
+</tr>
+<tr>
+<td><code>@Update suspend fun update(item)</code></td>
+<td><code>UPDATE ... WHERE id = item.id</code>, using the <strong>primary key</strong> to find the row.</td>
+</tr>
+<tr>
+<td><code>@Delete suspend fun delete(item)</code></td>
+<td><code>DELETE ... WHERE id = item.id</code>.</td>
+</tr>
+<tr>
+<td><code>@Query(...) fun getItem(id)</code></td>
+<td>Your own SQL. <code>:id</code> is a <strong>parameter</strong> bound to the function argument, never string-glued (lesson 32).</td>
+</tr>
+<tr>
+<td><code>Flow&lt;Item?&gt;</code></td>
+<td>Emits the row, or <code>null</code> if it does not exist (for example after deletion), and emits again after changes.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">A few helpful details:</p>
+<ul class="v2-ul">
+<li>The SQL in <code>@Query</code> is validated <strong>at compile time</strong> against your entities. Misspell <code>itemz</code> and the build fails with a clear message.</li>
+<li>In Room 3, non-observable DAO functions must be <code>suspend</code>. The insert, update and delete functions return <code>Unit</code> here, but they can also return the new row id (<code>Long</code>) or a count of affected rows (<code>Int</code>).</li>
+<li><code>Flow&lt;Item?&gt;</code> is nullable because <code>getItem</code> may match nothing.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: The DAO</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 14</div><div class="pt">Step-by-Step Build 4: The Database and One Instance</div><div class="pc" id="chk7"></div></div><div class="pb2"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">InventoryDatabase.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.inventory.data
+
+import android.content.Context
+import androidx.room3.Database
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
+import androidx.sqlite.driver.AndroidSQLiteDriver
+
+@Database(entities = [Item::class], version = 1, exportSchema = true)
+abstract class InventoryDatabase : RoomDatabase() {
+
+    abstract fun itemDao(): ItemDao
+
+    companion object {
+        fun build(context: Context): InventoryDatabase =
+            Room.databaseBuilder&lt;InventoryDatabase&gt;(
+                context = context.applicationContext,
+                name = "inventory_database"
+            )
+                .setDriver(AndroidSQLiteDriver())
+                .build()
+    }
+}</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>@Database(entities = [...], version = 1)</code> lists every table. <strong>Increase <code>version</code> whenever you change the schema</strong> (lesson section on migrations).</li>
+<li><code>exportSchema = true</code> writes a JSON copy of each version of your schema into a folder you commit; Room uses it for tests and automatic migrations. Configure the output folder as the official migration guide shows (a <code>room { schemaDirectory(...) }</code> block or a KSP argument, depending on the Room version).</li>
+<li><code>abstract fun itemDao()</code> is how you get the DAO. Room generates the body.</li>
+<li><code>context.applicationContext</code> avoids leaking an Activity (lesson 24).</li>
+<li><strong>Create one <code>Database</code> instance for the whole app.</strong> Building one is expensive. In lesson 30 you learned the right home for a long-lived object: the <strong>app container</strong>.</li>
+</ul>
+<p class="v2-p">Check your imports against the official setup page: package and driver names changed between Room 2 and 3, and are the most likely thing to differ in your project.</p>
+<h3 class="v2-h3">Wire it into the container</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// AppContainer.kt
+interface AppContainer {
+    val itemsRepository: ItemsRepository
+}
+
+class DefaultAppContainer(private val context: Context) : AppContainer {
+    override val itemsRepository: ItemsRepository by lazy {
+        OfflineItemsRepository(InventoryDatabase.build(context).itemDao())
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// InventoryApplication.kt (register with android:name in the manifest)
+class InventoryApplication : Application() {
+    lateinit var container: AppContainer
+    override fun onCreate() {
+        super.onCreate()
+        container = DefaultAppContainer(this)
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">The repository</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// ItemsRepository.kt
+interface ItemsRepository {
+    fun getAllItemsStream(): Flow&lt;List&lt;Item&gt;&gt;
+    fun getItemStream(id: Int): Flow&lt;Item?&gt;
+    suspend fun insertItem(item: Item)
+    suspend fun deleteItem(item: Item)
+    suspend fun updateItem(item: Item)
+}
+
+class OfflineItemsRepository(private val itemDao: ItemDao) : ItemsRepository {
+    override fun getAllItemsStream(): Flow&lt;List&lt;Item&gt;&gt; = itemDao.getAllItems()
+    override fun getItemStream(id: Int): Flow&lt;Item?&gt; = itemDao.getItem(id)
+    override suspend fun insertItem(item: Item) = itemDao.insert(item)
+    override suspend fun deleteItem(item: Item) = itemDao.delete(item)
+    override suspend fun updateItem(item: Item) = itemDao.update(item)
+}</code></pre></div></div>
+<p class="v2-p">The name <code>OfflineItemsRepository</code> hints at the offline-first design in lesson 62: the database is the source of truth. Later, a <code>NetworkItemsRepository</code> could sync with a server without changing any ViewModel.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: The Database and One Instance</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 14</div><div class="pt">Step-by-Step Build 5: ViewModels and Screens</div><div class="pc" id="chk8"></div></div><div class="pb2"><h3 class="v2-h3">The home list</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// HomeViewModel.kt
+data class HomeUiState(val itemList: List&lt;Item&gt; = emptyList())
+
+class HomeViewModel(itemsRepository: ItemsRepository) : ViewModel() {
+
+    val homeUiState: StateFlow&lt;HomeUiState&gt; =
+        itemsRepository.getAllItemsStream()
+            .map { HomeUiState(it) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = HomeUiState()
+            )
+}</code></pre></div></div>
+<p class="v2-p">This is lesson 33's <code>stateIn</code> recipe. Insert a row anywhere in the app and this StateFlow emits, and the list redraws. Imports needed: <code>androidx.lifecycle.ViewModel</code>, <code>androidx.lifecycle.viewModelScope</code>, <code>kotlinx.coroutines.flow.*</code> (<code>StateFlow</code>, <code>SharingStarted</code>, <code>map</code>, <code>stateIn</code>).</p>
+<h3 class="v2-h3">Entry with validation and a money helper</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// ItemEntryViewModel.kt
+data class ItemDetails(
+    val id: Int = 0,
+    val name: String = "",
+    val price: String = "",       // typed by the user, in naira, e.g. "1250.50"
+    val quantity: String = ""
+)
+
+data class ItemUiState(
+    val itemDetails: ItemDetails = ItemDetails(),
+    val isEntryValid: Boolean = false
+)
+
+fun ItemDetails.toItem(): Item = Item(
+    id = id,
+    name = name.trim(),
+    priceKobo = nairaTextToKobo(price) ?: 0L,
+    quantity = quantity.toIntOrNull() ?: 0
+)
+
+fun Item.toItemDetails(): ItemDetails = ItemDetails(
+    id = id,
+    name = name,
+    price = "%d.%02d".format(priceKobo / 100, priceKobo % 100),
+    quantity = quantity.toString()
+)
+
+fun nairaTextToKobo(text: String): Long? {
+    val clean = text.trim()
+    if (!Regex("""\d+(\.\d{1,2})?""").matches(clean)) return null
+    val parts = clean.split(".")
+    val naira = parts[0].toLongOrNull() ?: return null
+    val kobo = parts.getOrNull(1)?.padEnd(2, '0')?.toLongOrNull() ?: 0L
+    return naira * 100 + kobo
+}</code></pre></div></div>
+<p class="v2-p"><code>nairaTextToKobo("1250.5")</code> gives <code>125050</code> (the <code>.5</code> is padded to <code>50</code>), <code>"300"</code> gives <code>30000</code>, and <code>"abc"</code> or <code>"1.234"</code> give <code>null</code>. Working with text and then converting once at the boundary keeps floating-point numbers out of your money entirely. (<code>"%d.%02d".format(...)</code> uses the device locale for digits; in locales that use different numerals you would format differently, a trap lesson 20 explained. For a shop-owner app, test it in your target locale.)</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
+
+    var itemUiState by mutableStateOf(ItemUiState())
+        private set
+
+    fun updateUiState(details: ItemDetails) {
+        itemUiState = ItemUiState(details, isEntryValid = validate(details))
+    }
+
+    private fun validate(d: ItemDetails): Boolean =
+        d.name.isNotBlank() &amp;&amp;
+            nairaTextToKobo(d.price) != null &amp;&amp;
+            (d.quantity.toIntOrNull() ?: -1) &gt;= 0
+
+    suspend fun saveItem() {
+        if (validate(itemUiState.itemDetails)) {
+            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Here the form state is held with Compose <code>mutableStateOf</code> inside the ViewModel (<code>private set</code> protects it from outside writes), a pattern the official codelab uses for text fields. <code>StateFlow</code> works equally well. <code>saveItem</code> is a <code>suspend</code> function the screen launches from <code>rememberCoroutineScope</code> (lesson 28), so the save is tied to the UI event.</p>
+<h3 class="v2-h3">Details: read, sell, edit, delete</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class ItemDetailsViewModel(
+    savedStateHandle: SavedStateHandle,
+    private val itemsRepository: ItemsRepository
+) : ViewModel() {
+
+    private val itemId: Int = checkNotNull(savedStateHandle["itemId"])
+
+    val uiState: StateFlow&lt;ItemDetailsUiState&gt; =
+        itemsRepository.getItemStream(itemId)
+            .filterNotNull()
+            .map { ItemDetailsUiState(it.toItemDetails(), outOfStock = it.quantity &lt;= 0) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ItemDetailsUiState())
+
+    suspend fun sellOne() {
+        val item = uiState.value.itemDetails.toItem()
+        if (item.quantity &gt; 0) itemsRepository.updateItem(item.copy(quantity = item.quantity - 1))
+    }
+
+    suspend fun deleteItem() {
+        itemsRepository.deleteItem(uiState.value.itemDetails.toItem())
+    }
+}
+
+data class ItemDetailsUiState(
+    val itemDetails: ItemDetails = ItemDetails(),
+    val outOfStock: Boolean = true
+)</code></pre></div></div>
+<p class="v2-p"><code>savedStateHandle["itemId"]</code> receives the route argument from navigation (lesson 26: type-safe routes put their arguments into the <code>SavedStateHandle</code>). <code>filterNotNull()</code> drops the <code>null</code> emitted after a delete, so the screen does not crash while navigating away. Tap <strong>Sell</strong>, and <code>updateItem</code> changes the row; the <code>getItem</code> Flow re-emits; the screen shows the new quantity. You wrote no refresh code.</p>
+<h3 class="v2-h3">Factory</h3>
+<p class="v2-p">Use the factory pattern from lesson 30 to build each ViewModel from <code>InventoryApplication.container</code>, with <code>createSavedStateHandle()</code> for the one needing a handle:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>object AppViewModelProvider {
+    val Factory = viewModelFactory {
+        initializer { HomeViewModel(inventoryApplication().container.itemsRepository) }
+        initializer { ItemEntryViewModel(inventoryApplication().container.itemsRepository) }
+        initializer {
+            ItemDetailsViewModel(
+                this.createSavedStateHandle(),
+                inventoryApplication().container.itemsRepository
+            )
+        }
+    }
+}
+
+fun CreationExtras.inventoryApplication(): InventoryApplication =
+    this[AndroidViewModel.APPLICATION_KEY] as InventoryApplication</code></pre></div></div>
+<p class="v2-p">(Imports: <code>androidx.lifecycle.createSavedStateHandle</code>, <code>androidx.lifecycle.viewmodel.CreationExtras</code>, <code>androidx.lifecycle.AndroidViewModel</code>.)</p>
+<h3 class="v2-h3">Seeing the screen</h3>
+<p class="v2-p">Build three screens following lessons 21 and 26: a <code>LazyColumn</code> for the home list with a <code>+</code> floating action button; a form with two <code>OutlinedTextField</code>s (set <code>keyboardOptions</code> for decimal and number keyboards) and a Save button enabled when <code>isEntryValid</code>; and a details screen with Sell, Edit and Delete buttons. Delete should ask for confirmation with an <code>AlertDialog</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: ViewModels and Screens</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 14</div><div class="pt">Inspecting the Database</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Run the app, add three items, then open <strong>View &gt; Tool Windows &gt; App Inspection</strong> and choose <strong>Database Inspector</strong> (lesson 44 covers the inspectors in depth). You can:</p>
+<ul class="v2-ul">
+<li>See the <code>items</code> table and every row live.</li>
+<li>Run your own SQL (<code>SELECT * FROM items WHERE quantity = 0</code>).</li>
+<li>Edit a cell and watch the app's list update immediately, which proves the Flow wiring.</li>
+</ul>
+<p class="v2-p">The Inspector works with debuggable builds running on an emulator or device that supports it. It is the fastest way to answer "is the problem in my query or in my UI?".</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Inspecting the Database</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 14</div><div class="pt">Migrations: Changing the Schema Later</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Suppose version 2 of your app adds a <code>supplier</code> column. Users already have a version 1 database on their phones. If you simply change the entity and bump <code>version</code>, Room refuses to open the old file ("a migration from 1 to 2 is required") because it cannot guess what to do with the existing data.</p>
+<p class="v2-p">You have three options:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Approach</th>
+<th>Use it when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auto-migration</strong></td>
+<td>Simple changes: add a column or table, rename with a spec. Declare <code>@Database(version = 2, autoMigrations = [AutoMigration(from = 1, to = 2)])</code>. Needs <code>exportSchema</code> so Room can compare schema JSON files.</td>
+</tr>
+<tr>
+<td><strong>Manual <code>Migration</code></strong></td>
+<td>Anything auto-migration cannot do. You write the <code>ALTER TABLE</code> SQL yourself.</td>
+</tr>
+<tr>
+<td><strong>Destructive migration</strong> (<code>fallbackToDestructiveMigration</code>)</td>
+<td>Throws away all user data when the schema changes. <strong>Only for throw-away or cache data, never for something users created</strong>, such as an inventory.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Always test migrations (Room provides a migration test helper that loads the exported schemas). A broken migration crashes the app at launch for every existing user, which is among the most painful bugs to ship. The exact API for migrations changed in Room 3 (migrations are <code>suspend</code>, working with <code>SQLiteConnection</code> instead of <code>SupportSQLiteDatabase</code>); follow the official migration guide for your Room version rather than copying from older articles.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Migrations: Changing the Schema Later</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 14</div><div class="pt">Testing a DAO</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p">A DAO test runs on a device or emulator (it needs a real SQLite) and uses an <strong>in-memory</strong> database that vanishes after the test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// app/src/androidTest/.../ItemDaoTest.kt
+package com.example.inventory
+
+import android.content.Context
+import androidx.room3.Room
+import androidx.sqlite.driver.AndroidSQLiteDriver
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.inventory.data.InventoryDatabase
+import com.example.inventory.data.Item
+import com.example.inventory.data.ItemDao
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+
+@RunWith(AndroidJUnit4::class)
+class ItemDaoTest {
+
+    private lateinit var db: InventoryDatabase
+    private lateinit var dao: ItemDao
+
+    @Before
+    fun createDb() {
+        val context = ApplicationProvider.getApplicationContext&lt;Context&gt;()
+        db = Room.inMemoryDatabaseBuilder&lt;InventoryDatabase&gt;(context)
+            .setDriver(AndroidSQLiteDriver())
+            .build()
+        dao = db.itemDao()
+    }
+
+    @After
+    fun closeDb() = db.close()
+
+    @Test
+    fun insert_thenReadAll_returnsItemsSortedByName() = runTest {
+        dao.insert(Item(name = "Rice", priceKobo = 5_000_000, quantity = 3))
+        dao.insert(Item(name = "Beans", priceKobo = 2_500_000, quantity = 10))
+
+        val names = dao.getAllItems().first().map { it.name }
+
+        assertEquals(listOf("Beans", "Rice"), names)
+    }
+
+    @Test
+    fun update_changesQuantity() = runTest {
+        dao.insert(Item(name = "Garri", priceKobo = 100_000, quantity = 5))
+        val saved = dao.getAllItems().first().single()
+
+        dao.update(saved.copy(quantity = 4))
+
+        assertEquals(4, dao.getItem(saved.id).first()?.quantity)
+    }
+}</code></pre></div></div>
+<p class="v2-p">The <code>.first()</code> operator takes one emission from the Flow and finishes, which gives a clean "read once" in a test. Test dependencies: <code>androidTestImplementation</code> entries for <code>androidx.test.ext:junit</code>, <code>androidx.test:core</code> and <code>kotlinx-coroutines-test</code> (look up current versions; the project template already includes the first). Room 2.x uses <code>Room.inMemoryDatabaseBuilder(context, InventoryDatabase::class.java)</code> and often <code>.allowMainThreadQueries()</code> for blocking tests.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Testing a DAO</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 14</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk12"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Low-stock query</strong></p>
+<p class="v2-p">Add a DAO function <code>getLowStock(threshold: Int): Flow&lt;List&lt;Item&gt;&gt;</code> that returns items with a quantity at or below the threshold, lowest first. Expose it through the repository and write a DAO test with three items (quantities 0, 3 and 10, threshold 3) that expects the first two, in order.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// ItemDao.kt
+@Query("SELECT * FROM items WHERE quantity &lt;= :threshold ORDER BY quantity ASC, name ASC")
+fun getLowStock(threshold: Int): Flow&lt;List&lt;Item&gt;&gt;
+
+// ItemsRepository.kt
+fun getLowStockStream(threshold: Int): Flow&lt;List&lt;Item&gt;&gt;
+// OfflineItemsRepository.kt
+override fun getLowStockStream(threshold: Int) = itemDao.getLowStock(threshold)</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun lowStock_returnsItemsAtOrBelowThreshold() = runTest {
+    dao.insert(Item(name = "Salt", priceKobo = 10_000, quantity = 0))
+    dao.insert(Item(name = "Sugar", priceKobo = 20_000, quantity = 3))
+    dao.insert(Item(name = "Rice", priceKobo = 30_000, quantity = 10))
+
+    val result = dao.getLowStock(3).first().map { it.name }
+
+    assertEquals(listOf("Salt", "Sugar"), result)
+}</code></pre></div></div>
+<p class="v2-p">The SQL is checked at build time. Adding the second sort key <code>name</code> makes ties deterministic, as lesson 32 stressed.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Search</strong></p>
+<p class="v2-p">Add a search box to the home screen that filters by name using SQL, not Kotlin. Use <code>LIKE</code> with a parameter and make the query reactive to the text with <code>flatMapLatest</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// ItemDao.kt
+@Query("SELECT * FROM items WHERE name LIKE '%' || :text || '%' ORDER BY name")
+fun search(text: String): Flow&lt;List&lt;Item&gt;&gt;</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// HomeViewModel.kt
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+class HomeViewModel(private val repo: ItemsRepository) : ViewModel() {
+
+    private val query = MutableStateFlow("")
+    fun onQueryChange(text: String) { query.value = text }
+
+    val homeUiState: StateFlow&lt;HomeUiState&gt; = query
+        .debounce(250)
+        .flatMapLatest { q -&gt; if (q.isBlank()) repo.getAllItemsStream() else repo.searchStream(q.trim()) }
+        .map { HomeUiState(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+}</code></pre></div></div>
+<p class="v2-p"><code>'%' || :text || '%'</code> builds the pattern <strong>inside SQL</strong> with a bound parameter, so user text can never alter the query (the safe alternative to string concatenation from lesson 32). A user who types <code>%</code> or <code>_</code> will match as wildcards; escape them if exact matching matters.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: The practice, Bus Schedule</strong></p>
+<p class="v2-p">Plan and build the <strong>Bus Schedule</strong> app. The data is a table of stops: <code>id</code>, <code>stopName</code>, <code>arrivalTimeInMillis</code>. Screen 1 lists all stops ordered by arrival time. Tapping a stop shows only the buses that arrive at that stop, ordered by time. Prepopulate the database with sample rows (use your own city's stops, for example Ibadan to Lagos route stops). Use two DAO queries, <code>getAll()</code> and <code>getByStopName(name)</code>, both returning <code>Flow</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Entity(tableName = "schedule")
+data class Schedule(
+    @PrimaryKey val id: Int,
+    @ColumnInfo(name = "stop_name") val stopName: String,
+    @ColumnInfo(name = "arrival_time") val arrivalTimeInMillis: Long
+)
+
+@Dao
+interface ScheduleDao {
+    @Query("SELECT * FROM schedule ORDER BY arrival_time ASC")
+    fun getAll(): Flow&lt;List&lt;Schedule&gt;&gt;
+
+    @Query("SELECT * FROM schedule WHERE stop_name = :stopName ORDER BY arrival_time ASC")
+    fun getByStopName(stopName: String): Flow&lt;List&lt;Schedule&gt;&gt;
+}</code></pre></div></div>
+<p class="v2-p">To prepopulate, copy a ready-made database file from <code>assets/</code> using the builder's <code>createFromAsset("database/bus_schedule.db")</code> (Room 2.x and Room 3 offer ways to do this; check the current builder API) <strong>or</strong> insert sample rows in a <code>RoomDatabase.Callback</code> the first time the database is created. Format times with <code>SimpleDateFormat("h:mm a", Locale.getDefault()).format(Date(millis))</code>. The detail view uses the same list screen with a stop name argument in the navigation route (lesson 26), and a ViewModel that exposes <code>scheduleFor(stopName)</code> as <code>stateIn</code> StateFlow. Nothing in this app needs insert, update or delete, so the DAO is <strong>read-only</strong>, a good example of exposing only what the UI needs.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Open the Database Inspector, insert a row by running <code>INSERT INTO items (name, priceKobo, quantity) VALUES ('Test', 100, 1)</code>, and watch the list update. Then change the <code>name</code> column name in the entity without bumping the version and read the exact error you get. Restore it.</p></div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 14</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Creating the database more than once.</strong> <em>What happens:</em> wasted memory, and two instances that do not see each other's changes. <em>The fix:</em> one instance in the app container.</p>
+<p class="v2-p"><strong>Mistake #2: Forgetting <code>@PrimaryKey</code>.</strong> <em>Symptom:</em> a build error saying the entity needs a primary key. <em>The fix:</em> add one, usually <code>autoGenerate = true</code> with a default of <code>0</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Changing the schema without bumping the version.</strong> <em>Symptom:</em> a crash on launch with an integrity or identity-hash error. <em>The fix:</em> increase <code>version</code> and provide a migration. During early development, uninstall the app to clear the old database.</p>
+<p class="v2-p"><strong>Mistake #4: <code>fallbackToDestructiveMigration()</code> on user data.</strong> <em>What happens:</em> all user data deleted on upgrade. <em>The fix:</em> write migrations for anything users created.</p>
+<p class="v2-p"><strong>Mistake #5: Blocking DAO calls on the main thread (Room 2.x).</strong> <em>Symptom:</em> <em>Cannot access database on the main thread.</em> <em>The fix:</em> <code>suspend</code> or <code>Flow</code>. Do not use <code>allowMainThreadQueries()</code> outside tests.</p>
+<p class="v2-p"><strong>Mistake #6: <code>@Update</code> on an item with the wrong id.</strong> <em>What happens:</em> nothing is updated. <em>The fix:</em> load the row first and use <code>copy</code> on it, so the id is preserved.</p>
+<p class="v2-p"><strong>Mistake #7: Storing money in <code>Double</code>.</strong> <em>What happens:</em> rounding oddities. <em>The fix:</em> kobo as <code>Long</code>.</p>
+<p class="v2-p"><strong>Mistake #8: Wrong KSP version.</strong> <em>Symptom:</em> a Gradle error mentioning an incompatible Kotlin version. <em>The fix:</em> use the KSP release whose version prefix matches your Kotlin version.</p>
+<p class="v2-p"><strong>Mistake #9: Room 2.x and Room 3 imports mixed together.</strong> <em>Symptom:</em> unresolved references or ambiguous types. <em>The fix:</em> pick one version, use only its package (<code>androidx.room.</code> or <code>androidx.room3.</code>).</p>
+<p class="v2-p"><strong>Mistake #10: Treating the Flow like a one-shot call.</strong> <em>What happens:</em> calling <code>getAllItems()</code> repeatedly, creating new collectors. <em>The fix:</em> build the Flow once in the ViewModel and expose it with <code>stateIn</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 14</div><div class="pt">Knowledge Check</div><div class="pc" id="chk14"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What are the three main Room components?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">The entity (a data class that defines a table), the DAO (an interface of query and write functions) and the database class (ties entities and DAOs together and gives access to the DAO).</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why does a DAO function returning <code>Flow</code> not need <code>suspend</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A <code>Flow</code> is cold and does its work only when collected, in a coroutine, on a background dispatcher chosen by Room. The function itself returns immediately.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> How does the UI update when a row is inserted from another screen?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Room re-runs observed queries when their tables change, so the <code>Flow</code> emits a new list, the ViewModel's <code>StateFlow</code> updates, and Compose recomposes. No manual refresh is needed.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why is <code>fallbackToDestructiveMigration</code> dangerous?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It deletes all existing data when the schema version changes. For user-created data that means permanent loss on app update.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why store prices as whole kobo rather than <code>Double</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Binary floating point cannot represent many decimal values exactly, so arithmetic produces rounding errors. Integers in the smallest currency unit are exact.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-6-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 6, Pathway 2: Persist data with Room</a>: the official pathway including the Inventory app and Bus Schedule practice.</li>
+<li><a href="https://developer.android.com/training/data-storage/room" rel="noopener noreferrer">Room: save data in a local database</a></li>
+<li><a href="https://developer.android.com/training/data-storage/room/migration-2-to-3" rel="noopener noreferrer">Migrate from Room 2.x to Room 3.0</a></li>
+<li><a href="https://developer.android.com/topic/architecture/data-layer/offline-first" rel="noopener noreferrer">Offline-first data layer</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Pocket Expense Tracker</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a personal <strong>expense tracker</strong> with Room, from scratch, using everything in this lesson.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Entity <code>Expense(id, title, amountKobo: Long, category: String, createdAtMillis: Long)</code>.</li>
+<li>DAO with <code>insert</code>, <code>delete</code>, <code>getAll()</code> ordered by newest first, <code>getByCategory(category)</code>, and <code>getTotal(): Flow&lt;Long?&gt;</code> using <code>SELECT SUM(amountKobo) FROM expenses</code>.</li>
+<li>Database singleton in the app container, repository, ViewModels with <code>stateIn(WhileSubscribed(5000))</code>.</li>
+<li>A list screen with the running total at the top (formatted as naira), an add form with validation, and swipe or button delete with confirmation.</li>
+<li>A filter chip row for categories.</li>
+<li>Two DAO tests with an in-memory database: total of three expenses, and <code>getByCategory</code>.</li>
+<li>Inspect the live data in Database Inspector and take notes on one thing you learned.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add <code>@Database(version = 2)</code> with a new <code>note</code> column and an auto-migration, and prove that existing rows survive.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Expense.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.expenses.data
+
+import androidx.room3.Dao
+import androidx.room3.Delete
+import androidx.room3.Entity
+import androidx.room3.Insert
+import androidx.room3.PrimaryKey
+import androidx.room3.Query
+import kotlinx.coroutines.flow.Flow
+
+@Entity(tableName = "expenses")
+data class Expense(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val title: String,
+    val amountKobo: Long,
+    val category: String,
+    val createdAtMillis: Long
+)
+
+@Dao
+interface ExpenseDao {
+
+    @Insert
+    suspend fun insert(expense: Expense)
+
+    @Delete
+    suspend fun delete(expense: Expense)
+
+    @Query("SELECT * FROM expenses ORDER BY createdAtMillis DESC")
+    fun getAll(): Flow&lt;List&lt;Expense&gt;&gt;
+
+    @Query("SELECT * FROM expenses WHERE category = :category ORDER BY createdAtMillis DESC")
+    fun getByCategory(category: String): Flow&lt;List&lt;Expense&gt;&gt;
+
+    @Query("SELECT SUM(amountKobo) FROM expenses")
+    fun getTotal(): Flow&lt;Long?&gt;
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ExpenseDaoTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@RunWith(AndroidJUnit4::class)
+class ExpenseDaoTest {
+    private lateinit var db: ExpenseDatabase
+    private lateinit var dao: ExpenseDao
+
+    @Before fun create() {
+        val context = ApplicationProvider.getApplicationContext&lt;Context&gt;()
+        db = Room.inMemoryDatabaseBuilder&lt;ExpenseDatabase&gt;(context)
+            .setDriver(AndroidSQLiteDriver())
+            .build()
+        dao = db.expenseDao()
+    }
+
+    @After fun close() = db.close()
+
+    @Test fun total_sumsAllExpenses() = runTest {
+        dao.insert(Expense(title = "Bus", amountKobo = 20_000, category = "Transport", createdAtMillis = 1))
+        dao.insert(Expense(title = "Lunch", amountKobo = 150_000, category = "Food", createdAtMillis = 2))
+        dao.insert(Expense(title = "Data", amountKobo = 100_000, category = "Bills", createdAtMillis = 3))
+
+        assertEquals(270_000L, dao.getTotal().first())
+    }
+
+    @Test fun byCategory_filters() = runTest {
+        dao.insert(Expense(title = "Bus", amountKobo = 20_000, category = "Transport", createdAtMillis = 1))
+        dao.insert(Expense(title = "Lunch", amountKobo = 150_000, category = "Food", createdAtMillis = 2))
+
+        val food = dao.getByCategory("Food").first()
+
+        assertEquals(listOf("Lunch"), food.map { it.title })
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> <code>SUM</code> returns <code>NULL</code> on an empty table, which is why <code>getTotal()</code> is <code>Flow&lt;Long?&gt;</code>; display <code>total ?: 0L</code>. The test checks the arithmetic by hand: 20,000 + 150,000 + 100,000 = 270,000 kobo, or ₦2,700. The <code>ExpenseDatabase</code> class mirrors <code>InventoryDatabase</code> from the lesson, with <code>entities = [Expense::class]</code>. The auto-migration stretch goal needs <code>exportSchema</code> set up and <code>autoMigrations = [AutoMigration(from = 1, to = 2)]</code>; follow the current migration guide for the exact syntax in your Room version. Because the Room API has recently changed major versions, treat any import in this solution as a starting point and confirm it against the official setup page.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 34 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-34-persist-data-with-room</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 34 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: The Three Room Pieces</li><li>✅ Step-by-Step Build 1: Add Room to the Project</li><li>✅ Step-by-Step Build 2: The Entity</li><li>✅ Step-by-Step Build 3: The DAO</li><li>✅ Step-by-Step Build 4: The Database and One Instance</li><li>✅ Step-by-Step Build 5: ViewModels and Screens</li><li>✅ Inspecting the Database</li><li>✅ Migrations: Changing the Schema Later</li><li>✅ Testing a DAO</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_33.html" class="ln-btn">&#8592; Lesson 33</a><a href="lesson_35.html" class="ln-btn primary">Lesson 35 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 34 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

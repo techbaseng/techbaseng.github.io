@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 66: Why Kotlin Multiplatform — Techbase Android</title>
+</head>
+<body data-total="13" data-key="techbase_android_l66">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 66 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 66</div>
+      <h1>Why Kotlin Multiplatform</h1>
+      <div class="l-hero-sub">13 phases &nbsp;·&nbsp; Build: Candidate Analysis: What Would You Share?</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 66</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Learn what Kotlin Multiplatform is, ten reasons to adopt it, how it compiles to each target, and expect/actual.</p></div><div class="wm"><span>📚 13 phases</span><span>🏗️ Candidate Analysis: What Would You Share?</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 13</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Suppose your school-fees app is a success on Android, and the bursar's office asks for an iPhone version, and the head teacher wants a desktop version for the school computer. The traditional answer is to write the app <strong>again</strong> in Swift for iOS, with its own bugs, its own business rules and its own team. When the fee rule changes, you change it twice, and the two apps slowly drift apart.</p>
+<p class="v2-p"><strong>Kotlin Multiplatform (KMP)</strong> offers another answer: write the parts that are the same <strong>once</strong>, in Kotlin, and compile them for every platform, while keeping each platform's own UI and system APIs where that matters. This lesson opens the <strong>Kotlin Multiplatform</strong> programme at https://developer.android.com/courses/pathways/kotlin-multiplatform (<em>Why you should adopt Kotlin Multiplatform</em> and <em>Get started with Kotlin Multiplatform</em>). The programme links to the JetBrains documentation at https://www.jetbrains.com/help/kotlin-multiplatform-dev/ and to Google's guidance at https://developer.android.com/kotlin/multiplatform.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain <strong>what KMP is</strong> and how it differs from "write once, run anywhere" frameworks.</li>
+<li>Describe <strong>how Kotlin compiles</strong> to each <strong>target</strong>.</li>
+<li>Decide <strong>what to share</strong> and what to keep native.</li>
+<li>Use <strong><code>expect</code>/<code>actual</code></strong> and <strong>interfaces</strong> to reach platform APIs.</li>
+<li>Compare KMP, <strong>Compose Multiplatform</strong>, <strong>Flutter</strong> and <strong>React Native</strong> fairly.</li>
+<li>Make an honest <strong>adopt / do not adopt</strong> decision for a project.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> KMP is about <strong>sharing the right code</strong>, not all the code. Share the logic that is identical, and let each platform keep what is special.</p>
+<p class="v2-p"><strong>Honesty note:</strong> the KMP tooling changes quickly (Gradle plugins, the Android target, which libraries support which targets). This lesson explains stable ideas and shows code in the style of current documentation, but <strong>check the official pages for the current setup</strong> before starting a real project. The ten-style list of reasons below is my own summary of the common arguments; JetBrains publishes its own list at https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-reasons-to-try.html, and you should read it too.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 13</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Kotlin classes, interfaces and functions</strong> (lessons 6 to 14).</li>
+<li><strong>Coroutines and Flow</strong> (lesson 33).</li>
+<li><strong>App architecture and layers</strong> (lessons 60 to 65), because the layered design decides what is easy to share.</li>
+<li><strong>Gradle Kotlin DSL and version catalogs</strong> (lessons 3 and 34).</li>
+<li><strong>Room and Retrofit</strong> (lessons 29 and 34), which you will meet again in KMP form.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 13</div><div class="pt">Conceptual Understanding: What Is Kotlin Multiplatform?</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">One language, many targets</h3>
+<p class="v2-p">A <strong>target</strong> is a platform your code is compiled for. Kotlin can compile to several:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Target</th>
+<th>Kotlin compiles to</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Android</strong></td>
+<td>JVM bytecode (then Android's runtime)</td>
+<td>Your Android app</td>
+</tr>
+<tr>
+<td><strong>JVM / Desktop</strong></td>
+<td>JVM bytecode</td>
+<td>Desktop apps, servers</td>
+</tr>
+<tr>
+<td><strong>iOS</strong> (and macOS, watchOS, tvOS)</td>
+<td>Native machine code via Kotlin/Native (LLVM)</td>
+<td>iPhone and iPad apps</td>
+</tr>
+<tr>
+<td><strong>Web</strong></td>
+<td>JavaScript or WebAssembly</td>
+<td>Browser apps</td>
+</tr>
+<tr>
+<td><strong>Linux, Windows</strong></td>
+<td>Native code</td>
+<td>Command-line and desktop tools</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">You write <strong>common Kotlin</strong> that uses only the Kotlin standard library and multiplatform libraries. The Kotlin compiler produces the correct output for each target. On iOS your shared code becomes a <strong>framework</strong> that Swift code imports, like any other iOS library.</p>
+<h3 class="v2-h3">Where the code lives</h3>
+<p class="v2-p">A KMP module is split into <strong>source sets</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>shared/
+  src/
+    commonMain/kotlin/       code for ALL targets
+    commonTest/kotlin/       tests for common code
+    androidMain/kotlin/      Android-only code
+    iosMain/kotlin/          iOS-only code</code></pre></div></div>
+<p class="v2-p">Common code cannot call Android or iOS APIs directly, because it must compile everywhere. When it needs a platform feature, you use <strong><code>expect</code>/<code>actual</code></strong> or an <strong>interface</strong> (below).</p>
+<h3 class="v2-h3">What KMP is not</h3>
+<ul class="v2-ul">
+<li>It is <strong>not</strong> a UI toolkit. By default, your Android app still uses Compose and your iOS app still uses SwiftUI. (<strong>Compose Multiplatform</strong> is a separate JetBrains framework that can share UI as well; see the comparison below.)</li>
+<li>It is <strong>not</strong> "all or nothing". You can share a single module, a single class, or the whole data layer, in an existing app.</li>
+<li>It does <strong>not</strong> hide the platform. You still build and ship an Android app and an iOS app, each with its own entry point.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What Is Kotlin Multiplatform?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 13</div><div class="pt">Reasons to Adopt KMP (and Honest Limits)</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">The usual arguments, in my own words:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Reason</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Share business logic</strong></td>
+<td>Fee rules, validation and sync run on both platforms and cannot drift apart</td>
+</tr>
+<tr>
+<td><strong>Native UI stays native</strong></td>
+<td>Each platform keeps its own look, accessibility and performance</td>
+</tr>
+<tr>
+<td><strong>Incremental adoption</strong></td>
+<td>Start with one module in an app you already have</td>
+</tr>
+<tr>
+<td><strong>One language and one set of skills</strong></td>
+<td>Android developers read and review the shared code</td>
+</tr>
+<tr>
+<td><strong>Fewer duplicate bugs</strong></td>
+<td>Fix once; both apps benefit</td>
+</tr>
+<tr>
+<td><strong>Shared tests</strong></td>
+<td>Test business rules once in <code>commonTest</code></td>
+</tr>
+<tr>
+<td><strong>Real libraries exist</strong></td>
+<td>Coroutines, serialization, Ktor, Room, DataStore and more support multiple targets</td>
+</tr>
+<tr>
+<td><strong>Strong backing</strong></td>
+<td>JetBrains develops it; Google supports KMP for sharing business logic on Android and iOS</td>
+</tr>
+<tr>
+<td><strong>Interop, not a sandbox</strong></td>
+<td>You can call platform APIs and use platform libraries when needed</td>
+</tr>
+<tr>
+<td><strong>Freedom to share more later</strong></td>
+<td>Move from logic-only to shared UI with Compose Multiplatform if it suits you</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Limits to be honest about:</p>
+<ul class="v2-ul">
+<li><strong>iOS builds need a Mac with Xcode</strong>, always. You can learn and ship the Android half on any computer, but running the iOS app needs Apple's tools.</li>
+<li><strong>Not every library is multiplatform.</strong> Some Android libraries have no iOS version, so you find alternatives or use <code>expect</code>/<code>actual</code>.</li>
+<li><strong>Build setup is more complex</strong> than a single-platform app, and tooling changes between releases.</li>
+<li><strong>The team needs to cooperate.</strong> iOS developers must be willing to use a Kotlin-built framework, and Kotlin/Swift interop has some rough edges (for example with generics and sealed classes).</li>
+<li><strong>It is not always worth it.</strong> An app with little shared logic, or a team already happy with two native codebases, may gain little.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Reasons to Adopt KMP (and Honest Limits)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 13</div><div class="pt">Step-by-Step Build 1: Common Code and Its Platforms</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Business logic that needs nothing special</h3>
+<p class="v2-p">Our FeeTracker rule from lesson 63 uses only Kotlin, so it can move to <code>commonMain</code> <strong>unchanged</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/commonMain/kotlin/com/example/fees/FeeSummary.kt
+package com.example.fees
+
+data class FeeSummary(val paid: Long, val balance: Long) {
+    val isOwing: Boolean get() = balance &gt; 0
+}
+
+class CalculateFeeSummary(private val termFee: Long = 450_000) {
+    operator fun invoke(payments: List&lt;Long&gt;): FeeSummary {
+        val paid = payments.sum()
+        return FeeSummary(paid = paid, balance = termFee - paid)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Why this works: no Android imports, no <code>java.*</code> classes (those do not exist on iOS), just Kotlin's standard library. This is the strongest argument for the <strong>plain Kotlin domain layer</strong> in lesson 63: it is already shareable.</p>
+<p class="v2-p">A test in <code>commonTest</code> runs on <strong>every</strong> target:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/src/commonTest/kotlin/com/example/fees/FeeSummaryTest.kt
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+class FeeSummaryTest {
+    @Test
+    fun balance_is_term_fee_minus_payments() {
+        val summary = CalculateFeeSummary(termFee = 100)(listOf(30, 20))
+        assertEquals(50, summary.balance)
+        assertTrue(summary.isOwing)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Notice <code>kotlin.test</code>, not JUnit: JUnit is a JVM library, so common tests use the multiplatform <code>kotlin.test</code> API. The same test runs on the JVM (Android host tests) and, on a Mac, on the iOS simulator.</p>
+<h3 class="v2-h3">What you cannot use in common code</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Do not use in <code>commonMain</code></th>
+<th>Use instead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>java.util.*</code>, <code>java.time.*</code>, <code>java.io.*</code></td>
+<td><code>kotlin.collections</code>, <code>kotlinx-datetime</code>, <code>kotlinx-io</code> or Okio</td>
+</tr>
+<tr>
+<td><code>String.format(...)</code></td>
+<td>String templates, or a multiplatform formatting library</td>
+</tr>
+<tr>
+<td><code>android.*</code> classes</td>
+<td><code>expect</code>/<code>actual</code> or an interface</td>
+</tr>
+<tr>
+<td><code>Retrofit</code>, <code>OkHttp</code></td>
+<td><code>Ktor</code> client</td>
+</tr>
+<tr>
+<td>Gson or Moshi</td>
+<td><code>kotlinx.serialization</code></td>
+</tr>
+<tr>
+<td><code>SharedPreferences</code></td>
+<td>DataStore (multiplatform) or an interface</td>
+</tr>
+<tr>
+<td><code>LiveData</code></td>
+<td><code>Flow</code> / <code>StateFlow</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Most of your lessons already used the multiplatform-friendly choices (coroutines, Flow, kotlinx.serialization), so your code is closer to KMP than you might think.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Common Code and Its Platforms</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 13</div><div class="pt">Step-by-Step Build 2: Reaching the Platform with `expect`/`actual`</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Sometimes common code needs something only the platform knows, such as the device name or the current time zone. Declare <strong>what you need</strong> in common code, and supply <strong>how</strong> on each platform.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain/Platform.kt
+expect fun platformName(): String
+
+fun greeting(): String = "Hello from ${platformName()}!"</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidMain/Platform.android.kt
+import android.os.Build
+
+actual fun platformName(): String = "Android ${Build.VERSION.SDK_INT}"</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// iosMain/Platform.ios.kt
+import platform.UIKit.UIDevice
+
+actual fun platformName(): String =
+    UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>expect</code> is a <strong>promise</strong>: "every target will provide this".</li>
+<li><code>actual</code> is the <strong>fulfilment</strong> in a platform source set. If a target lacks an <code>actual</code>, the build fails, so you cannot forget one.</li>
+<li><code>greeting()</code> lives in common code and works everywhere, calling the right <code>actual</code> at run time.</li>
+<li>On iOS, Kotlin has access to Apple's frameworks through the <code>platform.*</code> packages (here <code>UIKit</code>).</li>
+</ul>
+<p class="v2-p"><code>expect</code>/<code>actual</code> also works for <strong>classes</strong>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+expect class Clock() {
+    fun nowMillis(): Long
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidMain
+actual class Clock actual constructor() {
+    actual fun nowMillis(): Long = System.currentTimeMillis()
+}</code></pre></div></div>
+<h3 class="v2-h3">Often better: an interface</h3>
+<p class="v2-p"><code>expect</code>/<code>actual</code> is compile-time and rigid. For most application code, a plain <strong>interface</strong> in common code, with implementations supplied by each platform app, is more flexible and easier to test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+interface TokenStorage {
+    suspend fun read(): String?
+    suspend fun write(token: String)
+}
+
+class LoginUseCase(private val storage: TokenStorage, private val api: AuthApi) {
+    suspend operator fun invoke(user: String, password: String): Result&lt;Unit&gt; = runCatching {
+        val token = api.login(user, password)
+        storage.write(token)
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// androidMain
+class AndroidTokenStorage(private val context: Context) : TokenStorage {
+    override suspend fun read(): String? = /* EncryptedSharedPreferences or DataStore */ null
+    override suspend fun write(token: String) { /* ... */ }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">swift</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// iosApp (Swift): Keychain implementation of the same Kotlin interface
+class KeychainTokenStorage: TokenStorage {
+    func read() async throws -&gt; String? { /* Keychain lookup */ return nil }
+    func write(token: String) async throws { /* Keychain save */ }
+}</code></pre></div></div>
+<p class="v2-p">The shared <code>LoginUseCase</code> depends on the interface, not the platform. This is the <strong>dependency inversion</strong> idea from lessons 60 and 65 doing real work. A rule of thumb from experience: use <code>expect</code>/<code>actual</code> for <strong>tiny, stateless platform facts</strong> (a platform name, a UUID generator), and <strong>interfaces plus injection</strong> for services (storage, notifications, biometrics).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Reaching the Platform with `expect`/`actual`</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 13</div><div class="pt">Step-by-Step Build 3: How Compilation Works</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Understanding the pipeline removes much of the mystery.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>commonMain  ─┐
+             ├─► compiled for Android ──► .class bytecode ─► your Android app
+androidMain ─┘
+
+commonMain  ─┐
+             ├─► compiled for iOS ─────► native code ───────► shared.framework ─► Xcode app
+iosMain     ─┘</code></pre></div></div>
+<ol class="v2-ol">
+<li>For <strong>each target</strong>, the Kotlin compiler combines <code>commonMain</code> with that target's own source set.</li>
+<li>For Android and JVM, the output is bytecode, exactly as in any Android module.</li>
+<li>For iOS, <strong>Kotlin/Native</strong> compiles to machine code and packages it as a <strong>framework</strong> (and, with Swift Package Manager export, an XCFramework: lesson 69). Swift sees Kotlin classes as Objective-C-style classes with a generated header.</li>
+<li><strong>Dependencies</strong> must also have a version for each target. A multiplatform library publishes a <strong>common variant</strong> plus per-target artifacts, and Gradle picks the right ones automatically.</li>
+</ol>
+<p class="v2-p">The Gradle setup is a short <code>kotlin { }</code> block. You will study it line by line in lesson 67; here is a preview so that it does not look strange later:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// shared/build.gradle.kts (preview; see lesson 67 for the current Android target setup)
+plugins {
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+}
+
+kotlin {
+    android {
+        namespace = "com.example.fees.shared"
+        compileSdk = 36
+        minSdk = 24
+    }
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: How Compilation Works</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 13</div><div class="pt">Step-by-Step Build 4: What to Share</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">A practical way to choose, layer by layer, using the architecture from lessons 60 to 65:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Share?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Domain</strong> (use cases, rules, models)</td>
+<td><strong>Yes, first</strong></td>
+<td>Plain Kotlin; highest value, lowest risk</td>
+</tr>
+<tr>
+<td><strong>Data: networking</strong></td>
+<td>Yes</td>
+<td>Ktor client and kotlinx.serialization</td>
+</tr>
+<tr>
+<td><strong>Data: database</strong></td>
+<td>Often</td>
+<td>Room supports KMP (lesson 70); SQLDelight is another popular option</td>
+</tr>
+<tr>
+<td><strong>Data: repositories</strong></td>
+<td>Yes</td>
+<td>Depend on multiplatform sources</td>
+</tr>
+<tr>
+<td><strong>Preferences/storage</strong></td>
+<td>Yes with care</td>
+<td>DataStore is multiplatform</td>
+</tr>
+<tr>
+<td><strong>UI-layer state holders (ViewModels)</strong></td>
+<td>Possible</td>
+<td>Lifecycle ViewModel has multiplatform support; check the docs</td>
+</tr>
+<tr>
+<td><strong>UI</strong></td>
+<td>Optional</td>
+<td>Native UI per platform, <strong>or</strong> Compose Multiplatform</td>
+</tr>
+<tr>
+<td><strong>Platform integrations</strong> (push, camera, biometrics, widgets)</td>
+<td>No</td>
+<td>Keep native behind interfaces</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Start small.</strong> The recommended adoption path is: (1) share a pure-Kotlin domain module, (2) share networking and models, (3) share the database, (4) consider shared state holders and, only if you want to, shared UI.</p>
+<h3 class="v2-h3">What a good first candidate looks like</h3>
+<ul class="v2-ul">
+<li>It has <strong>clear inputs and outputs</strong> (a function from payments to a summary).</li>
+<li>It has <strong>no UI and no platform calls</strong>.</li>
+<li>It is <strong>already tested</strong> and <strong>stable</strong>.</li>
+<li>Both teams care about <strong>consistency</strong> (money calculations, validation, date rules).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: What to Share</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 13</div><div class="pt">Step-by-Step Build 5: Fair Comparisons</div><div class="pc" id="chk9"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th><strong>Kotlin Multiplatform</strong></th>
+<th><strong>Compose Multiplatform</strong></th>
+<th><strong>Flutter</strong></th>
+<th><strong>React Native</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Kotlin</td>
+<td>Kotlin</td>
+<td>Dart</td>
+<td>JavaScript/TypeScript</td>
+</tr>
+<tr>
+<td>Shares</td>
+<td>Logic (UI optional)</td>
+<td>Logic <strong>and</strong> UI</td>
+<td>Logic and UI</td>
+<td>Logic and UI</td>
+</tr>
+<tr>
+<td>UI approach</td>
+<td>Native UI per platform</td>
+<td>Compose-style UI drawn by the framework on each platform</td>
+<td>Own rendering engine</td>
+<td>Native views driven by JS</td>
+</tr>
+<tr>
+<td>Native look and feel</td>
+<td>Fully native</td>
+<td>Compose look on every platform (customisable)</td>
+<td>Own widgets, can imitate platforms</td>
+<td>Native components</td>
+</tr>
+<tr>
+<td>Adopt in an existing app</td>
+<td>Very easy, module by module</td>
+<td>Possible</td>
+<td>Harder (embedding "add-to-app")</td>
+<td>Possible</td>
+</tr>
+<tr>
+<td>Best when</td>
+<td>You have native apps and want to share logic</td>
+<td>You want one UI codebase with Kotlin</td>
+<td>Greenfield app, one team, custom UI</td>
+<td>Web-skilled team, shared JS code</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Points of fairness:</p>
+<ul class="v2-ul">
+<li><strong>Compose Multiplatform</strong> is built on Kotlin Multiplatform and is developed by JetBrains. Its iOS support has been reaching stable status in recent releases; check the current status page before relying on any particular platform.</li>
+<li>None of these is "the best". A team of Android developers with an existing native app usually finds KMP the smoothest path; a startup with no native code and a small team may prefer a single-UI framework.</li>
+<li>Whatever you choose, <strong>measure</strong> with a small prototype before committing, as lesson 57 taught for performance.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Fair Comparisons</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 13</div><div class="pt">Step-by-Step Build 6: Your Own Adoption Decision</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Create a short <strong>decision record</strong> for a project. A good one answers:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Project:        FeeTracker (Android today; iOS and desktop requested)
+Shared code:    domain rules, networking models, repositories, database
+Native code:    UI, notifications, camera for receipts
+Team:           3 Android developers, 1 iOS developer
+Risks:          iOS developer unfamiliar with Kotlin framework; one Android library has no iOS version
+Mitigation:     pair on the first shared module; replace the library with a multiplatform one
+First step:     move CalculateFeeSummary and models to :shared, tests green on both platforms
+Decision:       Adopt incrementally. Review after the first release.</code></pre></div></div>
+<p class="v2-p">Writing it down forces honest answers and makes the review easy later.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Your Own Adoption Decision</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 13</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk11"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Shareable or not?</strong></p>
+<p class="v2-p">For each, decide whether it can live in <code>commonMain</code> as written, and what to change if not: (a) <code>fun today() = java.time.LocalDate.now().toString()</code>; (b) <code>class Student(val id: Int, val name: String)</code>; (c) <code>fun toNaira(kobo: Long) = kobo / 100</code>; (d) <code>val prefs = context.getSharedPreferences("x", 0)</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(a) No: <code>java.time</code> is JVM-only. Use <code>kotlinx-datetime</code>'s <code>Clock.System.todayIn(TimeZone.currentSystemDefault())</code>, or an interface. (b) Yes. (c) Yes. (d) No: <code>Context</code> and <code>SharedPreferences</code> are Android. Hide storage behind an interface (such as <code>TokenStorage</code>) or use multiplatform DataStore.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: <code>expect</code>/<code>actual</code> or interface?</strong></p>
+<p class="v2-p">Choose a mechanism for each: (a) returning the platform name; (b) a biometric prompt with a callback result; (c) generating a random UUID string.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>expect</code>/<code>actual</code> function: tiny, stateless. (b) An interface (<code>BiometricAuthenticator</code>) implemented natively and injected, because it involves UI, lifecycle and callbacks. (c) <code>expect</code>/<code>actual</code> (or Kotlin's own <code>kotlin.uuid.Uuid</code> where available in your Kotlin version), because it is a small stateless utility.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Honest advice</strong></p>
+<p class="v2-p">A friend wants to rewrite a working Android-only app in KMP "because everyone is doing it". The app has no iOS version planned. What do you advise?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Do not rewrite for fashion. Without a second platform, the main benefit (sharing) is absent, and the migration costs time and adds build complexity. Keep a clean layered design (lessons 60 to 65), so that moving the domain layer into a shared module later is cheap, and revisit KMP when a second platform becomes a real requirement.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 13</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Importing <code>java.*</code> or <code>android.*</code> in common code.</strong> <em>Fix:</em> use multiplatform libraries or interfaces.</p>
+<p class="v2-p"><strong>Mistake #2: Trying to share everything on day one.</strong> <em>Fix:</em> start with the domain layer.</p>
+<p class="v2-p"><strong>Mistake #3: Using JUnit in <code>commonTest</code>.</strong> <em>Fix:</em> use <code>kotlin.test</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Overusing <code>expect</code>/<code>actual</code>.</strong> <em>Fix:</em> prefer interfaces for services.</p>
+<p class="v2-p"><strong>Mistake #5: Forgetting the iOS side needs a Mac.</strong> <em>Fix:</em> plan hardware and CI early.</p>
+<p class="v2-p"><strong>Mistake #6: Choosing libraries without checking target support.</strong> <em>Fix:</em> check klibs.io or the library's docs (lesson 69).</p>
+<p class="v2-p"><strong>Mistake #7: Treating KMP as a UI framework.</strong> <em>Fix:</em> remember it shares logic; Compose Multiplatform shares UI.</p>
+<p class="v2-p"><strong>Mistake #8: Copying outdated Gradle setups from old blog posts.</strong> <em>Fix:</em> follow the current official pages.</p>
+<p class="v2-p"><strong>Mistake #9: Skipping tests in shared code.</strong> <em>Fix:</em> test in <code>commonTest</code>; one test runs on every target.</p>
+<p class="v2-p"><strong>Mistake #10: Adopting without a decision record.</strong> <em>Fix:</em> write down scope, risks and a first step.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 13</div><div class="pt">Knowledge Check</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does KMP compile common Kotlin into for Android and for iOS?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">JVM bytecode for Android, and native machine code packaged as a framework (via Kotlin/Native) for iOS.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the difference between <code>expect</code> and <code>actual</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>expect</code> declares in common code what is needed; <code>actual</code> provides the implementation in each platform source set.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why is the domain layer the best first candidate to share?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It is plain Kotlin with no platform dependencies, has high value (rules stay consistent) and is easy to test.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Name two things KMP does not do.</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It does not provide a UI toolkit by itself (that is Compose Multiplatform), and it does not remove the need for a Mac and Xcode to build iOS apps.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Which test library works in <code>commonTest</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p"><code>kotlin.test</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/kotlin-multiplatform" rel="noopener noreferrer">Kotlin Multiplatform programme</a></li>
+<li><a href="https://developer.android.com/kotlin/multiplatform" rel="noopener noreferrer">Kotlin Multiplatform on Android Developers</a></li>
+<li><a href="https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-reasons-to-try.html" rel="noopener noreferrer">Why try Kotlin Multiplatform (JetBrains)</a></li>
+<li><a href="https://klibs.io" rel="noopener noreferrer">Search multiplatform libraries on klibs.io</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Candidate Analysis: What Would You Share?</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Analyse one of your own apps and produce a KMP adoption plan, plus a small proof-of-concept of shareable code.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Pick an app you have built in this course (FeeTracker, ClassRegister, or another).</li>
+<li>List every class and mark it <strong>Share</strong>, <strong>Share with changes</strong> or <strong>Keep native</strong>, with one line of reasoning.</li>
+<li>List every library you use and mark whether a multiplatform alternative exists (check klibs.io and each library's documentation).</li>
+<li>Write the <strong>decision record</strong> in the format of Build 6.</li>
+<li>Take <strong>one</strong> pure-Kotlin class and rewrite it using only the Kotlin standard library, so it could live in <code>commonMain</code>. Write its test using <code>kotlin.test</code>.</li>
+<li>Write one <code>expect</code>/<code>actual</code> pair and one interface-based design for two different platform needs, and justify each choice.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> estimate what percentage of your code is shareable by lines of code per layer, and explain which layer would give the best return.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">A worked analysis for FeeTracker (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Class                        Verdict               Reason
+Payment, Student             Share                 plain data classes
+CalculateFeeSummary          Share                 pure rule, tested
+GetStudentBalancesUseCase    Share                 depends only on repository interfaces
+PaymentsRepository (iface)   Share                 interface only
+DefaultPaymentsRepository    Share with changes    swap Retrofit for Ktor, Room for Room KMP
+PaymentApi (Retrofit)        Share with changes    rewrite as a Ktor client class
+Room entities and DAOs       Share with changes    Room KMP (lesson 70)
+FeeViewModel                 Share with changes    use multiplatform lifecycle ViewModel, or keep native
+Composables                  Keep native           (or Compose Multiplatform later)
+Notification code            Keep native           interface + Android/iOS implementations</code></pre></div></div>
+<p class="v2-p">A proof-of-concept class and test using only the standard library:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// commonMain
+class Percentage(private val part: Long, private val whole: Long) {
+    init { require(whole &gt; 0) { "whole must be positive" } }
+    fun asWholeNumber(): Int = ((part * 100) / whole).toInt()
+}
+
+// commonTest
+class PercentageTest {
+    @Test fun half_is_fifty() = assertEquals(50, Percentage(50, 100).asWholeNumber())
+    @Test fun zero_whole_is_rejected() {
+        assertFailsWith&lt;IllegalArgumentException&gt; { Percentage(1, 0) }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Library check (example):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Retrofit/OkHttp   -&gt; Ktor client (multiplatform)
+Gson/Moshi        -&gt; kotlinx.serialization
+Room 2.x          -&gt; Room KMP (check setup page; lesson 70)
+Hilt              -&gt; Android-only: keep DI per platform, or use Koin/kotlin-inject in shared code
+Coil              -&gt; Coil 3 supports multiplatform (verify targets before relying on it)</code></pre></div></div><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 66 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-66-why-kotlin-multiplatform</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 66 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What Is Kotlin Multiplatform?</li><li>✅ Reasons to Adopt KMP (and Honest Limits)</li><li>✅ Step-by-Step Build 1: Common Code and Its Platforms</li><li>✅ Step-by-Step Build 2: Reaching the Platform with `expect`/`actual`</li><li>✅ Step-by-Step Build 3: How Compilation Works</li><li>✅ Step-by-Step Build 4: What to Share</li><li>✅ Step-by-Step Build 5: Fair Comparisons</li><li>✅ Step-by-Step Build 6: Your Own Adoption Decision</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_65.html" class="ln-btn">&#8592; Lesson 65</a><a href="lesson_67.html" class="ln-btn primary">Lesson 67 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 66 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

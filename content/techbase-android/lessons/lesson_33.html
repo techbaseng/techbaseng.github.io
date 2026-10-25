@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 33: Kotlin Flows in Practice — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l33">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 33 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 33</div>
+      <h1>Kotlin Flows in Practice</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: Live Stopwatch and Lap Recorder</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 33</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Stream data over time with Flow, StateFlow and SharedFlow, collect it safely in Compose and test flows.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ Live Stopwatch and Lap Recorder</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">A <code>suspend</code> function returns <strong>one</strong> value after waiting. But many things in an app produce values <strong>over time</strong>: a database that changes as the user adds rows, a countdown timer, a stream of GPS locations, a search box where the user keeps typing. For those you need something that can deliver a <strong>sequence of values</strong>, and in Kotlin that is a <strong>Flow</strong>.</p>
+<p class="v2-p">Flows are the glue of modern Android architecture. Room returns them (lesson 34), DataStore returns them (lesson 35), and your ViewModel exposes UI state through them (lessons 24 and 25). This lesson makes sure you understand them properly instead of copying the pattern.</p>
+<p class="v2-p">This lesson covers the two items of Pathway 2, Unit 6 in the official <strong>Android Basics with Compose</strong> course that build on flows: <em>Kotlin Flows in Practice</em> and <em>Testing Flows</em>. Most examples run in the free Kotlin Playground (https://play.kotlinlang.org), so you can experiment on any computer.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain the difference between a suspend function, a <code>List</code>, a <code>Sequence</code> and a <code>Flow</code>.</li>
+<li>Build a flow with <code>flow { emit() }</code>, and collect it.</li>
+<li>Use operators: <code>map</code>, <code>filter</code>, <code>onEach</code>, <code>take</code>, <code>catch</code>, <code>onCompletion</code>, <code>combine</code>, <code>debounce</code>, <code>flatMapLatest</code>.</li>
+<li>Explain <strong>cold</strong> versus <strong>hot</strong> flows, and <code>StateFlow</code> versus <code>SharedFlow</code>.</li>
+<li>Turn a cold flow into a <code>StateFlow</code> with <code>stateIn</code> and <code>SharingStarted.WhileSubscribed(5000)</code>.</li>
+<li>Collect flows safely in Compose with <code>collectAsStateWithLifecycle</code>.</li>
+<li>Write tests for flows with <code>runTest</code>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a Flow is a suspend function that can return many values. It is <em>cold</em>: nothing happens until somebody collects it.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Coroutines, <code>launch</code>, <code>suspend</code>, dispatchers and structured concurrency</strong> (lesson 28). You cannot understand flows without them.</li>
+<li><strong><code>StateFlow</code> basics in a ViewModel</strong> (lessons 24 and 25).</li>
+<li><strong>Lambdas</strong> (lesson 12). Operators take lambdas.</li>
+<li><strong>Kotlin collections</strong> (lesson 14). <code>map</code> and <code>filter</code> on lists work the same conceptually.</li>
+<li><strong>Dependencies.</strong> In the Playground, <code>import kotlinx.coroutines.flow.*</code> works with no setup. In Android Studio, coroutines come with Compose and Lifecycle libraries, plus <code>kotlinx-coroutines-test</code> for tests (lesson 25).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: One Value or Many?</div><div class="pc" id="chk3"></div></div><div class="pb2"><div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>How many values</th>
+<th>When are they produced?</th>
+<th>Blocking?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Int</code> / <code>suspend fun f(): Int</code></td>
+<td>One</td>
+<td>Once, when called</td>
+<td>Suspends</td>
+</tr>
+<tr>
+<td><code>List&lt;Int&gt;</code></td>
+<td>Many</td>
+<td>All at once, already in memory</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>Sequence&lt;Int&gt;</code></td>
+<td>Many</td>
+<td>Lazily, one at a time, <strong>synchronously</strong></td>
+<td>Blocks the thread</td>
+</tr>
+<tr>
+<td><code>Flow&lt;Int&gt;</code></td>
+<td>Many</td>
+<td>Over time, <strong>asynchronously</strong></td>
+<td>Suspends</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">An analogy: a <strong>suspend function</strong> is ordering one meal. A <strong>list</strong> is a buffet already on the table. A <strong>flow</strong> is a conveyor-belt sushi bar: dishes arrive one after another, and you take them as they pass.</p>
+<p class="v2-p">Three roles in any flow:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Producer  -&gt;  [operators: map, filter, ...]  -&gt;  Collector
+ (emits)         (intermediate, transform)        (terminal, receives)</code></pre></div></div>
+<ul class="v2-ul">
+<li>The <strong>producer</strong> emits values (a database, a sensor, a loop).</li>
+<li><strong>Intermediate operators</strong> transform the stream without starting it.</li>
+<li>The <strong>collector</strong> is the terminal step that actually runs everything, and receives each value.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: One Value or Many?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Your First Flow</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Open the Kotlin Playground and run:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+fun countdown(from: Int): Flow&lt;Int&gt; = flow {
+    for (i in from downTo 1) {
+        delay(500)
+        emit(i)
+    }
+}
+
+fun main() = runBlocking {
+    println("Before collecting")
+    countdown(3).collect { value -&gt;
+        println("Got $value")
+    }
+    println("Finished")
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Before collecting<br/>Got 3<br/>Got 2<br/>Got 1<br/>Finished</p>
+</blockquote>
+<p class="v2-p">What happened:</p>
+<ul class="v2-ul">
+<li><code>flow { ... }</code> is a <strong>builder</strong>. The block is the producer; <code>emit(value)</code> sends a value downstream.</li>
+<li><code>countdown(3)</code> just <strong>creates</strong> the flow. Nothing runs yet.</li>
+<li><code>.collect { }</code> is the <strong>terminal operator</strong>. It starts the producer, and runs the lambda for each emitted value. It is a suspend function, so the surrounding coroutine waits (without blocking the thread) until the flow completes.</li>
+<li>The <code>delay</code> inside the producer suspends, it does not block, so other coroutines can run.</li>
+</ul>
+<h3 class="v2-h3">Cold: each collector gets its own run</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() = runBlocking {
+    val flow = countdown(2)
+    println("First collector")
+    flow.collect { println("A got $it") }
+    println("Second collector")
+    flow.collect { println("B got $it") }
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">First collector<br/>A got 2<br/>A got 1<br/>Second collector<br/>B got 2<br/>B got 1</p>
+</blockquote>
+<p class="v2-p">The second <code>collect</code> starts the producer <strong>from scratch</strong>. This is what <em>cold</em> means: a cold flow is like a recipe, and every collector cooks it again. It does no work when nobody is collecting, and it stops when the collector stops (cancellation).</p>
+<h3 class="v2-h3">Other ways to create flows</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val a = flowOf(1, 2, 3)                    // fixed values
+val b = listOf("x", "y").asFlow()          // from a collection
+val c = (1..5).asFlow()                    // from a range</code></pre></div></div>
+<p class="v2-p">Use <code>flowOf</code> and <code>asFlow</code> for tests and previews; use <code>flow { }</code> for real producers.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Your First Flow</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Operators</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Operators transform a flow. They are <strong>intermediate</strong>: they return a new flow and do nothing until collected.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+fun main() = runBlocking {
+    (1..10).asFlow()
+        .filter { it % 2 == 0 }          // keep evens: 2, 4, 6, 8, 10
+        .map { it * it }                 // square: 4, 16, 36, 64, 100
+        .onEach { println("About to use $it") }
+        .take(3)                         // only the first three: 4, 16, 36
+        .collect { println("Result: $it") }
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">About to use 4<br/>Result: 4<br/>About to use 16<br/>Result: 16<br/>About to use 36<br/>Result: 36</p>
+</blockquote>
+<p class="v2-p">Notice the interleaving: values travel through the whole pipeline <strong>one at a time</strong>, not stage by stage. After <code>take(3)</code> receives its third item, it cancels the upstream flow, so 8 and 10 are never produced.</p>
+<h3 class="v2-h3">The operators you will use most</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Operator</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>map { }</code></td>
+<td>Transform each value</td>
+</tr>
+<tr>
+<td><code>filter { }</code></td>
+<td>Keep matching values</td>
+</tr>
+<tr>
+<td><code>onEach { }</code></td>
+<td>Do a side effect (logging) without changing values</td>
+</tr>
+<tr>
+<td><code>take(n)</code></td>
+<td>Stop after n values</td>
+</tr>
+<tr>
+<td><code>distinctUntilChanged()</code></td>
+<td>Skip a value equal to the previous one</td>
+</tr>
+<tr>
+<td><code>catch { e -&gt; }</code></td>
+<td>Handle an <strong>upstream</strong> exception</td>
+</tr>
+<tr>
+<td><code>onStart { }</code> / <code>onCompletion { }</code></td>
+<td>Run code at start or end</td>
+</tr>
+<tr>
+<td><code>flowOn(dispatcher)</code></td>
+<td>Change the dispatcher for the <strong>upstream</strong> part</td>
+</tr>
+<tr>
+<td><code>debounce(ms)</code></td>
+<td>Wait for a quiet period before emitting</td>
+</tr>
+<tr>
+<td><code>combine(a, b) { x, y -&gt; }</code></td>
+<td>Merge the latest values of several flows</td>
+</tr>
+<tr>
+<td><code>flatMapLatest { }</code></td>
+<td>Switch to a new inner flow, cancelling the old one</td>
+</tr>
+<tr>
+<td><code>stateIn(scope, started, initial)</code></td>
+<td>Turn a flow into a <code>StateFlow</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Handling errors with <code>catch</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() = runBlocking {
+    flow {
+        emit(1)
+        emit(2)
+        throw IllegalStateException("Sensor failed")
+    }
+        .map { it * 10 }
+        .catch { e -&gt; println("Caught: ${e.message}"); emit(-1) }
+        .collect { println("Value: $it") }
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">Value: 10<br/>Value: 20<br/>Caught: Sensor failed<br/>Value: -1</p>
+</blockquote>
+<p class="v2-p"><code>catch</code> handles exceptions from <strong>upstream</strong> (operators above it) only. It does <strong>not</strong> catch exceptions thrown inside <code>collect { }</code>, because that is downstream. Put a <code>try/catch</code> around the collection for those. And remember lesson 28's rule: do not swallow <code>CancellationException</code>; <code>catch</code> correctly ignores cancellation.</p>
+<h3 class="v2-h3"><code>flowOn</code>: choosing the thread</h3>
+<p class="v2-p">By default a flow runs in the <strong>collector's</strong> context. To do heavy upstream work on another dispatcher without changing the collector:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>flow { emit(readHugeFile()) }
+    .flowOn(Dispatchers.IO)          // affects everything ABOVE this line
+    .collect { show(it) }            // runs where it was collected, e.g. Main</code></pre></div></div>
+<p class="v2-p">Never call <code>withContext</code> inside <code>flow { }</code> to emit from another dispatcher: Kotlin's context-preservation rule throws an exception. Use <code>flowOn</code>.</p>
+<h3 class="v2-h3"><code>combine</code>: join several streams</h3>
+<p class="v2-p">Suppose a search screen has two independent inputs, the query text and a "sort by" choice. Whenever <strong>either</strong> changes, you recompute the result:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+fun main() = runBlocking {
+    val query = MutableStateFlow("b")
+    val ascending = MutableStateFlow(true)
+    val names = listOf("Bola", "Ada", "Banji", "Tunde")
+
+    val job = launch {
+        combine(query, ascending) { q, asc -&gt;
+            val matches = names.filter { it.contains(q, ignoreCase = true) }
+            if (asc) matches.sorted() else matches.sortedDescending()
+        }.collect { println(it) }
+    }
+
+    delay(100); ascending.value = false     // change sorting
+    delay(100); query.value = "a"           // change search text
+    delay(100)
+    job.cancel()
+}</code></pre></div></div>
+<blockquote class="v2-bq">
+<p class="v2-p">[Banji, Bola]<br/>[Bola, Banji]<br/>[Bola, Banji, Ada]</p>
+</blockquote>
+<p class="v2-p">Work through it by hand. With the query <code>b</code>, the names containing the letter b (ignoring case) are Bola and Banji, so ascending order gives <code>[Banji, Bola]</code>. Flipping <code>ascending</code> to false recomputes with the same query: <code>[Bola, Banji]</code>. Changing the query to <code>a</code> keeps the descending order and now matches Bola, Banji and Ada (Tunde has no <code>a</code>), giving <code>[Bola, Banji, Ada]</code>. Notice that <code>combine</code> recomputed <strong>every time either input changed</strong>, and that it emitted once at the start because both flows already had values. Predict output first, run it second: that habit catches mistakes in your own tutorials as well as in code.</p>
+<h3 class="v2-h3"><code>debounce</code> and <code>flatMapLatest</code>: the search-as-you-type pattern</h3>
+<p class="v2-p">A search box that calls the server on every keystroke wastes bandwidth. The standard recipe:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+class SearchRepository {
+    fun search(query: String): Flow&lt;List&lt;String&gt;&gt; = flow {
+        delay(300)                                   // pretend network
+        emit(listOf("$query result 1", "$query result 2"))
+    }
+}
+
+@OptIn(FlowPreview::class)
+fun resultsFor(queries: Flow&lt;String&gt;, repo: SearchRepository): Flow&lt;List&lt;String&gt;&gt; =
+    queries
+        .debounce(400)                // wait until the user pauses for 400 ms
+        .map { it.trim() }
+        .filter { it.length &gt;= 2 }    // ignore very short text
+        .distinctUntilChanged()       // do not repeat the same search
+        .flatMapLatest { repo.search(it) }   // cancel the old search if text changes</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>debounce</code> is marked as a preview API in some versions, hence <code>@OptIn(FlowPreview::class)</code>.</li>
+<li><code>flatMapLatest</code> cancels an in-flight search when a newer query arrives, which also fixes the race condition from lesson 29 (Exercise 2).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Operators</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: Hot Flows: StateFlow and SharedFlow</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">A <strong>hot</strong> flow exists independently of collectors. It produces values whether or not anyone listens, and collectors just tune in.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th></th>
+<th><code>StateFlow</code></th>
+<th><code>SharedFlow</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Has a current value?</td>
+<td><strong>Yes</strong>, always (<code>.value</code>)</td>
+<td>No</td>
+</tr>
+<tr>
+<td>New collector receives</td>
+<td>The latest value immediately</td>
+<td>By default nothing; optionally the last N (<code>replay</code>)</td>
+</tr>
+<tr>
+<td>Equal consecutive values</td>
+<td>Ignored (conflated by equality)</td>
+<td>Delivered</td>
+</tr>
+<tr>
+<td>Typical use</td>
+<td><strong>UI state</strong></td>
+<td><strong>One-off events</strong> (but see below)</td>
+</tr>
+</tbody>
+</table></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val state = MutableStateFlow(0)          // needs an initial value
+state.value = 1                          // set
+println(state.value)                     // get
+
+val events = MutableSharedFlow&lt;String&gt;() // no value stored
+events.emit("Saved")                     // suspends until delivered to collectors</code></pre></div></div>
+<h3 class="v2-h3">Events: a word of caution</h3>
+<p class="v2-p">Early tutorials used <code>SharedFlow</code> or <code>Channel</code> for one-off events such as "show a snackbar" or "navigate". Current Android guidance recommends <strong>modelling events as state</strong> where possible: put <code>message: String?</code> in the UI state, show it, and have the UI call <code>onMessageShown()</code> to clear it. That way an event is never lost during rotation, and never delivered twice. See lesson 25 on UI state and the official guide to UI events (https://developer.android.com/topic/architecture/ui-layer/events).</p>
+<h3 class="v2-h3"><code>stateIn</code>: from cold to hot, safely</h3>
+<p class="v2-p">Say a repository exposes a <strong>cold</strong> <code>Flow&lt;List&lt;Item&gt;&gt;</code>. A ViewModel should expose a <code>StateFlow</code> that the UI collects. <code>stateIn</code> makes the conversion:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+
+class ItemsViewModel(repository: ItemsRepository) : ViewModel() {
+
+    val uiState: StateFlow&lt;ItemsUiState&gt; = repository.getItems()          // Flow&lt;List&lt;Item&gt;&gt;
+        .map { items -&gt; ItemsUiState(items) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ItemsUiState()
+        )
+}</code></pre></div></div>
+<p class="v2-p">The three parameters:</p>
+<ul class="v2-ul">
+<li><code>scope</code>: where the sharing coroutine lives (<code>viewModelScope</code>, so it is cancelled with the ViewModel).</li>
+<li><code>started</code>: <strong>when</strong> to run the upstream flow. <code>WhileSubscribed(5_000)</code> starts it when the first collector arrives and stops it <strong>5 seconds after the last collector leaves</strong>. That timeout is the key detail: when the user rotates the phone, the UI stops collecting for a moment, but the upstream (say a database query) is kept alive for the 5 seconds, so it does not restart unnecessarily. When the user leaves the app for longer than 5 seconds, the work stops and saves battery.</li>
+<li><code>initialValue</code>: what the UI sees before the first emission.</li>
+</ul>
+<p class="v2-p">Alternatives: <code>SharingStarted.Eagerly</code> (start at once, never stop) and <code>SharingStarted.Lazily</code> (start at the first collector, never stop). <code>WhileSubscribed(5_000)</code> is the recommended default for UI state.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Hot Flows: StateFlow and SharedFlow</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: Collecting Flows in Compose</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">You have already used:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val uiState by viewModel.uiState.collectAsStateWithLifecycle()</code></pre></div></div>
+<p class="v2-p"><code>collectAsStateWithLifecycle()</code> collects only while the lifecycle is at least <code>STARTED</code> (lesson 23), and cancels and restarts as the app goes to the background and back. The older <code>collectAsState()</code> keeps collecting in the background.</p>
+<p class="v2-p">For a flow that is <strong>not</strong> a <code>StateFlow</code>, give an initial value:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val time by timeFlow.collectAsStateWithLifecycle(initialValue = "--:--")</code></pre></div></div>
+<p class="v2-p">To collect a flow for <strong>side effects</strong> (for example showing a snackbar for each event) use <code>LaunchedEffect</code> with the flow as a key, and <code>repeatOnLifecycle</code> when you must respect the lifecycle (lesson 55 covers effects):</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>LaunchedEffect(viewModel) {
+    viewModel.messages.collect { message -&gt;
+        snackbarHostState.showSnackbar(message)
+    }
+}</code></pre></div></div>
+<p class="v2-p">In classic Activity code, the safe pattern is:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.uiState.collect { render(it) }
+    }
+}</code></pre></div></div>
+<p class="v2-p">A common beginner bug is calling <code>collect</code> directly in <code>lifecycleScope.launch { }</code> with no <code>repeatOnLifecycle</code>, which keeps collecting while the app is in the background.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Collecting Flows in Compose</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Testing Flows</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The second item in this lesson is <em>Testing Flows</em>. You already know <code>runTest</code> from lesson 25. Flows add one idea: <strong>the flow produces values over time, so decide what you want to check</strong>.</p>
+<h3 class="v2-h3">1. Check the latest state</h3>
+<p class="v2-p">For a <code>StateFlow</code>, usually just read <code>.value</code> after advancing the scheduler:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Test
+fun query_updatesResults() = runTest {
+    val vm = SearchViewModel(FakeSearchRepository())
+    vm.onQueryChange("ada")
+    advanceUntilIdle()
+    assertEquals(listOf("Ada"), vm.uiState.value.results)
+}</code></pre></div></div>
+<h3 class="v2-h3">2. Check a whole sequence with <code>toList</code></h3>
+<p class="v2-p">For a <strong>finite</strong> cold flow, collect everything:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class OperatorTest {
+    @Test
+    fun squares_areEmittedInOrder() = runTest {
+        val result = flowOf(1, 2, 3).map { it * it }.toList()
+        assertEquals(listOf(1, 4, 9), result)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>toList()</code> never returns for an endless flow such as a <code>StateFlow</code> (it never completes), so the test would hang. For those use <code>first()</code>, <code>take(n).toList()</code>, or collect in a background job.</p>
+<h3 class="v2-h3">3. Collect a hot flow in a background job</h3>
+<p class="v2-p">When you need to see <strong>every</strong> value of a <code>StateFlow</code> over time, start a collector before triggering the changes:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Test
+fun counter_emitsEachValue() = runTest {
+    val counter = MutableStateFlow(0)
+    val seen = mutableListOf&lt;Int&gt;()
+
+    val job = launch(UnconfinedTestDispatcher(testScheduler)) {
+        counter.toList(seen)               // appends every value into `seen`
+    }
+
+    counter.value = 1
+    counter.value = 2
+    job.cancel()
+
+    assertEquals(listOf(0, 1, 2), seen)
+}</code></pre></div></div>
+<p class="v2-p"><code>UnconfinedTestDispatcher</code> starts the collector <strong>eagerly</strong>, so it is already listening before the first change. Because <code>StateFlow</code> conflates, rapid changes in a standard dispatcher could skip values, so the unconfined dispatcher is what makes this deterministic. The <code>toList(destination)</code> overload appends into an existing list, so you can read it after cancelling.</p>
+<h3 class="v2-h3">4. Testing with a fake that exposes a flow</h3>
+<p class="v2-p">A fake repository can expose a <code>MutableSharedFlow</code> or <code>MutableStateFlow</code> that your test controls:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FakeItemsRepository : ItemsRepository {
+    val items = MutableStateFlow&lt;List&lt;Item&gt;&gt;(emptyList())
+    override fun getItems(): Flow&lt;List&lt;Item&gt;&gt; = items
+}</code></pre></div></div>
+<p class="v2-p">Then the test sets <code>repo.items.value = listOf(Item(1, "Rice"))</code> and asserts that the ViewModel's <code>uiState</code> changes. A third-party library named <strong>Turbine</strong> is popular for readable flow tests (<code>flow.test { awaitItem() }</code>); it is not part of the official course, so check its current documentation and release notes before adopting it. The built-in tools above are enough for everything in this course.</p>
+<h3 class="v2-h3">Testing <code>stateIn</code> with <code>WhileSubscribed</code></h3>
+<p class="v2-p">A <code>StateFlow</code> made with <code>WhileSubscribed</code> does <strong>nothing</strong> until someone collects it. A test that just reads <code>.value</code> sees only the initial value. Start a collector first:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val vm = ItemsViewModel(repo)
+val job = launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }
+repo.items.value = listOf(Item(1, "Rice"))
+assertEquals(1, vm.uiState.value.items.size)
+job.cancel()</code></pre></div></div>
+<p class="v2-p">Forgetting this is the most common reason a <code>stateIn</code> test returns the initial state forever.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Testing Flows</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Temperature stream</strong></p>
+<p class="v2-p">In the Playground, write a <code>temperatures()</code> flow that emits <code>22, 24, 27, 31, 35, 33</code> with a short delay. Using operators, print only the readings above 25, converted to Fahrenheit (<code>c * 9 / 5 + 32</code>, as an integer using Kotlin's <code>Int</code> arithmetic), stopping after the first three such readings. Predict the output <strong>before</strong> running.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+
+fun temperatures(): Flow&lt;Int&gt; = flow {
+    for (t in listOf(22, 24, 27, 31, 35, 33)) {
+        delay(100)
+        emit(t)
+    }
+}
+
+fun main() = runBlocking {
+    temperatures()
+        .filter { it &gt; 25 }
+        .map { it * 9 / 5 + 32 }
+        .take(3)
+        .collect { println("$it F") }
+}</code></pre></div></div>
+<p class="v2-p">Hand calculation: readings above 25 are 27, 31, 35, 33. Fahrenheit with integer arithmetic: 27 x 9 = 243, 243 / 5 = 48 (integer division), 48 + 32 = 80. 31 x 9 = 279, 279 / 5 = 55, 55 + 32 = 87. 35 x 9 = 315, 315 / 5 = 63, 63 + 32 = 95. <code>take(3)</code> stops before 33.</p>
+<blockquote class="v2-bq">
+<p class="v2-p">80 F<br/>87 F<br/>95 F</p>
+</blockquote>
+<p class="v2-p">(Integer division drops the decimals; the exact values are 80.6, 87.8 and 95.)</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Search-as-you-type ViewModel</strong></p>
+<p class="v2-p">Build a <code>SearchViewModel</code> with <code>query: StateFlow&lt;String&gt;</code> and <code>results: StateFlow&lt;List&lt;String&gt;&gt;</code>. Results come from a repository search function returning a <code>Flow</code>. Use <code>debounce</code>, <code>distinctUntilChanged</code>, <code>flatMapLatest</code> and <code>stateIn</code>. Then write a test that types <code>a</code>, <code>ad</code>, <code>ada</code> quickly and checks that only <strong>one</strong> search ran, for <code>ada</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
+
+interface SearchRepository {
+    fun search(query: String): Flow&lt;List&lt;String&gt;&gt;
+}
+
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+class SearchViewModel(private val repo: SearchRepository) : ViewModel() {
+
+    private val _query = MutableStateFlow("")
+    val query: StateFlow&lt;String&gt; = _query.asStateFlow()
+
+    val results: StateFlow&lt;List&lt;String&gt;&gt; = _query
+        .debounce(300)
+        .map { it.trim() }
+        .distinctUntilChanged()
+        .flatMapLatest { q -&gt; if (q.length &lt; 2) flowOf(emptyList()) else repo.search(q) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun onQueryChange(text: String) { _query.value = text }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FakeSearchRepository : SearchRepository {
+    val searches = mutableListOf&lt;String&gt;()
+    override fun search(query: String): Flow&lt;List&lt;String&gt;&gt; = flow {
+        searches += query
+        emit(listOf(query.uppercase()))
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@Test
+fun typingQuickly_runsOnlyOneSearch() = runTest {
+    val repo = FakeSearchRepository()
+    val vm = SearchViewModel(repo)
+    val job = launch(UnconfinedTestDispatcher(testScheduler)) { vm.results.collect {} }
+
+    vm.onQueryChange("a")
+    advanceTimeBy(100)
+    vm.onQueryChange("ad")
+    advanceTimeBy(100)
+    vm.onQueryChange("ada")
+    advanceTimeBy(400)                // let the debounce window pass
+    runCurrent()
+
+    assertEquals(listOf("ada"), repo.searches)
+    assertEquals(listOf("ADA"), vm.results.value)
+    job.cancel()
+}</code></pre></div></div>
+<p class="v2-p">The three quick keystrokes arrive within the 300 ms window, so <code>debounce</code> keeps only the last. The single-letter <code>a</code> would have been filtered anyway by the length rule. <code>advanceTimeBy</code> and <code>runCurrent</code> come from <code>kotlinx.coroutines.test</code>; they let you move virtual time precisely. Run the test in your project to confirm; timing tests are the most sensitive to library versions.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Why does this show an empty screen?</strong></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val uiState: StateFlow&lt;UiState&gt; = repository.items
+    .map { UiState(it) }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), UiState())
+
+// in a test:
+val vm = ViewModel(fakeRepo)
+fakeRepo.items.value = listOf(Item(1))
+assertEquals(1, vm.uiState.value.items.size)       // fails!</code></pre></div></div></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>WhileSubscribed</code> only runs the upstream flow while something collects <code>uiState</code>. In the test nothing collects it, so <code>.value</code> stays at the initial <code>UiState()</code>. Fix: start a collector (<code>launch(UnconfinedTestDispatcher(testScheduler)) { vm.uiState.collect {} }</code>) before changing the repository, and cancel it at the end.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Run the countdown flow from Build 1 with two collectors launched at the same time using <code>launch</code>, and observe that each one gets its own full countdown. Then convert the flow to a <code>SharedFlow</code> with <code>shareIn</code> and observe the difference.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting that cold flows do nothing until collected.</strong> <em>Symptom:</em> "my <code>onEach</code> never runs". <em>The fix:</em> there must be a terminal operator such as <code>collect</code>, <code>first</code>, <code>toList</code> or <code>launchIn</code>.</p>
+<p class="v2-p"><strong>Mistake #2: <code>collect</code> in the wrong place.</strong> <em>What happens:</em> <code>collect</code> suspends forever for a hot flow, so code after it never runs. <em>The fix:</em> launch the collection in its own coroutine.</p>
+<p class="v2-p"><strong>Mistake #3: <code>catch</code> placed below the failure.</strong> <em>What happens:</em> not caught. <em>The fix:</em> <code>catch</code> only handles upstream exceptions; place it after the code that can throw.</p>
+<p class="v2-p"><strong>Mistake #4: Using <code>collectAsState()</code> for streams that hit the network or database.</strong> <em>What happens:</em> collection continues in the background. <em>The fix:</em> <code>collectAsStateWithLifecycle()</code>.</p>
+<p class="v2-p"><strong>Mistake #5: <code>withContext</code> inside <code>flow { }</code>.</strong> <em>Symptom:</em> <em>Flow invariant is violated</em>. <em>The fix:</em> <code>flowOn</code>.</p>
+<p class="v2-p"><strong>Mistake #6: Expecting <code>StateFlow</code> to emit equal values.</strong> <em>What happens:</em> setting the same value twice triggers nothing. <em>The fix:</em> that is by design; use immutable states so changes are real changes.</p>
+<p class="v2-p"><strong>Mistake #7: Using <code>SharedFlow</code> for one-time UI events and losing them on rotation.</strong> <em>The fix:</em> model events as state and clear them after handling.</p>
+<p class="v2-p"><strong>Mistake #8: <code>toList()</code> on an endless flow in a test.</strong> <em>Symptom:</em> the test hangs. <em>The fix:</em> <code>take(n)</code>, <code>first()</code> or a background collector.</p>
+<p class="v2-p"><strong>Mistake #9: Trusting an expected output you did not calculate.</strong> <em>What happens:</em> wrong assertions in tests. <em>The fix:</em> hand-calculate, then run it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does it mean that a <code>Flow</code> is cold?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">It does no work until collected, and each collector triggers a fresh run of the producer.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What is the difference between <code>StateFlow</code> and <code>SharedFlow</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>StateFlow</code> always holds a current value, replays it to new collectors and skips equal consecutive values; it models state. <code>SharedFlow</code> has no current value and delivers every emission to the active collectors, with configurable replay.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What does <code>stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), initial)</code> do?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">It converts a cold flow into a <code>StateFlow</code> that starts collecting upstream when the first collector subscribes and stops five seconds after the last one leaves, surviving brief interruptions like rotation.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What does <code>flatMapLatest</code> do and why is it useful for search?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It maps each value to a new flow and cancels the previous inner flow when a new value arrives, so only the latest query's results are used and stale requests are cancelled.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why can a test of a <code>stateIn</code> flow see only the initial value?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">With <code>WhileSubscribed</code> the upstream flow only runs while something collects the state flow; without a collector the value never updates. The test must start a collector.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-6-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 6, Pathway 2: Kotlin Flows</a></li>
+<li><a href="https://developer.android.com/kotlin/coroutines" rel="noopener noreferrer">Kotlin coroutines on Android</a></li>
+<li><a href="https://kotlinlang.org/docs/home.html" rel="noopener noreferrer">Kotlin documentation: Flow</a></li>
+<li><a href="https://developer.android.com/topic/architecture/ui-layer/state-production" rel="noopener noreferrer">State production in the UI layer</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Live Stopwatch and Lap Recorder</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a stopwatch whose time is produced by a <strong>flow</strong>, with Start, Stop and Lap buttons, a ViewModel exposing a <code>StateFlow</code>, and tests.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <code>ticker(periodMs: Long): Flow&lt;Long&gt;</code> that emits <code>0, 1, 2, ...</code> once per period using <code>flow { }</code> and <code>delay</code>.</li>
+<li>A ViewModel with <code>isRunning</code> and <code>laps</code> in a UI state. While running, the elapsed seconds are driven by the ticker; stopping cancels it (use a <code>Job</code>).</li>
+<li>A Lap button that appends the current elapsed time to a list shown in a <code>LazyColumn</code>.</li>
+<li>Collect with <code>collectAsStateWithLifecycle</code>.</li>
+<li>Tests: elapsed time after 3 virtual seconds is 3; stop freezes the time; a lap records the correct value.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> format the time as <code>mm:ss</code> with <code>map</code> in the state production pipeline.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StopwatchViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.stopwatch
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+fun ticker(periodMs: Long = 1_000): Flow&lt;Long&gt; = flow {
+    var n = 0L
+    while (true) {
+        delay(periodMs)
+        emit(++n)
+    }
+}
+
+data class StopwatchUiState(
+    val elapsedSeconds: Long = 0,
+    val isRunning: Boolean = false,
+    val laps: List&lt;Long&gt; = emptyList()
+)
+
+class StopwatchViewModel : ViewModel() {
+
+    private val _uiState = MutableStateFlow(StopwatchUiState())
+    val uiState: StateFlow&lt;StopwatchUiState&gt; = _uiState.asStateFlow()
+
+    private var tickJob: Job? = null
+
+    fun start() {
+        if (tickJob?.isActive == true) return
+        _uiState.update { it.copy(isRunning = true) }
+        val base = _uiState.value.elapsedSeconds
+        tickJob = viewModelScope.launch {
+            ticker().collect { tick -&gt;
+                _uiState.update { it.copy(elapsedSeconds = base + tick) }
+            }
+        }
+    }
+
+    fun stop() {
+        tickJob?.cancel()
+        tickJob = null
+        _uiState.update { it.copy(isRunning = false) }
+    }
+
+    fun lap() {
+        _uiState.update { it.copy(laps = it.laps + it.elapsedSeconds) }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">StopwatchViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.stopwatch
+
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+
+class StopwatchViewModelTest {
+    @get:Rule val mainRule = MainDispatcherRule()     // from lesson 25
+
+    @Test
+    fun running_countsSeconds() = runTest {
+        val vm = StopwatchViewModel()
+        vm.start()
+        advanceTimeBy(3_100)
+        runCurrent()
+        assertEquals(3L, vm.uiState.value.elapsedSeconds)
+        vm.stop()
+    }
+
+    @Test
+    fun stop_freezesTime() = runTest {
+        val vm = StopwatchViewModel()
+        vm.start()
+        advanceTimeBy(2_100); runCurrent()
+        vm.stop()
+        advanceTimeBy(5_000); runCurrent()
+        assertEquals(2L, vm.uiState.value.elapsedSeconds)
+    }
+
+    @Test
+    fun lap_recordsCurrentTime() = runTest {
+        val vm = StopwatchViewModel()
+        vm.start()
+        advanceTimeBy(4_100); runCurrent()
+        vm.lap()
+        assertEquals(listOf(4L), vm.uiState.value.laps)
+        vm.stop()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> restarting after a stop continues from the frozen time because <code>start()</code> captures <code>elapsedSeconds</code> as <code>base</code> and adds the new ticker's count. The ticker is a plain cold flow, so every <code>start()</code> creates a new one from zero, which is exactly the cold-flow behaviour from Build 1. Advancing 3,100 ms (not 3,000) avoids an off-by-one at the exact tick boundary. Timing tests depend on <code>runTest</code> sharing the Main test dispatcher's scheduler; if the elapsed values are zero, check the rule from lesson 25. The <code>mm:ss</code> stretch is <code>"%02d:%02d".format(s / 60, s % 60)</code>.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 33 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-33-kotlin-flows-in-practice</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 33 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: One Value or Many?</li><li>✅ Step-by-Step Build 1: Your First Flow</li><li>✅ Step-by-Step Build 2: Operators</li><li>✅ Step-by-Step Build 3: Hot Flows: StateFlow and SharedFlow</li><li>✅ Step-by-Step Build 4: Collecting Flows in Compose</li><li>✅ Testing Flows</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_32.html" class="ln-btn">&#8592; Lesson 32</a><a href="lesson_34.html" class="ln-btn primary">Lesson 34 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 33 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

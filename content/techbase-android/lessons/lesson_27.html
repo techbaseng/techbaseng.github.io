@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 27: Adaptive Layouts and Navigation Drawers — Techbase Android</title>
+</head>
+<body data-total="11" data-key="techbase_android_l27">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 27 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 27</div>
+      <h1>Adaptive Layouts and Navigation Drawers</h1>
+      <div class="l-hero-sub">11 phases &nbsp;·&nbsp; Build: My City: Ibadan Guide</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 27</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Adapt your UI to phones, tablets and foldables with window size classes, adaptive navigation and a list-detail layout. Includes Reply, Sports and My City.</p></div><div class="wm"><span>📚 11 phases</span><span>🏗️ My City: Ibadan Guide</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 11</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Your app will not only run on the phone in your pocket. People open it on a small budget phone, a large phone in landscape, a tablet, a foldable that opens like a book, a Chromebook, or a window that is dragged to half the screen. If your layout is designed for one width, it will look stretched and empty on a tablet and cramped on a small screen.</p>
+<p class="v2-p">An <strong>adaptive</strong> app changes its layout to fit the space it is given. In this lesson you will learn the tools Android gives you: <strong>window size classes</strong>, <strong>adaptive navigation</strong> (a bottom bar on phones, a side rail or drawer on large screens) and a <strong>list-detail</strong> layout that shows two panes side by side when there is room. You will apply them to the official Unit 4 examples: the <strong>Reply</strong> email app and the <strong>Sports</strong> practice app, and plan the <strong>My City</strong> project.</p>
+<p class="v2-p">This lesson covers six items of Pathway 3, Unit 4 of Google's <strong>Android Basics with Compose</strong> course: <em>Adaptive layouts</em>, <em>Intro to Reply app</em>, <em>Build an adaptive app with dynamic navigation</em>, <em>Build an app with an adaptive layout</em>, <em>Practice: Build Sports app</em> and <em>Project: Create a My City app</em>.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain why apps must adapt, and what <strong>window size classes</strong> are.</li>
+<li>Read the current window size class and branch on it.</li>
+<li>Choose between <strong>bottom navigation bar</strong>, <strong>navigation rail</strong> and <strong>navigation drawer</strong>.</li>
+<li>Use <code>NavigationSuiteScaffold</code> to switch the navigation type automatically.</li>
+<li>Build a <strong>list-detail</strong> layout that shows one pane on a phone and two panes on a tablet.</li>
+<li>Test your layout on different emulators and with the resizable emulator.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> do not ask "is this a tablet?". Ask "how much room does my window have right now?". The window can change at any time.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 11</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Navigation</strong> (lesson 26). You will move between destinations.</li>
+<li><strong>ViewModel and UI state</strong> (lessons 24 and 25). Adaptive layouts depend on state that survives window changes.</li>
+<li><strong>Lazy lists</strong> (lesson 21). List-detail screens use them.</li>
+<li><strong>Rotation is a configuration change</strong> (lesson 23). Window size changes, such as unfolding a phone or dragging a split-screen divider, are configuration changes too, so your state must survive them.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 11</div><div class="pt">Conceptual Understanding: Window Size Classes</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">A <strong>window size class</strong> puts the app window into a small set of buckets. You get one bucket for <strong>width</strong> and one for <strong>height</strong>.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Class</th>
+<th>Width</th>
+<th>Height</th>
+<th>Typical device</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compact</td>
+<td>under 600 dp</td>
+<td>under 480 dp</td>
+<td>Phone in portrait (width), phone in landscape (height)</td>
+</tr>
+<tr>
+<td>Medium</td>
+<td>600 to under 840 dp</td>
+<td>480 to under 900 dp</td>
+<td>Small tablet, foldable, large phone in landscape</td>
+</tr>
+<tr>
+<td>Expanded</td>
+<td>840 dp or more</td>
+<td>900 dp or more</td>
+<td>Tablet, unfolded foldable, desktop window</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Newer versions of the library also define <strong>large</strong> (1200 dp and up) and <strong>extra-large</strong> (1600 dp and up) width classes for desktops and external displays. They are opt-in; check the current documentation before relying on them.</p>
+<p class="v2-p">Two important facts:</p>
+<ol class="v2-ol">
+<li>A size class describes the <strong>window</strong>, not the device. A tablet in split-screen can be compact. A phone in landscape can be medium wide.</li>
+<li>The class <strong>changes at run time</strong>. Rotation, folding, resizing, and multi-window all change it, so your UI must react.</li>
+</ol>
+<h3 class="v2-h3">What changes at each size?</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>COMPACT width (phone portrait)
++------------------+
+|     content      |
+|                  |
+|                  |
++------------------+
+| [Home][Inbox][Me]|   &lt;- bottom navigation bar
++------------------+
+
+MEDIUM width (small tablet, foldable)
++---+--------------+
+| R |              |
+| A |   content    |    &lt;- navigation rail on the side
+| I |              |
+| L |              |
++---+--------------+
+
+EXPANDED width (tablet, desktop)
++--------+---------+-----------+
+| Drawer |  list   |  detail   |   &lt;- permanent drawer + two panes
+|  Home  |  item 1 |  Selected |
+|  Inbox |  item 2 |  item     |
+|  Sent  |  item 3 |  content  |
++--------+---------+-----------+</code></pre></div></div>
+<h3 class="v2-h3">The three navigation components</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Component</th>
+<th>Best for</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Navigation bar</strong> (bottom)</td>
+<td>Compact width, 3 to 5 destinations</td>
+<td>Thumb-friendly on phones</td>
+</tr>
+<tr>
+<td><strong>Navigation rail</strong> (side)</td>
+<td>Medium width, 3 to 7 destinations</td>
+<td>Vertical strip of icons beside the content</td>
+</tr>
+<tr>
+<td><strong>Navigation drawer</strong></td>
+<td>Expanded width, or many destinations</td>
+<td>Permanent on large screens, modal (slide-in) on small ones</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Material guidelines say to avoid a bottom bar on wide screens because the buttons end up far from the thumbs and look lost in empty space.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Window Size Classes</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 11</div><div class="pt">Step-by-Step Build 1: Read the Window Size Class</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Add the adaptive library. Look up the current stable version on the Compose Material 3 adaptive release page (https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive) rather than copying one from a tutorial, and add entries to your version catalog following the pattern from lesson 26:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+adaptive = "&lt;latest stable&gt;"
+
+[libraries]
+androidx-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptive" }
+androidx-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "adaptive" }
+androidx-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "adaptive" }
+androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }</code></pre></div></div>
+<p class="v2-p">The last entry belongs to the Compose Material 3 group, so with the Compose BOM in your project it needs no version. If your project has no BOM, give it a version from the Material 3 release page. Names and grouping of these artifacts have moved between releases, so if Sync fails, check the official pages for the current coordinates.</p>
+<p class="v2-p">In <code>app/build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">build.gradle.kts</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>dependencies {
+    implementation(libs.androidx.adaptive)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.adaptive.navigation)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+}</code></pre></div></div>
+<h3 class="v2-h3">Branch on the window size</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.runtime.Composable
+import androidx.window.core.layout.WindowSizeClass
+
+@Composable
+fun AdaptiveGreeting() {
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
+    val isExpandedWidth = windowSizeClass.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND
+    )
+    val isMediumWidth = windowSizeClass.isWidthAtLeastBreakpoint(
+        WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND
+    )
+
+    when {
+        isExpandedWidth -&gt; ExpandedLayout()
+        isMediumWidth -&gt; MediumLayout()
+        else -&gt; CompactLayout()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>isWidthAtLeastBreakpoint</code> is the current way to compare. Older tutorials and the Unit 4 codelabs may show <code>calculateWindowSizeClass(activity)</code> with <code>WindowWidthSizeClass.Compact</code>/<code>Medium</code>/<code>Expanded</code> values from the <code>material3-window-size-class</code> artifact. That still exists in many projects, so you will recognise it, but prefer the adaptive-info API in new code because it works without an Activity reference and plays well with previews.</p>
+<p class="v2-p">Pass the result <strong>down</strong> as a parameter, rather than reading it deep in the tree, to keep composables easy to preview and test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun ReplyApp(
+    windowSize: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+) {
+    // choose layout from windowSize
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Read the Window Size Class</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 11</div><div class="pt">Step-by-Step Build 2: Adaptive Navigation with NavigationSuiteScaffold</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">Reply is an email app with four mailboxes: Inbox, Sent, Drafts, Spam. You will build the shell that swaps the navigation component for you.</p>
+<h3 class="v2-h3">The data</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Mailbox.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.reply
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Drafts
+import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.ui.graphics.vector.ImageVector
+
+enum class Mailbox(val label: String, val icon: ImageVector) {
+    INBOX("Inbox", Icons.Filled.Inbox),
+    SENT("Sent", Icons.Filled.Send),
+    DRAFTS("Drafts", Icons.Filled.Drafts),
+    SPAM("Spam", Icons.Filled.Report)
+}
+
+data class Email(
+    val id: Int,
+    val sender: String,
+    val subject: String,
+    val body: String,
+    val mailbox: Mailbox
+)
+
+val sampleEmails = listOf(
+    Email(1, "Ada", "Meeting on Friday", "Can we move the meeting to 10am?", Mailbox.INBOX),
+    Email(2, "Tunde", "Invoice for materials", "Attached is the invoice for the paint.", Mailbox.INBOX),
+    Email(3, "Mum", "Sunday lunch", "Jollof and plantain. Do not be late.", Mailbox.INBOX),
+    Email(4, "You", "Re: Meeting on Friday", "10am works for me.", Mailbox.SENT),
+    Email(5, "You", "Project idea", "A bus tracking app for Ibadan...", Mailbox.DRAFTS),
+    Email(6, "Prize Team", "You have WON", "Send your bank details now.", Mailbox.SPAM)
+)</code></pre></div></div>
+<p class="v2-p">(<code>Icons.Filled.Inbox</code>, <code>Drafts</code>, <code>Report</code> and <code>Send</code> are in the <strong>extended</strong> icon set, <code>material-icons-extended</code>. In many projects it is not included by default, and it is large, so release builds rely on R8 to remove unused icons. If you see unresolved references, add the extended icons dependency or draw your own icons from vector assets, as in lesson 21.)</p>
+<h3 class="v2-h3">The scaffold</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ReplyApp.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.reply
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.window.core.layout.WindowSizeClass
+
+@Composable
+fun ReplyApp() {
+    var currentMailbox by rememberSaveable { mutableStateOf(Mailbox.INBOX) }
+
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val layoutType = if (
+        adaptiveInfo.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)
+    ) {
+        NavigationSuiteType.NavigationDrawer      // permanent drawer on big screens
+    } else {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)  // bar or rail
+    }
+
+    NavigationSuiteScaffold(
+        layoutType = layoutType,
+        navigationSuiteItems = {
+            Mailbox.entries.forEach { mailbox -&gt;
+                item(
+                    icon = { Icon(mailbox.icon, contentDescription = mailbox.label) },
+                    label = { Text(mailbox.label) },
+                    selected = mailbox == currentMailbox,
+                    onClick = { currentMailbox = mailbox }
+                )
+            }
+        }
+    ) {
+        EmailListScreen(
+            emails = sampleEmails.filter { it.mailbox == currentMailbox },
+            title = currentMailbox.label
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p">How it behaves:</p>
+<ul class="v2-ul">
+<li>On a phone in portrait, <code>calculateFromAdaptiveInfo</code> returns a <strong>navigation bar</strong> at the bottom.</li>
+<li>On a medium window it returns a <strong>navigation rail</strong> on the side.</li>
+<li>On an expanded window we override with a <strong>permanent drawer</strong>.</li>
+<li><code>currentMailbox</code> is saved with <code>rememberSaveable</code>, so rotation or folding keeps the selected mailbox. (An enum is saved automatically because it is <code>Serializable</code>.)</li>
+</ul>
+<p class="v2-p">Without the override, <code>NavigationSuiteScaffold</code> chooses bar or rail only. Dropping the <code>layoutType</code> argument completely gives you the default behaviour with zero extra code, which is often enough.</p>
+<h3 class="v2-h3">A simple list screen</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun EmailListScreen(emails: List&lt;Email&gt;, title: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxSize()) {
+        Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(16.dp))
+        LazyColumn {
+            items(emails, key = { it.id }) { email -&gt;
+                Column(Modifier.padding(16.dp)) {
+                    Text(email.sender, style = MaterialTheme.typography.titleMedium)
+                    Text(email.subject)
+                }
+                HorizontalDivider()
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Run it on a phone emulator and then on a tablet emulator (<strong>Device Manager &gt; Create Virtual Device &gt; Tablet</strong>). The same code shows a bottom bar on one and a rail or drawer on the other.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Adaptive Navigation with NavigationSuiteScaffold</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 11</div><div class="pt">Step-by-Step Build 3: A List-Detail Layout</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Navigation chrome is half the story. The other half is the <strong>content layout</strong>. A mail app on a phone shows the list, and tapping an email opens the full message on a new screen. On a tablet, that wastes space: you want the list on the left and the open email on the right, at the same time. This is the <strong>list-detail</strong> pattern.</p>
+<p class="v2-p">There are two ways to build it:</p>
+<ol class="v2-ol">
+<li><strong>By hand</strong> with a window size branch (what the Reply codelab does, and what you will do now, because it teaches the idea clearly).</li>
+<li><strong>With the adaptive layout library</strong> (<code>ListDetailPaneScaffold</code> and <code>NavigableListDetailPaneScaffold</code>) which handles back navigation and one-pane/two-pane switching for you. It is the better choice for production apps, and is introduced at the end of this section.</li>
+</ol>
+<h3 class="v2-h3">By hand</h3>
+<p class="v2-p">State lives in a ViewModel so that it survives a window change:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">ReplyViewModel.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.reply
+
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+data class ReplyUiState(
+    val mailbox: Mailbox = Mailbox.INBOX,
+    val selectedEmailId: Int? = null,
+    val isShowingDetailOnly: Boolean = false
+)
+
+class ReplyViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(ReplyUiState())
+    val uiState: StateFlow&lt;ReplyUiState&gt; = _uiState.asStateFlow()
+
+    fun selectMailbox(mailbox: Mailbox) =
+        _uiState.update { it.copy(mailbox = mailbox, selectedEmailId = null, isShowingDetailOnly = false) }
+
+    fun selectEmail(id: Int) =
+        _uiState.update { it.copy(selectedEmailId = id, isShowingDetailOnly = true) }
+
+    fun backToList() =
+        _uiState.update { it.copy(isShowingDetailOnly = false) }
+}</code></pre></div></div>
+<p class="v2-p"><code>isShowingDetailOnly</code> only matters in compact windows, where one pane is shown at a time. In wide windows both panes show regardless.</p>
+<p class="v2-p">The screen chooses by width:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+
+@Composable
+fun ReplyHomeContent(
+    uiState: ReplyUiState,
+    emails: List&lt;Email&gt;,
+    isWide: Boolean,
+    onEmailClick: (Int) -&gt; Unit,
+    onBackToList: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    val selected = emails.firstOrNull { it.id == uiState.selectedEmailId }
+
+    if (isWide) {
+        Row(modifier.fillMaxSize()) {
+            LazyColumn(Modifier.width(360.dp).fillMaxHeight()) {
+                items(emails, key = { it.id }) { email -&gt;
+                    Column(
+                        Modifier
+                            .clickable { onEmailClick(email.id) }
+                            .padding(16.dp)
+                    ) {
+                        Text(email.sender, style = MaterialTheme.typography.titleMedium)
+                        Text(email.subject)
+                    }
+                    HorizontalDivider()
+                }
+            }
+            EmailDetail(selected, Modifier.weight(1f))
+        }
+    } else if (uiState.isShowingDetailOnly &amp;&amp; selected != null) {
+        BackHandler(onBack = onBackToList)
+        EmailDetail(selected, modifier)
+    } else {
+        LazyColumn(modifier.fillMaxSize()) {
+            items(emails, key = { it.id }) { email -&gt;
+                Column(
+                    Modifier
+                        .clickable { onEmailClick(email.id) }
+                        .padding(16.dp)
+                ) {
+                    Text(email.sender, style = MaterialTheme.typography.titleMedium)
+                    Text(email.subject)
+                }
+                HorizontalDivider()
+            }
+        }
+    }
+}
+
+@Composable
+fun EmailDetail(email: Email?, modifier: Modifier = Modifier) {
+    Column(modifier.padding(24.dp)) {
+        if (email == null) {
+            Text("Select an email")
+        } else {
+            Text(email.subject, style = MaterialTheme.typography.headlineSmall)
+            Text("From ${email.sender}", modifier = Modifier.padding(vertical = 8.dp))
+            Text(email.body)
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">(<code>Modifier.weight(1f)</code> needs the <code>Row</code> scope, which is why <code>EmailDetail</code> receives the modifier from the Row. Add <code>import androidx.compose.foundation.layout.padding</code> and the Material imports from earlier.)</p>
+<p class="v2-p">Notice the duplicated list item markup: you would extract an <code>EmailRow</code> composable in real code. We left it in line so each branch reads on its own.</p>
+<p class="v2-p">Test it:</p>
+<ol class="v2-ol">
+<li>On the <strong>phone</strong> emulator, tap an email. You see the message alone. Press Back to return to the list.</li>
+<li>On the <strong>tablet</strong> emulator, both appear at once.</li>
+<li>Use the <strong>resizable emulator</strong> (create a virtual device of type <em>Resizable</em>, which lets you switch between phone, foldable, tablet and desktop presets) and switch sizes while the app runs. The selected email must stay selected. If it does not, your state is in the wrong place.</li>
+</ol>
+<h3 class="v2-h3">The library way: ListDetailPaneScaffold</h3>
+<p class="v2-p">The adaptive library provides <code>NavigableListDetailPaneScaffold</code>, which takes a list pane and a detail pane and does the one-pane versus two-pane switch, the back behaviour and the animation for you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+fun AdaptiveEmailScreen(emails: List&lt;Email&gt;) {
+    val navigator = rememberListDetailPaneScaffoldNavigator&lt;Int&gt;()
+    val scope = rememberCoroutineScope()
+
+    NavigableListDetailPaneScaffold(
+        navigator = navigator,
+        listPane = {
+            AnimatedPane {
+                LazyColumn {
+                    items(emails, key = { it.id }) { email -&gt;
+                        Column(
+                            Modifier
+                                .clickable {
+                                    scope.launch {
+                                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, email.id)
+                                    }
+                                }
+                                .padding(16.dp)
+                        ) { Text(email.subject) }
+                    }
+                }
+            }
+        },
+        detailPane = {
+            AnimatedPane {
+                val id = navigator.currentDestination?.contentKey
+                EmailDetail(emails.firstOrNull { it.id == id })
+            }
+        }
+    )
+}</code></pre></div></div>
+<p class="v2-p">This API is marked experimental in several releases and its exact names have changed between versions, which is why the <code>@OptIn</code> is there. If your version differs, follow the current official guide (search "list-detail layout" in the adaptive apps documentation). The manual approach above works on any version, so you can build and ship with it while the library settles.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: A List-Detail Layout</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 11</div><div class="pt">Step-by-Step Build 4: The Sports App Practice</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">The <em>Practice: Build Sports app</em> exercise asks you to use everything above on a new app. Here is the specification to build, with your own data:</p>
+<ul class="v2-ul">
+<li>A list of sports (for example Football, Basketball, Athletics, Table tennis, Ayo), each with a name, a one-line description and a longer description.</li>
+<li><strong>Compact:</strong> a list screen; tapping a sport opens a detail screen; Back returns.</li>
+<li><strong>Expanded:</strong> list on the left, detail on the right, no separate detail screen.</li>
+<li>A top app bar that shows the app name, or the selected sport name on the detail screen, with an Up arrow when appropriate.</li>
+<li>A toggle in the top bar to switch the list between <strong>list view</strong> and <strong>grid view</strong> (lesson 21).</li>
+</ul>
+<p class="v2-p">Use <code>ReplyViewModel</code>'s shape for your state: <code>selectedSportId</code>, <code>isShowingDetailOnly</code>, <code>isListView</code>. This is a good moment to try designing the state class <strong>before</strong> writing any composable.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: The Sports App Practice</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 11</div><div class="pt">Project Planning: My City</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">The unit ends with a project: <strong>Create a My City app</strong>. Write the specification yourself:</p>
+<ol class="v2-ol">
+<li>Pick a city or town you know (Ibadan, Lagos, Abuja, Kano, or your village).</li>
+<li>Define 4 to 5 <strong>categories</strong> such as Restaurants, Parks, Markets, Historic sites.</li>
+<li>Each category has at least 5 <strong>recommendations</strong> with a name, a short description and a picture or icon.</li>
+<li><strong>Navigation:</strong> a start screen of categories; a list of places for the chosen category; a detail screen for one place.</li>
+<li><strong>Adaptive:</strong> compact uses a bottom bar for categories and a list-detail flow. Expanded shows a rail or drawer plus two panes.</li>
+<li>The app uses one ViewModel, immutable UI state, previews for every screen, unit tests for the ViewModel and one UI test.</li>
+<li>Every image has a meaningful <code>contentDescription</code> (lesson 47).</li>
+</ol>
+<p class="v2-p">Resist the urge to start with the visuals. Sketch screens on paper for the compact and expanded layouts, write the state class, then code.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Project Planning: My City</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 11</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk9"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Responsive column count</strong></p>
+<p class="v2-p">Write <code>ResponsiveGrid</code> that shows a <code>LazyVerticalGrid</code> with 1 column on compact width, 2 on medium and 3 on expanded, using the window size class. Then explain why <code>GridCells.Adaptive(minSize = ...)</code> might be a better answer.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
+
+@Composable
+fun ResponsiveGrid(items: List&lt;String&gt;, modifier: Modifier = Modifier) {
+    val size = currentWindowAdaptiveInfo().windowSizeClass
+    val columns = when {
+        size.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -&gt; 3
+        size.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -&gt; 2
+        else -&gt; 1
+    }
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(columns),
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp)
+    ) {
+        items(items) { Card(Modifier.padding(4.dp)) { Text(it, Modifier.padding(16.dp)) } }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>GridCells.Adaptive(minSize = 200.dp)</code> is often better because it reacts to the <strong>actual</strong> width in dp continuously, not just to three buckets, and needs no window size code at all. Use window size classes when the <strong>structure</strong> changes (bar versus rail, one pane versus two) and flexible sizing for density.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Preserve selection across folding</strong></p>
+<p class="v2-p">A teammate stores <code>selectedEmailId</code> with <code>remember</code> inside <code>ReplyHomeContent</code>. Describe what the user sees when they unfold the phone and how to fix it.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Unfolding changes the window size, which is a configuration change, so the Activity is recreated and <code>remember</code> state is lost: the selected email disappears and the user is returned to an empty detail pane. Fix it by holding <code>selectedEmailId</code> in the ViewModel's UI state (it survives configuration changes) or, for a purely local choice, <code>rememberSaveable</code>. The architecture rule from lessons 23 and 24 applies directly: state that matters must not live in a plain <code>remember</code>.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Create three emulators: a phone, the <strong>Resizable</strong> device and a tablet. Run Reply on each, and write down which navigation component appears at which width. Then resize the resizable emulator slowly and note the exact moment it changes.</p></div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 11</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Checking "is it a tablet?".</strong> <em>What happens:</em> split-screen and foldables break your assumptions. <em>The fix:</em> use the window size class, which describes the available window.</p>
+<p class="v2-p"><strong>Mistake #2: Hard-coded widths.</strong> <em>The wrong code:</em> <code>Modifier.width(400.dp)</code> for a panel. <em>What happens:</em> it overflows on small windows. <em>The fix:</em> use <code>fillMaxWidth</code>, <code>weight</code>, fractions or size-class branches.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting to handle Back in the one-pane detail view.</strong> <em>What happens:</em> Back exits the app instead of returning to the list. <em>The fix:</em> a <code>BackHandler</code> that clears the detail-only flag.</p>
+<p class="v2-p"><strong>Mistake #4: Locking orientation to avoid adaptive work.</strong> <em>What happens:</em> on large screens the setting may be ignored or letterboxed, and Google Play may flag poor large-screen quality. <em>The fix:</em> support resizing.</p>
+<p class="v2-p"><strong>Mistake #5: Selection state lost on resize.</strong> <em>The fix:</em> keep it in a ViewModel or <code>rememberSaveable</code>.</p>
+<p class="v2-p"><strong>Mistake #6: A bottom bar on a wide screen.</strong> <em>What happens:</em> the bar stretches across a huge window and its items are unreachable. <em>The fix:</em> rail or drawer from medium width up.</p>
+<p class="v2-p"><strong>Mistake #7: Two sources of truth for the selected destination.</strong> <em>What happens:</em> the drawer shows one thing, the content another. <em>The fix:</em> one <code>currentMailbox</code> value drives both.</p>
+<p class="v2-p"><strong>Mistake #8: Using experimental APIs blindly.</strong> <em>What happens:</em> an update renames a function and the build breaks. <em>The fix:</em> read the release notes, pin versions, and keep experimental API usage in one place.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 11</div><div class="pt">Knowledge Check</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What does a window size class describe?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">The space available to the app's window (width and height buckets: compact, medium, expanded), not the device type. It can change while the app runs.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Which navigation component suits compact, medium and expanded widths?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">A bottom navigation bar for compact, a navigation rail for medium, and a navigation drawer (often permanent) for expanded.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is a list-detail layout?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">A layout that shows a list and the details of the selected item. On narrow windows they are separate screens; on wide windows they appear side by side.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What does <code>NavigationSuiteScaffold</code> do for you?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">It displays a navigation bar, rail or drawer depending on window size, using the destinations you declare once, and lays out your content beside or above it.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> Why must state survive window size changes?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">Resizing, folding and rotation are configuration changes that recreate the Activity. State held only in <code>remember</code> is lost, so important state belongs in a ViewModel or <code>rememberSaveable</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-4-pathway-3" rel="noopener noreferrer">Android Basics with Compose, Unit 4, Pathway 3: Adaptive layouts</a>: the official pathway for Reply, Sports and My City.</li>
+<li><a href="https://developer.android.com/develop/adaptive-apps/guides/build-adaptive-navigation" rel="noopener noreferrer">Adaptive navigation guide</a></li>
+<li><a href="https://developer.android.com/develop/ui/compose/layouts/adaptive/window-size-classes" rel="noopener noreferrer">Window size classes</a></li>
+<li><a href="https://codelabs.developers.google.com/jetpack-compose-adaptability" rel="noopener noreferrer">Jetpack Compose adaptability codelab</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">My City: Ibadan Guide</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build the <strong>My City</strong> project for Ibadan or your own city, in miniature: three categories, three places each, adaptive layout, tested ViewModel.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Categories: Food, Landmarks, Markets (or your own). Each has three places with a name and description.</li>
+<li><code>CityViewModel</code> with a <code>CityUiState(category, selectedPlaceId, isShowingDetailOnly)</code>.</li>
+<li><code>NavigationSuiteScaffold</code> with one item per category.</li>
+<li>List-detail layout: one pane in compact, two panes in expanded.</li>
+<li>Back from the detail returns to the list.</li>
+<li>Two ViewModel unit tests: changing category clears the selected place; selecting a place sets detail-only.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> display a <code>Card</code> with an image for each place, with a <code>contentDescription</code> that describes it.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CityApp.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.mycity
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.window.core.layout.WindowSizeClass
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+
+enum class Category(val label: String, val icon: ImageVector) {
+    FOOD("Food", Icons.Filled.Home),
+    LANDMARKS("Landmarks", Icons.Filled.Place),
+    MARKETS("Markets", Icons.Filled.ShoppingCart)
+}
+
+data class CityPlace(val id: Int, val name: String, val description: String, val category: Category)
+
+val places = listOf(
+    CityPlace(1, "Amala spot", "Amala with gbegiri and ewedu, a local favourite.", Category.FOOD),
+    CityPlace(2, "Suya corner", "Evening suya with spicy yaji.", Category.FOOD),
+    CityPlace(3, "Roasted plantain stand", "Boli with groundnut.", Category.FOOD),
+    CityPlace(4, "Cocoa House", "A well-known tall building in the city skyline.", Category.LANDMARKS),
+    CityPlace(5, "Mapo Hall", "A colonial-era hall on a hill overlooking the city.", Category.LANDMARKS),
+    CityPlace(6, "Bower's Tower", "A tower with wide views over the rooftops.", Category.LANDMARKS),
+    CityPlace(7, "Bodija Market", "A busy market for foodstuffs.", Category.MARKETS),
+    CityPlace(8, "Dugbe Market", "A trading centre in the city.", Category.MARKETS),
+    CityPlace(9, "Oje Market", "Known for traditional cloth.", Category.MARKETS)
+)
+
+data class CityUiState(
+    val category: Category = Category.FOOD,
+    val selectedPlaceId: Int? = null,
+    val isShowingDetailOnly: Boolean = false
+)
+
+class CityViewModel : ViewModel() {
+    private val _uiState = MutableStateFlow(CityUiState())
+    val uiState: StateFlow&lt;CityUiState&gt; = _uiState.asStateFlow()
+
+    fun selectCategory(category: Category) =
+        _uiState.update { CityUiState(category = category) }
+
+    fun selectPlace(id: Int) =
+        _uiState.update { it.copy(selectedPlaceId = id, isShowingDetailOnly = true) }
+
+    fun backToList() =
+        _uiState.update { it.copy(isShowingDetailOnly = false) }
+}
+
+@Composable
+fun CityApp(viewModel: CityViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val isWide = currentWindowAdaptiveInfo().windowSizeClass
+        .isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
+    NavigationSuiteScaffold(
+        navigationSuiteItems = {
+            Category.entries.forEach { category -&gt;
+                item(
+                    icon = { Icon(category.icon, contentDescription = category.label) },
+                    label = { Text(category.label) },
+                    selected = category == state.category,
+                    onClick = { viewModel.selectCategory(category) }
+                )
+            }
+        }
+    ) {
+        val list = places.filter { it.category == state.category }
+        val selected = list.firstOrNull { it.id == state.selectedPlaceId }
+
+        if (isWide) {
+            Row(Modifier.fillMaxSize()) {
+                PlaceList(list, viewModel::selectPlace, Modifier.width(320.dp).fillMaxHeight())
+                PlaceDetail(selected, Modifier.weight(1f))
+            }
+        } else if (state.isShowingDetailOnly &amp;&amp; selected != null) {
+            BackHandler(onBack = viewModel::backToList)
+            PlaceDetail(selected, Modifier.fillMaxSize())
+        } else {
+            PlaceList(list, viewModel::selectPlace, Modifier.fillMaxSize())
+        }
+    }
+}
+
+@Composable
+fun PlaceList(list: List&lt;CityPlace&gt;, onClick: (Int) -&gt; Unit, modifier: Modifier = Modifier) {
+    LazyColumn(modifier) {
+        items(list, key = { it.id }) { place -&gt;
+            Text(
+                place.name,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.clickable { onClick(place.id) }.padding(16.dp)
+            )
+            HorizontalDivider()
+        }
+    }
+}
+
+@Composable
+fun PlaceDetail(place: CityPlace?, modifier: Modifier = Modifier) {
+    Column(modifier.padding(24.dp)) {
+        if (place == null) Text("Choose a place")
+        else {
+            Text(place.name, style = MaterialTheme.typography.headlineSmall)
+            Text(place.description, modifier = Modifier.padding(top = 8.dp))
+        }
+    }
+}</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">CityViewModelTest.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.mycity
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class CityViewModelTest {
+    @Test
+    fun changingCategory_clearsSelectedPlace() {
+        val vm = CityViewModel()
+        vm.selectPlace(1)
+        vm.selectCategory(Category.MARKETS)
+        assertNull(vm.uiState.value.selectedPlaceId)
+        assertEquals(Category.MARKETS, vm.uiState.value.category)
+    }
+
+    @Test
+    fun selectingPlace_setsDetailOnly() {
+        val vm = CityViewModel()
+        vm.selectPlace(4)
+        assertTrue(vm.uiState.value.isShowingDetailOnly)
+        assertEquals(4, vm.uiState.value.selectedPlaceId)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Notes:</strong> the place descriptions are short, general statements; check facts about real landmarks and markets yourself before publishing an app about your city. This solution treats medium width and above as "wide" to keep two panes on small tablets; adjust the breakpoint to taste. <code>Icons.Filled.Home</code>, <code>Place</code> and <code>ShoppingCart</code> are in the core icon set, so no extended icon dependency is needed.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 27 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-27-adaptive-layouts-and-navigation-drawers</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 27 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Window Size Classes</li><li>✅ Step-by-Step Build 1: Read the Window Size Class</li><li>✅ Step-by-Step Build 2: Adaptive Navigation with NavigationSuiteScaffold</li><li>✅ Step-by-Step Build 3: A List-Detail Layout</li><li>✅ Step-by-Step Build 4: The Sports App Practice</li><li>✅ Project Planning: My City</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_26.html" class="ln-btn">&#8592; Lesson 26</a><a href="lesson_28.html" class="ln-btn primary">Lesson 28 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 27 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

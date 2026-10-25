@@ -14,7 +14,7 @@
 
 </div>
 
-![Techbase Academy home page showing the seven courses](docs/assets/preview.png)
+![Techbase Academy home page showing the eight courses](docs/assets/preview.png)
 
 ## About
 
@@ -31,12 +31,13 @@ Techbase Academy is a free learning platform built by Techbase Consultant Servic
 | [Scratch Programming](https://techbaseng.github.io/techbase-scratch/) | 35 | Beginner, ages 8 to 16 |
 | [Micro:bit Fundamentals (Stage 1)](https://techbaseng.github.io/techbase-robotics/) | 123 | Beginner to Advanced |
 | [Practical Robotics (Stage 2)](https://techbaseng.github.io/techbase-practical-robotics/) | 44 | Beginner to Advanced |
+| [Google Android Studio](https://techbaseng.github.io/techbase-android/) | 72 | Beginner to Advanced |
 
 Video walkthroughs are on the [Techbase YouTube channel](https://www.youtube.com/@techbasengr).
 
 ## Features
 
-- 400 lessons and projects across seven courses
+- 472 lessons and projects across eight courses
 - Step-by-step lessons that unlock phase by phase, with practice tasks and a mini project
 - Search every lesson with Ctrl + K (or `/`)
 - Progress saved on your own device, with a "Continue" shortcut

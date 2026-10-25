@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 41: Animation in Compose — Techbase Android</title>
+</head>
+<body data-total="16" data-key="techbase_android_l41">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 41 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 41</div>
+      <h1>Animation in Compose</h1>
+      <div class="l-hero-sub">16 phases &nbsp;·&nbsp; Build: Weather Dashboard with Motion</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 41</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Bring your UI to life: animate*AsState, AnimatedVisibility, AnimatedContent, transitions, Animatable and gesture-driven animation.</p></div><div class="wm"><span>📚 16 phases</span><span>🏗️ Weather Dashboard with Motion</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 16</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Good animation is not decoration. It tells the user <strong>what just happened</strong>: a card expanded, a row was removed, a screen changed. In the old View system, animation meant XML files, <code>ObjectAnimator</code> and a lot of bookkeeping. In Compose, most animation is just <em>state that changes smoothly</em>, and a few lines of code are enough.</p>
+<p class="v2-p">This lesson covers the <em>5 quick animations to make your app stand out</em> and <em>Animating elements in Jetpack Compose</em> items of Pathway 2 of the <em>Jetpack Compose for Android developers</em> programme (https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2). It follows the ideas of the official <em>Animation in Jetpack Compose</em> codelab, using our own example: a <strong>weather-style dashboard</strong> with a refresh button, an expandable card and a loading shimmer.</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Pick the right animation API for a job from the "animation decision tree".</li>
+<li>Animate values with <code>animate*AsState</code>.</li>
+<li>Show and hide content with <code>AnimatedVisibility</code> and swap content with <code>AnimatedContent</code> and <code>Crossfade</code>.</li>
+<li>Animate several values together with <code>updateTransition</code>.</li>
+<li>Loop animations with <code>rememberInfiniteTransition</code>.</li>
+<li>Control animations with <code>Animatable</code> and run them from coroutines.</li>
+<li>Choose an <code>animationSpec</code>: <code>tween</code>, <code>spring</code>, <code>keyframes</code>, <code>snap</code>.</li>
+<li>Animate content size and list items.</li>
+<li>Combine animation with gestures.</li>
+<li>Respect the user's "remove animations" setting.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> in Compose you do not animate <em>views</em>. You change <em>state</em>, and Compose animates the <em>values</em> that depend on that state.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 16</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>State and recomposition</strong> (lessons 17 and 37). An animation is a value that changes over many frames, each frame causing a small recomposition or redraw.</li>
+<li><strong><code>remember</code> and <code>mutableStateOf</code></strong> (lesson 17).</li>
+<li><strong>Coroutines</strong> (lesson 28). <code>Animatable</code> uses <code>suspend</code> functions.</li>
+<li><strong>Modifiers and layout</strong> (lessons 16 and 38).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 16</div><div class="pt">Conceptual Understanding: Choosing an Animation API</div><div class="pc" id="chk3"></div></div><div class="pb2"><p class="v2-p">Compose has many animation APIs. The beginner's problem is not how to use them but <strong>which one to pick</strong>. Use this decision list.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Is it a single value that should move smoothly to a new target?
+   yes -&gt; animate*AsState   (animateFloatAsState, animateDpAsState, animateColorAsState ...)
+
+Is it showing/hiding a composable?
+   yes -&gt; AnimatedVisibility
+
+Is it swapping one composable for another based on a value?
+   yes -&gt; AnimatedContent  (or Crossfade for a simple fade)
+
+Do several values change together as one "state change"?
+   yes -&gt; updateTransition
+
+Does it run forever (spinner, pulse, shimmer)?
+   yes -&gt; rememberInfiniteTransition
+
+Do you need to start/stop/interrupt it from code, or drive it with gestures?
+   yes -&gt; Animatable
+
+Does the layout size change?
+   yes -&gt; Modifier.animateContentSize()
+
+A list item enters, leaves or moves?
+   yes -&gt; Modifier.animateItem() in a lazy list (lesson 39)</code></pre></div></div>
+<p class="v2-p">All of these are built on the same low-level pieces:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Piece</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Target</strong></td>
+<td>The value you want to reach</td>
+</tr>
+<tr>
+<td><strong><code>animationSpec</code></strong></td>
+<td><em>How</em> to get there: duration, easing, spring physics</td>
+</tr>
+<tr>
+<td><strong>Animation state</strong></td>
+<td>The value at the current frame</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Two behaviours matter for correctness. First, animations are <strong>interruptible</strong>: if the target changes mid-animation, Compose redirects from the current value instead of jumping. Second, animations run on the <strong>frame clock</strong>, which is why they stay in step with the screen refresh rate.</p>
+<h3 class="v2-h3">Spring versus tween</h3>
+<p class="v2-p">A <code>tween</code> is like a train timetable: <em>arrive in 300 ms</em>, with an easing curve. A <code>spring</code> is like a ball on a rubber band: no fixed time; it moves according to <strong>stiffness</strong> and <strong>damping ratio</strong>. Springs feel natural, and handle interruptions best because velocity carries over. Compose's default for most <code>animate*AsState</code> calls is a spring.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Choosing an Animation API</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 16</div><div class="pt">Step-by-Step Build 1: animate*AsState</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a project <code>WeatherBoard</code> (Empty Activity, Compose). We start with the simplest animation: a card that grows when tapped.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.weatherboard
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.unit.dp
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface { TapToGrow() }
+            }
+        }
+    }
+}
+
+@Composable
+fun TapToGrow() {
+    var big by remember { mutableStateOf(false) }
+
+    val height by animateDpAsState(
+        targetValue = if (big) 220.dp else 100.dp,
+        label = "cardHeight"
+    )
+    val colour by animateColorAsState(
+        targetValue = if (big) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.secondaryContainer,
+        label = "cardColour"
+    )
+    val alpha by animateFloatAsState(
+        targetValue = if (big) 1f else 0.7f,
+        label = "cardAlpha"
+    )
+
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .height(height)
+            .alpha(alpha)
+            .background(colour)
+            .clickable { big = !big },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(if (big) "Lagos: 31°C" else "Tap me")
+    }
+}</code></pre></div></div>
+<p class="v2-p">(Add <code>import androidx.compose.foundation.background</code> to the imports.) Run it and tap the card.</p>
+<p class="v2-p"><strong>What happens:</strong> <code>big</code> flips between <code>true</code> and <code>false</code>. The <code>targetValue</code> of each animation changes, and Compose moves the value from its current number to the new target over several frames. The <code>by</code> delegates (<code>val height by ...</code>) read the <em>current</em> animated value on each frame, which makes the layout recompose with a slightly different height each time.</p>
+<p class="v2-p">Three details to remember:</p>
+<ul class="v2-ul">
+<li><strong><code>label</code></strong> is a name shown in Android Studio's <em>Animation Preview</em> and tooling. It is optional but good practice.</li>
+<li>The animated value is a <code>State&lt;Dp&gt;</code>. Reading it in the composition (<code>.height(height)</code>) re-composes the function every frame. For high-frequency animations (a scrolling parallax, a fade on a big tree) read it later, in the draw or layout phase, to avoid recomposition: use <code>Modifier.graphicsLayer { alpha = animatedAlpha }</code> or <code>Modifier.drawBehind { ... }</code>. We use a lambda <code>graphicsLayer</code> for this in lesson 57.</li>
+<li>Tap fast and watch: the card reverses smoothly mid-way. That is interruption working.</li>
+</ul>
+<h3 class="v2-h3">The family of animate*AsState functions</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Animates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>animateFloatAsState</code></td>
+<td><code>Float</code> (alpha, scale, rotation)</td>
+</tr>
+<tr>
+<td><code>animateDpAsState</code></td>
+<td><code>Dp</code> (size, padding, elevation)</td>
+</tr>
+<tr>
+<td><code>animateColorAsState</code></td>
+<td><code>Color</code></td>
+</tr>
+<tr>
+<td><code>animateIntAsState</code></td>
+<td><code>Int</code></td>
+</tr>
+<tr>
+<td><code>animateSizeAsState</code>, <code>animateOffsetAsState</code>, <code>animateIntOffsetAsState</code></td>
+<td>geometry</td>
+</tr>
+<tr>
+<td><code>animateValueAsState</code></td>
+<td>any type, with a <code>TwoWayConverter</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Animation Preview in Android Studio</h3>
+<p class="v2-p">Use <code>@Preview</code> on a composable with a transition-based animation, and the preview shows a small <strong>Start Animation Preview</strong> icon on the composable. Clicking it opens a panel where you can scrub through time, which is the quickest way to tune a duration. It works with <code>updateTransition</code> and <code>AnimatedVisibility</code>. (The exact controls change between Studio versions.)</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: animate*AsState</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 16</div><div class="pt">Step-by-Step Build 2: Animation Specs</div><div class="pc" id="chk5"></div></div><div class="pb2"><p class="v2-p">An <code>animationSpec</code> says how a value moves. Every <code>animate*AsState</code> function accepts one.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun specExamples(expanded: Boolean): List&lt;State&lt;Dp&gt;&gt; {
+    val target = if (expanded) 200.dp else 80.dp
+
+    // 1. tween: fixed duration plus easing
+    val a = animateDpAsState(
+        target,
+        animationSpec = tween(durationMillis = 400, delayMillis = 50, easing = FastOutSlowInEasing),
+        label = "tween"
+    )
+
+    // 2. spring: physics, no duration
+    val b = animateDpAsState(
+        target,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "spring"
+    )
+
+    // 3. keyframes: specify values at times
+    val c = animateDpAsState(
+        target,
+        animationSpec = keyframes {
+            durationMillis = 600
+            120.dp at 150      // reach 120 dp at 150 ms
+            180.dp at 300 using LinearEasing
+        },
+        label = "keyframes"
+    )
+
+    // 4. snap: jump with no animation
+    val d = animateDpAsState(target, animationSpec = snap(), label = "snap")
+
+    return listOf(a, b, c, d)
+}</code></pre></div></div>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Spec</th>
+<th>Use it when</th>
+<th>Feel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spring</code></td>
+<td>Default choice; interactions, gestures</td>
+<td>Natural, interruptible</td>
+</tr>
+<tr>
+<td><code>tween</code></td>
+<td>Fixed timing matters (a splash fade)</td>
+<td>Predictable</td>
+</tr>
+<tr>
+<td><code>keyframes</code></td>
+<td>Custom path, e.g. overshoot</td>
+<td>Choreographed</td>
+</tr>
+<tr>
+<td><code>snap</code></td>
+<td>Reduced motion or instant change</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>repeatable</code> / <code>infiniteRepeatable</code></td>
+<td>Loops</td>
+<td>Repeating</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Spring parameters</h3>
+<ul class="v2-ul">
+<li><strong>dampingRatio</strong>: below 1 it bounces. <code>DampingRatioNoBouncy</code> (1.0) settles without overshoot; <code>DampingRatioHighBouncy</code> bounces a lot.</li>
+<li><strong>stiffness</strong>: how fast it pulls to the target. <code>StiffnessHigh</code> is snappy; <code>StiffnessLow</code> is lazy.</li>
+</ul>
+<h3 class="v2-h3">Easing</h3>
+<p class="v2-p"><code>FastOutSlowInEasing</code> starts quickly and ends gently, the standard for elements moving on the screen. <code>LinearEasing</code> is constant speed and is right for spinners and progress. <code>LinearOutSlowInEasing</code> suits entering elements; <code>FastOutLinearInEasing</code> suits leaving ones.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Animation Specs</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 16</div><div class="pt">Step-by-Step Build 3: AnimatedVisibility</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p"><code>AnimatedVisibility</code> adds the element to the composition with an <strong>enter</strong> transition and removes it with an <strong>exit</strong> transition. Unlike changing <code>alpha</code> to 0, an exited element no longer takes part in layout and is not composed.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ForecastPanel() {
+    var showDetails by remember { mutableStateOf(false) }
+
+    Column(Modifier.padding(16.dp)) {
+        Button(onClick = { showDetails = !showDetails }) {
+            Text(if (showDetails) "Hide forecast" else "Show forecast")
+        }
+
+        AnimatedVisibility(
+            visible = showDetails,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            Card(Modifier.padding(top = 12.dp)) {
+                Text("Mon 31°  Tue 30°  Wed 29°", Modifier.padding(16.dp))
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Enter and exit transitions are combined with <code>+</code>. The built-in ones are:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Enter</th>
+<th>Exit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fadeIn()</code></td>
+<td><code>fadeOut()</code></td>
+</tr>
+<tr>
+<td><code>slideInVertically()</code>, <code>slideInHorizontally()</code></td>
+<td><code>slideOutVertically()</code>, <code>slideOutHorizontally()</code></td>
+</tr>
+<tr>
+<td><code>scaleIn()</code></td>
+<td><code>scaleOut()</code></td>
+</tr>
+<tr>
+<td><code>expandIn()</code>, <code>expandVertically()</code>, <code>expandHorizontally()</code></td>
+<td><code>shrinkOut()</code>, <code>shrinkVertically()</code>, <code>shrinkHorizontally()</code></td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Different animation for children</h3>
+<p class="v2-p">Inside the <code>AnimatedVisibility</code> content, use <code>Modifier.animateEnterExit(enter = ..., exit = ...)</code> to give children their own transitions, for example the background fades while the content slides.</p>
+<h3 class="v2-h3">Visibility from a MutableTransitionState</h3>
+<p class="v2-p">To show something <em>immediately when first composed</em>, pass a <code>MutableTransitionState</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+
+@Composable
+fun WelcomeBanner() {
+    val state = remember { MutableTransitionState(false).apply { targetState = true } }
+    AnimatedVisibility(visibleState = state) {
+        Text("Welcome back!")
+    }
+}</code></pre></div></div>
+<p class="v2-p">The element starts hidden and animates in as soon as the screen appears. <code>state.isIdle</code> and <code>state.currentState</code> tell you when the animation has finished.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: AnimatedVisibility</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 16</div><div class="pt">Step-by-Step Build 4: AnimatedContent and Crossfade</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p"><code>AnimatedContent</code> runs a transition <strong>when a value changes</strong>, animating the old content out and the new content in. It is ideal for counters, tabs and loading → data → error.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+@Composable
+fun TemperatureCounter(temp: Int) {
+    AnimatedContent(
+        targetState = temp,
+        transitionSpec = {
+            if (targetState &gt; initialState) {
+                // value goes up: new number slides up from below
+                (slideInVertically { height -&gt; height } + fadeIn())
+                    .togetherWith(slideOutVertically { height -&gt; -height } + fadeOut())
+            } else {
+                (slideInVertically { height -&gt; -height } + fadeIn())
+                    .togetherWith(slideOutVertically { height -&gt; height } + fadeOut())
+            }.using(SizeTransform(clip = false))
+        },
+        label = "temp"
+    ) { value -&gt;
+        Text("$value°C", style = MaterialTheme.typography.displayMedium)
+    }
+}</code></pre></div></div>
+<p class="v2-p">Key points:</p>
+<ul class="v2-ul">
+<li><code>targetState</code> is the value that decides the content. The lambda receives the <em>state it is animating for</em>, so do <strong>not</strong> read your outer variable inside; use the lambda parameter (<code>value</code>), or the old content would flip too early.</li>
+<li><code>transitionSpec</code> is a receiver lambda with <code>initialState</code> and <code>targetState</code> available, so you can choose a direction.</li>
+<li><code>togetherWith</code> (formerly <code>with</code>) pairs the enter transition and the exit transition.</li>
+<li><code>SizeTransform</code> controls how the container grows from the old content's size to the new.</li>
+</ul>
+<p class="v2-p">For a plain fade between two different screens, <code>Crossfade</code> is simpler:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.Crossfade
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+
+sealed interface LoadState {
+    data object Loading : LoadState
+    data class Ready(val summary: String) : LoadState
+    data class Failed(val message: String) : LoadState
+}
+
+@Composable
+fun WeatherContent(state: LoadState) {
+    Crossfade(targetState = state, label = "load") { s -&gt;
+        when (s) {
+            LoadState.Loading -&gt; CircularProgressIndicator()
+            is LoadState.Ready -&gt; Text(s.summary)
+            is LoadState.Failed -&gt; Text("Error: ${s.message}")
+        }
+    }
+}</code></pre></div></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: AnimatedContent and Crossfade</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 16</div><div class="pt">Step-by-Step Build 5: updateTransition for Several Values</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">When one state change should animate <strong>several properties together</strong>, and you want them to start and finish as a group, use <code>updateTransition</code>. Imagine a "favourite" star: it grows, changes colour and rotates.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.unit.dp
+
+enum class StarState { Off, On }
+
+@Composable
+fun FavouriteStar() {
+    var state by remember { mutableStateOf(StarState.Off) }
+    val transition = updateTransition(targetState = state, label = "star")
+
+    val size by transition.animateDp(
+        transitionSpec = { spring(dampingRatio = 0.4f) },
+        label = "size"
+    ) { s -&gt; if (s == StarState.On) 48.dp else 32.dp }
+
+    val tint by transition.animateColor(label = "tint") { s -&gt;
+        if (s == StarState.On) Color(0xFFFFB300) else Color.Gray
+    }
+
+    val angle by transition.animateFloat(
+        transitionSpec = { tween(400) },
+        label = "angle"
+    ) { s -&gt; if (s == StarState.On) 360f else 0f }
+
+    Icon(
+        imageVector = Icons.Filled.Star,
+        contentDescription = "Favourite",
+        tint = tint,
+        modifier = Modifier
+            .size(size)
+            .rotate(angle)
+            .clickable {
+                state = if (state == StarState.On) StarState.Off else StarState.On
+            }
+    )
+}</code></pre></div></div>
+<p class="v2-p">(For <code>animateColor</code>, import <code>androidx.compose.animation.animateColor</code>.) All three values are driven by <strong>one</strong> <code>state</code>, each with its own spec. The transition also gives you <code>transition.currentState</code>, <code>transition.targetState</code> and <code>transition.isRunning</code>, which is useful for knowing when to start something else. The Animation Preview in Studio can scrub through a <code>Transition</code>.</p>
+<p class="v2-p"><code>AnimatedVisibility</code> and <code>AnimatedContent</code> are themselves built on <code>Transition</code>. You can access it inside their content with <code>transition</code> to add child animations.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: updateTransition for Several Values</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 16</div><div class="pt">Step-by-Step Build 6: Infinite Animations</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">For loading indicators and pulses, use <code>rememberInfiniteTransition</code>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SkeletonLine(modifier: Modifier = Modifier) {
+    val infinite = rememberInfiniteTransition(label = "skeleton")
+    val alpha by infinite.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(20.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .alpha(alpha)
+            .background(Color.LightGray)
+    )
+}</code></pre></div></div>
+<p class="v2-p"><code>RepeatMode.Reverse</code> goes back and forth; <code>RepeatMode.Restart</code> jumps to the start. An infinite animation runs as long as it is in the composition, which is a <strong>battery cost</strong>. Never leave one running in a hidden or off-screen part of the UI, and consider stopping it with <code>AnimatedVisibility</code>, or by removing it from the composition once data has loaded.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Infinite Animations</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 16</div><div class="pt">Step-by-Step Build 7: Animatable and Gesture-Driven Animation</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p"><code>animate*AsState</code> is declarative: "here is the target". Sometimes you need <strong>imperative control</strong>: start from a tap, stop on touch, run steps in sequence, or follow a finger. <code>Animatable</code> holds a value and exposes <code>suspend</code> functions.</p>
+<h3 class="v2-h3">A button that shakes on error</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.offset
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+
+@Composable
+fun ShakeButton(onTap: () -&gt; Boolean) {
+    val offsetX = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+
+    Button(
+        onClick = {
+            val ok = onTap()
+            if (!ok) {
+                scope.launch {
+                    repeat(3) {
+                        offsetX.animateTo(16f, tween(50))
+                        offsetX.animateTo(-16f, tween(50))
+                    }
+                    offsetX.animateTo(0f, tween(50))
+                }
+            }
+        },
+        modifier = Modifier.offset { IntOffset(offsetX.value.roundToInt(), 0) }
+    ) {
+        Text("Submit")
+    }
+}</code></pre></div></div>
+<p class="v2-p">Notice <code>Modifier.offset { ... }</code> with a <strong>lambda</strong>: it reads <code>offsetX.value</code> during the <em>layout</em> phase, so the shaking does not recompose the button. This is the recommended pattern for fast-changing values.</p>
+<p class="v2-p">Key <code>Animatable</code> functions:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>animateTo(target, spec)</code></td>
+<td>Animates to a target; suspends until done; cancels any running animation</td>
+</tr>
+<tr>
+<td><code>snapTo(value)</code></td>
+<td>Jumps instantly</td>
+</tr>
+<tr>
+<td><code>animateDecay(velocity, spec)</code></td>
+<td>Continues with velocity and slows down (fling)</td>
+</tr>
+<tr>
+<td><code>stop()</code></td>
+<td>Stops the current animation</td>
+</tr>
+<tr>
+<td><code>updateBounds(lower, upper)</code></td>
+<td>Limits the value range</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Dragging a card and flinging it back</h3>
+<p class="v2-p">This combines <code>pointerInput</code>, <code>detectDragGestures</code> and <code>Animatable</code>: when the user lets go, the card <strong>springs back</strong> to the centre.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+
+@Composable
+fun DraggableCard() {
+    val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val scope = rememberCoroutineScope()
+
+    Box(Modifier.size(300.dp), contentAlignment = Alignment.Center) {
+        Card(
+            Modifier
+                .offset { IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt()) }
+                .size(160.dp, 100.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDrag = { change, dragAmount -&gt;
+                            change.consume()
+                            scope.launch { offset.snapTo(offset.value + dragAmount) }
+                        },
+                        onDragEnd = {
+                            scope.launch {
+                                offset.animateTo(
+                                    Offset.Zero,
+                                    spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                )
+                            }
+                        }
+                    )
+                }
+        ) {
+            Text("Drag me")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">While dragging, we <code>snapTo</code> the finger position; on release, <code>animateTo(Offset.Zero)</code> with a bouncy spring pulls it home. Because a new <code>animateTo</code> cancels the previous one, touching the card mid-bounce takes over smoothly. (<code>Offset.VectorConverter</code> comes from <code>androidx.compose.ui.geometry</code>; if your Compose version reports it unresolved, add <code>import androidx.compose.animation.core.VectorConverter</code>.) For swipe-to-dismiss, Material 3 already provides <code>SwipeToDismissBox</code>, so build custom gestures only when you need something special.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 7: Animatable and Gesture-Driven Animation</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 16</div><div class="pt">Step-by-Step Build 8: Size, Lists and Visibility Helpers</div><div class="pc" id="chk11"></div></div><div class="pb2"><h3 class="v2-h3">animateContentSize</h3>
+<p class="v2-p">When content grows (a long text expanded with "Read more"), apply <code>Modifier.animateContentSize()</code> to the container and size changes animate for free:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun NewsCard(body: String) {
+    var expanded by remember { mutableStateOf(false) }
+    Card(
+        Modifier
+            .animateContentSize()
+            .clickable { expanded = !expanded }
+    ) {
+        Text(
+            body,
+            Modifier.padding(16.dp),
+            maxLines = if (expanded) Int.MAX_VALUE else 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Order matters.</strong> <code>animateContentSize()</code> must come <strong>before</strong> the size-constraining modifiers that should animate. Put it too late and the animation does nothing.</p>
+<h3 class="v2-h3">List item animations</h3>
+<p class="v2-p">In a <code>LazyColumn</code>, <code>Modifier.animateItem()</code> (lesson 39) animates insertions, removals and reordering, as long as items have <strong>stable keys</strong>. Without keys, Compose cannot know which item moved.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 8: Size, Lists and Visibility Helpers</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 16</div><div class="pt">Step-by-Step Build 9: Five Quick Animations That Make an App Stand Out</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p">The official course has a short piece named <em>5 quick animations to make your app stand out</em>. Here is our own set of five, all small and all built from the tools above.</p>
+<ol class="v2-ol">
+<li><strong>Press feedback.</strong> Scale a card slightly when pressed, using <code>MutableInteractionSource</code>, <code>collectIsPressedAsState</code> and <code>animateFloatAsState</code>.</li>
+<li><strong>Fade-slide entrance</strong> for list rows: <code>AnimatedVisibility</code> with <code>fadeIn() + slideInVertically()</code>, staggered by index.</li>
+<li><strong>Animated counter</strong>: <code>AnimatedContent</code> with a vertical slide for numbers.</li>
+<li><strong>Skeleton loading</strong> with <code>rememberInfiniteTransition</code> (Build 6).</li>
+<li><strong>Expand/collapse</strong> with <code>animateContentSize</code> and a rotating arrow using <code>animateFloatAsState</code>.</li>
+</ol>
+<p class="v2-p">Code for the first one, since it uses a pattern you have not seen:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun PressCard(title: String, onClick: () -&gt; Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) 0.96f else 1f, label = "press")
+
+    Card(
+        Modifier
+            .padding(8.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
+    ) {
+        Text(title, Modifier.padding(24.dp))
+    }
+}</code></pre></div></div>
+<p class="v2-p">The <code>graphicsLayer { }</code> lambda reads <code>scale</code> in the draw phase, so pressing the card never recomposes it.</p>
+<p class="v2-p">Rules of good taste: keep durations short (150–350 ms), animate only what helps understanding, never block the user while an animation plays, and do not animate everything.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 9: Five Quick Animations That Make an App Stand Out</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase13"><div class="ph"><div class="pn">Phase 13 of 16</div><div class="pt">Step-by-Step Build 10: Respecting Reduced Motion and Other Practical Concerns</div><div class="pc" id="chk13"></div></div><div class="pb2"><p class="v2-p">Some users get dizzy from motion, and Android has a developer/accessibility setting that scales or disables animations (<em>Remove animations</em> in accessibility settings, and <em>Animation scale</em> in Developer options). Compose's standard animations follow the system animator duration scale; a custom <code>Animatable</code> follows it too, because it uses the frame clock. Nevertheless, long decorative motion should be <strong>optional</strong> and infinite animations should stop when not needed.</p>
+<p class="v2-p">Other practical points:</p>
+<ul class="v2-ul">
+<li><strong>Previews</strong> can show animation progress with the <em>Animation Preview</em>; use it to tune durations.</li>
+<li><strong>Testing:</strong> the Compose test rule controls time (<code>composeTestRule.mainClock</code>), so you can advance an animation by 500 ms in a test instead of waiting (lesson 45). Infinite animations make <code>waitForIdle</code> hang; <code>mainClock.autoAdvance = false</code> then step manually.</li>
+<li><strong>Performance:</strong> animate with <code>graphicsLayer</code> (alpha, scale, rotation, translation) wherever possible; it avoids recomposition and relayout, and is the cheapest kind of animation (lesson 57).</li>
+<li><strong>Shared element transitions</strong> (an image that flies from a list into a detail screen) exist in Compose via <code>SharedTransitionLayout</code>. The API has been moving, so check its current stability in the official documentation before relying on it in production.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 10: Respecting Reduced Motion and Other Practical Concerns</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(13)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase14"><div class="ph"><div class="pn">Phase 14 of 16</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk14"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: Expandable forecast card</strong></p>
+<p class="v2-p">Build a <code>ForecastCard</code> that shows today's temperature. When tapped, it expands to reveal three more lines (humidity, wind, rain chance). Use <code>animateContentSize</code>, rotate a small arrow icon 180° with <code>animateFloatAsState</code>, and fade the details in with <code>AnimatedVisibility</code>.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun ForecastCard() {
+    var expanded by remember { mutableStateOf(false) }
+    val arrow by animateFloatAsState(if (expanded) 180f else 0f, label = "arrow")
+
+    Card(
+        Modifier
+            .padding(16.dp)
+            .animateContentSize()
+            .clickable { expanded = !expanded }
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Ibadan: 29°C", Modifier.weight(1f))
+                Icon(Icons.Filled.KeyboardArrowDown, "Expand", Modifier.rotate(arrow))
+            }
+            AnimatedVisibility(expanded, enter = fadeIn(), exit = fadeOut()) {
+                Column {
+                    Text("Humidity 78%")
+                    Text("Wind 12 km/h")
+                    Text("Rain chance 40%")
+                }
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p"><code>weight</code> needs the <code>RowScope</code>, which the <code>Row</code> lambda provides.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: A like button with a bounce</strong></p>
+<p class="v2-p">Build a heart button. On tap, the heart scales up to 1.4× and springs back to 1×, while its colour changes to red. Use <code>Animatable</code> and a coroutine so the bounce plays on every tap, even if the state does not change from "liked" to "not liked".</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
+
+@Composable
+fun LikeButton() {
+    var liked by remember { mutableStateOf(false) }
+    val scale = remember { Animatable(1f) }
+    val scope = rememberCoroutineScope()
+    val tint by animateColorAsState(if (liked) Color.Red else Color.Gray, label = "tint")
+
+    Icon(
+        Icons.Filled.Favorite,
+        contentDescription = if (liked) "Unlike" else "Like",
+        tint = tint,
+        modifier = Modifier
+            .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
+            .clickable {
+                liked = !liked
+                scope.launch {
+                    scale.animateTo(1.4f, tween(100))
+                    scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                }
+            }
+    )
+}</code></pre></div></div>
+<p class="v2-p">Each tap starts a new coroutine that restarts the bounce; because <code>animateTo</code> cancels the previous run, rapid taps never pile up.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Choose the API</strong></p>
+<p class="v2-p">For each case choose the best API and say why: (a) a profile photo border that turns green when a user is online; (b) a banner that slides in after a network error; (c) a three-dot "typing…" indicator; (d) a card that follows the finger and snaps to the nearest edge; (e) a tab content area that changes with the selected tab.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>animateColorAsState</code>: one value moving to a new target.
+(b) <code>AnimatedVisibility</code> with <code>slideInVertically() + fadeIn()</code>.
+(c) <code>rememberInfiniteTransition</code> with three staggered <code>animateFloat</code>s using <code>StartOffset</code>.
+(d) <code>Animatable</code> with <code>snapTo</code> while dragging and <code>animateTo</code> on release (or <code>animateDecay</code> plus a snap target).
+(e) <code>AnimatedContent</code> (or <code>Crossfade</code> for a plain fade) keyed on the selected tab.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(14)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase15"><div class="ph"><div class="pn">Phase 15 of 16</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk15"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Using <code>Thread.sleep</code> or manual timers to animate.</strong> <em>What happens:</em> the UI freezes. <em>Fix:</em> use the animation APIs, which run on the frame clock.</p>
+<p class="v2-p"><strong>Mistake #2: Forgetting <code>label</code>.</strong> <em>What happens:</em> nothing breaks, but tools show generic names. <em>Fix:</em> add labels.</p>
+<p class="v2-p"><strong>Mistake #3: Reading the outer variable inside <code>AnimatedContent</code>.</strong> <em>What happens:</em> the old content already shows the new value during the exit animation. <em>Fix:</em> use the lambda's parameter.</p>
+<p class="v2-p"><strong>Mistake #4: Animating <code>alpha</code> to 0 and calling it hidden.</strong> <em>What happens:</em> the invisible element still takes space and receives clicks. <em>Fix:</em> <code>AnimatedVisibility</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Wrong modifier order for <code>animateContentSize</code>.</strong> <em>What happens:</em> no animation. <em>Fix:</em> place it before the size modifiers.</p>
+<p class="v2-p"><strong>Mistake #6: Reading animated state in composition for big trees.</strong> <em>What happens:</em> heavy recomposition each frame. <em>Fix:</em> read in <code>graphicsLayer { }</code> or <code>offset { }</code> lambdas.</p>
+<p class="v2-p"><strong>Mistake #7: Infinite animations that never stop.</strong> <em>What happens:</em> battery drain, test hangs. <em>Fix:</em> remove them when not needed.</p>
+<p class="v2-p"><strong>Mistake #8: Launching <code>animateTo</code> in composition.</strong> <em>What happens:</em> a side effect runs on every recomposition. <em>Fix:</em> start it in <code>LaunchedEffect</code>, or in an event handler through a coroutine scope.</p>
+<p class="v2-p"><strong>Mistake #9: Over-animating.</strong> <em>What happens:</em> the app feels slow. <em>Fix:</em> short durations, only meaningful motion.</p>
+<p class="v2-p"><strong>Mistake #10: Unstable list keys.</strong> <em>What happens:</em> item animations look wrong. <em>Fix:</em> stable ids (lesson 39).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(15)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase16"><div class="ph"><div class="pn">Phase 16 of 16</div><div class="pt">Knowledge Check</div><div class="pc" id="chk16"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is the difference between <code>tween</code> and <code>spring</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>tween</code> runs for a fixed duration along an easing curve. <code>spring</code> uses physics (stiffness and damping), has no fixed duration and keeps velocity when interrupted, so it handles changes of target more naturally.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Which API would you use to show and hide a composable with enter and exit effects?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>AnimatedVisibility</code>, using <code>enter</code> and <code>exit</code> transitions such as <code>fadeIn() + expandVertically()</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> When is <code>Animatable</code> a better choice than <code>animate*AsState</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">When you need imperative control: starting from an event, sequencing animations, stopping them, snapping to a value, or driving the value from a gesture or a fling.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Why use <code>Modifier.graphicsLayer { }</code> or <code>Modifier.offset { }</code> with a lambda for fast animations?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">The lambda reads the animated value in the layout or draw phase, so the animation does not trigger recomposition each frame, which is cheaper.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>updateTransition</code> give you that several separate <code>animate*AsState</code> calls do not?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">One shared state drives several animated values that begin and end as a group, with a single <code>Transition</code> object you can observe and preview in Android Studio.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-2" rel="noopener noreferrer">Jetpack Compose for Android developers, Pathway 2: Layouts, theming and animation</a></li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-animation" rel="noopener noreferrer">Jetpack Compose animation codelab</a></li>
+<li><a href="https://developer.android.com/develop/ui/compose/animation/introduction" rel="noopener noreferrer">Animation in Compose (documentation)</a></li>
+<li><a href="https://developer.android.com/courses/jetpack-compose/course" rel="noopener noreferrer">Jetpack Compose course page</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(16)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Weather Dashboard with Motion</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a small dashboard that uses at least five different animation APIs in a way that helps the user.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>A <strong>refresh button</strong> that rotates an icon while loading (infinite or <code>Animatable</code>) and swaps the content between <em>Loading</em> skeleton, <em>Ready</em> data and <em>Error</em> using <code>AnimatedContent</code> or <code>Crossfade</code>.</li>
+<li>A big temperature number that changes with an <code>AnimatedContent</code> vertical slide each time you press <strong>Next city</strong>.</li>
+<li>A list of three cities as expandable cards, using <code>animateContentSize</code> and an arrow rotation.</li>
+<li>A <strong>favourite star</strong> using <code>updateTransition</code> (size, colour, rotation).</li>
+<li>A press-scale effect on the cards via <code>graphicsLayer</code>.</li>
+<li>All loading and fake data is local (use <code>delay(1000)</code> in a coroutine).</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> add a drag-to-refresh pull gesture using <code>Animatable</code>, or a reduced-motion switch that replaces every <code>tween</code> and <code>spring</code> with <code>snap()</code>.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Dashboard.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.weatherboard
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+sealed interface Load {
+    data object Loading : Load
+    data class Ready(val temp: Int) : Load
+    data class Error(val msg: String) : Load
+}
+
+@Composable
+fun Dashboard() {
+    var load by remember { mutableStateOf&lt;Load&gt;(Load.Ready(29)) }
+    var attempt by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+
+    Column(Modifier.padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Ibadan", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            SpinningRefresh(spinning = load is Load.Loading) {
+                scope.launch {
+                    load = Load.Loading
+                    delay(1000)
+                    attempt++
+                    load = if (attempt % 3 == 0) Load.Error("No network") else Load.Ready(26 + attempt % 7)
+                }
+            }
+        }
+
+        Crossfade(targetState = load is Load.Loading, label = "loading") { loading -&gt;
+            if (loading) {
+                Text("Loading…")
+            } else {
+                when (val s = load) {
+                    is Load.Ready -&gt; AnimatedContent(
+                        targetState = s.temp,
+                        transitionSpec = {
+                            (slideInVertically { it } + fadeIn())
+                                .togetherWith(slideOutVertically { -it } + fadeOut())
+                        },
+                        label = "temp"
+                    ) { t -&gt; Text("$t°C", style = MaterialTheme.typography.displayMedium) }
+                    is Load.Error -&gt; Text("Error: ${s.msg}", color = MaterialTheme.colorScheme.error)
+                    Load.Loading -&gt; {}
+                }
+            }
+        }
+
+        listOf("Lagos", "Abuja", "Kano").forEach { city -&gt; CityCard(city) }
+    }
+}
+
+@Composable
+fun SpinningRefresh(spinning: Boolean, onClick: () -&gt; Unit) {
+    val infinite = rememberInfiniteTransition(label = "spin")
+    val angle by infinite.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(900, easing = LinearEasing), RepeatMode.Restart),
+        label = "angle"
+    )
+    Button(onClick = onClick, enabled = !spinning) {
+        Icon(Icons.Filled.Refresh, "Refresh", Modifier.rotate(if (spinning) angle else 0f))
+    }
+}
+
+@Composable
+fun CityCard(city: String) {
+    var expanded by remember { mutableStateOf(false) }
+    val arrow by animateFloatAsState(if (expanded) 180f else 0f, label = "arrow")
+    val scale by animateFloatAsState(if (expanded) 1.02f else 1f, label = "scale")
+
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .animateContentSize()
+            .clickable { expanded = !expanded }
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(city, Modifier.weight(1f))
+                Icon(Icons.Filled.KeyboardArrowDown, "Expand", Modifier.rotate(arrow))
+            }
+            if (expanded) {
+                Text("Humidity 72%")
+                Text("Wind 10 km/h")
+            }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">The favourite star from requirement 4 is the <code>FavouriteStar</code> composable from Build 5; place one in each <code>CityCard</code> row. This solution uses <code>Crossfade</code>, <code>AnimatedContent</code>, <code>rememberInfiniteTransition</code>, <code>animateFloatAsState</code>, <code>graphicsLayer</code> and <code>animateContentSize</code> together. Note that the <code>Crossfade</code> hides the old value while loading, and that the spinning icon only rotates when <code>spinning</code> is true, so the infinite transition runs but visually rests otherwise (for a battery-conscious version, place the spinner in its own composable that exists only while loading).</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 41 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-41-animation-in-compose</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 41 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Choosing an Animation API</li><li>✅ Step-by-Step Build 1: animate*AsState</li><li>✅ Step-by-Step Build 2: Animation Specs</li><li>✅ Step-by-Step Build 3: AnimatedVisibility</li><li>✅ Step-by-Step Build 4: AnimatedContent and Crossfade</li><li>✅ Step-by-Step Build 5: updateTransition for Several Values</li><li>✅ Step-by-Step Build 6: Infinite Animations</li><li>✅ Step-by-Step Build 7: Animatable and Gesture-Driven Animation</li><li>✅ Step-by-Step Build 8: Size, Lists and Visibility Helpers</li><li>✅ Step-by-Step Build 9: Five Quick Animations That Make an App Stand Out</li><li>✅ Step-by-Step Build 10: Respecting Reduced Motion and Other Practical Concerns</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_40.html" class="ln-btn">&#8592; Lesson 40</a><a href="lesson_42.html" class="ln-btn primary">Lesson 42 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 41 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

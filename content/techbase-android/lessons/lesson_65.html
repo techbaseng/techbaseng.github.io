@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 65: Dependency Injection with Hilt and Modularization — Techbase Android</title>
+</head>
+<body data-total="12" data-key="techbase_android_l65">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 65 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 65</div>
+      <h1>Dependency Injection with Hilt and Modularization</h1>
+      <div class="l-hero-sub">12 phases &nbsp;·&nbsp; Build: FeeTracker with Hilt and Modules</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 65</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Replace manual DI with Hilt, structure a multi-module project, and finish the architecture quiz.</p></div><div class="wm"><span>📚 12 phases</span><span>🏗️ FeeTracker with Hilt and Modules</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 12</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">By lesson 64 FeeTracker and RegisterSync had a database, a repository, a sync worker, use cases and ViewModels. Every one of those objects needs other objects to work, and someone has to <strong>create them in the right order and hand them over</strong>. So far you did that by hand in an <code>AppContainer</code> (lesson 30). That works for a small app. As the object graph grows, the manual wiring becomes long, repetitive and easy to get wrong.</p>
+<p class="v2-p"><strong>Dependency injection (DI)</strong> is the technique of <strong>giving a class the things it needs</strong> instead of letting it create them. <strong>Hilt</strong> is Google's recommended DI library for Android: it generates the wiring code at build time. This lesson also covers <strong>modularisation</strong>, splitting an app into Gradle modules so that the dependency rules of the previous lessons are enforced by the build.</p>
+<p class="v2-p">It completes the <strong>Modern Android App Architecture</strong> programme (https://developer.android.com/courses/android-architecture), drawing on https://developer.android.com/training/dependency-injection, the Hilt guide (https://developer.android.com/training/dependency-injection/hilt-android) and the modularisation guide (https://developer.android.com/topic/modularization).</p>
+<p class="v2-p">By the end you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain <strong>dependency injection</strong> and <strong>inversion of control</strong> in plain words.</li>
+<li>Set up <strong>Hilt</strong> with <strong>KSP</strong>, and use <code>@HiltAndroidApp</code>, <code>@AndroidEntryPoint</code>, <code>@HiltViewModel</code>, <code>@Inject</code>.</li>
+<li>Write <strong>modules</strong> with <code>@Provides</code> and <code>@Binds</code>, choose <strong>scopes</strong> and <strong>qualifiers</strong>.</li>
+<li>Inject <strong>dispatchers</strong>, <strong>Room</strong>, <strong>Retrofit</strong> and <strong>WorkManager workers</strong>.</li>
+<li><strong>Replace</strong> dependencies in tests with <code>@TestInstallIn</code>.</li>
+<li>Design a <strong>multi-module</strong> project (app, feature and core modules), use <code>api</code> versus <code>implementation</code>, and meet <strong>convention plugins</strong>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Big idea:</strong> a class should say <strong>what it needs</strong> in its constructor and not care <strong>where it comes from</strong>. A DI framework is just a machine that builds the object graph for you.</p>
+<p class="v2-p"><strong>Honesty note:</strong> Hilt and AndroidX Hilt artifacts are renamed and reorganised from time to time (for example, where <code>hiltViewModel()</code> lives). Version numbers below are placeholders. Always check the Hilt setup page for the current coordinates.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 12</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><ul class="v2-ul">
+<li><strong>Layers and the dependency rule</strong> (lessons 60 to 63).</li>
+<li><strong>Repositories and data sources</strong> (lesson 62).</li>
+<li><strong>The manual app container</strong> (lesson 30).</li>
+<li><strong>Interfaces and fakes</strong> (lesson 60).</li>
+<li><strong>Gradle Kotlin DSL and version catalogs</strong> (lessons 3 and 34).</li>
+<li><strong>WorkManager</strong> (lesson 64).</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 12</div><div class="pt">Conceptual Understanding: What Is Dependency Injection?</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Without DI</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FeeViewModel : ViewModel() {
+    private val repository = DefaultPaymentsRepository(          // the class builds its own dependency
+        local = RoomPaymentsLocalDataSource(Room.databaseBuilder(...).build().paymentDao()),
+        remote = RetrofitPaymentsRemoteDataSource(Retrofit.Builder().build().create(PaymentApi::class.java))
+    )
+}</code></pre></div></div>
+<p class="v2-p">Problems: the ViewModel knows <strong>how</strong> to build a database and a network client; two ViewModels will build <strong>two</strong> databases; and you cannot test it with a fake.</p>
+<h3 class="v2-h3">With DI (by hand)</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class FeeViewModel(private val repository: PaymentsRepository) : ViewModel()</code></pre></div></div>
+<p class="v2-p">The class <strong>declares</strong> what it needs. Someone else, the <strong>container</strong>, decides which implementation to give: the real one in production, a fake in tests. That change of responsibility is called <strong>inversion of control</strong>.</p>
+<h3 class="v2-h3">Why a framework?</h3>
+<p class="v2-p">For a few classes, manual injection (lesson 30's container) is fine and has no magic. Frameworks pay off when:</p>
+<ul class="v2-ul">
+<li>there are <strong>many</strong> classes and several scopes (app, screen, request);</li>
+<li>you need <strong>per-screen lifetimes</strong>, such as one ViewModel dependency per ViewModel;</li>
+<li>you want <strong>compile-time checking</strong> (a missing binding is a build error, not a crash);</li>
+<li>you need <strong>test replacement</strong> of whole parts of the graph.</li>
+</ul>
+<h3 class="v2-h3">Hilt in one picture</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltAndroidApp  Application
+        │ creates
+        ▼
+SingletonComponent (lives as long as the app)
+  ├─ Database, Retrofit, Repositories (@Singleton)
+  └─ ActivityRetainedComponent
+        └─ ViewModelComponent
+              └─ @HiltViewModel classes get their constructor parameters here</code></pre></div></div>
+<p class="v2-p">Hilt builds a <strong>component</strong> for each Android class that has its own lifetime (application, activity, ViewModel, fragment, service) and puts your bindings in the right one.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What Is Dependency Injection?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 12</div><div class="pt">Step-by-Step Build 1: Set Up Hilt</div><div class="pc" id="chk4"></div></div><div class="pb2"><h3 class="v2-h3">Version catalog</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">libs.versions.toml</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>[versions]
+hilt = "&lt;latest stable&gt;"
+ksp = "&lt;matches your Kotlin version&gt;"
+hiltNavigationCompose = "&lt;latest stable&gt;"
+
+[libraries]
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+
+[plugins]
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }</code></pre></div></div>
+<p class="v2-p">Hilt supports <strong>KSP</strong> (the same processor used for Room in lesson 34), so you do not need KAPT. (Check the Hilt page: very old guides still show KAPT.)</p>
+<h3 class="v2-h3">Build files</h3>
+<p class="v2-p">Project-level <code>build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.ksp) apply false
+}</code></pre></div></div>
+<p class="v2-p">App-level <code>build.gradle.kts</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+}
+
+dependencies {
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)    // hiltViewModel() for Compose; where this lives may change, check docs
+}</code></pre></div></div>
+<h3 class="v2-h3">The application class</h3>
+<p class="v2-p">Every Hilt app needs one annotated <code>Application</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltAndroidApp
+class FeeApplication : Application()</code></pre></div></div>
+<p class="v2-p">Register it with <code>android:name=".FeeApplication"</code> in the manifest. This annotation generates the base component and <strong>triggers code generation</strong>; without it nothing works.</p>
+<h3 class="v2-h3">Entry points</h3>
+<p class="v2-p">Android classes that Hilt can inject into are annotated with <code>@AndroidEntryPoint</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent { AppTheme { FeeNavHost() } }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Supported entry points include <code>Application</code>, <code>Activity</code> (a <code>ComponentActivity</code> subclass), <code>Fragment</code>, <code>View</code>, <code>Service</code> and <code>BroadcastReceiver</code>. In a Compose app you usually need only the Activity.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: Set Up Hilt</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 12</div><div class="pt">Step-by-Step Build 2: Constructor Injection and ViewModels</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3"><code>@Inject constructor</code></h3>
+<p class="v2-p">If Hilt can create a class by calling its constructor, just mark the constructor:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class CalculateFeeSummary @Inject constructor() {
+    operator fun invoke(payments: List&lt;Payment&gt;): FeeSummary { /* ... */ }
+}
+
+class GetStudentBalancesUseCase @Inject constructor(
+    private val studentsRepository: StudentsRepository,
+    private val paymentsRepository: PaymentsRepository,
+    @DefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) { /* ... */ }</code></pre></div></div>
+<p class="v2-p">Hilt now knows how to build both. Their own dependencies (<code>StudentsRepository</code>, dispatcher) must be provided somewhere (Build 3).</p>
+<h3 class="v2-h3"><code>@HiltViewModel</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltViewModel
+class StudentsViewModel @Inject constructor(
+    getBalances: GetStudentBalancesUseCase,
+    private val savedStateHandle: SavedStateHandle        // provided automatically
+) : ViewModel() {
+    // as in lesson 61
+}</code></pre></div></div>
+<p class="v2-p">Hilt supplies a <code>SavedStateHandle</code> for any <code>@HiltViewModel</code>. No factory class is needed any more; compare it with the <code>FeeViewModelFactory</code> of lesson 60.</p>
+<h3 class="v2-h3">In Compose</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.hilt.navigation.compose.hiltViewModel
+
+@Composable
+fun StudentsRoute(viewModel: StudentsViewModel = hiltViewModel()) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    StudentsScreen(state)
+}</code></pre></div></div>
+<p class="v2-p"><code>hiltViewModel()</code> creates (or reuses) the ViewModel scoped to the current <strong>navigation back-stack entry</strong>, so each screen gets its own, and it is cleared when the screen leaves the stack. For a ViewModel shared by a whole nested graph, pass the parent entry as in lesson 55: <code>hiltViewModel(parentEntry)</code>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Constructor Injection and ViewModels</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 12</div><div class="pt">Step-by-Step Build 3: Modules, `@Provides` and `@Binds`</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Hilt cannot construct everything with <code>@Inject</code>. You cannot annotate Room's database builder or Retrofit, and an <strong>interface</strong> needs an implementation chosen. For that you write <strong>modules</strong>.</p>
+<h3 class="v2-h3"><code>@Binds</code>: an interface to an implementation</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindPaymentsRepository(impl: DefaultPaymentsRepository): PaymentsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindStudentsRepository(impl: DefaultStudentsRepository): StudentsRepository
+}</code></pre></div></div>
+<p class="v2-p"><code>DefaultPaymentsRepository</code> has an <code>@Inject constructor</code>; <code>@Binds</code> says "when someone asks for <code>PaymentsRepository</code>, give them that class". <code>@Binds</code> is an <strong>abstract function</strong> in an <strong>abstract class</strong> and generates less code than <code>@Provides</code>, so prefer it when you only choose an implementation.</p>
+<h3 class="v2-h3"><code>@Provides</code>: objects you build yourself</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): FeeDatabase =
+        Room.databaseBuilder&lt;FeeDatabase&gt;(context, "fee_database")
+            .setDriver(AndroidSQLiteDriver())
+            .build()
+
+    @Provides
+    fun providePaymentDao(db: FeeDatabase): PaymentDao = db.paymentDao()
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+
+    @Provides
+    @Singleton
+    fun provideOkHttp(): OkHttpClient = OkHttpClient.Builder()
+        .callTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    @Provides
+    @Singleton
+    fun providePaymentApi(client: OkHttpClient): PaymentApi =
+        Retrofit.Builder()
+            .baseUrl("https://api.example.com/")
+            .client(client)
+            .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(PaymentApi::class.java)
+}</code></pre></div></div>
+<p class="v2-p">Notes:</p>
+<ul class="v2-ul">
+<li><code>@ApplicationContext</code> is a built-in qualifier that gives the <strong>application</strong> context (no leak risk).</li>
+<li><code>@InstallIn(SingletonComponent::class)</code> puts the binding in the application-wide component.</li>
+<li><code>@Provides fun providePaymentDao(db)</code> has no scope: the DAO is cheap, and it asks for the database, which is a singleton.</li>
+<li>(Check the Room 3 builder syntax against lesson 34; for Room 2.x use <code>Room.databaseBuilder(context, FeeDatabase::class.java, "fee_database")</code>.)</li>
+</ul>
+<h3 class="v2-h3">Scopes</h3>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Scope annotation</th>
+<th>Component</th>
+<th>Lifetime</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@Singleton</code></td>
+<td><code>SingletonComponent</code></td>
+<td>The whole app process</td>
+</tr>
+<tr>
+<td><code>@ActivityRetainedScoped</code></td>
+<td><code>ActivityRetainedComponent</code></td>
+<td>Survives configuration changes of an activity</td>
+</tr>
+<tr>
+<td><code>@ViewModelScoped</code></td>
+<td><code>ViewModelComponent</code></td>
+<td>Same instance within one ViewModel</td>
+</tr>
+<tr>
+<td><code>@ActivityScoped</code>, <code>@FragmentScoped</code></td>
+<td>Activity / Fragment</td>
+<td>Their lifetimes</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p"><strong>Scope only what must be shared or is expensive</strong> (database, HTTP client, repositories that hold state). An unscoped binding creates a <strong>new instance every time</strong> it is injected, which is fine for stateless helpers. Scoping everything keeps objects alive longer than needed.</p>
+<h3 class="v2-h3">Qualifiers: two bindings of the same type</h3>
+<p class="v2-p">You often need several <code>CoroutineDispatcher</code>s. A <strong>qualifier</strong> tells Hilt which one:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Qualifier @Retention(AnnotationRetention.BINARY) annotation class IoDispatcher
+@Qualifier @Retention(AnnotationRetention.BINARY) annotation class DefaultDispatcher
+@Qualifier @Retention(AnnotationRetention.BINARY) annotation class ApplicationScope
+
+@Module
+@InstallIn(SingletonComponent::class)
+object CoroutinesModule {
+
+    @Provides @IoDispatcher
+    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides @DefaultDispatcher
+    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @Provides @Singleton @ApplicationScope
+    fun provideApplicationScope(@DefaultDispatcher dispatcher: CoroutineDispatcher): CoroutineScope =
+        CoroutineScope(SupervisorJob() + dispatcher)
+}</code></pre></div></div>
+<p class="v2-p">Now repositories ask for <code>@IoDispatcher ioDispatcher: CoroutineDispatcher</code>, which is exactly the injectable dispatcher pattern recommended since lesson 60, and the application scope from lesson 62 comes from one place.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Modules, `@Provides` and `@Binds`</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 12</div><div class="pt">Step-by-Step Build 4: Workers, Navigation and Other Entry Points</div><div class="pc" id="chk7"></div></div><div class="pb2"><h3 class="v2-h3">Hilt and WorkManager</h3>
+<p class="v2-p"><code>SyncWorker</code> from lesson 64 needed a hand-written factory. Hilt offers <code>@HiltWorker</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltWorker
+class SyncWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
+    @Assisted params: WorkerParameters,
+    private val repository: AttendanceRepository
+) : CoroutineWorker(appContext, params) {
+    override suspend fun doWork(): Result =
+        if (repository.syncNow().isSuccess) Result.success() else Result.retry()
+}</code></pre></div></div>
+<p class="v2-p">and the application supplies the factory:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltAndroidApp
+class FeeApplication : Application(), Configuration.Provider {
+
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
+}</code></pre></div></div>
+<p class="v2-p">This needs the <code>androidx.hilt:hilt-work</code> dependency and its KSP compiler. (The exact property name in <code>Configuration.Provider</code> has changed between WorkManager versions: older code uses a <code>getWorkManagerConfiguration()</code> function. Check the current WorkManager documentation. Also disable the default initializer in the manifest, as the guide shows.)</p>
+<h3 class="v2-h3">Injecting where Hilt cannot reach: entry points</h3>
+<p class="v2-p">For classes Hilt does not manage (a <code>ContentProvider</code>, third-party code), use <code>@EntryPoint</code> with <code>EntryPointAccessors</code>. It is an advanced tool; if you can use <code>@AndroidEntryPoint</code> instead, do so.</p>
+<h3 class="v2-h3">Assisted injection for runtime parameters</h3>
+<p class="v2-p">A class that needs both injected dependencies and a runtime value (for example a student id picked on screen) can use <code>@AssistedInject</code> and <code>@AssistedFactory</code>. In a ViewModel, the usual alternative is simpler: read the value from <code>SavedStateHandle</code>, which holds navigation arguments (lesson 55).</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 4: Workers, Navigation and Other Entry Points</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 12</div><div class="pt">Step-by-Step Build 5: Testing with Hilt</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p">DI exists so tests can swap parts. Hilt supports this for instrumented tests.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Module
+@TestInstallIn(
+    components = [SingletonComponent::class],
+    replaces = [RepositoryModule::class]
+)
+abstract class FakeRepositoryModule {
+    @Binds @Singleton
+    abstract fun bindPayments(fake: FakePaymentsRepository): PaymentsRepository
+}</code></pre></div></div>
+<p class="v2-p">Create a custom test runner that uses Hilt's test application:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class HiltTestRunner : AndroidJUnitRunner() {
+    override fun newApplication(cl: ClassLoader?, name: String?, context: Context?): Application =
+        super.newApplication(cl, HiltTestApplication::class.java.name, context)
+}</code></pre></div></div>
+<p class="v2-p">Set <code>testInstrumentationRunner = "com.example.fees.HiltTestRunner"</code> in the module's <code>defaultConfig</code>, then write the test:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@HiltAndroidTest
+class StudentsScreenTest {
+
+    @get:Rule(order = 0) val hiltRule = HiltAndroidRule(this)
+    @get:Rule(order = 1) val composeRule = createAndroidComposeRule&lt;MainActivity&gt;()
+
+    @Before fun setUp() { hiltRule.inject() }
+
+    @Test
+    fun shows_students_from_fake_repository() {
+        composeRule.onNodeWithText("Adaeze Okoye").assertExists()
+    }
+}</code></pre></div></div>
+<p class="v2-p">Hilt replaces <code>RepositoryModule</code> with <code>FakeRepositoryModule</code> for tests only, so the <strong>real screen</strong> runs against <strong>fake data</strong>, with no network. For plain <strong>unit tests</strong> (JUnit on the JVM), you do not need Hilt at all: call constructors directly with fakes, as in lessons 60 to 63. That is the best proof of good DI: <strong>your classes work without the framework</strong>.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 5: Testing with Hilt</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 12</div><div class="pt">Step-by-Step Build 6: Modularisation</div><div class="pc" id="chk9"></div></div><div class="pb2"><h3 class="v2-h3">Why split into modules?</h3>
+<p class="v2-p">As an app grows, one Gradle module (<code>:app</code>) becomes slow to build and easy to tangle. The modularisation guide gives these benefits:</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Reusability</strong></td>
+<td>Share a module across apps or form factors</td>
+</tr>
+<tr>
+<td><strong>Strict visibility control</strong></td>
+<td><code>internal</code> and <code>implementation</code> hide details</td>
+</tr>
+<tr>
+<td><strong>Customisable delivery</strong></td>
+<td>Dynamic feature delivery on Play</td>
+</tr>
+<tr>
+<td><strong>Scalability and ownership</strong></td>
+<td>Teams own modules</td>
+</tr>
+<tr>
+<td><strong>Faster builds</strong></td>
+<td>Gradle builds only changed modules, and in parallel</td>
+</tr>
+<tr>
+<td><strong>Enforced architecture</strong></td>
+<td>The build prevents illegal dependencies</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">There are costs: more build files, more configuration, harder refactors across modules. <strong>Do not modularise a tiny app.</strong> A good trigger is when builds are slow, several developers collide, or you need to reuse code in a second app or target.</p>
+<h3 class="v2-h3">A typical structure</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>:app                      assembles the app; navigation graph; Hilt application
+:feature:students         screen, ViewModel (UI layer for one feature)
+:feature:payments
+:core:model               plain Kotlin data models shared everywhere
+:core:domain              use cases (plain Kotlin / Android library)
+:core:data                repositories (implementation)
+:core:database            Room database, DAOs, entities
+:core:network             Retrofit services, DTOs
+:core:ui                  shared composables, theme
+:core:testing             fakes and test utilities</code></pre></div></div>
+<p class="v2-p">Dependency rules:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>:app ──► :feature:* ──► :core:domain ──► :core:data ──► :core:database, :core:network
+                    └─► :core:ui                 └─► :core:model (everyone may use)</code></pre></div></div>
+<ul class="v2-ul">
+<li><strong>Feature modules depend on core modules, never on each other.</strong> Navigation between features goes through <strong>routes</strong> known to <code>:app</code> or a small <code>:core:navigation</code> module.</li>
+<li><strong>Core modules never depend on feature modules.</strong></li>
+<li>The <strong>data layer</strong> modules know nothing of the UI.</li>
+</ul>
+<h3 class="v2-h3"><code>implementation</code> versus <code>api</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// :core:data/build.gradle.kts
+dependencies {
+    implementation(project(":core:database"))   // hidden from modules that depend on :core:data
+    implementation(project(":core:network"))
+    api(project(":core:model"))                  // exposed: :core:data's public API returns model classes
+}</code></pre></div></div>
+<ul class="v2-ul">
+<li><code>implementation</code>: the dependency is an <strong>internal detail</strong>. Modules that depend on <code>:core:data</code> do <strong>not</strong> see <code>:core:database</code>. This speeds builds (changes recompile fewer modules) and enforces the rule that the UI never touches DAOs.</li>
+<li><code>api</code>: the dependency is part of <strong>your public API</strong> (your function signatures expose its types), so consumers see it too. Use sparingly.</li>
+</ul>
+<h3 class="v2-h3">Hilt across modules</h3>
+<p class="v2-p">Each module may contain its own <code>@Module @InstallIn(SingletonComponent::class)</code> classes; Hilt aggregates them in <code>:app</code>. The <code>:app</code> module must be able to see (depend on) all modules that contribute bindings, which is why <code>:app</code> depends on every feature and core module it assembles. Interfaces live in a lower module (for example <code>PaymentsRepository</code> in <code>:core:data</code>'s API or in <code>:core:domain</code>), with implementations hidden using <code>internal</code>.</p>
+<h3 class="v2-h3">Convention plugins (an introduction)</h3>
+<p class="v2-p">Ten modules means ten near-identical <code>build.gradle.kts</code> files: compile SDK, Kotlin options, Compose, Hilt. Instead of copying, put the shared setup into <strong>convention plugins</strong> in an included build (commonly named <code>build-logic</code>) and apply a one-liner in each module:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// :feature:students/build.gradle.kts
+plugins {
+    alias(libs.plugins.myapp.android.feature)      // applies library + Compose + Hilt + test setup
+}
+dependencies {
+    implementation(project(":core:domain"))
+    implementation(project(":core:ui"))
+}</code></pre></div></div>
+<p class="v2-p">Writing convention plugins is an advanced Gradle topic. For now, know <strong>why</strong> they exist, and look at the official <strong>Now in Android</strong> sample (https://github.com/android/nowinandroid), which uses a modular, offline-first architecture with Hilt, as a real-world reference.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 6: Modularisation</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 12</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk10"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: <code>@Binds</code> or <code>@Provides</code>?</strong></p>
+<p class="v2-p">Choose for each: (a) mapping <code>PaymentsRepository</code> to <code>DefaultPaymentsRepository</code>; (b) building a <code>Retrofit</code> instance; (c) providing <code>Dispatchers.IO</code>; (d) exposing a DAO from a database.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">(a) <code>@Binds</code> (just an implementation choice). (b) <code>@Provides</code> (you run builder code). (c) <code>@Provides</code> with a qualifier. (d) <code>@Provides</code>, calling <code>db.paymentDao()</code>.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Fix the scope</strong></p>
+<p class="v2-p">A teammate annotated every repository, use case and mapper with <code>@Singleton</code>. Explain the downside and what to scope instead.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Singletons live as long as the process, so stateless helpers stay in memory and hidden shared state can leak between screens. Scope only what must be shared or is costly to create: the database, HTTP client and repositories that hold state or caches. Leave use cases, mappers and formatters unscoped (a new light instance each time).</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Module rules</strong></p>
+<p class="v2-p"><code>:feature:payments</code> needs a list of students for a drop-down, and a developer adds <code>implementation(project(":feature:students"))</code>. What is wrong and what is the better design?</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p">Feature modules should not depend on each other, because that creates tangles and cycles and defeats parallel builds and ownership. Move the shared piece to a core module: for data, expose it through a repository in <code>:core:data</code> (and a model in <code>:core:model</code>); for a shared UI component, put it in <code>:core:ui</code>. Both features then depend on the core module.</p></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Guided Practice Exercises</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase11"><div class="ph"><div class="pn">Phase 11 of 12</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk11"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Forgetting <code>@HiltAndroidApp</code>.</strong> <em>Fix:</em> annotate the Application and register it in the manifest.</p>
+<p class="v2-p"><strong>Mistake #2: Forgetting <code>@AndroidEntryPoint</code> on the Activity.</strong> <em>Fix:</em> add it; the error is "ViewModel not injected".</p>
+<p class="v2-p"><strong>Mistake #3: Using KAPT for new projects.</strong> <em>Fix:</em> use KSP.</p>
+<p class="v2-p"><strong>Mistake #4: Scoping everything as <code>@Singleton</code>.</strong> <em>Fix:</em> scope only what needs it.</p>
+<p class="v2-p"><strong>Mistake #5: Two bindings of one type without a qualifier.</strong> <em>Fix:</em> add qualifiers.</p>
+<p class="v2-p"><strong>Mistake #6: Passing <code>Context</code> into repositories.</strong> <em>Fix:</em> use <code>@ApplicationContext</code> only where truly needed (databases), not in domain classes.</p>
+<p class="v2-p"><strong>Mistake #7: Making classes depend on Hilt in unit tests.</strong> <em>Fix:</em> inject through constructors; call constructors in tests.</p>
+<p class="v2-p"><strong>Mistake #8: Feature modules depending on each other.</strong> <em>Fix:</em> shared code goes in core modules.</p>
+<p class="v2-p"><strong>Mistake #9: Using <code>api</code> everywhere.</strong> <em>Fix:</em> default to <code>implementation</code>.</p>
+<p class="v2-p"><strong>Mistake #10: Modularising a tiny app.</strong> <em>Fix:</em> wait for a real pain point.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(11)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase12"><div class="ph"><div class="pn">Phase 12 of 12</div><div class="pt">Knowledge Check</div><div class="pc" id="chk12"></div></div><div class="pb2"><p class="v2-p"><strong>Question 1.</strong> What is inversion of control?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">A class declares the dependencies it needs, and someone else decides which implementations to provide.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does <code>@HiltViewModel</code> plus <code>@Inject constructor</code> replace?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">The hand-written <code>ViewModelProvider.Factory</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What is the difference between <code>@Binds</code> and <code>@Provides</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>@Binds</code> (abstract) maps an interface to an injectable implementation; <code>@Provides</code> runs code to create an object you cannot construct by annotation.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> What is the difference between <code>implementation</code> and <code>api</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>implementation</code> hides the dependency from consumers; <code>api</code> exposes it as part of your public API.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> How does Hilt help testing?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p"><code>@TestInstallIn</code> replaces real modules with fake ones in instrumented tests, so the real app code runs against fake dependencies.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/android-architecture" rel="noopener noreferrer">Modern Android App Architecture programme</a></li>
+<li><a href="https://developer.android.com/training/dependency-injection/hilt-android" rel="noopener noreferrer">Dependency injection with Hilt</a></li>
+<li><a href="https://developer.android.com/training/dependency-injection/hilt-testing" rel="noopener noreferrer">Hilt testing guide</a></li>
+<li><a href="https://developer.android.com/topic/modularization" rel="noopener noreferrer">Guide to Android app modularisation</a></li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(12)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">FeeTracker with Hilt and Modules</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Replace the manual container with Hilt and split the project into modules.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Add Hilt with KSP; annotate the Application and the Activity.</li>
+<li>Convert ViewModels to <code>@HiltViewModel</code> and use <code>hiltViewModel()</code> in routes.</li>
+<li>Write <code>RepositoryModule</code> (<code>@Binds</code>), <code>DatabaseModule</code>, <code>NetworkModule</code> and <code>CoroutinesModule</code> with qualified dispatchers.</li>
+<li>Move the sync worker to <code>@HiltWorker</code>.</li>
+<li>Split into at least <code>:app</code>, <code>:core:model</code>, <code>:core:data</code> and <code>:feature:students</code>, following the dependency rules, using <code>implementation</code> by default.</li>
+<li>Write one <code>@HiltAndroidTest</code> UI test with a <code>@TestInstallIn</code> fake repository module.</li>
+<li>Keep your plain JVM unit tests passing without Hilt.</li>
+<li>Write a short note drawing your module graph and saying why each <code>api</code> (if any) is necessary.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> create a <code>:core:ui</code> module and a first convention plugin that applies the Android library and Compose setup to feature modules.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><p class="v2-p">The module graph and one build file:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>:app
+ ├─ :feature:students ──► :core:data ──► :core:model (api)
+ │                     └► :core:ui
+ └─ :feature:payments ──► :core:data</code></pre></div></div>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>// :core:data/build.gradle.kts
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+}
+
+android {
+    namespace = "com.example.fees.core.data"
+    compileSdk = 36
+}
+
+dependencies {
+    api(project(":core:model"))          // repository functions return model classes
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.kotlinx.coroutines.android)
+}</code></pre></div></div>
+<p class="v2-p">A feature route that still does not know any Hilt module:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun StudentsRoute(
+    onOpenStudent: (Int) -&gt; Unit,
+    viewModel: StudentsViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    StudentsScreen(state = state, onOpenStudent = onOpenStudent)
+}</code></pre></div></div>
+<p class="v2-p">Because <code>:feature:students</code> sees only repository interfaces and model classes, a developer who tries to import <code>PaymentDao</code> there gets a compile error. The architecture is now enforced by the build, which is what the previous five lessons were building towards.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 65 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-65-dependency-injection-with-hilt-and-modular</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 65 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What Is Dependency Injection?</li><li>✅ Step-by-Step Build 1: Set Up Hilt</li><li>✅ Step-by-Step Build 2: Constructor Injection and ViewModels</li><li>✅ Step-by-Step Build 3: Modules, `@Provides` and `@Binds`</li><li>✅ Step-by-Step Build 4: Workers, Navigation and Other Entry Points</li><li>✅ Step-by-Step Build 5: Testing with Hilt</li><li>✅ Step-by-Step Build 6: Modularisation</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_64.html" class="ln-btn">&#8592; Lesson 64</a><a href="lesson_66.html" class="ln-btn primary">Lesson 66 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 65 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

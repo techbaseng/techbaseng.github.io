@@ -4,7 +4,7 @@ This guide is for the site owner. You never need a terminal. Everything happens 
 
 ## How deployment works
 
-Every time a change lands on the `main` branch, GitHub builds the whole site (all 400 lessons) and publishes it on GitHub Pages. That takes about two minutes. You do nothing except make the change.
+Every time a change lands on the `main` branch, GitHub builds the whole site (all 472 lessons) and publishes it on GitHub Pages. That takes about two minutes. You do nothing except make the change.
 
 ## One-time setup
 

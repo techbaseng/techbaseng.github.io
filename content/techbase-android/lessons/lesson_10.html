@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 10: Nullability in Kotlin — Techbase Android</title>
+</head>
+<body data-total="9" data-key="techbase_android_l10">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 10 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 10</div>
+      <h1>Nullability in Kotlin</h1>
+      <div class="l-hero-sub">9 phases &nbsp;·&nbsp; Build: Safe Student Directory</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 10</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Understand null safety: nullable types, safe calls, the Elvis operator, smart casts and when to avoid !!.</p></div><div class="wm"><span>📚 9 phases</span><span>🏗️ Safe Student Directory</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 9</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">Welcome back! In the last few lessons you learned to store values, write functions and make decisions. Today you meet one of Kotlin's best ideas, the one that quietly saves Android developers from a huge number of crashes: <strong>null safety</strong>.</p>
+<p class="v2-p">Every programmer eventually meets a value that is simply <em>missing</em>. A customer who did not give a phone number. A search that found nothing. A text box the user left empty. In many older languages, touching a missing value crashes the program with the infamous "null pointer" error, which its inventor Tony Hoare called his "billion-dollar mistake". Kotlin attacks the problem at the root: <strong>the compiler makes you deal with missing values before your app ever runs</strong>.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Explain what <code>null</code> means and why it causes crashes in other languages.</li>
+<li>Declare nullable types with <code>?</code> and tell them apart from non-null types.</li>
+<li>Use the safe call operator <code>?.</code> to read members of a value that might be missing.</li>
+<li>Use the Elvis operator <code>?:</code> to supply a default value.</li>
+<li>Use <code>let</code> with <code>?.</code> to run code only when a value exists.</li>
+<li>Understand smart casts after a null check.</li>
+<li>Know why <code>!!</code> is dangerous and what to write instead.</li>
+<li>Use <code>lateinit</code>, <code>isNullOrEmpty()</code>, <code>toIntOrNull()</code>, <code>requireNotNull()</code> and safe casts with <code>as?</code>.</li>
+<li>Recognise <em>platform types</em> when Kotlin meets Java code.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>How this fits the bigger picture:</strong> This lesson matches the <em>Use nullability in Kotlin</em> codelab in Unit 2 of Google's official <strong>Android Basics with Compose</strong> course. We add more practice and more pitfalls. Links to the official page are at the end.</p>
+</blockquote>
+<h3 class="v2-h3">Why it matters for Android</h3>
+<p class="v2-p">Android is full of values that may be absent: the text a user typed, a saved setting that was never saved, an image that has not downloaded yet, an extra passed between screens. Every Android library you will use (Compose, Room, Retrofit) uses nullable types to say "this might not be there". If you cannot read a <code>String?</code>, you cannot read Android code. This lesson is that reading skill.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 9</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">You should be comfortable with these ideas. If any feels shaky, revisit the lesson shown.</p>
+<h3 class="v2-h3">1. Variables and types (lesson 07)</h3>
+<p class="v2-p"><code>val</code> creates a value that cannot be reassigned, <code>var</code> creates one that can. Every variable has a <strong>type</strong> such as <code>String</code>, <code>Int</code> or <code>Boolean</code>. Kotlin usually works the type out for you (type inference), but you can write it explicitly: <code>val city: String = "Ibadan"</code>.</p>
+<h3 class="v2-h3">2. Functions (lesson 08)</h3>
+<p class="v2-p">A function takes parameters and may return a value: <code>fun double(n: Int): Int = n * 2</code>. Parameters and return values have types too, and those types can be nullable, as you will see today.</p>
+<h3 class="v2-h3">3. Conditionals (lesson 09)</h3>
+<p class="v2-p"><code>if (x &gt; 3) { ... } else { ... }</code> makes decisions, and <code>if</code> can also produce a value: <code>val label = if (x &gt; 3) "big" else "small"</code>. Null checks use exactly this tool.</p>
+<h3 class="v2-h3">4. Reading a compiler error (lesson 06)</h3>
+<p class="v2-p">You will see red underlines today on purpose. Reading the message from the first error is a skill you already started. Today's errors read things like <em>Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type String?</em>. It sounds scary, but it is simply the compiler saying "that value might be missing, please handle it".</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 9</div><div class="pt">Conceptual Understanding: What Is null?</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">An empty seat on a danfo bus</h3>
+<p class="v2-p">Imagine a danfo bus with fourteen seats. A <strong>non-null</strong> seat always has a passenger. A <strong>nullable</strong> seat might be empty. If the conductor says "ask the passenger in seat 5 for their fare" and seat 5 is empty, the conductor is talking to nobody and the whole routine breaks down. A careful conductor first looks: <em>"Is anyone there? If yes, collect the fare. If not, move on."</em> Kotlin forces you to be that careful conductor.</p>
+<p class="v2-p"><code>null</code> is the value that means "nothing here". It is not zero, it is not an empty string <code>""</code>, and it is not <code>false</code>. Those are real values. <code>null</code> is the absence of any value.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Value</th>
+<th>Is it a real value?</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Yes</td>
+<td>The number zero</td>
+</tr>
+<tr>
+<td><code>""</code></td>
+<td>Yes</td>
+<td>A text with no characters</td>
+</tr>
+<tr>
+<td><code>false</code></td>
+<td>Yes</td>
+<td>The Boolean "no"</td>
+</tr>
+<tr>
+<td><code>null</code></td>
+<td>No</td>
+<td>There is nothing here at all</td>
+</tr>
+</tbody>
+</table></div>
+<h3 class="v2-h3">Two families of types</h3>
+<p class="v2-p">In Kotlin every type comes in two flavours.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>String    -&gt; can NEVER be null. The compiler guarantees a real text.
+String?   -&gt; can be a text OR null. The ? means "maybe missing".
+
+Int       -&gt; always a number
+Int?      -&gt; a number or null</code></pre></div></div>
+<p class="v2-p">The question mark is part of the type. <code>String</code> and <code>String?</code> are <em>different types</em>, and the compiler treats them differently:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>          can hold null?   can call .length directly?
+String        no                  yes
+String?       yes                 NO (must check first)</code></pre></div></div>
+<p class="v2-p">That last column is the heart of the lesson. Because a <code>String</code> is guaranteed to exist, you can call <code>.length</code> on it freely. Because a <code>String?</code> might be missing, Kotlin refuses to let you call <code>.length</code> until you have handled the "missing" case. A whole class of crash is removed, because the dangerous code simply does not compile.</p>
+<h3 class="v2-h3">The toolbox</h3>
+<p class="v2-p">Kotlin gives you a small set of tools for dealing with <code>null</code>. Learn what each is for and you will rarely be stuck.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Tool</th>
+<th>Name</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>x?.length</code></td>
+<td>Safe call</td>
+<td>If <code>x</code> is null, the whole expression is null. Otherwise it reads <code>.length</code>.</td>
+</tr>
+<tr>
+<td><code>x ?: "default"</code></td>
+<td>Elvis operator</td>
+<td>Use <code>x</code> if it is not null, otherwise use the right-hand side.</td>
+</tr>
+<tr>
+<td><code>x?.let { ... }</code></td>
+<td>Safe call with <code>let</code></td>
+<td>Run a block only when <code>x</code> is not null.</td>
+</tr>
+<tr>
+<td><code>if (x != null)</code></td>
+<td>Null check</td>
+<td>Inside the <code>if</code>, Kotlin treats <code>x</code> as non-null (a <em>smart cast</em>).</td>
+</tr>
+<tr>
+<td><code>x!!</code></td>
+<td>Not-null assertion</td>
+<td>"I promise it is not null." Crashes if you are wrong. Use rarely.</td>
+</tr>
+<tr>
+<td><code>lateinit var</code></td>
+<td>Late initialisation</td>
+<td>"I will set it before I use it." For properties only.</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Think about it:</strong> Why do you think the Kotlin designers made the compiler <em>refuse</em> to compile unsafe code, instead of merely warning you? (Because warnings get ignored, and a crash in the hands of a user is far more expensive than an error on your own screen.)</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: What Is null?</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 9</div><div class="pt">Worked Examples: Nullable Types</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Run each example in the Kotlin Playground at <code>play.kotlinlang.org</code>, exactly as in lesson 06.</p>
+<h3 class="v2-h3">Example 1: The compiler refuses null in a normal type</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    var name: String = "Tunde"
+    name = null
+    println(name)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> this does <strong>not</strong> run. The compiler reports an error on <code>null</code>:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Null can not be a value of a non-null type String</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>String</code> promises a real text, so assigning <code>null</code> breaks the promise. To allow null, change the type to <code>String?</code>.</p>
+<h3 class="v2-h3">Example 2: Declaring a nullable variable</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    var nickname: String? = null
+    println("Nickname: $nickname")
+
+    nickname = "Tee"
+    println("Nickname: $nickname")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Nickname: null<br/>Nickname: Tee</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> A nullable variable can start as <code>null</code> and be given a real value later. Notice that a string template happily prints the word <code>null</code> when the value is missing. That is useful for debugging but is rarely what you want to show a user, so you will usually replace it with a default (Example 5).</p>
+<h3 class="v2-h3">Example 3: The compiler stops an unsafe call</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun printLength(nickname: String?) {
+    println(nickname.length)
+}
+
+fun main() {
+    printLength("Tee")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected result:</strong> this does not compile, even though the call passes a real text. The compiler checks the <em>type</em> of the parameter, not the value that happens to arrive:</p>
+<blockquote class="v2-bq">
+<p class="v2-p">Only safe (?.) or non-null asserted (!!.) calls are allowed on a nullable receiver of type String?</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Inside <code>printLength</code> the type is <code>String?</code>, so the compiler must assume the worst: some other caller might pass <code>null</code>. We need one of the tools in our toolbox. (A small side note: in the later examples we write things like <code>val first: String? = "Genevieve"</code> to keep them short. Kotlin can see you just stored a real text, so it may warn that a <code>?.</code> is unnecessary. The warning is harmless. In real apps the nullable values come from function parameters, user input and libraries, where the compiler cannot know.)</p>
+<h3 class="v2-h3">Example 4: Safe call <code>?.</code></h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val first: String? = "Genevieve"
+    val second: String? = null
+
+    println(first?.length)
+    println(second?.length)
+    println(first?.uppercase())
+    println(second?.uppercase())
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">9<br/>null<br/>GENEVIEVE<br/>null</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>first?.length</code> reads the length because <code>first</code> exists: "Genevieve" has nine letters. <code>second?.length</code> sees null and <strong>stops</strong>, producing <code>null</code> instead of crashing. Notice that the result of a safe call is itself nullable: <code>first?.length</code> has type <code>Int?</code>, not <code>Int</code>. The "maybe" spreads along with the value.</p>
+<p class="v2-p">Safe calls can be chained. If <em>any</em> link is null, the whole chain is null:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Address(val city: String?)
+class Person(val name: String, val address: Address?)
+
+fun main() {
+    val ada = Person("Ada", Address("Ibadan"))
+    val bola = Person("Bola", Address(null))
+    val chidi = Person("Chidi", null)
+
+    println(ada.address?.city)
+    println(bola.address?.city)
+    println(chidi.address?.city)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Ibadan<br/>null<br/>null</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Ada has an address with a city. Bola has an address but no city. Chidi has no address at all, so the chain stops at <code>address?.</code> and the <code>.city</code> is never attempted.</p>
+<h3 class="v2-h3">Example 5: The Elvis operator <code>?:</code></h3>
+<p class="v2-p">The name comes from the operator's resemblance to Elvis Presley's hairstyle if you tilt your head. It means <em>"or else"</em>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val nickname: String? = null
+    val shown = nickname ?: "No nickname"
+    println(shown)
+
+    val length = nickname?.length ?: 0
+    println("Length: $length")
+
+    val other: String? = "Kemi"
+    println(other ?: "No nickname")
+    println(other?.length ?: 0)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">No nickname<br/>Length: 0<br/>Kemi<br/>4</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>a ?: b</code> gives <code>a</code> when <code>a</code> is not null, otherwise <code>b</code>. Combining <code>?.</code> and <code>?:</code> is the single most common null-handling pattern in Kotlin: <em>read it safely, and give a default if it was missing</em>. The type of <code>nickname?.length ?: 0</code> is plain <code>Int</code>, because the default removes the "maybe".</p>
+<p class="v2-p">The right side of <code>?:</code> can even be a <code>return</code> or a <code>throw</code>, which is a neat way to exit a function early:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun describe(name: String?): String {
+    val safeName = name ?: return "Nobody"
+    return "Hello, $safeName"
+}
+
+fun main() {
+    println(describe("Ada"))
+    println(describe(null))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Hello, Ada<br/>Nobody</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> If <code>name</code> is null, the function returns <code>"Nobody"</code> immediately. Otherwise <code>safeName</code> is a non-null <code>String</code> and the rest of the function can use it freely.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Nullable Types</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 9</div><div class="pt">Worked Examples: Checks, Smart Casts and let</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Example 6: Null checks and smart casts</h3>
+<p class="v2-p">Sometimes the clearest approach is an ordinary <code>if</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val city: String? = "Ibadan"
+
+    if (city != null) {
+        println("City has ${city.length} letters")
+    } else {
+        println("City unknown")
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">City has 6 letters</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Inside the <code>if</code> block the compiler <em>knows</em> <code>city</code> is not null, so it quietly treats it as a <code>String</code> and lets you write <code>city.length</code> without <code>?.</code>. This is a <strong>smart cast</strong>: the type is narrowed automatically because you proved it. "Ibadan" has six letters.</p>
+<p class="v2-p">Smart casts work when the compiler can be sure the value cannot change between the check and the use. That is true for a local <code>val</code>, and for a local <code>var</code> that nothing else modifies in between. It is <strong>not</strong> true for a <code>var</code> property of a class, because another part of the program could change it at any moment:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Profile(var bio: String?)
+
+fun main() {
+    val p = Profile("Learning Kotlin")
+
+    // if (p.bio != null) println(p.bio.length)   // does NOT compile
+
+    val bio = p.bio              // copy into a local val first
+    if (bio != null) {
+        println(bio.length)      // works: bio is a local val
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">15</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The commented line fails because <code>p.bio</code> could become null between the check and the use. Copying into a local <code>val</code> freezes the value, and then the smart cast works. "Learning Kotlin" is 8 + 1 + 6 = 15 characters.</p>
+<h3 class="v2-h3">Example 7: <code>let</code> for "only if present"</h3>
+<p class="v2-p"><code>let</code> runs a block of code with the value as <code>it</code>. Combined with <code>?.</code>, the block runs <em>only if the value is not null</em>.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val phone: String? = "0803 000 1234"
+    val nothing: String? = null
+
+    phone?.let {
+        println("Calling $it")
+    }
+
+    nothing?.let {
+        println("This line never prints: $it")
+    }
+
+    println("Done")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Calling 0803 000 1234<br/>Done</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> For <code>phone</code>, the block runs with <code>it</code> standing for the text. For <code>nothing</code>, the safe call short-circuits and the block is skipped entirely. Inside the block <code>it</code> is non-null, so no further checks are needed. (Lesson 12 explains lambdas and <code>it</code> properly, and lesson 13 returns to <code>let</code> and the other scope functions. For now, remember the pattern <code>value?.let { ... }</code>.)</p>
+<h3 class="v2-h3">Example 8: Dangerous <code>!!</code></h3>
+<p class="v2-p">The <strong>not-null assertion</strong> <code>!!</code> tells the compiler "trust me, this is not null". If you are wrong, the program crashes.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val a: String? = "safe"
+    println(a!!.length)
+
+    val b: String? = null
+    println(b!!.length)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">4<br/>Exception in thread "main" java.lang.NullPointerException</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> The first <code>!!</code> is fine. The second one finds <code>null</code> and throws a <code>NullPointerException</code>, which ends the program (the exact wording of the crash report varies by tool). In an Android app this is the "Unfortunately, the app has stopped" screen your users hate.</p>
+<p class="v2-p"><strong>When is <code>!!</code> acceptable?</strong> Almost never in app code. If you catch yourself typing <code>!!</code>, stop and choose instead: <code>?.</code>, <code>?:</code>, an <code>if</code> check, or <code>requireNotNull(value) { "message" }</code>, which crashes <em>with a helpful message</em> when a value that must exist is missing. Kotlin has a famous rule of thumb: <code>!!</code> is the compiler's way of saying "I told you so".</p>
+<h3 class="v2-h3">Example 9: Helpful standard-library functions</h3>
+<p class="v2-p">Several everyday functions handle null for you:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val empty: String? = ""
+    val missing: String? = null
+    val real: String? = "Hi"
+
+    println(empty.isNullOrEmpty())
+    println(missing.isNullOrEmpty())
+    println(real.isNullOrEmpty())
+
+    println("42".toIntOrNull())
+    println("forty-two".toIntOrNull())
+    println("forty-two".toIntOrNull() ?: -1)
+
+    val thing: Any = "text"
+    val number = thing as? Int
+    println(number)
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">true<br/>true<br/>false<br/>42<br/>null<br/>-1<br/>null</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong></p>
+<ul class="v2-ul">
+<li><code>isNullOrEmpty()</code> is true for both <code>null</code> and <code>""</code>. (<code>isNullOrBlank()</code> also treats whitespace-only text as empty.)</li>
+<li><code>toIntOrNull()</code> converts text to a number, or returns <code>null</code> instead of crashing if the text is not a number. Compare it with <code>toInt()</code>, which throws an exception on bad input. This is how you safely read what a user typed into a text field.</li>
+<li><code>as?</code> is a <strong>safe cast</strong>: it returns the converted value, or <code>null</code> if the conversion is impossible. Here <code>"text"</code> cannot become an <code>Int</code>, so the result is <code>null</code>.</li>
+</ul>
+<h3 class="v2-h3">Example 10: <code>lateinit</code></h3>
+<p class="v2-p">Sometimes a property cannot be given a value when the object is created, but you promise to set it before it is used. On Android this happens often, because the system creates your objects first and hands you the pieces later. <code>lateinit</code> is that promise:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Screen {
+    lateinit var title: String
+
+    fun show() {
+        if (::title.isInitialized) {
+            println("Title: $title")
+        } else {
+            println("title not set yet")
+        }
+    }
+}
+
+fun main() {
+    val screen = Screen()
+    screen.show()
+    screen.title = "Home"
+    screen.show()
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">title not set yet<br/>Title: Home</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>lateinit var title: String</code> is a non-null property with no starting value. If you read it before assigning it, the program crashes with <code>UninitializedPropertyAccessException</code>. The <code>::title.isInitialized</code> check lets code ask safely, and it works only from inside the same class. Rules to remember: <code>lateinit</code> is for <code>var</code> only, cannot be used with <code>Int</code>, <code>Boolean</code> and the other basic number types, and is a promise you must keep. Prefer nullable types or normal initial values when you can.</p>
+<h3 class="v2-h3">Platform types, briefly</h3>
+<p class="v2-p">Kotlin can call code written in Java, and Java has no null safety. When Kotlin receives a value from Java it cannot know whether it can be null, so it labels the type with an exclamation mark in tooltips, such as <code>String!</code>. This is called a <strong>platform type</strong>. Kotlin lets you treat it as either <code>String</code> or <code>String?</code>, but if you pick <code>String</code> and the value is secretly null, you get a crash. Many Android framework functions return platform types. The safe habit: when a Java or Android API gives you a value that could plausibly be missing, assign it to an explicit nullable type (<code>val s: String? = ...</code>) and handle it.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Worked Examples: Checks, Smart Casts and let</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 9</div><div class="pt">Choosing the Right Tool</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">When you meet a nullable value, ask yourself what you want to happen when it is missing.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>If, when the value is missing, you want to...</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Get a default value</td>
+<td><code>value ?: default</code></td>
+</tr>
+<tr>
+<td>Skip some work</td>
+<td><code>value?.let { ... }</code> or <code>if (value != null) { ... }</code></td>
+</tr>
+<tr>
+<td>Return early from a function</td>
+<td><code>val v = value ?: return</code></td>
+</tr>
+<tr>
+<td>Crash with a clear message because it is a bug</td>
+<td><code>requireNotNull(value) { "message" }</code></td>
+</tr>
+<tr>
+<td>Read a property or call a function and accept a null result</td>
+<td><code>value?.property</code></td>
+</tr>
+<tr>
+<td>Say "I promised to set it later" for a property</td>
+<td><code>lateinit var</code></td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">The most important design question comes <em>before</em> all of these. <strong>Should this value be nullable at all?</strong> If a student always has a name, make it <code>String</code>. Only use <code>String?</code> when "missing" is a genuine possibility that your program must handle. Fewer nullable types means less handling code.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Choosing the Right Tool</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 9</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk7"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: A friendly greeting</strong></p>
+<p class="v2-p">Write a function <code>greet(name: String?): String</code> that returns <code>"Hello, &lt;name&gt;!"</code> when a name is given and <code>"Hello, guest!"</code> when the name is null. Call it twice from <code>main</code>, once with <code>"Ada"</code> and once with <code>null</code>, and print both results.</p>
+<p class="v2-p">Use the Elvis operator, and write the function with a single expression.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun greet(name: String?): String = "Hello, ${name ?: "guest"}!"
+
+fun main() {
+    println(greet("Ada"))
+    println(greet(null))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Hello, Ada!<br/>Hello, guest!</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Inside <code>${ }</code> you can write any expression, including one with its own quotes. <code>name ?: "guest"</code> yields <code>"Ada"</code> for the first call and <code>"guest"</code> for the second.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: Add up the good numbers</strong></p>
+<p class="v2-p">A form gave you a list of texts typed by users: <code>"12"</code>, <code>"x"</code>, <code>"7"</code>, <code>"3.5"</code>, <code>"20"</code>. Some are not whole numbers. Write a program that adds up only the valid whole numbers and prints how many entries were skipped.</p>
+<p class="v2-p">Hint: <code>toIntOrNull()</code> returns <code>null</code> for bad input, and <code>?: continue</code> skips to the next loop round.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>fun main() {
+    val inputs = listOf("12", "x", "7", "3.5", "20")
+    var total = 0
+    var skipped = 0
+
+    for (text in inputs) {
+        val number = text.toIntOrNull()
+        if (number == null) {
+            skipped++
+            continue
+        }
+        total += number
+    }
+
+    println("Total: $total")
+    println("Skipped: $skipped")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Total: 39<br/>Skipped: 2</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> <code>"12"</code>, <code>"7"</code> and <code>"20"</code> convert to numbers: 12 + 7 + 20 = 39. <code>"x"</code> and <code>"3.5"</code> return <code>null</code> (a decimal is not a whole number), so two entries are skipped. After the <code>if (number == null) { ... continue }</code> check, <code>number</code> is smart-cast to <code>Int</code>, so <code>total += number</code> compiles. <code>listOf</code> is explained in lesson 14.</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 3: Which contact do we use?</strong></p>
+<p class="v2-p">Create a class <code>Student(val name: String, val phone: String?, val email: String?)</code>. Write a function <code>contactLine(s: Student): String</code> that returns <code>"&lt;name&gt;: &lt;phone&gt;"</code> if there is a phone, otherwise the email, otherwise <code>"no contact"</code>. Test it with three students: one with only a phone, one with only an email, and one with neither.</p></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Student(val name: String, val phone: String?, val email: String?)
+
+fun contactLine(s: Student): String {
+    val contact = s.phone ?: s.email ?: "no contact"
+    return "${s.name}: $contact"
+}
+
+fun main() {
+    println(contactLine(Student("Ada", "0803 111 2222", null)))
+    println(contactLine(Student("Bola", null, "bola@example.com")))
+    println(contactLine(Student("Chidi", null, null)))
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Ada: 0803 111 2222<br/>Bola: bola@example.com<br/>Chidi: no contact</p>
+</blockquote>
+<p class="v2-p"><strong>Explanation:</strong> Elvis operators chain left to right. <code>s.phone ?: s.email ?: "no contact"</code> tries the phone first, then the email, then the fixed text. Classes are covered in lesson 11.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">In the Playground, declare <code>var score: Int? = null</code>. Print <code>score</code>, then print <code>score ?: 0</code>, then assign <code>score = 85</code> and print both again. Predict the four lines before you run it.</p></div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 9</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk8"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: Making everything nullable "just in case".</strong> <em>The wrong code:</em> <code>val name: String? = "Ada"</code> everywhere. <em>The problem:</em> you must now handle null every time you use it, and the code fills with <code>?.</code> and <code>?:</code>. <em>The fix:</em> use a non-null type unless "missing" is a real situation. Let the compiler guarantee the value.</p>
+<p class="v2-p"><strong>Mistake #2: Reaching for <code>!!</code> when the compiler complains.</strong> <em>The wrong code:</em> <code>println(name!!.length)</code>. <em>The problem:</em> it silences the compiler but moves the crash to runtime. <em>The fix:</em> <code>println(name?.length ?: 0)</code> or an <code>if (name != null)</code> check.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting that <code>?.</code> produces a nullable result.</strong> <em>The wrong code:</em></p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val name: String? = "Ada"
+val len: Int = name?.length</code></pre></div></div>
+<p class="v2-p"><em>The problem:</em> <code>name?.length</code> is <code>Int?</code>, not <code>Int</code>, so it cannot be stored in an <code>Int</code>. <em>The fix:</em> give a default, <code>val len: Int = name?.length ?: 0</code>, or declare <code>val len: Int? = name?.length</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Expecting a smart cast on a class <code>var</code>.</strong> <em>The wrong code:</em> <code>if (p.bio != null) println(p.bio.length)</code>. <em>The problem:</em> <code>bio</code> could change between the check and the use. <em>The fix:</em> copy into a local <code>val</code> first (Example 6) or use <code>p.bio?.length</code>.</p>
+<p class="v2-p"><strong>Mistake #5: Confusing <code>null</code> with an empty string.</strong> <em>The wrong code:</em> <code>if (name == "") { /* handle missing */ }</code> when <code>name</code> can also be null. <em>The fix:</em> use <code>name.isNullOrEmpty()</code> to cover both, or <code>isNullOrBlank()</code> to also cover spaces.</p>
+<p class="v2-p"><strong>Mistake #6: Using <code>toInt()</code> on user input.</strong> <em>The wrong code:</em> <code>val age = text.toInt()</code>. <em>The problem:</em> if the user typed "abc", the program crashes with a <code>NumberFormatException</code>. <em>The fix:</em> <code>val age = text.toIntOrNull() ?: 0</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Using <code>lateinit</code> and then reading too early.</strong> <em>The problem:</em> reading a <code>lateinit</code> property before assignment crashes. <em>The fix:</em> make sure assignment happens first, check with <code>::name.isInitialized</code>, or use a nullable type if "not set yet" is a normal state.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 9</div><div class="pt">Knowledge Check</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p">Answer each question in your head, then reveal the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What is the difference between <code>String</code> and <code>String?</code>?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p"><code>String</code> can never hold <code>null</code>, so you can use its members freely. <code>String?</code> may hold either a text or <code>null</code>, so Kotlin forces you to handle the missing case (with <code>?.</code>, <code>?:</code>, an <code>if</code> check and so on) before using its members.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> What does this print?</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val x: String? = null
+println(x?.length ?: -1)</code></pre></div></div>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p"><code>-1</code>. The safe call <code>x?.length</code> gives <code>null</code> because <code>x</code> is null, and the Elvis operator replaces that <code>null</code> with <code>-1</code>.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> Why is <code>!!</code> risky, and what should you usually write instead?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>!!</code> asserts the value is not null and throws a <code>NullPointerException</code> if it is, so the compiler's protection is switched off and the crash can reach users. Prefer <code>?.</code> with <code>?:</code>, an <code>if (x != null)</code> check, <code>x?.let { ... }</code>, or <code>requireNotNull(x) { "message" }</code> when null really is a bug and you want a clear error message.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Inside <code>if (city != null) { ... }</code>, why can you write <code>city.length</code> without a question mark?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p">Because of a smart cast. The compiler has proved that <code>city</code> is not null inside that block, so it treats <code>city</code> as a non-null <code>String</code> there. This works for local <code>val</code>s and unchanged local <code>var</code>s, but not for <code>var</code> properties of a class, since those could change at any time.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>"abc".toIntOrNull()</code> return, and why is that better than <code>"abc".toInt()</code> for user input?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">It returns <code>null</code>. <code>toInt()</code> would throw a <code>NumberFormatException</code> and crash the program, while <code>toIntOrNull()</code> lets you decide what to do with bad input, for example <code>toIntOrNull() ?: 0</code>.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-2-pathway-1" rel="noopener noreferrer">Android Basics with Compose, Unit 2, Pathway 1: Kotlin fundamentals</a>: the official pathway containing the <em>Use nullability in Kotlin</em> codelab.</li>
+<li><a href="https://kotlinlang.org/docs/null-safety.html" rel="noopener noreferrer">Kotlin docs: Null safety</a>: the full reference for <code>?.</code>, <code>?:</code>, <code>!!</code>, smart casts and safe casts.</li>
+<li><a href="https://play.kotlinlang.org/" rel="noopener noreferrer">Kotlin Playground</a>: run every example in this lesson.</li>
+<li><a href="https://kotlinlang.org/docs/properties.html" rel="noopener noreferrer">Kotlin docs: Properties, including late-initialized properties</a>: the rules for <code>lateinit</code>.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Safe Student Directory</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Build a small console program that prints a directory of students where some information may be missing, without a single crash and without a single <code>!!</code>.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Create a class <code>Student</code> with a non-null <code>name</code>, and nullable <code>phone</code> and <code>email</code>, plus a nullable <code>age</code> of type <code>Int?</code>.</li>
+<li>Create a list of at least four students with different combinations of missing data (use <code>listOf</code>, see lesson 14).</li>
+<li>Write a function <code>contactLine(s: Student): String</code> that returns the phone, else the email, else <code>"no contact"</code>.</li>
+<li>Write a function <code>ageGroup(age: Int?): String</code> that returns <code>"unknown"</code> for null, <code>"minor"</code> under 18, and <code>"adult"</code> otherwise.</li>
+<li>Loop over the students and print one line each in the format <code>Name | contact | ageGroup</code>.</li>
+<li>After the loop, print how many students have no contact information at all.</li>
+<li>Use at least one <code>?.</code>, one <code>?:</code>, and one <code>?.let</code>.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Write <code>fun parseAge(text: String): Int?</code> that uses <code>toIntOrNull()</code> and returns <code>null</code> for numbers below 0 or above 120. Build one extra student from the text <code>"abc"</code> and show that the program handles it.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">Main.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>class Student(
+    val name: String,
+    val phone: String?,
+    val email: String?,
+    val age: Int?
+)
+
+fun contactLine(s: Student): String = s.phone ?: s.email ?: "no contact"
+
+fun ageGroup(age: Int?): String {
+    if (age == null) return "unknown"
+    return if (age &lt; 18) "minor" else "adult"
+}
+
+fun parseAge(text: String): Int? {
+    val n = text.toIntOrNull() ?: return null
+    return if (n in 0..120) n else null
+}
+
+fun main() {
+    val students = listOf(
+        Student("Ada", "0803 111 2222", "ada@example.com", 17),
+        Student("Bola", null, "bola@example.com", 25),
+        Student("Chidi", null, null, null),
+        Student("Dayo", "0809 555 0000", null, parseAge("abc"))
+    )
+
+    var noContact = 0
+
+    for (s in students) {
+        println("${s.name} | ${contactLine(s)} | ${ageGroup(s.age)}")
+        if (s.phone == null &amp;&amp; s.email == null) {
+            noContact++
+        }
+        s.email?.let { println("   (email on file: ${it.length} characters)") }
+    }
+
+    println("Students with no contact: $noContact")
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected output:</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">Ada | 0803 111 2222 | minor<br/>   (email on file: 15 characters)<br/>Bola | bola@example.com | adult<br/>   (email on file: 16 characters)<br/>Chidi | no contact | unknown<br/>Dayo | 0809 555 0000 | unknown<br/>Students with no contact: 1</p>
+</blockquote>
+<p class="v2-p"><strong>Why it works:</strong> Ada has a phone, so the Elvis chain stops there, and age 17 gives "minor". Her email <code>ada@example.com</code> has 15 characters (3 + 1 + 11). Bola has no phone, so the email is used, 25 is an adult, and <code>bola@example.com</code> has 16 characters. Chidi has nothing, so <code>"no contact"</code> and an unknown age; <code>?.let</code> is skipped because his email is null. Dayo's age comes from <code>parseAge("abc")</code>, which is <code>null</code>, so the group is unknown. Only Chidi lacks both phone and email, so the final count is 1.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 10 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-10-nullability-in-kotlin</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 10 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: What Is null?</li><li>✅ Worked Examples: Nullable Types</li><li>✅ Worked Examples: Checks, Smart Casts and let</li><li>✅ Choosing the Right Tool</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_09.html" class="ln-btn">&#8592; Lesson 09</a><a href="lesson_11.html" class="ln-btn primary">Lesson 11 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 10 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lesson 17: Buttons and Click Behaviour: The Dice Roller App — Techbase Android</title>
+</head>
+<body data-total="10" data-key="techbase_android_l17">
+<nav class="l-nav">
+  <a href="../index.html" class="nav-logo-wrap"><div class="nav-logo-text">Techbase Code Coach</div></a>
+  <span class="l-nav-lbl">Lesson 17 of 72</span>
+  <a href="../index.html" class="l-nav-back">&#8592; All Lessons</a>
+</nav>
+<div class="pw"><div class="pb" id="pbar"></div></div>
+
+<div class="l-hero">
+  <div class="l-hero-in">
+    <div class="l-hero-logo"></div>
+    <div class="l-hero-text">
+      <div class="badge">Android · Lesson 17</div>
+      <h1>Buttons and Click Behaviour: The Dice Roller App</h1>
+      <div class="l-hero-sub">10 phases &nbsp;·&nbsp; Build: Two-Dice Lucky Seven</div>
+    </div>
+  </div>
+</div>
+
+<section style="padding-bottom:1.5rem">
+  <div style="max-width:880px;margin:0 auto;padding:0 1.5rem"><div class="wb"><h2>👋 Welcome to Lesson 17</h2><div style="font-size:1rem;line-height:1.85"><p class="v2-p">Respond to taps with Button, update the screen with remember and mutableStateOf, and build an interactive dice roller.</p></div><div class="wm"><span>📚 10 phases</span><span>🏗️ Two-Dice Lucky Seven</span><span>🤖 Android Studio</span></div></div></div>
+</section>
+
+<main style="max-width:880px;margin:0 auto;padding:2rem 1.5rem 5rem">
+<div class="phase" id="phase1"><div class="ph"><div class="pn">Phase 1 of 10</div><div class="pt">Lesson Introduction</div><div class="pc" id="chk1"></div></div><div class="pb2"><p class="v2-p">So far your apps have only <em>displayed</em> things. A birthday card and a business card are lovely, but they never react when you touch them. Real apps respond: you tap a button and something changes. In this lesson you will build your first <strong>interactive</strong> app, a dice roller, and learn the single most important idea in Jetpack Compose: <strong>state</strong>.</p>
+<p class="v2-p">This lesson matches three items from Unit 2 of Google's official <strong>Android Basics with Compose</strong> course: the <em>Intro to Dice Roller app</em> video, the <em>Create an interactive Dice Roller app</em> codelab, and the <em>Practice: Click behavior</em> exercise. We take the same journey with extra explanation and our own code.</p>
+<p class="v2-p">By the end of this lesson you will be able to:</p>
+<ul class="v2-ul">
+<li>Add a <code>Button</code> to a screen and run code when it is tapped.</li>
+<li>Explain why a normal Kotlin variable does <strong>not</strong> update the screen.</li>
+<li>Use <code>remember</code> and <code>mutableIntStateOf</code> so Compose redraws automatically.</li>
+<li>Use the <code>by</code> delegate with the <code>getValue</code> and <code>setValue</code> imports.</li>
+<li>Pick a random number with <code>(1..6).random()</code>.</li>
+<li>Choose what to show with a <code>when</code> expression.</li>
+<li>Show an image from <code>res/drawable</code> with <code>painterResource</code>, or fall back to text if you have no images yet.</li>
+<li>Notice and fix the "my state vanished when I rotated the phone" bug with <code>rememberSaveable</code>.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>A promise:</strong> if you only remember one thing from this lesson, remember this sentence. <em>In Compose, the screen is a function of state. Change the state and Compose redraws the screen for you.</em></p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Lesson Introduction</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(1)">Start Lesson ✓</button></div></div>
+<div class="phase locked" id="phase2"><div class="ph"><div class="pn">Phase 2 of 10</div><div class="pt">Prerequisite Concepts</div><div class="pc" id="chk2"></div></div><div class="pb2"><p class="v2-p">Make sure these ideas feel familiar. If one does not, a quick revisit will pay off.</p>
+<ul class="v2-ul">
+<li><strong>Composable functions</strong> (lesson 15). A function marked <code>@Composable</code> describes a piece of UI. You call composables inside other composables, like <code>Text</code> inside <code>Column</code>.</li>
+<li><strong>Modifiers and layouts</strong> (lesson 16). <code>Column</code> stacks children vertically, <code>Modifier.fillMaxSize()</code> fills the available space, and <code>Arrangement</code> and <code>Alignment</code> position the children.</li>
+<li><strong><code>when</code> expressions</strong> (lesson 9). A <code>when</code> chooses between branches and can <em>return a value</em>.</li>
+<li><strong>Ranges</strong> (lesson 9). <code>1..6</code> is every whole number from 1 up to and including 6.</li>
+<li><strong>Lambdas</strong> (lesson 12). A button's behaviour is a lambda: a small block of code you hand to the button, saying "run this when tapped".</li>
+</ul>
+<p class="v2-p">If you are unsure about lambdas, remember this picture: a lambda is a <em>sticky note</em> you give to a button. The note says what to do. The button keeps it and reads it every time it is tapped.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Prerequisite Concepts</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(2)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase3"><div class="ph"><div class="pn">Phase 3 of 10</div><div class="pt">Conceptual Understanding: Events, State and Recomposition</div><div class="pc" id="chk3"></div></div><div class="pb2"><h3 class="v2-h3">Events</h3>
+<p class="v2-p">When a user touches the screen, Android creates an <strong>event</strong>. A tap on a button is a <em>click event</em>. In Compose you do not write "listener objects". You pass a lambda to the composable:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>Button(onClick = { /* code that runs on every tap */ }) {
+    Text("Roll")
+}</code></pre></div></div>
+<p class="v2-p">The parameter is called <code>onClick</code>, and its value is the code to run.</p>
+<h3 class="v2-h3">Why a plain variable is not enough</h3>
+<p class="v2-p">Imagine you try the obvious thing:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun BrokenCounter() {
+    var count = 0
+    Column {
+        Text("Count: $count")
+        Button(onClick = { count++ }) { Text("Add") }
+    }
+}</code></pre></div></div>
+<p class="v2-p">You tap the button. The variable <code>count</code> really does go up, but the number on screen never changes. There are <strong>two</strong> separate problems:</p>
+<ol class="v2-ol">
+<li>Compose does not know that <code>count</code> changed, so it has no reason to redraw.</li>
+<li>Even if it did redraw, the function would run again from the top, and <code>var count = 0</code> would reset the variable to zero.</li>
+</ol>
+<h3 class="v2-h3">State fixes both problems</h3>
+<p class="v2-p"><strong>State</strong> is a value that Compose <em>watches</em>. When it changes, Compose re-runs (the official word is <em>recomposes</em>) the composables that read it, so the screen updates. To survive the re-run without resetting, the value must be <em>remembered</em>.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Ingredient</th>
+<th>What it does</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mutableIntStateOf(1)</code></td>
+<td>Creates a watched whole-number value starting at 1.</td>
+<td>A scoreboard that tells the referee every time it changes.</td>
+</tr>
+<tr>
+<td><code>remember { ... }</code></td>
+<td>Keeps the value alive across recompositions instead of recreating it.</td>
+<td>Writing the score on a whiteboard instead of in your head.</td>
+</tr>
+<tr>
+<td><code>by</code> delegate</td>
+<td>Lets you read and write the state like an ordinary variable.</td>
+<td>A cover that hides the scoreboard machinery.</td>
+</tr>
+</tbody>
+</table></div>
+<p class="v2-p">Putting them together:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>var result by remember { mutableIntStateOf(1) }</code></pre></div></div>
+<p class="v2-p">Read it like a sentence: <em>"<code>result</code> is a remembered, watched integer that starts at 1."</em></p>
+<h3 class="v2-h3">The cycle</h3>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">text</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>   user taps button
+          |
+          v
+   onClick lambda runs  ---&gt; changes state (result = 4)
+          ^                          |
+          |                          v
+   screen shows new UI  &lt;---  Compose recomposes</code></pre></div></div>
+<p class="v2-p">Every interactive Compose screen follows this loop: <strong>event, state change, recomposition, new UI</strong>. You never say "set the text to 4". You only change the state, and the UI follows.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Conceptual Understanding: Events, State and Recomposition</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(3)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase4"><div class="ph"><div class="pn">Phase 4 of 10</div><div class="pt">Step-by-Step Build 1: The Static Screen</div><div class="pc" id="chk4"></div></div><div class="pb2"><p class="v2-p">Create a new project exactly as in lesson 03: <strong>File &gt; New &gt; New Project &gt; Empty Activity</strong>. Name it <code>Dice Roller</code>, keep the package <code>com.example.diceroller</code>, choose a minimum SDK your emulator supports, and finish. Wait for Gradle to sync.</p>
+<p class="v2-p">Open <code>MainActivity.kt</code>. The template gives you a <code>MainActivity</code> class that calls <code>setContent</code>. Replace the file contents with the following. Your theme function is named after your app, so it will be <code>DiceRollerTheme</code> if you used the name above.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.diceroller
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.diceroller.ui.theme.DiceRollerTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            DiceRollerTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    DiceRollerApp()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DiceRollerApp(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "⚀", fontSize = 120.sp)
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = { }) {
+            Text(text = "Roll")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DiceRollerAppPreview() {
+    DiceRollerTheme {
+        DiceRollerApp()
+    }
+}</code></pre></div></div>
+<h3 class="v2-h3">What each part does</h3>
+<ul class="v2-ul">
+<li><code>Surface</code> gives the app a background colour from the Material theme.</li>
+<li><code>Column</code> stacks the die and the button, centred both ways using <code>horizontalAlignment</code> and <code>verticalArrangement</code>.</li>
+<li>The die is the Unicode character <code>⚀</code> (die face one), shown at <code>120.sp</code>. It lets you finish the whole lesson <strong>without any image files</strong>. We replace it with real pictures later.</li>
+<li><code>Spacer</code> adds an empty 24 dp gap between the die and the button.</li>
+<li><code>Button(onClick = { })</code> has an empty lambda for now, so tapping does nothing.</li>
+</ul>
+<p class="v2-p">Run the app (lesson 04) or open the <strong>Preview</strong> pane. You should see a big die face above a Roll button.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Tip:</strong> <code>sp</code> (scale-independent pixels) is for text, so it respects the user's font-size setting. <code>dp</code> (density-independent pixels) is for everything else. You met both in lesson 15.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 1: The Static Screen</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(4)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase5"><div class="ph"><div class="pn">Phase 5 of 10</div><div class="pt">Step-by-Step Build 2: Make It Respond</div><div class="pc" id="chk5"></div></div><div class="pb2"><h3 class="v2-h3">Step 1: Add state</h3>
+<p class="v2-p">Inside <code>DiceRollerApp</code>, before the <code>Column</code>, create the state. Add these imports at the top of the file:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue</code></pre></div></div>
+<p class="v2-p">The two imports <code>getValue</code> and <code>setValue</code> are what make the <code>by</code> keyword work. If you forget them, Android Studio underlines <code>by</code> in red with a message about a missing <code>getValue</code> operator. Press <code>Alt + Enter</code> and choose <strong>Import</strong>.</p>
+<h3 class="v2-h3">Step 2: Roll a random number</h3>
+<p class="v2-p">Kotlin makes randomness easy:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val diceRoll = (1..6).random()</code></pre></div></div>
+<p class="v2-p"><code>1..6</code> is a range, and <code>.random()</code> picks one number from it. Both ends are included, so you can get 1 or 6.</p>
+<h3 class="v2-h3">Step 3: Connect the button to the state</h3>
+<p class="v2-p">Here is the complete composable. Only <code>DiceRollerApp</code> changes, so the rest of the file stays as before.</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun DiceRollerApp(modifier: Modifier = Modifier) {
+    var result by remember { mutableIntStateOf(1) }
+    val faces = listOf("⚀", "⚁", "⚂", "⚃", "⚄", "⚅")
+
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = faces[result - 1], fontSize = 120.sp)
+        Text(text = "You rolled a $result", fontSize = 20.sp)
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = { result = (1..6).random() }) {
+            Text(text = "Roll")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">Walk through it slowly:</p>
+<ol class="v2-ol">
+<li><code>var result by remember { mutableIntStateOf(1) }</code> creates the remembered, watched number, starting at 1.</li>
+<li><code>faces</code> is a list of six characters. Lists start counting at zero, so the face for a roll of <code>n</code> is <code>faces[n - 1]</code>. A roll of 1 uses index 0.</li>
+<li>The two <code>Text</code> composables <strong>read</strong> <code>result</code>. Because they read it, Compose knows they depend on it.</li>
+<li>The button's lambda <strong>writes</strong> <code>result = (1..6).random()</code>. That write is the state change.</li>
+<li>Compose notices, recomposes <code>DiceRollerApp</code>, the <code>Text</code>s show the new face and sentence.</li>
+</ol>
+<p class="v2-p">Run it and tap <strong>Roll</strong> several times. The die changes and the sentence updates. You just built a reactive UI.</p>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Expected behaviour:</strong> Starting screen shows ⚀ and "You rolled a 1". After a tap you might see ⚄ and "You rolled a 5". Results are random, so yours will differ.</p>
+</blockquote>
+<h3 class="v2-h3">Splitting into smaller composables</h3>
+<p class="v2-p">Big composables get hard to read. A common pattern is to separate the <em>layout</em> from the <em>dice</em>. Here the state still lives in one place, and a helper composable does the drawing:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>@Composable
+fun DiceRollerApp(modifier: Modifier = Modifier) {
+    DiceWithButtonAndFace(
+        modifier = modifier
+            .fillMaxSize()
+            .wrapContentSize(Alignment.Center)
+    )
+}
+
+@Composable
+fun DiceWithButtonAndFace(modifier: Modifier = Modifier) {
+    var result by remember { mutableIntStateOf(1) }
+    val faces = listOf("⚀", "⚁", "⚂", "⚃", "⚄", "⚅")
+
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = faces[result - 1], fontSize = 120.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { result = (1..6).random() }) {
+            Text(text = "Roll")
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">You need <code>import androidx.compose.foundation.layout.wrapContentSize</code>. The modifier <code>wrapContentSize(Alignment.Center)</code> centres the content inside the full-screen box.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 2: Make It Respond</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(5)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase6"><div class="ph"><div class="pn">Phase 6 of 10</div><div class="pt">Step-by-Step Build 3: Real Dice Images with painterResource</div><div class="pc" id="chk6"></div></div><div class="pb2"><p class="v2-p">Unicode faces are great for learning, but a shipped app usually shows pictures. Here is how to swap in image resources. The official course provides dice image files, and you may also draw your own vector assets or export six images from any design tool.</p>
+<ol class="v2-ol">
+<li>In Android Studio switch the <strong>Project</strong> tool window to the <strong>Android</strong> view.</li>
+<li>Copy six images named <code>dice_1.png</code> to <code>dice_6.png</code> (file names must be lowercase letters, digits and underscores).</li>
+<li>Paste them into <code>app/src/main/res/drawable</code>. The resource names are the file names without the extension.</li>
+</ol>
+<p class="v2-p">Now choose the image with a <code>when</code> expression, which <em>returns</em> the value, so it can be assigned directly:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>val imageResource = when (result) {
+    1 -&gt; R.drawable.dice_1
+    2 -&gt; R.drawable.dice_2
+    3 -&gt; R.drawable.dice_3
+    4 -&gt; R.drawable.dice_4
+    5 -&gt; R.drawable.dice_5
+    else -&gt; R.drawable.dice_6
+}
+
+Image(
+    painter = painterResource(imageResource),
+    contentDescription = result.toString()
+)</code></pre></div></div>
+<p class="v2-p">Add the imports <code>androidx.compose.foundation.Image</code>, <code>androidx.compose.ui.res.painterResource</code> and make sure <code>R</code> resolves (it is generated from your package, so no import is needed inside <code>com.example.diceroller</code>).</p>
+<p class="v2-p">Two details matter:</p>
+<ul class="v2-ul">
+<li><code>when</code> as an expression must cover every case, so the final <code>else</code> is required. Kotlin cannot know that <code>result</code> will only ever be 1 to 6.</li>
+<li><code>contentDescription</code> is read aloud by screen readers such as TalkBack. <code>result.toString()</code> announces the number. Lesson 47 explains accessibility in depth, but form the habit now.</li>
+</ul>
+<blockquote class="v2-bq">
+<p class="v2-p"><strong>Think about it:</strong> Why use <code>when</code> here instead of six <code>if</code> statements? Because <code>when</code> reads like a table, returns a value, and the compiler checks that the cases are complete.</p>
+</blockquote><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Step-by-Step Build 3: Real Dice Images with painterResource</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(6)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase7"><div class="ph"><div class="pn">Phase 7 of 10</div><div class="pt">Rotation, Process Death and rememberSaveable</div><div class="pc" id="chk7"></div></div><div class="pb2"><p class="v2-p">Run the app, roll until you get a 6, then rotate the emulator (use the rotate buttons beside the emulator, or press <code>Ctrl + Left</code> on Windows or Linux). The die resets to 1!</p>
+<p class="v2-p"><strong>Why?</strong> Rotating the phone is a <em>configuration change</em>. Android destroys the Activity and creates a new one, and everything stored with plain <code>remember</code> is lost. Lesson 23 explains the lifecycle in detail. The quick fix is <code>rememberSaveable</code>:</p>
+<div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.runtime.saveable.rememberSaveable
+
+var result by rememberSaveable { mutableIntStateOf(1) }</code></pre></div></div>
+<p class="v2-p"><code>rememberSaveable</code> stores the value in a bundle that Android keeps across configuration changes and even across process death. For simple types like <code>Int</code>, <code>String</code>, and <code>Boolean</code> nothing else is needed. Use <code>rememberSaveable</code> for state that the user would be annoyed to lose, and plain <code>remember</code> for temporary visual state.</p>
+<div class="v2-table-wrap"><table class="v2-table">
+<thead>
+<tr>
+<th>Function</th>
+<th>Survives recomposition</th>
+<th>Survives rotation</th>
+<th>Survives process death</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>plain variable</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>remember</code></td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>rememberSaveable</code></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table></div><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Rotation, Process Death and rememberSaveable</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(7)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase8"><div class="ph"><div class="pn">Phase 8 of 10</div><div class="pt">Guided Practice Exercises</div><div class="pc" id="chk8"></div></div><div class="pb2">
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 1: The Click Counter</strong></p>
+<p class="v2-p"><strong>Objective:</strong> Practise <code>remember</code>, <code>mutableIntStateOf</code> and <code>Button</code> with a different shape of state.</p>
+<p class="v2-p"><strong>Steps:</strong></p>
+<ol class="v2-ol">
+<li>Create a composable <code>ClickCounter</code> that shows <code>Taps: 0</code>.</li>
+<li>Add a <strong>Tap</strong> button that adds 1 each time.</li>
+<li>Add a <strong>Reset</strong> button that sets the counter back to 0.</li>
+<li>Make the text red once the count reaches 10 (hint: <code>color = Color.Red</code> and an <code>if</code> expression).</li>
+<li>Keep the count across rotation.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun ClickCounter() {
+    var taps by rememberSaveable { mutableIntStateOf(0) }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "Taps: $taps",
+            fontSize = 32.sp,
+            color = if (taps &gt;= 10) Color.Red else MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row {
+            Button(onClick = { taps++ }) { Text("Tap") }
+            Spacer(modifier = Modifier.width(12.dp))
+            Button(onClick = { taps = 0 }) { Text("Reset") }
+        }
+    }
+}</code></pre></div></div>
+<p class="v2-p">You also need <code>import androidx.compose.ui.Modifier</code>. <code>taps++</code> works on a delegated property because it expands to a read followed by a write. The colour uses an <code>if</code> <strong>expression</strong>, so the whole thing fits inside the parameter. Using <code>MaterialTheme.colorScheme.onBackground</code> keeps the text readable in both light and dark theme.</p>
+<p class="v2-p"><strong>Self-check:</strong> What happens to the count on rotation if you replace <code>rememberSaveable</code> with <code>remember</code>? (It resets to zero.)</p></div>
+
+<div class="chal-box"><div class="chal-lbl">🎯 Your Challenge</div><div class="chal-body"><p class="v2-p"><strong>Exercise 2: The Lemonade Tapper</strong> (the <em>Practice: Click behavior</em> exercise)</p>
+<p class="v2-p"><strong>Objective:</strong> Use a <strong>step</strong> state and a <code>when</code> inside <code>onClick</code> to build a four-stage tapping game.</p>
+<p class="v2-p"><strong>Rules:</strong></p>
+<ol class="v2-ol">
+<li>Step 1: a lemon tree. Tapping it picks a lemon and chooses a <em>random</em> squeeze count between 2 and 4.</li>
+<li>Step 2: a lemon. Each tap is one squeeze. After the required squeezes, move on.</li>
+<li>Step 3: a glass of lemonade. Tapping it drinks it.</li>
+<li>Step 4: an empty glass. Tapping it starts over at step 1.</li>
+<li>Show an instruction sentence under the picture that changes with the step.</li>
+</ol></div></div>
+
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">kotlin</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+@Composable
+fun LemonadeApp(modifier: Modifier = Modifier) {
+    var step by rememberSaveable { mutableIntStateOf(1) }
+    var squeezesNeeded by rememberSaveable { mutableIntStateOf(0) }
+    var squeezesDone by rememberSaveable { mutableIntStateOf(0) }
+
+    val (emoji, instruction) = when (step) {
+        1 -&gt; "🌳" to "Tap the lemon tree to pick a lemon"
+        2 -&gt; "🍋" to "Keep tapping the lemon to squeeze it"
+        3 -&gt; "🥤" to "Tap the lemonade to drink it"
+        else -&gt; "🥛" to "Tap the empty glass to start again"
+    }
+
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Button(
+            onClick = {
+                when (step) {
+                    1 -&gt; {
+                        squeezesNeeded = (2..4).random()
+                        squeezesDone = 0
+                        step = 2
+                    }
+                    2 -&gt; {
+                        squeezesDone++
+                        if (squeezesDone &gt;= squeezesNeeded) step = 3
+                    }
+                    3 -&gt; step = 4
+                    else -&gt; step = 1
+                }
+            }
+        ) {
+            Text(text = emoji, fontSize = 96.sp)
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(text = instruction, fontSize = 18.sp)
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>How it works:</strong> <code>step</code> decides what the screen shows and what a tap means. The <code>when</code> that picks the emoji <em>returns a pair</em> that is destructured into two values. The second <code>when</code> runs inside the click lambda and changes state. Because squeeze counts are random, two playthroughs differ, which is the point of the exercise.</p></div>
+
+<div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body"><p class="v2-p">Change the dice app so the <strong>Roll</strong> button is disabled for one second after each tap (hint: look at the <code>enabled</code> parameter of <code>Button</code>, and learn <code>rememberCoroutineScope</code> in lesson 28 to add a delay). If you are not ready for coroutines, simply disable the button once the player rolls a 6.</p></div></div><button class="ub" onclick="unlockNext(8)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase9"><div class="ph"><div class="pn">Phase 9 of 10</div><div class="pt">Common Beginner Mistakes (and How to Fix Them)</div><div class="pc" id="chk9"></div></div><div class="pb2"><p class="v2-p"><strong>Mistake #1: A plain <code>var</code> instead of state.</strong> <em>The wrong code:</em> <code>var result = 1</code>. <em>What happens:</em> the variable changes but the screen never does. <em>The fix:</em> <code>var result by remember { mutableIntStateOf(1) }</code>.</p>
+<p class="v2-p"><strong>Mistake #2: <code>remember</code> without the state wrapper.</strong> <em>The wrong code:</em> <code>var result by remember { 1 }</code>. <em>What happens:</em> the code does not compile, because <code>by</code> needs a state object. <em>The fix:</em> <code>remember { mutableIntStateOf(1) }</code>.</p>
+<p class="v2-p"><strong>Mistake #3: Forgetting the <code>getValue</code> and <code>setValue</code> imports.</strong> <em>Symptom:</em> a red underline on <code>by</code>. <em>The fix:</em> import <code>androidx.compose.runtime.getValue</code> and <code>androidx.compose.runtime.setValue</code>, or press <code>Alt + Enter</code>.</p>
+<p class="v2-p"><strong>Mistake #4: Off-by-one in a list.</strong> <em>The wrong code:</em> <code>faces[result]</code>. <em>What happens:</em> a roll of 6 crashes with <code>IndexOutOfBoundsException</code>, because the list has indexes 0 to 5. <em>The fix:</em> <code>faces[result - 1]</code>. Reading the red stack trace in Logcat (lesson 18) points straight to the line.</p>
+<p class="v2-p"><strong>Mistake #5: Creating state outside a composable.</strong> <em>The wrong code:</em> putting <code>remember</code> in a top-level property or in a normal function. <em>The fix:</em> <code>remember</code> may only be called from inside a composable.</p>
+<p class="v2-p"><strong>Mistake #6: Doing heavy work in a composable body.</strong> <em>The wrong code:</em> calling <code>(1..6).random()</code> directly in the body of <code>DiceRollerApp</code> so a new number is chosen on <strong>every</strong> recomposition. <em>What happens:</em> the die changes by itself. <em>The fix:</em> generate the random number only inside <code>onClick</code>.</p>
+<p class="v2-p"><strong>Mistake #7: Forgetting <code>else</code> in a <code>when</code> expression.</strong> <em>What happens:</em> a compile error saying the <code>when</code> must be exhaustive. <em>The fix:</em> add an <code>else</code> branch.</p>
+<p class="v2-p"><strong>Mistake #8: Losing state on rotation.</strong> <em>The fix:</em> use <code>rememberSaveable</code> for anything the user expects to survive.</p><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Common Beginner Mistakes (and How to Fix Them)</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(9)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="phase locked" id="phase10"><div class="ph"><div class="pn">Phase 10 of 10</div><div class="pt">Knowledge Check</div><div class="pc" id="chk10"></div></div><div class="pb2"><p class="v2-p">Answer each question before revealing the answer.</p>
+<p class="v2-p"><strong>Question 1.</strong> What is <em>state</em> in Compose?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 1 👁️</button><div class="reveal-content"><p class="v2-p">State is a value that Compose watches. When it changes, Compose recomposes the composables that read it so the screen shows the new value.</p></div>
+<p class="v2-p"><strong>Question 2.</strong> Why does <code>var count = 0</code> inside a composable not make a counter work?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 2 👁️</button><div class="reveal-content"><p class="v2-p">Compose is not told when a plain variable changes, so it does not redraw. And when the composable re-runs, the line <code>var count = 0</code> runs again and resets it.</p></div>
+<p class="v2-p"><strong>Question 3.</strong> What do <code>remember</code> and <code>mutableIntStateOf</code> each contribute?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 3 👁️</button><div class="reveal-content"><p class="v2-p"><code>mutableIntStateOf</code> creates a state object Compose can observe. <code>remember</code> keeps that same object alive across recompositions instead of creating a new one each time.</p></div>
+<p class="v2-p"><strong>Question 4.</strong> Which function would you use so a value survives rotating the phone?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 4 👁️</button><div class="reveal-content"><p class="v2-p"><code>rememberSaveable</code>. Plain <code>remember</code> is lost when the Activity is recreated on a configuration change.</p></div>
+<p class="v2-p"><strong>Question 5.</strong> What does <code>(1..6).random()</code> return, and can it return 6?</p>
+<button class="reveal-btn" onclick="toggleReveal(this)">Reveal Answer 5 👁️</button><div class="reveal-content"><p class="v2-p">A random integer from 1 to 6. Ranges built with <code>..</code> include both ends, so 6 is possible.</p></div>
+<h3 class="v2-h3">Go deeper: official resources</h3>
+<ul class="v2-ul">
+<li><a href="https://developer.android.com/courses/pathways/android-basics-compose-unit-2-pathway-2" rel="noopener noreferrer">Android Basics with Compose, Unit 2, Pathway 2: Add a button to an app</a>: the official pathway this lesson follows (Dice Roller intro video, codelab and click behaviour practice).</li>
+<li><a href="https://developer.android.com/courses/android-basics-compose/course" rel="noopener noreferrer">Android Basics with Compose course page</a>: all eight units.</li>
+<li><a href="https://developer.android.com/courses/pathways/jetpack-compose-for-android-developers-1" rel="noopener noreferrer">Jetpack Compose essentials, pathway 1</a>: state is explored again in the <em>Get started with state</em> codelab.</li>
+<li><a href="https://developer.android.com/codelabs/jetpack-compose-state" rel="noopener noreferrer">Get started with state codelab</a>: the deeper treatment you will study in lessons 19 and 37.</li>
+</ul><div class="task-box"><div class="task-lbl">✏️ Your Task</div><div class="task-body">Practise what you just learned about <strong>Knowledge Check</strong>. Open Android Studio, type the examples by hand, change a value, and observe what happens.</div></div><button class="ub" onclick="unlockNext(10)">Phase Complete — Unlock Next ✓</button></div></div>
+<div class="build-box" id="build-it"><div class="build-lbl">🏗️ Build It — Mini Project</div><div class="build-name">Two-Dice Lucky Seven</div><div class="build-req"><p class="v2-p"><strong>Project goal:</strong> Turn the dice roller into a tiny game with <strong>two</strong> dice. Rolling a total of seven wins, rolling a double earns a bonus message, and any other result invites another try.</p>
+<p class="v2-p"><strong>Requirements:</strong></p>
+<ol class="v2-ol">
+<li>Show two dice faces side by side in a <code>Row</code>.</li>
+<li>A <strong>Roll both</strong> button rolls both dice at once.</li>
+<li>Show the total under the dice.</li>
+<li>Show a message chosen with a <code>when</code> that has no argument (conditions in each branch): <code>Tap Roll to begin</code> before the first roll, <code>Lucky seven! You win!</code> when the total is 7, <code>Double N! Roll again</code> when both dice match, and <code>Total N. Try again</code> otherwise.</li>
+<li>Count how many rolls the player has made and show it.</li>
+<li>Keep every piece of state across rotation.</li>
+</ol>
+<p class="v2-p"><strong>Stretch goal:</strong> Add a <strong>Best streak</strong> counter that remembers the longest run of non-winning rolls before a win.</p></div><button class="reveal-btn" onclick="toggleCode(this)">Reveal Solution Code 💻</button><div class="reveal-content"><div class="v2-code-wrap"><div class="v2-code-bar"><span class="v2-dot r"></span><span class="v2-dot y"></span><span class="v2-dot g"></span><span class="v2-code-lang">MainActivity.kt</span><button class="copy-btn" onclick="copyCode(this)">❐ Copy</button></div><div class="v2-code-body"><pre><code>package com.example.diceroller
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.diceroller.ui.theme.DiceRollerTheme
+
+private val faces = listOf("⚀", "⚁", "⚂", "⚃", "⚄", "⚅")
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            DiceRollerTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    LuckySevenApp()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LuckySevenApp(modifier: Modifier = Modifier) {
+    var first by rememberSaveable { mutableIntStateOf(1) }
+    var second by rememberSaveable { mutableIntStateOf(1) }
+    var rolls by rememberSaveable { mutableIntStateOf(0) }
+
+    val total = first + second
+    val message = when {
+        rolls == 0 -&gt; "Tap Roll to begin"
+        total == 7 -&gt; "Lucky seven! You win!"
+        first == second -&gt; "Double ${first}s! Roll again"
+        else -&gt; "Total $total. Try again"
+    }
+
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row {
+            Text(text = faces[first - 1], fontSize = 96.sp)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = faces[second - 1], fontSize = 96.sp)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(text = message, fontSize = 22.sp)
+        Text(text = "Rolls so far: $rolls", fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = {
+            first = (1..6).random()
+            second = (1..6).random()
+            rolls++
+        }) {
+            Text(text = "Roll both")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LuckySevenPreview() {
+    DiceRollerTheme {
+        LuckySevenApp()
+    }
+}</code></pre></div></div>
+<p class="v2-p"><strong>Expected screen after the first tap (example):</strong></p>
+<blockquote class="v2-bq">
+<p class="v2-p">⚃ ⚂<br/>Lucky seven! You win!<br/>Rolls so far: 1</p>
+</blockquote>
+<p class="v2-p"><strong>Why it works:</strong> three separate state values change inside one <code>onClick</code>, and Compose recomposes once with all of them. The <code>when</code> without an argument tests conditions from top to bottom, so the order matters: a roll of double three is <em>not</em> seven, but a roll of 3 and 4 is, and the seven check comes first so a win is never reported as a double.</p><div style="display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.1rem"><button class="ub" onclick="showGithub()" style="background:#0f172a;box-shadow:none">🐙 Push to GitHub &#8594;</button></div></div></div>
+<div class="gh-acc" id="gh-steps" style="display:none">
+<div class="gh-hd" onclick="toggleGh(this)">🐙 Push to GitHub &nbsp;<span>▼</span></div>
+<div class="gh-bd">
+<div class="gh-st"><div class="gh-n">1</div><p>Open your finished project in Android Studio. Check that the <code>.gitignore</code> file the wizard created is in the project root. It keeps <code>local.properties</code>, build folders and keystores out of Git. Never commit passwords or signing keys.</p></div>
+<div class="gh-st"><div class="gh-n">2</div><p>Choose <strong>Git &gt; Create Git Repository…</strong> (or <strong>VCS &gt; Enable Version Control Integration</strong> in older versions), select the project folder, then open <strong>Git &gt; Commit</strong>, tick every file, and write the message <em>“Add Android lesson 17 project”</em>.</p></div>
+<div class="gh-st"><div class="gh-n">3</div><p>On <strong>github.com</strong> click <strong>New repository</strong>, name it <code>android-lesson-17-buttons-and-click-behaviour-the-dice-rolle</code>, set it to <strong>Public</strong>, leave <strong>Add a README</strong> unticked, and click <strong>Create repository</strong>.</p></div>
+<div class="gh-st"><div class="gh-n">4</div><p>Back in Android Studio choose <strong>Git &gt; Manage Remotes…</strong>, add the repository URL as <code>origin</code>, then choose <strong>Git &gt; Push…</strong> and push your <code>main</code> branch. Prefer the terminal? Run <code>git remote add origin &lt;your-url&gt;</code> then <code>git push -u origin main</code>.</p></div>
+<div class="gh-st"><div class="gh-n">5</div><p>Add a <code>README.md</code> with a screenshot of your app running and a short description. Employers and clients read READMEs first. Your project is now part of your public portfolio. 🎉</p></div>
+<button class="ub" onclick="showEnd()" style="margin-top:.5rem">Done — Finish Session ✅</button>
+</div></div>
+<div class="se" id="session-end"><h2>Lesson 17 complete! 🎉</h2><p style="margin-bottom:.85rem;font-size:.95rem;opacity:.9">You covered:</p><ul><li>✅ Lesson Introduction</li><li>✅ Prerequisite Concepts</li><li>✅ Conceptual Understanding: Events, State and Recomposition</li><li>✅ Step-by-Step Build 1: The Static Screen</li><li>✅ Step-by-Step Build 2: Make It Respond</li><li>✅ Step-by-Step Build 3: Real Dice Images with painterResource</li><li>✅ Rotation, Process Death and rememberSaveable</li><li>✅ Guided Practice Exercises</li><li>✅ Common Beginner Mistakes (and How to Fix Them)</li><li>✅ Knowledge Check</li></ul><div class="ln"><a href="lesson_16.html" class="ln-btn">&#8592; Lesson 16</a><a href="lesson_18.html" class="ln-btn primary">Lesson 18 &#8594;</a></div></div>
+</main>
+
+<footer class="lf">
+  <span class="lf-text">Techbase Code Coach &nbsp;·&nbsp; Android Course &nbsp;·&nbsp; Lesson 17 &nbsp;·&nbsp; © 2026 Techbase Consultant Services, Ibadan</span>
+</footer>
+</body></html>
