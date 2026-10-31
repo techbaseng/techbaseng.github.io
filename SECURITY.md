@@ -1,6 +1,6 @@
 # Security policy
 
-Techbase Academy is a static website. It has no accounts, logins or databases, and it stores only theme and lesson progress in the visitor's own browser.
+The Techbase website is a static site hosted on GitHub Pages. Accounts, saved progress and the contact and careers forms use Google Firebase (Authentication and Firestore). Firebase settings are injected from GitHub Actions secrets during the build; no keys or passwords are stored in this repository. Database access is deny-by-default (see `firebase/firestore.rules`): learners can only read and change their own data, and form submissions can be created but not read from the website.
 
 ## Reporting a vulnerability
 

@@ -1,0 +1,10 @@
+const DB = () => JSON.parse(localStorage.getItem('__fb_db') || '{}');
+const SDB = (d) => localStorage.setItem('__fb_db', JSON.stringify(d));
+export const getFirestore = () => ({});
+export const doc = (db, c, id) => ({ c, id });
+export const collection = (db, c) => ({ c });
+export const serverTimestamp = () => 'TS';
+export const getDoc = async (r) => { const d = DB()[r.c + '/' + r.id]; return { exists: () => !!d, data: () => d }; };
+export const setDoc = async (r, data, opt) => { const d = DB(), k = r.c + '/' + r.id; d[k] = opt && opt.merge ? { ...(d[k] || {}), ...data } : data; SDB(d); };
+export const deleteDoc = async (r) => { const d = DB(); delete d[r.c + '/' + r.id]; SDB(d); };
+export const addDoc = async (c, data) => { const d = DB(), k = c.c + '/' + Math.random().toString(36).slice(2); d[k] = data; SDB(d); };

@@ -2,14 +2,19 @@
 """Quality gate: checks the built site in /dist.
 Fails (exit 1) on broken internal links, missing assets, duplicate ids or leftover
 inline handlers. Prints warnings (exit 0) for softer problems such as long titles."""
-import re, sys
+import json
+import re
+import sys
 from pathlib import Path
-from urllib.parse import urldefrag, urlparse, unquote
+from urllib.parse import unquote, urldefrag, urlparse
+
 from bs4 import BeautifulSoup
 
 DIST = Path(__file__).resolve().parent.parent / "dist"
 errors, warns = [], []
-pages = sorted(DIST.rglob("*.html"))
+redirect_pages = {DIST / k / "index.html" for k in json.loads((DIST / "redirects.json").read_text(encoding="utf8"))} if (DIST / "redirects.json").exists() else set()
+pages = sorted(p for p in DIST.rglob("*.html") if p not in redirect_pages)  # redirect stubs are checked separately below
+JS_ANCHORS = {"signup"}  # panels created by the sign-in page script
 ids_cache = {}
 
 def page_ids(p):
@@ -46,9 +51,14 @@ for page in pages:
             target = (DIST / unquote(path.lstrip("/"))) if path.startswith("/") else (page.parent / unquote(path)).resolve()
             if target.is_dir(): target = target / "index.html"
             if not target.exists(): errors.append(f"{rel}: broken link {ref}"); continue
-        if frag and target.suffix == ".html" and frag not in page_ids(target): errors.append(f"{rel}: missing anchor {ref}")
+        if frag and frag not in JS_ANCHORS and target.suffix == ".html" and frag not in page_ids(target): errors.append(f"{rel}: missing anchor {ref}")
 
-for need in ("sitemap.xml", "robots.txt", "manifest.webmanifest", "404.html", "favicon.ico", "assets/data/search.json"):
+for stub in sorted(redirect_pages):
+    if not stub.exists(): errors.append(f"missing redirect page {stub.relative_to(DIST)}"); continue
+    m = re.search(r'url=([^"]+)"', stub.read_text(encoding="utf8"))
+    dest = m.group(1).split("#")[0].split("/", 3)[-1] if m else ""
+    if not m or not ((DIST / dest / "index.html").exists() or (DIST / dest).is_file()): errors.append(f"redirect {stub.relative_to(DIST)} points nowhere")
+for need in ("redirects.json", "sw.js", "assets/css/site.css", "assets/js/site.js", "assets/js/auth-ui.js", "sitemap.xml", "robots.txt", "manifest.webmanifest", "404.html", "favicon.ico", "assets/data/search.json"):
     if not (DIST / need).exists(): errors.append(f"missing {need}")
 for w in warns[:20]: print("WARNING:", w)
 for e in errors[:60]: print("ERROR:", e)

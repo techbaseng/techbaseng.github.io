@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero %}
+{% from "_macros.html" import photo with context %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block body %}
+<main id="main">
+{{ page_hero('Portfolio', 'Programmes we have run.', 'A running record of our work in classrooms, communities and conferences, with photos from each programme.') }}
+<section class="section">
+  <div class="wrap">
+    <div class="chips" role="group" aria-label="Filter by year" data-filter-group>
+      <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
+      {%- for y in years %}<button class="chip" type="button" data-filter="{{ y }}" aria-pressed="false">{{ y }}</button>{% endfor %}
+    </div>
+    <div class="cards-3 pf-grid" data-filter-items>
+      {%- for e in portfolio %}
+      <a class="pcard reveal" style="--i:{{ loop.index0 % 3 }}" data-year="{{ e.year }}" href="{{ ('portfolio/' ~ e.slug ~ '/')|u }}">
+        <div class="pcard-img">{{ photo(e.image, '(min-width: 900px) 380px, 92vw') }}</div>
+        <div class="pcard-body">
+          <p class="pcard-meta"><time datetime="{{ e.date }}">{{ e.date_label }}</time> · {{ e.location }}</p>
+          <h2>{{ e.title }}</h2>
+          <p>{{ e.summary_short }}</p>
+        </div>
+      </a>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <div><h2 class="h-section">Want a programme like this at your school?</h2><p>We deliver at your premises or virtually. All we need is a space and the learners.</p></div>
+    <div class="cta-actions"><a class="btn btn--lg btn--accent" href="{{ 'contact/'|u }}">Plan a visit {{ icon('arrow','icon-arrow') }}</a></div>
+  </div>
+</section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, field, page_hero %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block body %}
+<main id="main" class="account-page" data-account-page>
+{{ page_hero('Account', 'Your learning account.', 'Your profile, your progress and your account settings.') }}
+<section class="section">
+  <div class="wrap account-grid">
+    {%- if not site.accounts %}
+    <p class="empty is-visible">Accounts are not switched on yet. <a href="{{ 'learn/'|u }}">Browse the courses</a>.</p>
+    {%- else %}
+    <div class="auth-skeleton" data-auth-loading aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="account-main" data-auth-ready hidden>
+      <div class="auth-notice" role="alert" data-notice hidden></div>
+      <section class="acard" aria-labelledby="prof-h">
+        <h2 id="prof-h">Profile</h2>
+        <div class="acct-head"><span class="avatar avatar--xl" data-avatar aria-hidden="true">?</span><div><b data-name>Learner</b><small data-email></small><span class="badge" data-verified hidden>{{ icon('check-circle') }} Email verified</span></div></div>
+        <div class="verify-banner" data-verify-banner hidden><p>Your email is not verified yet. Check your inbox for the link.</p><div class="hero-actions"><button type="button" class="btn btn--sm" data-resend>Resend email</button><button type="button" class="btn btn--sm btn--ghost" data-refresh>I have verified</button></div></div>
+        <form class="tbform" data-account-form="profile" novalidate>
+          {{ field('name', 'Display name', required=True, autocomplete='name', maxlength=80) }}
+          <div class="fld" data-field="goal"><label for="f-goal">Learning goal <span class="opt">(optional)</span></label>
+            <select id="f-goal" name="goal"><option value="">Not sure yet</option>{%- for p in paths %}<option value="{{ p.start }}">{{ p.who }}: {{ p.label }}</option>{% endfor %}</select><p class="err" id="e-goal" role="alert"></p></div>
+          <button class="btn" type="submit"><span data-label>Save changes</span></button>
+        </form>
+      </section>
+
+      <section class="acard" aria-labelledby="prog-h">
+        <h2 id="prog-h">Your progress</h2>
+        <ul class="prog-list" data-progress-list>
+          {%- for c in courses %}
+          <li class="c-{{ c.key }}" data-course="{{ c.slug }}" data-count="{{ c.total }}">
+            <a href="{{ (c.slug ~ '/')|u }}"><span class="tile">{{ icon(c.icon) }}</span><span class="pl-body"><b>{{ c.title }}</b><span class="bar" aria-hidden="true"><i></i></span></span><em data-text>Not started</em></a>
+          </li>
+          {%- endfor %}
+        </ul>
+        <p class="hint" data-sync-note>Progress is saved to your account automatically.</p>
+      </section>
+
+      <section class="acard" aria-labelledby="sec-h">
+        <h2 id="sec-h">Security</h2>
+        <p class="hint" data-password-note>We will email you a link to choose a new password.</p>
+        <div class="hero-actions"><button type="button" class="btn btn--ghost" data-reset-password>Send password reset email</button><button type="button" class="btn btn--ghost" data-signout>{{ icon('logout') }} Sign out</button></div>
+      </section>
+
+      <section class="acard acard--danger" aria-labelledby="del-h">
+        <h2 id="del-h">Delete account</h2>
+        <p>This permanently deletes your account and the progress saved to it. Progress stored on this device is kept.</p>
+        <button type="button" class="btn btn--danger" data-delete-open>{{ icon('trash') }} Delete my account</button>
+      </section>
+    </div>
+    {%- endif %}
+  </div>
+</section>
+<dialog class="confirm" id="delete-dialog" aria-labelledby="del-title">
+  <form method="dialog" data-delete-form>
+    <h2 id="del-title">Delete your account?</h2>
+    <p>This cannot be undone. Your account and saved progress will be removed.</p>
+    <div class="fld" data-field="password" data-delete-password hidden><label for="f-del-pw">Confirm your password</label><div class="pw"><input id="f-del-pw" type="password" autocomplete="current-password" maxlength="128" aria-describedby="e-del-pw"></div><p class="err" id="e-del-pw" role="alert"></p></div>
+    <div class="hero-actions"><button class="btn btn--danger" type="submit" data-delete-confirm><span data-label>Yes, delete my account</span></button><button class="btn btn--ghost" type="button" data-delete-cancel>Cancel</button></div>
+  </form>
+</dialog>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/auth-ui.js?v={{ asset_v }}" defer></script>{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, heading %}
+{% from "_macros.html" import photo with context %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block head_extra %}<link rel="preload" as="image" href="{{ root }}assets/img/photos/kbis-class-a-960.webp" imagesrcset="{% for w in photos['kbis-class-a'].widths %}{{ root }}assets/img/photos/kbis-class-a-{{ w }}.webp {{ w }}w{{ ', ' if not loop.last }}{% endfor %}" imagesizes="(min-width: 900px) 540px, 92vw" fetchpriority="high">{% endblock %}
+{% block body %}
+<main id="main">
+
+<section class="hero hero--home">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Techbase Consultant Services · Ibadan, Nigeria</span>
+      <h1>Empowering youth for the <em>digital future</em> through STEM excellence.</h1>
+      <p class="hero-sub">We provide consultant services to schools and private individuals in STEM education, curriculum and teaching aids, coding and robotics training, website and mobile app development, and tutor training.</p>
+      <div class="hero-actions">
+        <a class="btn btn--lg" href="{{ 'contact/'|u }}">Start a conversation {{ icon('arrow','icon-arrow') }}</a>
+        <a class="btn btn--lg btn--ghost" href="{{ 'learn/'|u }}">Learn free with the Academy</a>
+      </div>
+      <ul class="trust-chips" aria-label="At a glance">
+        <li>{{ icon('users') }} Ages 5 to adult</li>
+        <li>{{ icon('school') }} In schools or virtual</li>
+        <li>{{ icon('award') }} Certificate of proficiency</li>
+      </ul>
+    </div>
+    <div class="hero-visual" aria-hidden="false">
+      <div class="hv-main">{{ photo('kbis-class-a', '(min-width: 900px) 540px, 92vw', alt='Pupils in school uniform coding on laptops during a Techbase class at Knowledge Base International Schools', eager=True) }}</div>
+      <div class="hv-side">{{ photo('girl-day-scratch', '(min-width: 900px) 240px, 40vw', alt='Girls learning Scratch at a laptop with a Techbase instructor') }}</div>
+      <div class="float-card fc-lesson" aria-hidden="true">
+        <span class="fc-tile">{{ icon('blocks') }}</span>
+        <div><b>Scratch · Project 12</b><small>Marked as done</small></div>
+        <span class="fc-check">{{ icon('check') }}</span>
+      </div>
+      <div class="float-card fc-count" aria-hidden="true">
+        <b>{{ total_lessons }}</b><small>free lessons in the Academy</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="trusted" aria-labelledby="trusted-h">
+  <div class="wrap">
+    <p class="trusted-label" id="trusted-h">Schools and organisations we work with</p>
+  </div>
+  <div class="logo-marquee">
+    <ul class="logo-track">
+      {%- for rep in range(2) %}
+      {%- for p in partners_flat %}
+      <li{% if rep %} aria-hidden="true"{% endif %}><img src="{{ root }}assets/img/partners/{{ p.logo }}.webp" alt="{{ p.name ~ ' logo' if not rep else '' }}" width="{{ p.w }}" height="{{ p.h }}" loading="lazy" decoding="async"><span>{{ p.name }}</span></li>
+      {%- endfor %}
+      {%- endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="stats-band" aria-label="Techbase in numbers">
+  <div class="wrap stats-grid">
+    <div class="sb"><b data-count="{{ total_lessons }}">{{ total_lessons }}</b><span>free lessons and projects</span></div>
+    <div class="sb"><b data-count="{{ courses|length }}">{{ courses|length }}</b><span>courses, Scratch to Android</span></div>
+    <div class="sb"><b data-count="{{ partners_flat|length }}">{{ partners_flat|length }}</b><span>partner schools and organisations</span></div>
+    <div class="sb"><b>5+</b><span>age our youngest learners start</span></div>
+  </div>
+</section>
+
+<section class="section" id="services">
+  <div class="wrap">
+    {{ heading('What we do', 'Four services, one practical approach.', 'From classroom coding to digital transformation, every engagement is structured, hands-on and built around your goal.') }}
+    <div class="svc-grid">
+      {%- for s in services %}
+      <a class="svc spot reveal" style="--i:{{ loop.index0 }}" href="{{ ('services/#' ~ s.id)|u }}">
+        <span class="svc-icon">{{ icon(s.icon) }}</span>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.short }}</p>
+        <span class="more">Details {{ icon('arrow','icon-arrow') }}</span>
+      </a>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section learn-feature" id="learn-feature">
+  <div class="wrap lf-grid">
+    <div class="lf-copy">
+      <span class="eyebrow reveal">Techbase Academy</span>
+      <h2 class="h-section reveal">Learn to code, free. Your progress follows you.</h2>
+      <p class="lede reveal">{{ total_lessons }} lessons across {{ courses|length }} courses, from first blocks in Scratch to Python, web development, robotics and Android apps. {% if site.accounts %}Create a free account and pick up exactly where you stopped, on any phone or laptop.{% else %}Open any course and start learning.{% endif %}</p>
+      <div class="hero-actions reveal">
+        {%- if site.accounts %}
+        <a class="btn btn--lg btn--accent" href="{{ 'login/#signup'|u }}" data-when-signed-out>Create a free account {{ icon('arrow','icon-arrow') }}</a>
+        <a class="btn btn--lg btn--accent" href="{{ 'learn/'|u }}" data-when-signed-in hidden>Continue learning {{ icon('arrow','icon-arrow') }}</a>
+        {%- else %}
+        <a class="btn btn--lg btn--accent" href="{{ 'learn/'|u }}">Start learning {{ icon('arrow','icon-arrow') }}</a>
+        {%- endif %}
+        <a class="btn btn--lg btn--ghost-light" href="{{ 'learn/#courses'|u }}">Browse the courses</a>
+      </div>
+    </div>
+    <div class="pathfinder reveal" data-pathfinder>
+      <p class="pf-title">Which path fits you?</p>
+      <div class="pf-tabs" role="tablist" aria-label="Choose your goal">
+        {%- for p in paths %}
+        <button type="button" class="pf-tab" role="tab" id="pf-tab-{{ loop.index0 }}" aria-controls="pf-panel-{{ loop.index0 }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ '0' if loop.first else '-1' }}">{{ p.who }}</button>
+        {%- endfor %}
+      </div>
+      {%- for p in paths %}
+      <div class="pf-panel c-{{ p.key }}" role="tabpanel" id="pf-panel-{{ loop.index0 }}" aria-labelledby="pf-tab-{{ loop.index0 }}"{% if not loop.first %} data-js-hidden{% endif %}>
+        <p class="pf-who">{{ p.who }}</p>
+        <p class="pf-route">{{ p.route }}</p>
+        <a class="btn" href="{{ (p.start ~ '/')|u }}">{{ p.label }} {{ icon('arrow','icon-arrow') }}</a>
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+  <div class="wrap">
+    <ul class="course-strip">
+      {%- for c in courses %}
+      <li class="c-{{ c.key }} reveal" style="--i:{{ loop.index0 % 4 }}"><a href="{{ (c.slug ~ '/')|u }}"><span class="tile">{{ icon(c.icon) }}</span><b>{{ c.short if c.key != 'microbit' else 'micro:bit' }}</b><small>{{ c.count }}</small></a></li>
+      {%- endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="section why">
+  <div class="wrap why-grid">
+    <div class="why-head">
+      <span class="eyebrow reveal">Why Techbase</span>
+      <h2 class="h-section reveal">We don't just provide solutions. We build futures.</h2>
+      <p class="lede reveal">Here is why individuals, schools and businesses trust us.</p>
+      <a class="btn btn--ghost reveal" href="{{ 'about/'|u }}">About Techbase {{ icon('arrow','icon-arrow') }}</a>
+    </div>
+    <ol class="why-list">
+      {%- for w in why %}
+      <li class="reveal" style="--i:{{ loop.index0 % 2 }}"><span class="why-n">{{ '%02d'|format(loop.index) }}</span><div><h3>{{ w.title }}</h3><p>{{ w.text }}</p></div></li>
+      {%- endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="section band" id="programmes">
+  <div class="wrap">
+    {{ heading('From the field', 'Programmes we have run.', 'A running record of our work in classrooms, communities and conferences.') }}
+    <div class="cards-3">
+      {%- for e in portfolio[:3] %}
+      <a class="pcard reveal" style="--i:{{ loop.index0 }}" href="{{ ('portfolio/' ~ e.slug ~ '/')|u }}">
+        <div class="pcard-img">{{ photo(e.image, '(min-width: 900px) 380px, 92vw') }}</div>
+        <div class="pcard-body">
+          <p class="pcard-meta"><time datetime="{{ e.date }}">{{ e.date_label }}</time> · {{ e.location }}</p>
+          <h3>{{ e.title }}</h3>
+          <p>{{ e.summary_short }}</p>
+        </div>
+      </a>
+      {%- endfor %}
+    </div>
+    <p class="more-link reveal"><a class="link-arrow" href="{{ 'portfolio/'|u }}">See all programmes {{ icon('arrow','icon-arrow') }}</a></p>
+  </div>
+</section>
+
+<section class="section" id="testimonials">
+  <div class="wrap">
+    {{ heading('In their words', 'What our clients say.') }}
+    <div class="tslider" data-slider>
+      <div class="tslider-track" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Client testimonials">
+        {%- for t in testimonials %}
+        <figure class="tcard" aria-label="{{ loop.index }} of {{ loop.length }}">
+          <span class="tcard-mark" aria-hidden="true">{{ icon('quote') }}</span>
+          <blockquote><p class="quote-text" data-clamp>{{ t.quote }}</p></blockquote>
+          <button type="button" class="link-btn" data-clamp-toggle hidden aria-expanded="false">Read more</button>
+          <figcaption><span class="avatar" aria-hidden="true">{{ t.name.split()[-1][0] }}</span><span><b>{{ t.name }}</b><small>{{ t.role }}</small></span></figcaption>
+        </figure>
+        {%- endfor %}
+      </div>
+      <div class="tslider-ctl">
+        <button type="button" class="icon-btn" data-slide="-1" aria-label="Previous testimonial">{{ icon('chev-left') }}</button>
+        <button type="button" class="icon-btn" data-slide="1" aria-label="Next testimonial">{{ icon('chev-right') }}</button>
+        <a class="link-arrow" href="{{ 'testimonials/'|u }}">All testimonials {{ icon('arrow','icon-arrow') }}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section band" id="notes">
+  <div class="wrap">
+    {{ heading('Notes from the classroom', 'Guides for parents, teachers and schools.') }}
+    <div class="cards-3">
+      {%- for p in posts[:3] %}
+      <a class="pcard reveal" style="--i:{{ loop.index0 }}" href="{{ ('blog/' ~ p.slug ~ '/')|u }}">
+        <div class="pcard-img">{% if p.image %}{{ photo(p.image, '(min-width: 900px) 380px, 92vw') }}{% else %}<div class="cover-fallback" aria-hidden="true">{{ icon('book') }}</div>{% endif %}</div>
+        <div class="pcard-body">
+          <p class="pcard-meta"><time datetime="{{ p.date }}">{{ p.date_label }}</time> · {{ p.reading }} min read</p>
+          <h3>{{ p.title }}</h3>
+          <p>{{ p.summary_short }}</p>
+        </div>
+      </a>
+      {%- endfor %}
+    </div>
+    <p class="more-link reveal"><a class="link-arrow" href="{{ 'blog/'|u }}">Read the blog {{ icon('arrow','icon-arrow') }}</a></p>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <div>
+      <h2 class="h-section">Tell us what you're trying to build.</h2>
+      <p>A school curriculum, a training plan, a website, or an AI tool for your team. Start with a short conversation.</p>
+    </div>
+    <div class="cta-actions">
+      <a class="btn btn--lg btn--accent" href="{{ 'contact/'|u }}">Send an enquiry {{ icon('arrow','icon-arrow') }}</a>
+      <a class="btn btn--lg btn--ghost-light" href="{{ site.company.whatsapp.chat }}" target="_blank" rel="noopener noreferrer">{{ icon('wa') }} WhatsApp us</a>
+    </div>
+  </div>
+</section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% endblock %}

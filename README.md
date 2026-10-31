@@ -1,26 +1,33 @@
 <div align="center">
 
-<img src="assets/img/logo-mark.svg" width="72" height="72" alt="Techbase Academy logo">
+<img src="assets/img/logo-mark.svg" width="72" height="72" alt="Techbase logo">
 
-# Techbase Academy
+# Techbase Consultant Services
 
-**Free coding and robotics courses from Ibadan, Nigeria.**
+**Empowering youth for the digital future through STEM excellence.**
 
 [![Build and deploy](https://github.com/techbaseng/techbaseng.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/techbaseng/techbaseng.github.io/actions/workflows/deploy.yml)
-[![Live site](https://img.shields.io/website?url=https%3A%2F%2Ftechbaseng.github.io&label=live%20site)](https://techbaseng.github.io)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2457e6.svg)](LICENSE)
 
-[Live site](https://techbaseng.github.io) · [Documentation](docs/) · [Report an issue](../../issues/new/choose)
+[Website](https://techbaseng.github.io) · [Free Academy](https://techbaseng.github.io/learn/) · [Contact](https://techbaseng.github.io/contact/) · [Report an issue](../../issues/new/choose)
 
 </div>
 
-![Techbase Academy home page showing the eight courses](docs/assets/preview.png)
+![The Techbase home page](docs/assets/preview.png)
 
 ## About
 
-Techbase Academy is a free learning platform built by Techbase Consultant Services in Ibadan, Nigeria. It gives students of any background a complete, self-paced path from first lesson to advanced topics, with no sign-up. The curriculum runs from Scratch and HTML to data science, algorithms, AI and hands-on micro:bit robotics, for ages 8 through adult.
+Techbase Consultant Services is a STEM education and technology consultancy in Moniya, Ibadan, Nigeria. We work with schools, organisations and individuals on coding and robotics training for ages 5 to adult, curriculum and teaching aids, website and mobile app development, and AI tools for education.
 
-## Courses
+This repository is the Techbase website. It also contains the **Techbase STEM Academy**: 472 free lessons across eight courses.
+
+## What is on the site
+
+- **Services**, **About**, **Team**, **Portfolio** of programmes we have run, **Blog**, **FAQ**, **Careers** and **Contact** pages.
+- **Techbase Academy** (`/learn/`): free courses in HTML, CSS, JavaScript, Python, Scratch, micro:bit robotics, Practical Robotics and Android app development. Create a free account to unlock every lesson and keep your progress on all your devices. The first lesson of each course is open to everyone.
+- Search the whole site with Ctrl + K (or `/`), light and dark themes, and pages that you have opened keep working offline.
+
+## Academy courses
 
 | Course | Lessons | Level |
 |---|---|---|
@@ -35,54 +42,39 @@ Techbase Academy is a free learning platform built by Techbase Consultant Servic
 
 Video walkthroughs are on the [Techbase YouTube channel](https://www.youtube.com/@techbasengr).
 
-## Features
+## Built with
 
-- 472 lessons and projects across eight courses
-- Step-by-step lessons that unlock phase by phase, with practice tasks and a mini project
-- Search every lesson with Ctrl + K (or `/`)
-- Progress saved on your own device, with a "Continue" shortcut
-- Copy buttons and syntax-highlighted code in every lesson
-- Light and dark themes that follow your device setting
-- Works on phones, tablets and desktops, and stays readable with JavaScript off
-
-## How to use it
-
-1. Open the [live site](https://techbaseng.github.io) and pick a course. The home page lists suggested learning paths.
-2. Start at lesson 1, or search for a topic with Ctrl + K.
-3. In step-by-step lessons, finish each phase to unlock the next. Project lessons link to the official micro:bit, Raspberry Pi or Freenove guide.
-4. Come back any time. Your progress is stored in your browser on that device.
-
-## Tech stack
-
-- Static site generated with Python (Jinja2, Beautiful Soup, Pygments)
-- Plain HTML, CSS and JavaScript in the browser, with no framework
-- Inter, Bricolage Grotesque and JetBrains Mono via Google Fonts
+- A static site generated with Python (Jinja2, Beautiful Soup, Pygments, Pillow)
+- Plain HTML, CSS and JavaScript in the browser, with no framework and self-hosted fonts
+- Firebase Authentication and Firestore for accounts, saved progress and the enquiry forms
 - GitHub Actions and GitHub Pages for building and hosting
 
-## Project structure
+## Repository layout
 
 ```
-content/      Course details and every lesson source file, one folder per course
-templates/    Page layouts (home, course, lesson, 404)
-assets/       Stylesheets, scripts, logo, favicons and social images
+content/      Company pages, blog posts, photos, course details and every lesson source file
+templates/    Page layouts
+assets/       Stylesheets, scripts, fonts, logo, icons and partner logos
+src/auth/     Sign-in and progress-sync code (bundled during the build)
+firebase/     Database security rules
 build/        The site generator and the quality checks
-tools/        Maintainer script that regenerates icons and social images
-docs/         Guides for maintaining and deploying the site
+tests/        Browser tests for accounts and forms
+docs/         Guides for the site owner
 .github/      Automated build, deploy and security workflows
 ```
 
 ## Contributing
 
-Spotted a typo or a broken lesson? [Open an issue](../../issues/new/choose) or edit the file on GitHub and open a pull request. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Spotted a typo or a broken lesson? [Open an issue](../../issues/new/choose) or edit the file on GitHub and open a pull request. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Security
 
 Please report vulnerabilities privately, as described in [SECURITY.md](SECURITY.md).
 
-## License and credits
+## Licence and credits
 
-Released under the [MIT License](LICENSE). Scratch projects follow the Raspberry Pi Foundation curriculum, micro:bit projects come from [microbit.org](https://microbit.org), and Practical Robotics follows the Freenove Ultimate Starter Kit for micro:bit (FNK0045). Each lesson links to the official source. Fonts: Inter, Bricolage Grotesque and JetBrains Mono, all under the SIL Open Font License.
+Released under the [MIT License](LICENSE). Scratch projects follow the Raspberry Pi Foundation curriculum, micro:bit projects come from [microbit.org](https://microbit.org), and Practical Robotics follows the Freenove Ultimate Starter Kit for micro:bit (FNK0045); each lesson links to its source. Fonts: Inter, Bricolage Grotesque and JetBrains Mono (SIL Open Font License). Icons: [Lucide](https://lucide.dev) (ISC) and [Simple Icons](https://simpleicons.org) (CC0).
 
 ## Contact
 
-[techbasengr.com.ng](https://techbasengr.com.ng)
+Techbase Consultant Services, Moniya, Ibadan, Oyo State, Nigeria · +234 812 690 9498 · techbasengr@gmail.com

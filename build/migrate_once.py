@@ -1,7 +1,10 @@
 """One-off migration helper: turns the seven old course repos into content/<slug>/.
 Kept in the repo for provenance; not part of the regular build."""
-import json, re, shutil, sys
+import json
+import re
+import sys
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 
 SRC = Path(sys.argv[1]); OUT = Path(sys.argv[2])
