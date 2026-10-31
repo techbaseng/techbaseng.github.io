@@ -294,7 +294,8 @@
     if (window.TB.authLoading) return ready;
     window.TB.authLoading = true;
     var s = document.createElement('script');
-    s.src = BASE + 'assets/js/auth.js?v=' + (document.body.getAttribute('data-v') || '');
+    var ver = document.body.getAttribute('data-v') || '';
+    s.src = BASE + 'assets/js/auth.js' + (/^[a-f0-9]{1,16}$/.test(ver) ? '?v=' + ver : '');
     s.onerror = function () { window.TB.authLoading = false; resolveReady(null); announce(null); };
     document.head.appendChild(s);
     return ready;
