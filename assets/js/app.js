@@ -4,7 +4,9 @@
   'use strict';
 
   var root = document.documentElement;
-  var BASE = document.body.getAttribute('data-root') || '';
+  var rawBase = document.body.getAttribute('data-root') || '';
+  var BASE = /^(?:(?:\.\.\/)*|\/)$/.test(rawBase) ? rawBase : '';   // only '', '../' steps or '/' are ever valid
+  var LESSON_URL = /^[a-z0-9-]+\/lessons\/[a-z0-9_.-]+$/i;
 
   /* ---- storage helpers (storage can throw in private windows) ---- */
   function load(key, fallback) {
@@ -13,6 +15,20 @@
   function touch() { try { document.dispatchEvent(new CustomEvent('tb:progress')); } catch (e) { /* ignore */ } }
   function save(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ignore */ } if (key.indexOf('tb:') === 0) touch(); }
   window.TB = { load: load, save: save, touch: touch };
+  /* tiny DOM builder: text always goes in as text, never as markup */
+  function h(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { if (attrs[k] === true) n.setAttribute(k, ''); else if (attrs[k] !== false && attrs[k] != null) n.setAttribute(k, attrs[k]); });
+    (kids || []).forEach(function (c) { n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function icon(name) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'icon'); svg.setAttribute('aria-hidden', 'true');
+    var use = document.createElementNS('http://www.w3.org/2000/svg', 'use'); use.setAttribute('href', '#i-' + name);
+    svg.appendChild(use); return svg;
+  }
+  window.TB.h = h;
 
   /* ---- toast ---- */
   var toastEl = document.getElementById('toast'), toastTimer;
@@ -175,7 +191,7 @@
   var gl = document.getElementById('continue-global');
   if (gl) {
     var lastAny = load('tb:last', null);
-    if (lastAny && lastAny.u) {
+    if (lastAny && typeof lastAny.u === 'string' && LESSON_URL.test(lastAny.u)) {
       gl.href = BASE + lastAny.u;
       gl.querySelector('[data-label]').textContent = 'Continue: ' + lastAny.t;
       gl.hidden = false;
@@ -189,7 +205,6 @@
   var dlg = document.getElementById('palette');
   if (dlg && typeof dlg.showModal === 'function') {
     var input2 = dlg.querySelector('input'), list = dlg.querySelector('.palette-list'), index = null, results = [], sel = 0;
-    var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
     var fetchIndex = function () {
       if (index) return Promise.resolve(index);
       return fetch(BASE + 'assets/data/search.json').then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -204,19 +219,23 @@
       }
       return s;
     };
+    var say = function (msg) { while (list.firstChild) list.removeChild(list.firstChild); list.appendChild(h('li', { 'class': 'palette-empty' }, [msg])); };
     var render = function () {
-      if (!results.length) {
-        list.innerHTML = '<li class="palette-empty">' + (index ? 'Nothing matches that. Try a topic like "flexbox", or a word like "robotics" or "contact".' : 'Loading lessons…') + '</li>';
-        return;
-      }
+      if (!results.length) { say(index ? 'Nothing matches that. Try a topic like "flexbox", or a word like "robotics" or "contact".' : 'Loading lessons…'); return; }
       var kinds = { lesson: 'Lesson', course: 'Course', page: 'Page', faq: 'FAQ', post: 'Article', event: 'Programme' };
-      list.innerHTML = results.map(function (r, i) {
-        var k = r.k || 'lesson';
-        var tile = (k === 'lesson' || k === 'course') ? esc(r.n || '·') : '';
-        return '<li><a role="option" href="' + BASE + esc(r.u) + '" class="c-' + esc(r.c || 'site') + '" aria-selected="' + (i === sel) + '" data-i="' + i + '">' +
-          '<span class="tile k-' + esc(k) + '" style="font:700 .72rem var(--font-mono)">' + (tile || '<svg class="icon" aria-hidden="true"><use href="#i-' + (k === 'page' ? 'arrow' : k === 'faq' ? 'message' : 'book') + '"/></svg>') + '</span>' +
-          '<span><b>' + esc(r.t) + '</b><small>' + esc(r.cs) + (r.d ? ' · ' + esc(r.d) : '') + '</small></span><span class="kind">' + (kinds[k] || '') + '</span></a></li>';
-      }).join('');
+      while (list.firstChild) list.removeChild(list.firstChild);
+      results.forEach(function (r, i) {
+        var k = kinds[r.k || 'lesson'] ? (r.k || 'lesson') : 'page';
+        var tile = h('span', { 'class': 'tile k-' + k, style: 'font:700 .72rem var(--font-mono)' }, []);
+        if (k === 'lesson' || k === 'course') tile.appendChild(document.createTextNode(String(r.n || '·')));
+        else tile.appendChild(icon(k === 'page' ? 'arrow' : k === 'faq' ? 'message' : 'book'));
+        var cls = /^[a-z0-9-]+$/.test(String(r.c)) ? r.c : 'site';
+        var href = /^[a-z0-9\/_.#-]+$/i.test(String(r.u)) ? BASE + r.u : BASE + 'index.html';
+        var a = h('a', { role: 'option', href: href, 'class': 'c-' + cls, 'aria-selected': String(i === sel), 'data-i': String(i) }, [tile,
+          h('span', {}, [h('b', {}, [String(r.t)]), h('small', {}, [String(r.cs) + (r.d ? ' \u00b7 ' + r.d : '')])]),
+          h('span', { 'class': 'kind' }, [kinds[k]])]);
+        list.appendChild(h('li', {}, [a]));
+      });
     };
     var run = function () {
       var q = input2.value.trim().toLowerCase();
@@ -229,7 +248,7 @@
     var open = function () {
       if (!dlg.open) dlg.showModal();
       input2.value = ''; results = []; render();
-      fetchIndex().then(run).catch(function () { list.innerHTML = '<li class="palette-empty">Search is unavailable offline. Browse the courses instead.</li>'; });
+      fetchIndex().then(run).catch(function () { say('Search is unavailable offline. Browse the courses instead.'); });
       input2.focus();
     };
     input2.addEventListener('input', run);
@@ -283,26 +302,30 @@
   window.TB.loadAuth = loadAuth;
 
   function initial(name) { return (String(name || '?').trim().charAt(0) || '?').toUpperCase(); }
-  function acctMarkup(name, email) {
-    return '<div class="acct"><button type="button" class="acct-btn" aria-haspopup="true" aria-expanded="false" data-acct-toggle>' +
-      '<span class="avatar" aria-hidden="true">' + esc2(initial(name)) + '</span><span class="nm">' + esc2((name || 'Account').split(' ')[0]) + '</span>' +
-      '<svg class="icon" aria-hidden="true"><use href="#i-chev-down"/></svg></button>' +
-      '<div class="acct-pop" hidden><div class="who"><b>' + esc2(name || 'Learner') + '</b><small>' + esc2(email || '') + '</small></div>' +
-      '<a href="' + BASE + 'learn/index.html">My courses</a><a href="' + BASE + 'account/index.html">Account</a>' +
-      '<button type="button" data-signout>Sign out</button></div></div>';
+  function acctNode(name, email) {
+    var wrap = h('div', { 'class': 'acct' });
+    wrap.appendChild(h('button', { type: 'button', 'class': 'acct-btn', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'data-acct-toggle': true }, [
+      h('span', { 'class': 'avatar', 'aria-hidden': 'true' }, [initial(name)]),
+      h('span', { 'class': 'nm' }, [String(name || 'Account').split(' ')[0]]), icon('chev-down')]));
+    wrap.appendChild(h('div', { 'class': 'acct-pop', hidden: true }, [
+      h('div', { 'class': 'who' }, [h('b', {}, [name || 'Learner']), h('small', {}, [email || ''])]),
+      h('a', { href: BASE + 'learn/index.html' }, ['My courses']),
+      h('a', { href: BASE + 'account/index.html' }, ['Account']),
+      h('button', { type: 'button', 'data-signout': true }, ['Sign out'])]));
+    return wrap;
   }
-  function esc2(x) { return String(x).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fill(node, kids) { while (node.firstChild) node.removeChild(node.firstChild); kids.forEach(function (k) { node.appendChild(k); }); }
 
   function renderAuth(user, pending) {
     var slot = document.querySelector('[data-auth-slot]');
     var menuSlot = document.querySelector('[data-menu-auth]');
     if (user || pending) {
-      var nm = user ? (user.displayName || (user.email || '').split('@')[0]) : (hint && hint.n);
-      if (slot) slot.innerHTML = acctMarkup(nm, user && user.email);
-      if (menuSlot) menuSlot.innerHTML = '<a href="' + BASE + 'account/index.html">Account</a><button type="button" class="btn btn--sm btn--ghost" data-signout>Sign out</button>';
+      var nm = user ? (user.displayName || (user.email || '').split('@')[0]) : '';
+      if (slot) fill(slot, [acctNode(nm, user && user.email)]);
+      if (menuSlot) fill(menuSlot, [h('a', { href: BASE + 'account/index.html' }, ['Account']), h('button', { type: 'button', 'class': 'btn btn--sm btn--ghost', 'data-signout': true }, ['Sign out'])]);
     } else if (accountsOn) {
-      if (slot) slot.innerHTML = '<a class="nav-login" href="' + BASE + 'login/index.html">Log in</a><a class="btn btn--sm" href="' + BASE + 'login/index.html#signup">Create account</a>';
-      if (menuSlot) menuSlot.innerHTML = '<a href="' + BASE + 'login/index.html">Log in</a><a class="btn btn--sm" href="' + BASE + 'login/index.html#signup">Create free account</a>';
+      if (slot) fill(slot, [h('a', { 'class': 'nav-login', href: BASE + 'login/index.html' }, ['Log in']), h('a', { 'class': 'btn btn--sm', href: BASE + 'login/index.html#signup' }, ['Create account'])]);
+      if (menuSlot) fill(menuSlot, [h('a', { href: BASE + 'login/index.html' }, ['Log in']), h('a', { 'class': 'btn btn--sm', href: BASE + 'login/index.html#signup' }, ['Create free account'])]);
     }
     Array.prototype.forEach.call(document.querySelectorAll('[data-when-signed-in]'), function (el) { el.hidden = !user; });
     Array.prototype.forEach.call(document.querySelectorAll('[data-when-signed-out]'), function (el) { el.hidden = !!user; });
@@ -331,10 +354,12 @@
         document.body.classList.add('is-gated');
         var host = document.querySelector('#lesson-main'), layout = host && host.closest('.lesson-layout, .project-layout');
         if (layout) {
-          var w = document.createElement('div');
-          w.id = 'gate-wall'; w.className = 'gate-wall';
-          w.innerHTML = '<h2>Create a free account to keep going</h2><p>The first lesson of every course is open to everyone. A free account unlocks the rest and saves your progress on every device. No card needed.</p>' +
-            '<div class="hero-actions"><a class="btn btn--lg" href="' + BASE + 'login/index.html#signup">Create free account</a><a class="btn btn--lg btn--ghost" href="' + BASE + 'login/index.html">Log in</a></div>';
+          var w = h('div', { id: 'gate-wall', 'class': 'gate-wall' }, [
+            h('h2', {}, ['Create a free account to keep going']),
+            h('p', {}, ['The first lesson of every course is open to everyone. A free account unlocks the rest and saves your progress on every device. No card needed.']),
+            h('div', { 'class': 'hero-actions' }, [
+              h('a', { 'class': 'btn btn--lg', href: BASE + 'login/index.html#signup' }, ['Create free account']),
+              h('a', { 'class': 'btn btn--lg btn--ghost', href: BASE + 'login/index.html' }, ['Log in'])])]);
           layout.parentNode.insertBefore(w, layout.nextSibling);
         }
       } else if (user && wall) { wall.remove(); document.body.classList.remove('is-gated'); }
@@ -344,7 +369,7 @@
       Array.prototype.forEach.call(courseItems, function (it, i) {
         it.classList.toggle('is-locked', !user && i >= FREE_N);
         var b = it.querySelector('.lock-badge');
-        if (!user && i >= FREE_N && !b) { var sp = document.createElement('span'); sp.className = 'lock-badge'; sp.innerHTML = '<svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> Free account'; var holder = it.querySelector('small'); if (holder) holder.appendChild(sp); }
+        if (!user && i >= FREE_N && !b) { var sp = h('span', { 'class': 'lock-badge' }, [icon('lock'), ' Free account']); var holder = it.querySelector('small'); if (holder) holder.appendChild(sp); }
         else if ((user || i < FREE_N) && b) b.remove();
       });
     }
@@ -356,7 +381,7 @@
     try { document.dispatchEvent(new CustomEvent('tb:auth', { detail: { user: user } })); } catch (e) { /* ignore */ }
   }
   window.TB.announceAuth = function (user) {
-    if (user) save(FLAG, { n: user.displayName || (user.email || '').split('@')[0] }); else { try { localStorage.removeItem(FLAG); } catch (e) { /* ignore */ } }
+    if (user) save(FLAG, 1); else { try { localStorage.removeItem(FLAG); } catch (e) { /* ignore */ } }
     announce(user); resolveReady(user);
   };
   if (hint && accountsOn) renderAuth(null, true);

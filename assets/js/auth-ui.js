@@ -3,7 +3,8 @@
   'use strict';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
-  var BASE = document.body.getAttribute('data-root') || '';
+  var rawBase = document.body.getAttribute('data-root') || '';
+  var BASE = /^(?:(?:\.\.\/)*|\/)$/.test(rawBase) ? rawBase : '';
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   var loading = $('[data-auth-loading]'), ready = $('[data-auth-ready]');
   if (!loading && !ready) return;
@@ -25,7 +26,7 @@
     if ($('[data-account-page]')) initAccount(user);
   });
   /* If the sign-in code could not load (offline, blocked), say so instead of spinning forever. */
-  setTimeout(function () { if (loading && !loading.hidden && !TB.auth) { loading.hidden = true; var p = $('[data-auth-page],[data-account-page] .wrap'); if (p) p.insertAdjacentHTML('afterbegin', '<p class="auth-notice">Sign-in could not load. Check your connection and refresh the page.</p>'); } }, 12000);
+  setTimeout(function () { if (loading && !loading.hidden && !TB.auth) { loading.hidden = true; var p = $('[data-auth-page],[data-account-page] .wrap'); if (p) p.insertBefore(TB.h('p', { 'class': 'auth-notice' }, ['Sign-in could not load. Check your connection and refresh the page.']), p.firstChild); } }, 12000);
 
   /* ---------------- login page ---------------- */
   function initLogin(user) {
