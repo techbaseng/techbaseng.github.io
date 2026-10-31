@@ -1,1 +1,50 @@
 {% macro icon(name, cls='') -%}<svg class="icon {{ cls }}" aria-hidden="true" focusable="false"><use href="#i-{{ name }}"/></svg>{%- endmacro %}
+
+{#- Responsive photo from content/photos (build makes 480/960/1600 px WebP). Import "with context". -#}
+{% macro photo(name, sizes='100vw', cls='', alt=None, eager=False) -%}
+{%- set p = photos[name] -%}
+<img{% if cls %} class="{{ cls }}"{% endif %} src="{{ root }}assets/img/photos/{{ name }}-{{ p.default }}.webp" srcset="{% for w in p.widths %}{{ root }}assets/img/photos/{{ name }}-{{ w }}.webp {{ w }}w{{ ', ' if not loop.last }}{% endfor %}" sizes="{{ sizes }}" width="{{ p.w }}" height="{{ p.h }}" alt="{{ alt if alt is not none else p.alt }}"{% if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %} decoding="async" style="--ph:{{ p.ph }}">
+{%- endmacro %}
+
+{#- Section heading block used on most company pages -#}
+{% macro heading(eyebrow, title, lede='', tag='h2', cls='') -%}
+<div class="sec-head {{ cls }}">
+  <span class="eyebrow reveal">{{ eyebrow }}</span>
+  <{{ tag }} class="h-section reveal">{{ title }}</{{ tag }}>
+  {%- if lede %}<p class="lede reveal">{{ lede }}</p>{% endif %}
+</div>
+{%- endmacro %}
+
+{#- Hero used on every inner page -#}
+{% macro page_hero(eyebrow, title, lede='', crumbs=None) -%}
+<section class="page-hero">
+  <div class="wrap">
+    {%- if crumbs %}
+    <nav class="crumbs" aria-label="Breadcrumb">
+      {%- for c in crumbs %}{% if c.href %}<a href="{{ c.href }}">{{ c.label }}</a><span class="sep" aria-hidden="true">/</span>{% else %}<span aria-current="page">{{ c.label }}</span>{% endif %}{% endfor %}
+    </nav>
+    {%- endif %}
+    <span class="eyebrow">{{ eyebrow }}</span>
+    <h1>{{ title }}</h1>
+    {%- if lede %}<p class="lede">{{ lede }}</p>{% endif %}
+  </div>
+</section>
+{%- endmacro %}
+
+{#- Accessible form field: label, optional hint, error slot -#}
+{% macro field(id, label, type='text', required=False, hint='', autocomplete='', maxlength=200, rows=0, options=None, placeholder='', sfx='') -%}
+<div class="fld" data-field="{{ id }}">
+  <label for="f-{{ id }}{{ sfx }}">{{ label }}{% if required %} <span class="req" aria-hidden="true">*</span>{% else %} <span class="opt">(optional)</span>{% endif %}</label>
+  {%- if options %}
+  <select id="f-{{ id }}{{ sfx }}" name="{{ id }}"{% if required %} required{% endif %}{% if hint %} aria-describedby="h-{{ id }}{{ sfx }}"{% endif %}>
+    {%- for o in options %}<option value="{{ o.value }}">{{ o.label }}</option>{% endfor %}
+  </select>
+  {%- elif rows %}
+  <textarea id="f-{{ id }}{{ sfx }}" name="{{ id }}" rows="{{ rows }}" maxlength="{{ maxlength }}"{% if required %} required{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %} aria-describedby="{{ 'h-' ~ id ~ sfx if hint else '' }} e-{{ id }}{{ sfx }}"></textarea>
+  {%- else %}
+  <input id="f-{{ id }}{{ sfx }}" name="{{ id }}" type="{{ type }}" maxlength="{{ maxlength }}"{% if required %} required{% endif %}{% if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}{% if placeholder %} placeholder="{{ placeholder }}"{% endif %} aria-describedby="{{ 'h-' ~ id ~ sfx if hint else '' }} e-{{ id }}{{ sfx }}">
+  {%- endif %}
+  {%- if hint %}<p class="hint" id="h-{{ id }}{{ sfx }}">{{ hint }}</p>{% endif %}
+  <p class="err" id="e-{{ id }}{{ sfx }}" role="alert"></p>
+</div>
+{%- endmacro %}

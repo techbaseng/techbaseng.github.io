@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% from "_macros.html" import photo with context %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block after_header %}<div class="read-progress" aria-hidden="true"><i id="read-bar"></i></div>{% endblock %}
+{% block body %}
+<main id="main">
+<article>
+<header class="article-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ ''|u }}">Home</a><span class="sep" aria-hidden="true">/</span><a href="{{ 'blog/'|u }}">Blog</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">Article</span></nav>
+    <span class="eyebrow">Blog</span>
+    <h1>{{ post.title }}</h1>
+    <ul class="meta-row"><li>{{ icon('calendar') }} <time datetime="{{ post.date }}">{{ post.date_label }}</time></li><li>{{ icon('clock') }} {{ post.reading }} min read</li><li>By Techbase Consultant Services</li></ul>
+  </div>
+</header>
+{%- if post.image %}<div class="wrap article-cover">{{ photo(post.image, '(min-width: 1100px) 1100px, 94vw', eager=True) }}</div>{% endif %}
+<div class="wrap article-body prose-body" id="article-body">
+  {{ post.html|safe }}
+  <div class="share" aria-label="Share this article">
+    <span>Share</span>
+    <a class="chip" href="https://wa.me/?text={{ (post.title ~ ' ' ~ canonical)|urlencode }}" target="_blank" rel="noopener noreferrer">{{ icon('wa') }} WhatsApp</a>
+    <button class="chip" type="button" data-copy-link="{{ canonical }}">{{ icon('copy') }} <span data-label>Copy link</span></button>
+  </div>
+</div>
+</article>
+<section class="section band">
+  <div class="wrap">
+    <div class="article-cta">
+      <div><h2>Put it into practice.</h2><p>{{ total_lessons }} free lessons are waiting in the Techbase Academy, or talk to us about a programme for your school.</p></div>
+      <div class="cta-actions"><a class="btn" href="{{ 'learn/'|u }}">Open the Academy</a><a class="btn btn--ghost" href="{{ 'contact/'|u }}">Contact us</a></div>
+    </div>
+    {%- if related %}
+    <h2 class="rel-title">Keep reading</h2>
+    <div class="cards-3">
+      {%- for p in related %}
+      <a class="pcard" href="{{ ('blog/' ~ p.slug ~ '/')|u }}">
+        <div class="pcard-img">{% if p.image %}{{ photo(p.image, '(min-width: 900px) 380px, 92vw') }}{% else %}<div class="cover-fallback" aria-hidden="true">{{ icon('book') }}</div>{% endif %}</div>
+        <div class="pcard-body"><p class="pcard-meta"><time datetime="{{ p.date }}">{{ p.date_label }}</time> · {{ p.reading }} min read</p><h3>{{ p.title }}</h3></div>
+      </a>
+      {%- endfor %}
+    </div>
+    {%- endif %}
+  </div>
+</section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% endblock %}

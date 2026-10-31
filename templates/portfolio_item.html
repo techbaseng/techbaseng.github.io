@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon %}
+{% from "_macros.html" import photo with context %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block body %}
+<main id="main">
+<article>
+<header class="article-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="{{ ''|u }}">Home</a><span class="sep" aria-hidden="true">/</span><a href="{{ 'portfolio/'|u }}">Portfolio</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">{{ item.title }}</span></nav>
+    <span class="eyebrow">Programme</span>
+    <h1>{{ item.title }}</h1>
+    <ul class="meta-row"><li>{{ icon('calendar') }} <time datetime="{{ item.date }}">{{ item.date_label }}</time></li><li>{{ icon('pin') }} {{ item.location }}</li></ul>
+  </div>
+</header>
+<div class="wrap article-cover">{{ photo(item.image, '(min-width: 1100px) 1100px, 94vw', eager=True) }}</div>
+<div class="wrap article-body prose-body" data-lightbox-scope>
+  <p class="article-lede">{{ item.summary }}</p>
+  {{ item.html|safe }}
+</div>
+</article>
+<nav class="wrap pager-cards" aria-label="More programmes">
+  {%- if prev %}<a href="{{ ('portfolio/' ~ prev.slug ~ '/')|u }}"><small>Earlier programme</small><b>{{ prev.title }}</b></a>{% endif %}
+  {%- if next %}<a class="next" href="{{ ('portfolio/' ~ next.slug ~ '/')|u }}"><small>Later programme</small><b>{{ next.title }}</b></a>{% endif %}
+</nav>
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <div><h2 class="h-section">Bring a programme like this to your school.</h2><p>Tell us your goal and we will suggest the shape.</p></div>
+    <div class="cta-actions"><a class="btn btn--lg btn--accent" href="{{ 'contact/'|u }}">Start a conversation {{ icon('arrow','icon-arrow') }}</a></div>
+  </div>
+</section>
+</main>
+<dialog class="lightbox" id="lightbox" aria-label="Photo viewer"><button type="button" class="icon-btn lb-close" aria-label="Close photo">{{ icon('close') }}</button><figure><img alt=""><figcaption></figcaption></figure></dialog>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% endblock %}

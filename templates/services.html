@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, heading, page_hero %}
+{% from "_macros.html" import photo with context %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block body %}
+<main id="main">
+{{ page_hero('Services', 'What we do.', 'Four service areas, all grounded in the same approach: practical, structured and genuinely useful.') }}
+
+<section class="section svc-list">
+  <div class="wrap">
+    {%- for s in services %}
+    <article class="svc-row reveal" id="{{ s.id }}">
+      <div class="svc-row-id"><span class="svc-icon">{{ icon(s.icon) }}</span><span class="svc-num">{{ '%02d'|format(loop.index) }}</span></div>
+      <div class="svc-row-body">
+        <h2>{{ s.title }}</h2>
+        <p class="svc-text">{{ s.text }}</p>
+        <div class="svc-meta">
+          <div><h3>Who it is for</h3><ul class="checks">{% for i in s['for'] %}<li>{{ i }}</li>{% endfor %}</ul></div>
+          <div><h3>What it includes</h3><ul class="checks">{% for i in s.includes %}<li>{{ i }}</li>{% endfor %}</ul></div>
+        </div>
+        <a class="link-arrow" href="{{ s.link.href|u }}">{{ s.link.label }} {{ icon('arrow','icon-arrow') }}</a>
+      </div>
+    </article>
+    {%- endfor %}
+  </div>
+</section>
+
+<section class="section band">
+  <div class="wrap">
+    {{ heading('Good to know', 'How our engagements work.', 'Straight answers to the questions schools and parents ask most.') }}
+    <div class="know-grid">
+      {%- for k in ['can-techbase-come-to-our-school','do-you-offer-virtual-training','can-you-provide-laptops-for-training','do-you-provide-certificates','do-you-offer-ai-training-for-teachers','how-do-i-enroll-in-a-programme'] %}
+      <div class="know reveal" style="--i:{{ loop.index0 % 3 }}"><h3>{{ faq_by[k].q }}</h3><p>{{ faq_by[k].a }}</p></div>
+      {%- endfor %}
+    </div>
+    <p class="more-link"><a class="link-arrow" href="{{ 'faq/'|u }}">Read all questions {{ icon('arrow','icon-arrow') }}</a></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    {{ heading('Our curriculum', 'Free and open on the Techbase Academy.', total_lessons ~ ' lessons across ' ~ courses|length ~ ' courses. The same curriculum behind our in-person and group training.') }}
+    <div class="curr-grid">
+      {%- for c in courses %}
+      <a class="curr c-{{ c.key }} spot reveal" style="--i:{{ loop.index0 % 4 }}" href="{{ (c.slug ~ '/')|u }}">
+        <span class="tile">{{ icon(c.icon) }}</span>
+        <b>{{ c.title }}</b>
+        <small>{{ c.count }} · {{ c.level }}</small>
+        <span class="more">Open course {{ icon('arrow','icon-arrow') }}</span>
+      </a>
+      {%- endfor %}
+    </div>
+    <p class="more-link"><a class="btn" href="{{ 'learn/'|u }}">Visit the Academy {{ icon('arrow','icon-arrow') }}</a></p>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap cta-inner">
+    <div><h2 class="h-section">Not sure which service fits?</h2><p>Most engagements combine two or three of these. Tell us the goal and we'll suggest the shape.</p></div>
+    <div class="cta-actions">
+      <a class="btn btn--lg btn--accent" href="{{ 'contact/'|u }}">Contact Techbase {{ icon('arrow','icon-arrow') }}</a>
+      <a class="btn btn--lg btn--ghost-light" href="{{ site.company.whatsapp.chat }}" target="_blank" rel="noopener noreferrer">{{ icon('wa') }} WhatsApp us</a>
+    </div>
+  </div>
+</section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% endblock %}

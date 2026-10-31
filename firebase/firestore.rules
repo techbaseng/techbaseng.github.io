@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// Deny by default: anything not listed below is refused.
+// Publish these in the Firebase console: Build > Firestore Database > Rules (see docs/FIREBASE_LOGIN_SETUP.md).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function text(v, max) { return v is string && v.size() <= max; }
+
+    // A learner's profile: only they can read or change it.
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['name', 'goal', 'createdAt'])
+        && text(request.resource.data.get('name', ''), 80)
+        && text(request.resource.data.get('goal', ''), 40);
+    }
+
+    // A learner's saved lesson progress: only they can read or change it.
+    match /progress/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['done', 'phases', 'last', 'updatedAt'])
+        && request.resource.data.done is map
+        && request.resource.data.phases is map
+        && request.resource.data.size() <= 4
+        && request.resource.data.done.size() <= 20
+        && request.resource.data.phases.size() <= 600;
+    }
+
+    // Website enquiries: anyone may send one, nobody can read, change or delete them from the website.
+    // Read them in the Firebase console (Firestore Database > Data).
+    match /enquiries/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'phone', 'who', 'service', 'message', 'createdAt'])
+        && text(request.resource.data.get('name', ''), 120) && request.resource.data.name.size() > 0
+        && text(request.resource.data.get('email', ''), 160) && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && text(request.resource.data.get('phone', ''), 30)
+        && text(request.resource.data.get('who', ''), 60)
+        && text(request.resource.data.get('service', ''), 80)
+        && text(request.resource.data.get('message', ''), 2000) && request.resource.data.message.size() > 0;
+      allow read, update, delete: if false;
+    }
+
+    // Careers applications: same idea.
+    match /applications/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'email', 'phone', 'role', 'cv', 'linkedin', 'message', 'createdAt'])
+        && text(request.resource.data.get('name', ''), 120) && request.resource.data.name.size() > 0
+        && text(request.resource.data.get('email', ''), 160) && request.resource.data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && text(request.resource.data.get('phone', ''), 30)
+        && text(request.resource.data.get('role', ''), 60)
+        && text(request.resource.data.get('cv', ''), 300)
+        && text(request.resource.data.get('linkedin', ''), 300)
+        && text(request.resource.data.get('message', ''), 3000) && request.resource.data.message.size() > 0;
+      allow read, update, delete: if false;
+    }
+  }
+}

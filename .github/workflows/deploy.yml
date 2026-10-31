@@ -26,16 +26,44 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+
       - name: Install build tools
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Check the sign-in code (unit tests)
+        run: npm test
 
       - name: Lint (reports problems, never blocks a deploy)
         continue-on-error: true
         run: |
           pip install ruff==0.12.0
-          ruff check build tools
+          ruff check build tools tests
+
+      # The Firebase settings come from repository secrets (Settings > Secrets and variables > Actions).
+      # They identify your Firebase project; they are not passwords. If they are missing, the site still
+      # builds, with accounts switched off. Pull requests from forks never receive secrets.
+      - name: Bundle the sign-in code
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_APPCHECK_SITE_KEY: ${{ secrets.FIREBASE_APPCHECK_SITE_KEY }}
+        run: node build/bundle.mjs
 
       - name: Build the site
+        env:
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_APPCHECK_SITE_KEY: ${{ secrets.FIREBASE_APPCHECK_SITE_KEY }}
         run: python build/build.py
 
       - name: Check links, ids and page structure
