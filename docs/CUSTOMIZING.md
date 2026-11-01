@@ -31,7 +31,23 @@ I wrote these from your WordPress site. Please read them once and correct anythi
 | The "Which path fits you?" box | `content/paths.json` |
 | A lesson | `content/<course>/lessons/lesson_NN.html` |
 
-## Add a blog post or a programme
+## Write blog posts without touching GitHub (the admin area)
+
+Once you have done Step 8 in `FIREBASE_LOGIN_SETUP.md`, sign in and open `/admin/` on your website.
+
+- **New post:** click **New post**, fill in the title, summary and date, choose a cover photo, write the article and tick **Published** when it is ready. Leave it unticked to keep a private draft.
+- **Photos:** choose one of the Techbase photos already on the site, or upload your own. Uploaded photos are shrunk automatically and need a short description for screen readers. Please use real photos from your own classes and events, not computer-generated pictures.
+- **Formatting:** use the buttons above the text box. A post is live on the blog the moment you save it as published. About every six hours the site rebuilds itself and gives the post a permanent page that Google can find. To make that happen sooner, open the **Actions** tab on GitHub, click **Build and deploy**, then **Run workflow**.
+- **Edit or delete:** open `/admin/`, click **Edit** on a post. Deleting a post also removes its uploaded pictures.
+- **Not in the admin area:** the original posts and the monthly archive are files in `content/blog/`. Edit those on GitHub as described below.
+
+## The monthly blog archive and its pictures
+
+`content/blog/` holds one post for each month from January 2022. Company milestones (KBI Schools, community holiday classes, Baptist Model High Schools, Rise Conference, the Akinyele Spelling Challenge, International Day of the Girl) come from your Portfolio. Posts about technology news and events are general write-ups; please read them once and change anything you disagree with.
+
+Posts that still need a picture show a plain book icon. The list is in `docs/IMAGE_TODO.md` (run `python tools/list_image_todo.py` to refresh it). To add a picture, follow the three steps at the top of that file.
+
+## Add a blog post (as a file) or a programme
 
 1. Copy an existing file in `content/blog/` (or `content/portfolio/`), give the copy a new name with dashes, for example `my-new-post.md`. The name becomes the web address.
 2. Change the lines between the `---` markers at the top (`title`, `date` as `YYYY-MM-DD`, `summary`, and `image`, which must be the name of a photo in `content/photos/` without `.jpg`) and write the text below in plain Markdown: `## Heading`, `**bold**`, `- list`, `[link](https://...)`. To place a photo inside the text: `![describe the photo](photo:photo-name)`.

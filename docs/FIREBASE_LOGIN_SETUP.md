@@ -15,6 +15,7 @@ This guide is for the site owner and assumes you have never used Firebase before
 | **Firestore** | The Firebase database. It holds each learner's progress, and the messages sent through your forms. |
 | **Secret (GitHub)** | A private setting stored in GitHub. The website build reads it, but nobody can look at it afterwards. |
 | **Web app config** | Four short settings that tell the website which Firebase project to talk to. They are an address, not a password. |
+| **Administrator** | A person who is allowed to write and delete blog posts. You choose them in Step 8. |
 | **Rules** | A list, kept in Firebase, of who may read or write what. Ours say "people can only see their own data". |
 
 ## Step 1. Create the Firebase project
@@ -67,7 +68,7 @@ This guide is for the site owner and assumes you have never used Firebase before
 3. Back in Firebase, click inside the rules editor, press **Ctrl + A** (Mac: Cmd + A) to select everything, and paste.
 4. Click **Publish**.
 
-**You should now see** "Rules published" with today's date. These rules refuse everything except: learners reading and changing only their own profile and progress, and anyone sending (but never reading) an enquiry or application.
+**You should now see** "Rules published" with today's date. These rules refuse everything except: learners reading and changing only their own profile and progress, and anyone sending (but never reading) an enquiry or application, anyone reading published blog posts, and only administrators writing posts (Step 8). If you published the rules earlier, publish this newer version again.
 
 ## Step 6. Give the settings to GitHub
 
@@ -103,6 +104,21 @@ Work through each line. Use a private (incognito) window so nothing is already r
 9. On the **Account** page click **Send password reset email** and check the email arrives.
 
 To remove test accounts: Firebase console > **Authentication > Users** > the three dots beside a user > **Delete account**, or use **Delete my account** on the Account page.
+
+## Step 8. Make yourself the blog administrator (one time, 2 minutes)
+
+This lets you write, edit and delete blog posts at `/admin/` on your website. Nobody else can, because the rules check a short list that only you can edit.
+
+1. On your website, sign in with your own account (create one first if you have not).
+2. Go to `https://YOUR-SITE/admin/`. It will say "This account is not an administrator yet" and show a long **account ID**. Click **Copy account ID**.
+3. In the Firebase console open **Build > Firestore Database > Data** and click **Start collection**.
+4. For **Collection ID** type `admins` and click **Next**.
+5. For **Document ID** paste the account ID you copied. Add no fields: click **Save**. (If Firebase insists on a field, add `ok` with the value `true`.)
+6. Go back to `/admin/` and refresh the page.
+
+**You should now see** the Posts list with a **New post** button. To make a second person an administrator, repeat steps 2 to 5 with their account ID.
+
+To remove an administrator, delete their document in the `admins` collection.
 
 ## Reading messages sent through your forms
 

@@ -55,5 +55,44 @@ service cloud.firestore {
         && text(request.resource.data.get('message', ''), 3000) && request.resource.data.message.size() > 0;
       allow read, update, delete: if false;
     }
+
+    // ---- Blog admin ---------------------------------------------------------------------------------
+    // An administrator is a signed-in person who has a document in the 'admins' collection whose ID is their
+    // account ID. Only you can create that document, in the Firebase console (docs/FIREBASE_LOGIN_SETUP.md).
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    match /admins/{uid} {
+      allow get: if isOwner(uid);      // lets the website ask "am I an administrator?"
+      allow list, write: if false;
+    }
+
+    // Blog posts written in the admin area. Visitors can read published posts only; drafts are visible to admins.
+    match /posts/{slug} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() && slug.matches('[a-z0-9]+(-[a-z0-9]+)*') && slug.size() >= 3 && slug.size() <= 80
+        && request.resource.data.keys().hasOnly(['title', 'summary', 'body', 'date', 'published', 'coverPhoto', 'coverImage', 'coverAlt', 'thumb', 'author', 'createdAt', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['title', 'summary', 'body', 'date', 'published'])
+        && text(request.resource.data.title, 140) && request.resource.data.title.size() > 0
+        && text(request.resource.data.summary, 300)
+        && text(request.resource.data.body, 40000) && request.resource.data.body.size() > 0
+        && request.resource.data.date is string && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.published is bool
+        && text(request.resource.data.get('coverPhoto', ''), 60)
+        && text(request.resource.data.get('coverImage', ''), 60)
+        && text(request.resource.data.get('coverAlt', ''), 200)
+        && text(request.resource.data.get('thumb', ''), 90000)
+        && text(request.resource.data.get('author', ''), 80);
+      allow delete: if isAdmin();
+    }
+
+    // Pictures used inside posts (resized in the browser before saving). Public to read, admins only to change.
+    match /postImages/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() && id.matches('[a-z0-9]+(-[a-z0-9]+)*') && id.size() <= 60
+        && request.resource.data.keys().hasOnly(['data', 'alt', 'createdAt'])
+        && text(request.resource.data.data, 450000) && request.resource.data.data.startsWith('data:image/')
+        && text(request.resource.data.get('alt', ''), 200);
+      allow delete: if isAdmin();
+    }
   }
 }

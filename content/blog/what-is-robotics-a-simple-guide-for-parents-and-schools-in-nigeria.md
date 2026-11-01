@@ -1,27 +1,43 @@
 ---
 title: What is Robotics? A Simple Guide for Parents and Schools in Nigeria
-date: 2026-07-06
-summary: Robotics is often misunderstood as something only advanced students can do. In practice, it is one of the most accessible and engaging ways to introduce young learners to technology, engineering, and problem-solving.
+date: 2024-12-10
+image: community-robotics
+summary: Robotics is not only for advanced students. Here is what it really involves, why children enjoy it, and what a school needs to start.
 ---
 
-Say the word "robotics" to a Nigerian parent and the mental picture is often the same: a university-level engineering lab, expensive imported kits, and a subject only for the academically gifted. None of that is true anymore — and it has not been true for some time.
+Mention robotics to many parents and they picture a university engineering laboratory, expensive imported kits and a subject for top students only. That picture is out of date. Today robotics is one of the friendliest ways to introduce children to technology.
 
-At its core, robotics is simply the combination of two things children are already comfortable with: building physical things, and giving instructions to a computer. A robotics kit is a set of motors, sensors, and a small controller board. The "coding" side is telling that controller what to do when a sensor detects something — turn left when the light sensor sees a wall, stop when the ultrasonic sensor detects an obstacle, spin the wheel faster when a button is pressed.
+## What robotics actually is
 
-## Why robotics works so well for young learners
+Robotics combines two things children already enjoy: building physical things and giving instructions to a computer.
 
-Robotics succeeds where a lot of STEM teaching struggles, because the feedback is immediate and physical. A child who writes a line of code and sees a robot turn left in response gets a kind of confirmation that a worksheet cannot provide. When something does not work — the robot drives into the wall instead of away from it — the child can see exactly what went wrong and fix it. That loop of build, test, observe, adjust is the entire discipline of engineering, taught through play.
+A beginner kit usually contains a small controller board, a few motors and some sensors. The programming side is telling the controller what to do when a sensor notices something. Turn left when the light sensor sees a dark line. Stop when the distance sensor finds an obstacle. Spin faster when a button is pressed.
 
-It also naturally blends several subjects at once. A single robotics session touches physics (how motors and gears produce motion), mathematics (measuring distances and angles), and logic (the actual programming). Children rarely notice they are doing three subjects at once — they only notice that they are building something that moves.
+## Why children take to it
 
-## What a Techbase robotics session actually looks like
+The feedback is immediate and physical. A child changes a line of code and watches the robot respond. If it drives into the wall instead of away from it, the problem is visible, and the child can work out why and fix it.
 
-Our robotics programme uses beginner-friendly kits that snap together without soldering or specialist tools. Sessions run in small groups, with each learner or pair building and programming their own robot across the term. Early sessions focus on assembly and basic movement — forward, backward, turning. Later sessions introduce sensors: line-following, obstacle avoidance, and simple reactive behaviours.
+![Children work on laptops and electronics during a community STEM session.](photo:community-robotics)
 
-By the end of a full programme, learners have typically built several different robot configurations and can independently write the logic to make a robot complete a task — follow a line around a track, or stop and reverse when it detects an obstacle. Some of our strongest robotics learners go on to represent their schools in local and national robotics competitions.
+That cycle of build, test, observe and adjust is the heart of engineering, learned through play.
 
-## What schools need to get started
+Robotics also brings several subjects together without anyone announcing it. In one session children meet physics (how motors and gears create movement), mathematics (measuring distances and angles) and logic (the programming). They usually just notice that they are building something that moves.
 
-Contrary to the common assumption, a school does not need a dedicated engineering lab to start a robotics programme. A regular classroom, a table for building, and a weekly time slot are enough. Techbase supplies the kits, the curriculum, and the instructor — schools do not need existing equipment or in-house technical staff to begin.
+## What a Techbase session looks like
 
-If your school is curious about what a robotics programme would look like for your students, or if you are a parent wondering whether your child is ready to start, get in touch. We are happy to talk through age-appropriate starting points and what a typical term looks like.
+Our programme uses beginner-friendly kits that connect without soldering. Learners work in small groups, or in pairs, and build and program their own robots across the term.
+
+- **Early sessions** cover assembly and basic movement: forward, backward and turning.
+- **Later sessions** add sensors, such as line following and obstacle avoidance.
+
+By the end, learners have built more than one robot design and can write the logic for a task on their own, for example following a track or reversing when something is in the way.
+
+![Pupils share laptops in a Techbase robotics class at a partner school.](photo:kbis-robotics-class)
+
+If you would like to learn at home, the free Academy has a [micro:bit robotics course](../../techbase-robotics/index.html) and a [Practical Robotics course](../../techbase-practical-robotics/index.html).
+
+## What a school needs to start
+
+A school does not need an engineering laboratory. An ordinary classroom, a table for building and a weekly time slot are enough. Techbase supplies the kits, the curriculum and the instructor, so there is no need for existing equipment or in-house technical staff.
+
+Whether you are a school leader or a parent wondering if your child is ready, [get in touch](../../contact/index.html). We will talk through the right starting point for your learners and what a typical term looks like.

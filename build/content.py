@@ -94,6 +94,14 @@ def make_og_from_photo(photo_name: str, out: Path) -> None:
         im.save(out, "JPEG", quality=82, optimize=True)
 
 
+def make_og_from_file(src: Path, out: Path) -> None:
+    """1200x630 social preview cropped from any image file."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(src) as im:
+        im = ImageOps.fit(ImageOps.exif_transpose(im).convert("RGB"), (1200, 630), Image.LANCZOS, centering=(0.5, 0.4))
+        im.save(out, "JPEG", quality=82, optimize=True)
+
+
 def logo_sizes() -> dict:
     sizes = {}
     for f in (ROOT / "assets" / "img" / "partners").glob("*.webp"):
@@ -113,15 +121,39 @@ def parse_front_matter(text: str) -> tuple[dict, str]:
     for line in m.group(1).splitlines():
         if ":" in line:
             k, v = line.split(":", 1)
-            meta[k.strip()] = v.strip()
+            v = v.strip()
+            if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+                v = v[1:-1]
+            meta[k.strip()] = v
     return meta, m.group(2).strip()
 
 
-def render_markdown(body: str, photos: dict, root_hint: str = "{{ROOT}}") -> str:
-    """Markdown -> HTML. ![alt](photo:name) becomes a responsive, click-to-enlarge figure.
-    {{ROOT}} is replaced per page by the caller."""
+ALLOWED_TAGS = {"p", "h2", "h3", "h4", "ul", "ol", "li", "a", "strong", "em", "code", "pre", "blockquote", "hr", "br", "img"}
+SAFE_HREF = re.compile(r"^(?:https?://|mailto:|tel:|/|\.{1,2}/|#|[a-z0-9_-]+/)", re.I)
+
+
+def sanitize(soup: BeautifulSoup) -> None:
+    """Posts typed in the admin area are reduced to a short list of harmless tags (no scripts, forms, frames or event handlers)."""
+    for t in soup.find_all(True):
+        if t.name in ("script", "style", "iframe", "object", "embed", "form", "svg"):
+            t.decompose()
+    for t in soup.find_all(True):
+        if t.name not in ALLOWED_TAGS:
+            t.unwrap()
+            continue
+        keep = {"a": ("href",), "img": ("src", "alt")}.get(t.name, ())
+        t.attrs = {k: v for k, v in t.attrs.items() if k in keep}
+        if t.name == "a" and not SAFE_HREF.match(t.get("href", "")):
+            t["href"] = "#"
+
+
+def render_markdown(body: str, photos: dict, root_hint: str = "{{ROOT}}", images: dict | None = None, untrusted: bool = False) -> str:
+    """Markdown -> HTML. ![alt](photo:name) becomes a responsive, click-to-enlarge figure; ![alt](img:id) is a picture
+    uploaded in the admin area (see cloudposts.py). {{ROOT}} is replaced per page by the caller."""
     html = markdown.markdown(body, extensions=["sane_lists"])
     soup = BeautifulSoup(html, "html.parser")
+    if untrusted:
+        sanitize(soup)
     for h in soup.find_all("h1"):
         h.name = "h2"
     for a in soup.find_all("a", href=True):
@@ -130,9 +162,23 @@ def render_markdown(body: str, photos: dict, root_hint: str = "{{ROOT}}") -> str
             a["target"] = "_blank"
     for img in soup.find_all("img"):
         src = img.get("src", "")
+        if src.startswith("img:"):
+            pic = (images or {}).get(src[4:])
+            target = img.parent if img.parent.name == "p" and len(img.parent.contents) == 1 else img
+            if not pic:
+                target.decompose()
+                continue
+            alt = img.get("alt") or pic["alt"]
+            fig = BeautifulSoup('<figure class="body-fig"><a data-lightbox><img loading="lazy" decoding="async"></a></figure>', "html.parser")
+            fig.a["href"] = f"{root_hint}{pic['file']}"; fig.a["data-caption"] = alt
+            fig.img.attrs.update(src=f"{root_hint}{pic['file']}", width=str(pic["w"]), height=str(pic["h"]), alt=alt, style=f"--ph:{pic['ph']}")
+            target.replace_with(fig)
+            continue
         if not src.startswith("photo:"):
             continue
         name = src[6:]
+        if name not in photos:
+            raise ValueError(f"unknown photo '{name}' in an article")
         p = photos[name]
         alt = img.get("alt") or p["alt"]
         srcset = ", ".join(f"{root_hint}assets/img/photos/{name}-{w}.webp {w}w" for w in p["widths"])
@@ -162,6 +208,7 @@ def load_articles(folder: str, photos: dict, kind: str) -> list[dict]:
             "summary_short": shorten(meta.get("summary", ""), 150),
             "image": meta.get("image") or None,
             "location": meta.get("location", ""),
+            "image_todo": meta.get("image_todo", ""),
             "body": body,
             "reading": max(1, math.ceil(words / 200)),
         }

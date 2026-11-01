@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_macros.html" import icon, page_hero %}
-{% from "_macros.html" import photo with context %}
+{% from "_macros.html" import post_cover with context %}
 {% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
 {% block body %}
 <main id="main">
@@ -8,8 +8,8 @@
 <section class="section">
   <div class="wrap">
     {%- set f = posts[0] %}
-    <a class="feature-post reveal" href="{{ ('blog/' ~ f.slug ~ '/')|u }}">
-      <div class="pcard-img">{% if f.image %}{{ photo(f.image, '(min-width: 900px) 600px, 92vw', eager=True) }}{% else %}<div class="cover-fallback" aria-hidden="true">{{ icon('book') }}</div>{% endif %}</div>
+    <a class="feature-post reveal" data-slug="{{ f.slug }}" href="{{ ('blog/' ~ f.slug ~ '/')|u }}">
+      <div class="pcard-img">{{ post_cover(f, '(min-width: 900px) 600px, 92vw', eager=True) }}</div>
       <div class="fp-body">
         <p class="pcard-meta"><time datetime="{{ f.date }}">{{ f.date_label }}</time> · {{ f.reading }} min read</p>
         <h2>{{ f.title }}</h2>
@@ -17,20 +17,24 @@
         <span class="link-arrow">Read the article {{ icon('arrow','icon-arrow') }}</span>
       </div>
     </a>
-    <div class="cards-3">
-      {%- for p in posts[1:] %}
-      <a class="pcard reveal" style="--i:{{ loop.index0 % 3 }}" href="{{ ('blog/' ~ p.slug ~ '/')|u }}">
-        <div class="pcard-img">{% if p.image %}{{ photo(p.image, '(min-width: 900px) 380px, 92vw') }}{% else %}<div class="cover-fallback" aria-hidden="true">{{ icon('book') }}</div>{% endif %}</div>
+    <nav class="year-jump" aria-label="Jump to a year">{%- for g in post_years %}<a class="chip" href="#y{{ g.year }}">{{ g.year }}</a>{% endfor %}</nav>
+    {%- for g in post_years %}
+    <h2 class="year-h" id="y{{ g.year }}">{{ g.year }}</h2>
+    <div class="cards-3"{% if loop.first %} data-live-list{% endif %}>
+      {%- for p in g.posts %}
+      <a class="pcard" data-slug="{{ p.slug }}" href="{{ ('blog/' ~ p.slug ~ '/')|u }}">
+        <div class="pcard-img">{{ post_cover(p, '(min-width: 900px) 380px, 92vw') }}</div>
         <div class="pcard-body">
           <p class="pcard-meta"><time datetime="{{ p.date }}">{{ p.date_label }}</time> · {{ p.reading }} min read</p>
-          <h2>{{ p.title }}</h2>
+          <h3>{{ p.title }}</h3>
           <p>{{ p.summary_short }}</p>
         </div>
       </a>
       {%- endfor %}
     </div>
+    {%- endfor %}
   </div>
 </section>
 </main>
 {% endblock %}
-{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/site.js?v={{ asset_v }}" defer></script>{% if fb_public %}<script src="{{ root }}assets/js/blog-md.js?v={{ asset_v }}" defer></script><script src="{{ root }}assets/js/blog-live.js?v={{ asset_v }}" defer></script>{% endif %}{% endblock %}

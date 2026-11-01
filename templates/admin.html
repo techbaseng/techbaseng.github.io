@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, page_hero %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}"><link rel="stylesheet" href="{{ root }}assets/css/admin.css?v={{ asset_v }}">{% endblock %}
+{% block body %}
+<main id="main" class="admin-page" data-admin data-needs-auth>
+{{ page_hero('Admin', 'Blog administration.', 'Write, edit, publish and delete the posts on the Techbase blog. Only approved administrators can use this page.') }}
+<section class="section">
+  <div class="wrap">
+    {%- if not site.accounts %}
+    <p class="empty is-visible">Accounts are not switched on yet, so the admin area is not available. See docs/FIREBASE_LOGIN_SETUP.md.</p>
+    {%- else %}
+    <div class="auth-skeleton" data-auth-loading aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="auth-notice" role="alert" data-notice hidden></div>
+
+    <div data-view="signin" hidden class="acard">
+      <h2>Sign in first</h2>
+      <p>Use the account you registered on this site. If you do not have one yet, create it first, then come back here.</p>
+      <div class="hero-actions"><a class="btn" href="{{ 'login/index.html?next=admin/index.html'|u }}">Sign in</a><a class="btn btn--ghost" href="{{ 'login/index.html#signup'|u }}">Create account</a></div>
+    </div>
+
+    <div data-view="denied" hidden class="acard">
+      <h2>This account is not an administrator yet</h2>
+      <p>To make it one, copy your account ID below and add it in the Firebase console, as explained in <b>docs/FIREBASE_LOGIN_SETUP.md, Step 8</b>. It takes about two minutes and you only do it once.</p>
+      <div class="uid-box"><code data-uid></code><button type="button" class="btn btn--sm btn--ghost" data-copy-uid>{{ icon('copy') }} <span data-label>Copy account ID</span></button></div>
+      <p class="hint">Signed in as <b data-who></b>. If this is the wrong account, <button type="button" class="linkbtn" data-signout>sign out</button> and try again.</p>
+    </div>
+
+    <div data-view="list" hidden>
+      <div class="admin-bar">
+        <div><h2>Posts</h2><p class="hint">Posts you write here appear on the blog straight away when published, and become permanent pages at the next automatic rebuild.</p></div>
+        <button type="button" class="btn" data-new>{{ icon('plus') }} New post</button>
+      </div>
+      <p class="empty" data-empty>No posts written here yet. Click “New post” to write the first one.</p>
+      <ul class="post-rows" data-post-list></ul>
+      <p class="hint">The six original articles are stored in the website files, not here. To change those, see docs/CUSTOMIZING.md.</p>
+    </div>
+
+    <form data-view="editor" hidden class="editor" novalidate>
+      <div class="admin-bar">
+        <h2 data-editor-title>New post</h2>
+        <div class="hero-actions"><button type="button" class="btn btn--ghost" data-cancel>Back to posts</button></div>
+      </div>
+
+      <div class="fld" data-field="title"><label for="ed-title">Title <span class="req" aria-hidden="true">*</span></label><input id="ed-title" maxlength="140" autocomplete="off" aria-describedby="e-ed-title"><p class="err" id="e-ed-title" role="alert"></p></div>
+      <div class="fld" data-field="slug"><label for="ed-slug">Web address <span class="req" aria-hidden="true">*</span></label><input id="ed-slug" maxlength="80" autocomplete="off" aria-describedby="h-ed-slug e-ed-slug"><p class="hint" id="h-ed-slug">Letters, numbers and hyphens. Filled in from the title. It cannot be changed after saving.</p><p class="err" id="e-ed-slug" role="alert"></p></div>
+      <div class="fld" data-field="summary"><label for="ed-summary">Short summary <span class="req" aria-hidden="true">*</span></label><textarea id="ed-summary" rows="3" maxlength="300" aria-describedby="h-ed-summary e-ed-summary"></textarea><p class="hint" id="h-ed-summary">One or two sentences shown on the blog list and in Google results (up to 300 characters). <span data-count>0/300</span></p><p class="err" id="e-ed-summary" role="alert"></p></div>
+      <div class="fld" data-field="date"><label for="ed-date">Date <span class="req" aria-hidden="true">*</span></label><input id="ed-date" type="date" aria-describedby="e-ed-date"><p class="err" id="e-ed-date" role="alert"></p></div>
+
+      <fieldset class="cover-box"><legend>Cover photo</legend>
+        <div class="cover-preview" data-cover-preview><span>No cover photo yet</span></div>
+        <div class="hero-actions"><button type="button" class="btn btn--sm btn--ghost" data-pick-cover>Choose from Techbase photos</button><button type="button" class="btn btn--sm btn--ghost" data-upload-cover>Upload my own photo</button><button type="button" class="btn btn--sm btn--ghost" data-remove-cover hidden>Remove</button></div>
+        <div class="fld" data-field="coveralt"><label for="ed-coveralt">Describe the photo <span class="opt">(for people using screen readers)</span></label><input id="ed-coveralt" maxlength="200" autocomplete="off"></div>
+        <p class="hint">Please use real photos from your own classes and events, not computer-generated pictures.</p>
+      </fieldset>
+
+      <div class="fld" data-field="body"><label for="ed-body">Article <span class="req" aria-hidden="true">*</span></label>
+        <div class="md-tools" role="toolbar" aria-label="Formatting">
+          <button type="button" data-md="h2" title="Heading">H</button><button type="button" data-md="bold" title="Bold"><b>B</b></button><button type="button" data-md="italic" title="Italic"><i>I</i></button>
+          <button type="button" data-md="link" title="Link">Link</button><button type="button" data-md="ul" title="Bulleted list">• List</button><button type="button" data-md="ol" title="Numbered list">1. List</button><button type="button" data-md="quote" title="Quote">“ Quote</button>
+          <span class="sp"></span>
+          <button type="button" data-md="photo">{{ icon('plus') }} Techbase photo</button><button type="button" data-md="upload">{{ icon('plus') }} My photo</button>
+        </div>
+        <div class="md-split">
+          <textarea id="ed-body" rows="18" maxlength="40000" aria-describedby="e-ed-body"></textarea>
+          <div class="md-preview prose-body" data-preview aria-label="Preview"><p class="hint">Your article appears here as you type.</p></div>
+        </div>
+        <p class="err" id="e-ed-body" role="alert"></p>
+        <details class="md-help"><summary>How to format</summary>
+          <p><code>## Heading</code> for a section title, <code>**bold**</code>, <code>*italic*</code>, <code>[link text](https://example.com)</code>, a line starting with <code>- </code> for a bullet list or <code>1. </code> for a numbered list, <code>&gt; </code> for a quote, and a blank line between paragraphs. To link to another page of this site use its short address, for example <code>[Contact us](/contact/)</code>. The buttons above do most of this for you.</p>
+        </details>
+      </div>
+
+      <label class="check"><input type="checkbox" id="ed-published"> <span><b>Published</b> — visible to everyone. Leave unticked to keep it as a private draft.</span></label>
+      <div class="hero-actions">
+        <button class="btn" type="submit"><span data-label>Save post</span></button>
+        <a class="btn btn--ghost" data-view-live href="#" target="_blank" rel="noopener" hidden>View on the site {{ icon('external') }}</a>
+        <button type="button" class="btn btn--danger" data-delete hidden>{{ icon('trash') }} Delete post</button>
+      </div>
+    </form>
+    {%- endif %}
+  </div>
+</section>
+
+<dialog class="confirm confirm--wide" id="lib-dialog" aria-labelledby="lib-title">
+  <h2 id="lib-title">Choose a Techbase photo</h2>
+  <div class="lib-grid" data-lib-grid></div>
+  <div class="hero-actions"><button type="button" class="btn btn--ghost" data-lib-cancel>Cancel</button></div>
+</dialog>
+<dialog class="confirm" id="up-dialog" aria-labelledby="up-title">
+  <form method="dialog" data-up-form>
+    <h2 id="up-title">Add your own photo</h2>
+    <div class="fld" data-field="file"><label for="up-file">Photo (JPEG, PNG or WebP)</label><input id="up-file" type="file" accept="image/jpeg,image/png,image/webp"><p class="err" id="e-up-file" role="alert"></p></div>
+    <div class="up-preview" data-up-preview hidden></div>
+    <div class="fld" data-field="alt"><label for="up-alt">Describe the photo <span class="req" aria-hidden="true">*</span></label><input id="up-alt" maxlength="200" autocomplete="off" aria-describedby="e-up-alt"><p class="err" id="e-up-alt" role="alert"></p></div>
+    <p class="hint">Use real photos from your own classes and events. The picture is shrunk automatically.</p>
+    <div class="hero-actions"><button class="btn" type="submit" data-up-add><span data-label>Add photo</span></button><button class="btn btn--ghost" type="button" data-up-cancel>Cancel</button></div>
+  </form>
+</dialog>
+<dialog class="confirm" id="del-dialog" aria-labelledby="del-title2">
+  <form method="dialog">
+    <h2 id="del-title2">Delete this post?</h2>
+    <p>This removes it from the blog for good. It cannot be undone.</p>
+    <div class="hero-actions"><button class="btn btn--danger" type="submit" data-del-confirm>Yes, delete it</button><button class="btn btn--ghost" type="button" data-del-cancel>Keep it</button></div>
+  </form>
+</dialog>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/blog-md.js?v={{ asset_v }}" defer></script><script src="{{ root }}assets/js/blog-live.js?v={{ asset_v }}" defer></script><script src="{{ root }}assets/js/admin.js?v={{ asset_v }}" defer></script>{% endblock %}
