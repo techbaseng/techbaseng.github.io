@@ -21,6 +21,7 @@ from jinja2 import Environment, FileSystemLoader, pass_context, select_autoescap
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import academy_parse as ap
 
+import cloudposts
 import content as cm
 
 ROOT = cm.ROOT
@@ -37,6 +38,7 @@ NAV = [
     {"label": "Contact", "href": "contact/", "key": "contact"},
 ]
 warnings: list[str] = []
+notes: list[str] = []   # things worth knowing that must not fail a build
 
 
 def warn(msg: str) -> None:
@@ -185,6 +187,12 @@ def main() -> int:
     company = cm.load_company(photos, total_lessons, len(courses))
     portfolio = cm.load_articles("portfolio", photos, "portfolio")
     posts = cm.load_articles("blog", photos, "blog")
+    static_slugs = [p["slug"] for p in posts]
+    cloud_posts = cloudposts.load(fb, photos, DIST, set(static_slugs), notes.append)
+    todo = [p["slug"] for p in posts if p.get("image_todo") and not p["image"]]
+    if todo:
+        notes.append(f"{len(todo)} blog posts are waiting for a picture (see docs/IMAGE_TODO.md)")
+    posts = sorted(posts + cloud_posts, key=lambda p: p["date"], reverse=True)
     years = sorted({e["year"] for e in portfolio}, reverse=True)
 
     theme_script = (TEMPLATES / "theme_inline.js").read_text(encoding="utf8").strip()
@@ -227,6 +235,7 @@ def main() -> int:
         html = env.get_template(tpl).render(
             site=site, courses=courses, paths=paths, total_lessons=total_lessons, root=root, nav=NAV, photos=photos,
             csp=csp, theme_script=theme_script, asset_v=asset_v, title=title, description=description[:300],
+            fb_public=({"project": fb["projectId"], "key": fb["apiKey"]} if fb else None),
             canonical=f"{base_url}/{canon_path}", og_image=f"{base_url}/{og_rel}", og_alt=og_alt,
             robots=None if index else "noindex, follow",
             jsonld=json.dumps(jsonld, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") if jsonld else None, **ctx,
@@ -245,7 +254,8 @@ def main() -> int:
     company_ctx = dict(services=company["services"], why=company["why"], process=company["process"], team=company["team"],
                        testimonials=company["testimonials"], partners=company["partners"], partners_flat=company["partners_flat"],
                        tools=company["tools"], faq=company["faq"], faq_by=company["faq_by"], careers=company["careers"],
-                       portfolio=portfolio, posts=posts, years=years)
+                       portfolio=portfolio, posts=posts, years=years,
+                       post_years=[{"year": y, "posts": [p for p in posts[1:] if p["year"] == y]} for y in sorted({p["year"] for p in posts[1:]}, reverse=True)])
 
     crumb = lambda *items: {"@type": "BreadcrumbList", "itemListElement": [
         {"@type": "ListItem", "position": i + 1, "name": n, "item": f"{base_url}/{p}"} for i, (n, p) in enumerate(items)]}
@@ -312,11 +322,14 @@ def main() -> int:
         og_rel = f"assets/img/og/b-{p['slug']}.jpg"
         if p["image"]:
             cm.make_og_from_photo(p["image"], DIST / og_rel)
+        elif p.get("cover_file"):
+            cm.make_og_from_file(DIST / p["cover_file"], DIST / og_rel)
         else:
             og_rel = "assets/img/og/company.png"
-        related = [x for x in posts if x["slug"] != p["slug"]][:3]
+        lo = max(0, min(i - 1, len(posts) - 4))   # posts published around the same time
+        related = [x for x in posts[lo:lo + 4] if x["slug"] != p["slug"]][:3]
         render("post.html", f"blog/{p['slug']}/index.html", title=p["title"] if len(p["title"]) < 65 else cm.shorten(p["title"], 62), description=p["summary"], og_path=og_rel, og_alt=p["title"],
-               nav_active="blog", section="site", post={**p, "html": cm.render_markdown(p["body"], photos)}, related=related, og_type="article",
+               nav_active="blog", section="site", post={**p, "html": cm.render_markdown(p["body"], photos, images=p.get("images"), untrusted=bool(p.get("cloud")))}, related=related, og_type="article",
                jsonld={"@context": "https://schema.org", "@graph": [
                    {"@type": "Article", "headline": p["title"], "datePublished": p["date"], "description": p["summary"], "image": f"{base_url}/{og_rel}", "author": {"@type": "Organization", "name": site["company"]["name"]}, "publisher": org, "mainEntityOfPage": f"{base_url}/blog/{p['slug']}/"},
                    {"@type": "BreadcrumbList", "itemListElement": [
@@ -333,6 +346,9 @@ def main() -> int:
            index=False, section="learn", nav_active="learn", **company_ctx)
     if site["accounts"]:
         add_search("page", "Account", "Log in or create an account", "Save your progress across devices", "login/index.html")
+    # blog admin + the live page for posts published since the last build (neither is listed in search engines)
+    render("admin.html", "admin/index.html", title="Admin | Techbase", description="Write and publish blog posts.", index=False, section="site", nav_active="blog", **company_ctx)
+    render("post_live.html", "blog/post/index.html", title="Article | Techbase blog", description="A Techbase blog article.", index=False, section="site", nav_active="blog", **company_ctx)
     render("offline.html", "offline.html", title="Offline | Techbase", description="You are offline.", index=False, section="site", **company_ctx)
 
     # ---- Academy ------------------------------------------------------------
@@ -400,7 +416,10 @@ def main() -> int:
     redirects.update({f"faq-item/{f['slug']}": f"faq/#{f['slug']}" for f in company["faq"]})
     redirects.update({f"team-member/{m['slug']}": f"team/#{m['slug']}" for m in company["team"]})
     redirects["team-member/sanni-mayowa"] = "team/"
-    redirects.update({p["slug"]: f"blog/{p['slug']}/" for p in posts})
+    wordpress_posts = {"5-stem-skills-every-nigerian-child-needs-for-jobs-in-2030", "from-scratch-to-python-a-parents-guide-to-the-techbase-learning-journey",
+                       "how-ai-prompts-are-changing-the-way-teachers-work-in-nigeria", "how-to-use-ai-to-create-better-lesson-plans-a-practical-guide-for-nigerian-teachers",
+                       "what-is-robotics-a-simple-guide-for-parents-and-schools-in-nigeria", "why-every-nigerian-child-should-learn-to-code"}
+    redirects.update({p["slug"]: f"blog/{p['slug']}/" for p in posts if p["slug"] in wordpress_posts})   # old WordPress addresses only
     for old, new in redirects.items():
         dest = f"{base_url}/{new}"
         stub = (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Redirecting…</title><meta name="robots" content="noindex">'
@@ -417,10 +436,14 @@ def main() -> int:
     # ---- data + SEO files ----------------------------------------------------
     (DIST / "assets" / "data").mkdir(parents=True, exist_ok=True)
     (DIST / "assets" / "data" / "search.json").write_text(json.dumps(search, ensure_ascii=False, separators=(",", ":")), encoding="utf8")
+    (DIST / "assets" / "data" / "blog.json").write_text(json.dumps({
+        "static": [p["slug"] for p in posts],
+        "photos": {k: {"widths": v["widths"], "default": v["default"], "w": v["w"], "h": v["h"], "alt": v["alt"]} for k, v in photos.items()}},
+        ensure_ascii=False, separators=(",", ":")), encoding="utf8")
     uniq = list(dict.fromkeys(sitemap))
     urls = "".join(f"  <url><loc>{x}</loc></url>\n" for x in uniq)
     (DIST / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n', encoding="utf8")
-    (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /login/\nDisallow: /account/\n\nSitemap: {base_url}/sitemap.xml\n", encoding="utf8")
+    (DIST / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /login/\nDisallow: /account/\nDisallow: /admin/\nDisallow: /blog/post/\n\nSitemap: {base_url}/sitemap.xml\n", encoding="utf8")
     (DIST / "manifest.webmanifest").write_text(json.dumps({
         "name": site["company"]["name"], "short_name": site["company"]["short"], "description": site["company"]["tagline"], "start_url": "/", "scope": "/", "display": "standalone",
         "background_color": "#fafaf8", "theme_color": site["theme_color"], "lang": "en",
@@ -439,6 +462,8 @@ def main() -> int:
         "/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n"
         "  Permissions-Policy: camera=(), microphone=(), geolocation=()\n", encoding="utf8")
 
+    for n in notes:
+        print("NOTE:", n)
     if ap.REPAIRED:
         print("Repaired unescaped sample markup in:", ", ".join(sorted(set(ap.REPAIRED))))
     print(f"Built {len(written)} pages ({total_lessons} lessons, {len(photos)} photos) into {DIST}; accounts {'ON' if fb else 'off'}")

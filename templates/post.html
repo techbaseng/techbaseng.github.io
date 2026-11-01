@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_macros.html" import icon %}
-{% from "_macros.html" import photo with context %}
+{% from "_macros.html" import post_cover with context %}
 {% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
 {% block after_header %}<div class="read-progress" aria-hidden="true"><i id="read-bar"></i></div>{% endblock %}
 {% block body %}
@@ -14,7 +14,7 @@
     <ul class="meta-row"><li>{{ icon('calendar') }} <time datetime="{{ post.date }}">{{ post.date_label }}</time></li><li>{{ icon('clock') }} {{ post.reading }} min read</li><li>By Techbase Consultant Services</li></ul>
   </div>
 </header>
-{%- if post.image %}<div class="wrap article-cover">{{ photo(post.image, '(min-width: 1100px) 1100px, 94vw', eager=True) }}</div>{% endif %}
+{%- if post.image or post.cover_file %}<div class="wrap article-cover">{{ post_cover(post, '(min-width: 1100px) 1100px, 94vw', eager=True) }}</div>{% endif %}
 <div class="wrap article-body prose-body" id="article-body">
   {{ post.html|safe }}
   <div class="share" aria-label="Share this article">
@@ -35,7 +35,7 @@
     <div class="cards-3">
       {%- for p in related %}
       <a class="pcard" href="{{ ('blog/' ~ p.slug ~ '/')|u }}">
-        <div class="pcard-img">{% if p.image %}{{ photo(p.image, '(min-width: 900px) 380px, 92vw') }}{% else %}<div class="cover-fallback" aria-hidden="true">{{ icon('book') }}</div>{% endif %}</div>
+        <div class="pcard-img">{{ post_cover(p, '(min-width: 900px) 380px, 92vw') }}</div>
         <div class="pcard-body"><p class="pcard-meta"><time datetime="{{ p.date }}">{{ p.date_label }}</time> · {{ p.reading }} min read</p><h3>{{ p.title }}</h3></div>
       </a>
       {%- endfor %}
