@@ -23,11 +23,11 @@ Companies in Lagos, Ibadan, Abuja, Port Harcourt and beyond are looking for deve
 
 ## Starting young makes it easier
 
-At Techbase we start children from age five with Scratch, a free visual programming tool from MIT. Nothing is typed. Children snap coloured blocks together to make characters move, play sounds and tell stories. It looks like play, and it teaches real programming ideas: loops, conditions, variables and events.
+At Techbase we start children from age {youngest} with Scratch, a free visual programming tool from MIT. Nothing is typed. Children snap coloured blocks together to make characters move, play sounds and tell stories. It looks like play, and it teaches real programming ideas: loops, conditions, variables and events.
 
 ![Pupils in a Techbase class share a laptop and talk through what they are building.](photo:kbis-young-learners)
 
-From there, learners move step by step to text-based languages. We have seen children who began with blocks at six write their own HTML and CSS pages by eight or nine. The jump feels natural because the thinking is already familiar.
+From there, learners move step by step to text-based languages. Children who begin with blocks at {youngest} are ready, a year or two later, to write their own HTML and CSS pages. The jump feels natural because the thinking is already familiar.
 
 ## What a school can do this term
 

@@ -7,7 +7,7 @@ summary: What comes after Scratch? Here is how the Techbase curriculum is organi
 
 Parents often ask the same question: "Yes, but what exactly are they learning to do?" It is a fair one. Coding covers everything from dragging coloured blocks to building machine learning models. Here is how the Techbase learning path is organised, one stage at a time.
 
-## Stage 1: Scratch (ages 5 and up)
+## Stage 1: Scratch (ages {ages:techbase-scratch})
 
 Scratch comes from MIT and is where almost every Techbase learner begins. Programs are built by connecting coloured blocks, so no typing is needed. The blocks stand for real programming ideas: loops, conditions, variables and events, presented like puzzle pieces.
 
@@ -17,7 +17,7 @@ By the end of the Scratch course, a learner can make their own games, animations
 
 This is not a toy. These children are programming, in a form that does not depend on fast typing.
 
-## Stage 2: HTML and CSS (ages 8 and up)
+## Stage 2: HTML and CSS (ages {ages:techbase-html})
 
 Once the logic feels familiar, learners move to the two languages behind every website: HTML for structure and CSS for appearance. Someone who finishes both can build a styled, multi-page website and understands how the sites they visit are put together.
 

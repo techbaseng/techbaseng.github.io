@@ -20,6 +20,26 @@ PHOTO_WIDTHS = (480, 960, 1600)
 PHOTO_EXT = {".jpg", ".jpeg", ".png"}
 
 
+# Facts that appear in many places (ages, lesson counts) are written once and inserted wherever a {token} is used.
+# Tokens: {lessons} {courses} {ages} {youngest} {n:course-slug} {ages:course-slug}. Set by build.py before anything is loaded.
+TOKENS: dict[str, str] = {}
+_TOKEN = re.compile(r"\{([a-z]+(?::[a-z-]+)?)\}")
+
+
+def fill(text: str) -> str:
+    return _TOKEN.sub(lambda m: str(TOKENS.get(m.group(1), m.group(0))), text)
+
+
+def fill_tree(obj):
+    if isinstance(obj, str):
+        return fill(obj)
+    if isinstance(obj, list):
+        return [fill_tree(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: fill_tree(v) for k, v in obj.items()}
+    return obj
+
+
 def read_json(path: Path):
     return json.loads(path.read_text(encoding="utf8"))
 
@@ -196,7 +216,7 @@ def render_markdown(body: str, photos: dict, root_hint: str = "{{ROOT}}", images
 def load_articles(folder: str, photos: dict, kind: str) -> list[dict]:
     items = []
     for path in sorted((CONTENT / folder).glob("*.md")):
-        meta, body = parse_front_matter(path.read_text(encoding="utf8"))
+        meta, body = parse_front_matter(fill(path.read_text(encoding="utf8")))
         words = len(re.findall(r"\w+", body))
         item = {
             "slug": path.stem,
@@ -223,7 +243,7 @@ def load_articles(folder: str, photos: dict, kind: str) -> list[dict]:
 # Company JSON data
 # --------------------------------------------------------------------------- #
 def load_company(photos: dict, total_lessons: int, course_count: int) -> dict:
-    d = {p.stem: read_json(p) for p in (CONTENT / "company").glob("*.json")}
+    d = {p.stem: fill_tree(read_json(p)) for p in (CONTENT / "company").glob("*.json")}
     for m in d["team"]:
         if m["photo"] not in photos:
             raise ValueError(f"team photo '{m['photo']}' missing")

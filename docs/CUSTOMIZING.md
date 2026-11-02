@@ -31,6 +31,21 @@ I wrote these from your WordPress site. Please read them once and correct anythi
 | The "Which path fits you?" box | `content/paths.json` |
 | A lesson | `content/<course>/lessons/lesson_NN.html` |
 
+## Facts that must match everywhere (ages, prices, counts)
+
+Write each fact once; the website and the training proposal read it from there.
+
+| What | File |
+|---|---|
+| Who each course is for (ages) and the overall age range | `content/ages.json` |
+| Fees, discounts, laptop and kit needs | `content/company/pricing.json` |
+| Phone, email, hours, address, social links | `content/site.json` |
+| Lesson and course counts, partner count | worked out automatically |
+
+Inside text (FAQ, blog posts, service lists) type a `{token}` instead of the number: `{ages}`, `{youngest}`, `{lessons}`, `{courses}`, `{ages:techbase-scratch}`, `{n:techbase-python}`. The build fills them in.
+
+After you change any of these, refresh the downloadable proposal: run `python tools/make_proposal_deck.py` and commit the two files it writes in `assets/downloads/` (a PowerPoint you can edit and the PDF visitors download). The build prints a warning if you forget. The ages for Scratch (8 to 16) and micro:bit (8 to 14) are the ones published by their makers; the others are Techbase's own recommendation.
+
 ## Write blog posts without touching GitHub (the admin area)
 
 Once you have done Step 8 in `FIREBASE_LOGIN_SETUP.md`, sign in and open `/admin/` on your website.

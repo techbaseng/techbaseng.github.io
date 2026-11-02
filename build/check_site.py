@@ -12,6 +12,15 @@ from bs4 import BeautifulSoup
 
 DIST = Path(__file__).resolve().parent.parent / "dist"
 errors, warns = [], []
+try:   # the downloadable proposal must match the data the site is built from
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    from make_proposal_deck import facts_hash
+    stamp = Path(__file__).resolve().parent.parent / "assets" / "downloads" / "proposal.stamp"
+    if not stamp.exists() or stamp.read_text().strip() != facts_hash():
+        warns.append("the training proposal (assets/downloads) is out of date with the site data: run python tools/make_proposal_deck.py and commit the result")
+except Exception as e:  # noqa: BLE001
+    warns.append(f"could not check the training proposal: {e}")
+STALE = [(r"\bages? (5|five)\b|\b5 to adult|from age five", 'youngest age should be 8'), (r"\b356\b", 'old lesson count'), (r"\b(6|six) (core )?(course|tracks)", 'old course count')]
 redirect_pages = {DIST / k / "index.html" for k in json.loads((DIST / "redirects.json").read_text(encoding="utf8"))} if (DIST / "redirects.json").exists() else set()
 pages = sorted(p for p in DIST.rglob("*.html") if p not in redirect_pages)  # redirect stubs are checked separately below
 JS_ANCHORS = {"signup"}  # panels created by the sign-in page script
@@ -34,6 +43,11 @@ for page in pages:
     if not soup.find("meta", attrs={"name": "description"}): errors.append(f"{rel}: missing meta description")
     if len(soup.find_all("h1")) != 1: errors.append(f"{rel}: expected exactly one <h1>")
     if soup.select("[onclick],[onload],[onerror]"): errors.append(f"{rel}: inline event handler left in markup")
+    if "/lessons/" not in str(rel):   # ages and counts must come from content/ages.json and the course data, never be typed in
+        text = soup.get_text(" ")
+        for pat, why in STALE:
+            if re.search(pat, text, re.I) and "turned six" not in text:
+                errors.append(f"{rel}: out-of-date detail ({why})")
     seen = set()
     for el in soup.select("[id]"):
         if el["id"] in seen: errors.append(f"{rel}: duplicate id {el['id']!r}")

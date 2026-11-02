@@ -7,9 +7,9 @@ image_todo: Your own photo: a learner starting at a laptop.
 
 Setting a learning goal is easier when you can see the road. Here is a simple map.
 
-## Ages 5 to 10: play first
+## Ages 8 to 12: play first
 
-Start with block-based coding in **Scratch**: make a character move, tell a story, create a quiz. Aim for twenty minutes, two or three times a week. Our Scratch course has 35 free projects.
+Start with block-based coding in **Scratch**: make a character move, tell a story, create a quiz. Aim for twenty minutes, two or three times a week. Our Scratch course has {n:techbase-scratch} free projects.
 
 ## Ages 10 to 14: build real things
 

@@ -122,6 +122,10 @@ def load_courses() -> list[dict]:
         used = {l["level"] for l in flat if l["level"]}
         c["levels"] = [{"id": k, "label": v} for k, v in ap.LEVELS.items() if k in used]
         out.append(c)
+    ages = cm.read_json(CONTENT / "ages.json")
+    for c in out:
+        c["ages"] = ages["courses"][c["slug"]]
+        c["level"] = f"{c['level']} · Ages {c['ages']}"
     for c in out:
         c["prev_course"] = next((x for x in out if x["slug"] == c.get("prev")), None)
         c["next_course"] = next((x for x in out if x["slug"] == c.get("next")), None)
@@ -165,6 +169,13 @@ def main() -> int:
     fb = firebase_config()
     site["accounts"] = bool(fb)
     courses = load_courses()
+    ages = cm.read_json(CONTENT / "ages.json")
+    cm.TOKENS.update({"lessons": str(sum(c["total"] for c in courses)), "courses": str(len(courses)), "ages": ages["overall"], "youngest": str(ages["youngest"])})
+    for c in courses:
+        cm.TOKENS[f"n:{c['slug']}"] = str(c["total"])
+        cm.TOKENS[f"ages:{c['slug']}"] = c["ages"]
+    paths = cm.fill_tree(paths)
+    site = cm.fill_tree(site)
     course_by_slug = {c["slug"]: c for c in courses}
     for p in paths:
         p["key"] = course_by_slug[p["start"]]["key"]
@@ -175,7 +186,7 @@ def main() -> int:
     if DIST.exists():
         shutil.rmtree(DIST)
     DIST.mkdir(parents=True)
-    shutil.copytree(ASSETS, DIST / "assets", ignore=shutil.ignore_patterns("site.css.old", "README.md"))
+    shutil.copytree(ASSETS, DIST / "assets", ignore=shutil.ignore_patterns("site.css.old", "README.md", "*.pptx", "proposal.stamp"))
     shutil.move(str(DIST / "assets" / "img" / "favicon.ico"), DIST / "favicon.ico")
     if JS_BUILD.exists():
         for f in JS_BUILD.iterdir():
@@ -235,7 +246,7 @@ def main() -> int:
         html = env.get_template(tpl).render(
             site=site, courses=courses, paths=paths, total_lessons=total_lessons, root=root, nav=NAV, photos=photos,
             csp=csp, theme_script=theme_script, asset_v=asset_v, title=title, description=description[:300],
-            fb_public=({"project": fb["projectId"], "key": fb["apiKey"]} if fb else None),
+            ages=ages, fb_public=({"project": fb["projectId"], "key": fb["apiKey"]} if fb else None),
             canonical=f"{base_url}/{canon_path}", og_image=f"{base_url}/{og_rel}", og_alt=og_alt,
             robots=None if index else "noindex, follow",
             jsonld=json.dumps(jsonld, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") if jsonld else None, **ctx,
@@ -251,7 +262,14 @@ def main() -> int:
     def add_search(kind, label, t, d, url, c="site", n=""):
         search.append({"k": kind, "c": c, "cs": label, "n": n, "t": t, "d": d, "u": url})
 
-    company_ctx = dict(services=company["services"], why=company["why"], process=company["process"], team=company["team"],
+    pr = company["pricing"]
+    money = lambda n: f"{pr['currency']}{n:,.0f}"
+    first_g, rest_g = pr["base_fee"] * (100 - pr["group_discount_pct"]) / 100, pr["base_fee"] * (100 - pr["family_discount_pct"] - pr["group_discount_pct"]) / 100
+    price = {**pr, "base": money(pr["base_fee"]), "combined_pct": pr["family_discount_pct"] + pr["group_discount_pct"],
+             "sibling_total": money(pr["base_fee"] * (200 - pr["family_discount_pct"]) / 100), "group12_total": money(first_g + 11 * rest_g)}
+    proposal = ASSETS / "downloads" / "Techbase-Training-Proposal.pdf"
+    proposal_kb = round(proposal.stat().st_size / 1024) if proposal.exists() else 0
+    company_ctx = dict(price=price, proposal_kb=proposal_kb, services=company["services"], why=company["why"], process=company["process"], team=company["team"],
                        testimonials=company["testimonials"], partners=company["partners"], partners_flat=company["partners_flat"],
                        tools=company["tools"], faq=company["faq"], faq_by=company["faq_by"], careers=company["careers"],
                        portfolio=portfolio, posts=posts, years=years,

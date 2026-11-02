@@ -17,7 +17,7 @@
 
 ## About
 
-Techbase Consultant Services is a STEM education and technology consultancy in Moniya, Ibadan, Nigeria. We work with schools, organisations and individuals on coding and robotics training for ages 5 to adult, curriculum and teaching aids, website and mobile app development, and AI tools for education.
+Techbase Consultant Services is a STEM education and technology consultancy in Moniya, Ibadan, Nigeria. We work with schools, organisations and individuals on coding and robotics training for ages 8 to adult, curriculum and teaching aids, website and mobile app development, and AI tools for education.
 
 This repository is the Techbase website. It also contains the **Techbase STEM Academy**: 472 free lessons across eight courses.
 
