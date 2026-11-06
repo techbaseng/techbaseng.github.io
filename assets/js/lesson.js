@@ -13,7 +13,7 @@
   /* remember where the learner is */
   var rec = { f: file, t: main.getAttribute('data-title'), n: main.getAttribute('data-num') };
   TB.save('tb:last:' + slug, rec);
-  TB.save('tb:last', { s: slug, u: main.getAttribute('data-url'), t: rec.t });
+  TB.save('tb:last', { s: slug, u: main.getAttribute('data-url'), t: rec.t, at: Date.now() });
 
   function markDone() {
     var d = TB.load('tb:done:' + slug, []);
@@ -82,7 +82,7 @@
   function unlockNext(n) {
     var c = document.getElementById('chk' + n);
     if (c) { c.classList.add('done'); c.textContent = '✓'; }
-    try { localStorage.setItem(key, String(n + 1)); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(key, String(n + 1)); } catch (e) { /* ignore */ } TB.touch();
     cur = n + 1;
     paintRail();
     if (n >= total) {

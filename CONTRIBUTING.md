@@ -18,8 +18,10 @@ This is optional. All real builds run on GitHub.
 
 ```
 pip install -r requirements.txt
-python build/build.py
+npm ci
+python build/build.py        # accounts are off unless FIREBASE_* settings are exported
 python build/check_site.py
+npm test                     # unit tests for the progress-sync code
 ```
 
 The finished site is written to `dist/`. See [docs/CUSTOMIZING.md](docs/CUSTOMIZING.md) for where things live.

@@ -1,3 +1,7 @@
 # docs
 
-Guides for maintaining the site: [DEPLOYMENT.md](DEPLOYMENT.md) covers publishing, rollbacks and domains, and [CUSTOMIZING.md](CUSTOMIZING.md) covers changing text, colours, fonts and images. `assets/` holds the README preview image.
+Guides for the site owner:
+
+- [DEPLOYMENT.md](DEPLOYMENT.md): reviewing and publishing, rollbacks, domains.
+- [FIREBASE_LOGIN_SETUP.md](FIREBASE_LOGIN_SETUP.md): switching on accounts, login and the contact forms.
+- [CUSTOMIZING.md](CUSTOMIZING.md): changing text, photos, colours, blog posts and lessons.

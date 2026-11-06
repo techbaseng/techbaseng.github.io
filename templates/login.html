@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, field %}
+{% block head_css %}<link rel="stylesheet" href="{{ root }}assets/css/site.css?v={{ asset_v }}">{% endblock %}
+{% block body %}
+<main id="main" class="auth-page">
+<div class="wrap auth-grid">
+  <section class="auth-card" aria-labelledby="auth-title" data-auth-page>
+    {%- if not site.accounts %}
+    <h1 id="auth-title">Accounts are not switched on yet</h1>
+    <p class="form-sub">Every course is open to read without an account in the meantime.</p>
+    <a class="btn" href="{{ 'learn/'|u }}">Browse the courses {{ icon('arrow','icon-arrow') }}</a>
+    {%- else %}
+    <div class="auth-skeleton" data-auth-loading aria-hidden="true"><i></i><i></i><i></i></div>
+    <div data-auth-ready hidden>
+      <h1 id="auth-title" data-title>Welcome back</h1>
+      <p class="form-sub" data-sub>Sign in to continue learning where you stopped.</p>
+      <div class="auth-tabs" role="tablist" aria-label="Sign in or create an account" data-tabs>
+        <button type="button" role="tab" id="tab-signin" aria-controls="panel-signin" aria-selected="true" data-tab="signin">Sign in</button>
+        <button type="button" role="tab" id="tab-signup" aria-controls="panel-signup" aria-selected="false" tabindex="-1" data-tab="signup">Create account</button>
+      </div>
+
+      <div class="auth-notice" role="alert" data-notice hidden></div>
+
+      <div role="tabpanel" id="panel-signin" aria-labelledby="tab-signin" data-panel="signin">
+        <button class="btn btn--google" type="button" data-google><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.5 5.5 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z" stroke="none"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.9-3a7.2 7.2 0 0 1-10.7-3.8h-4v3.1A12 12 0 0 0 12 24z" stroke="none"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8z" stroke="none"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.4.6 4.7 1.8l3.5-3.5A12 12 0 0 0 1.3 6.6l4 3.1A7.2 7.2 0 0 1 12 4.8z" stroke="none"/></svg><span>Continue with Google</span></button>
+        <p class="or"><span>or with email</span></p>
+        <form class="tbform" data-auth-form="signin" novalidate>
+          {{ field('email', 'Email', type='email', required=True, autocomplete='email', maxlength=160, sfx='-in') }}
+          <div class="fld" data-field="password">
+            <label for="f-password">Password <span class="req" aria-hidden="true">*</span></label>
+            <div class="pw"><input id="f-password" name="password" type="password" required autocomplete="current-password" maxlength="128" aria-describedby="e-password"><button type="button" class="pw-toggle" data-pw-toggle aria-label="Show password" aria-pressed="false">{{ icon('eye') }}</button></div>
+            <p class="err" id="e-password" role="alert"></p>
+          </div>
+          <button class="btn btn--lg btn--block" type="submit"><span data-label>Sign in</span></button>
+        </form>
+        <p class="auth-links"><button type="button" class="link-btn" data-go="reset">Forgot your password?</button></p>
+      </div>
+
+      <div role="tabpanel" id="panel-signup" aria-labelledby="tab-signup" data-panel="signup" hidden>
+        <button class="btn btn--google" type="button" data-google><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.5 5.5 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z" stroke="none"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.9-3a7.2 7.2 0 0 1-10.7-3.8h-4v3.1A12 12 0 0 0 12 24z" stroke="none"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8z" stroke="none"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.4.6 4.7 1.8l3.5-3.5A12 12 0 0 0 1.3 6.6l4 3.1A7.2 7.2 0 0 1 12 4.8z" stroke="none"/></svg><span>Sign up with Google</span></button>
+        <p class="or"><span>or with email</span></p>
+        <form class="tbform" data-auth-form="signup" novalidate>
+          {{ field('name', 'Your name', required=True, autocomplete='name', maxlength=80) }}
+          {{ field('email', 'Email', type='email', required=True, autocomplete='email', maxlength=160, sfx='-up') }}
+          <div class="fld" data-field="password">
+            <label for="f-password-new">Password <span class="req" aria-hidden="true">*</span></label>
+            <div class="pw"><input id="f-password-new" name="password" type="password" required autocomplete="new-password" maxlength="128" aria-describedby="h-password-new e-password-new"><button type="button" class="pw-toggle" data-pw-toggle aria-label="Show password" aria-pressed="false">{{ icon('eye') }}</button></div>
+            <div class="meter" aria-hidden="true"><i data-meter></i></div>
+            <p class="hint" id="h-password-new">At least 8 characters. A short sentence you will remember works well.</p>
+            <p class="err" id="e-password-new" role="alert"></p>
+          </div>
+          <div class="fld" data-field="goal">
+            <label for="f-goal">What do you want to learn first? <span class="opt">(optional)</span></label>
+            <select id="f-goal" name="goal">
+              <option value="">Not sure yet</option>
+              {%- for p in paths %}<option value="{{ p.start }}">{{ p.who }}: {{ p.label }}</option>{% endfor %}
+            </select>
+            <p class="err" id="e-goal" role="alert"></p>
+          </div>
+          <div class="fld fld--check" data-field="agree">
+            <label class="check"><input type="checkbox" name="agree" id="f-agree" required aria-describedby="e-agree"><span>I have read the <a href="{{ 'privacy/'|u }}" target="_blank" rel="noopener noreferrer">privacy notice</a>.</span></label>
+            <p class="err" id="e-agree" role="alert"></p>
+          </div>
+          <button class="btn btn--lg btn--block" type="submit"><span data-label>Create my free account</span></button>
+        </form>
+      </div>
+
+      <div role="tabpanel" id="panel-reset" aria-label="Reset your password" data-panel="reset" hidden>
+        <form class="tbform" data-auth-form="reset" novalidate>
+          {{ field('email', 'Email', type='email', required=True, autocomplete='email', maxlength=160, sfx='-rs') }}
+          <button class="btn btn--lg btn--block" type="submit"><span data-label>Send reset link</span></button>
+        </form>
+        <p class="auth-links"><button type="button" class="link-btn" data-go="signin">Back to sign in</button></p>
+      </div>
+
+      <div id="panel-verify" data-panel="verify" hidden>
+        <div class="verify">
+          <span class="verify-icon">{{ icon('mail-check') }}</span>
+          <p>We sent a verification link to <b data-email></b>. Open it to confirm your email address. Check your spam folder if it does not arrive.</p>
+          <div class="hero-actions"><a class="btn" data-continue href="{{ 'learn/'|u }}">Start learning {{ icon('arrow','icon-arrow') }}</a><button class="btn btn--ghost" type="button" data-resend>Resend email</button></div>
+        </div>
+      </div>
+    </div>
+    {%- endif %}
+  </section>
+
+  <aside class="auth-side">
+    <span class="eyebrow">Techbase Academy</span>
+    <h2>One free account. Every course.</h2>
+    <ul class="checks checks--lg">
+      <li>{{ total_lessons }} lessons and projects across {{ courses|length }} courses</li>
+      <li>Your progress saved and synced between your phone and laptop</li>
+      <li>Pick up exactly where you stopped</li>
+      <li>Free to use, with no card needed</li>
+    </ul>
+    <p class="side-photo-wrap">{% from "_macros.html" import photo with context %}{{ photo('kbis-class-b', '(min-width: 900px) 420px, 92vw') }}</p>
+  </aside>
+</div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ root }}assets/js/auth-ui.js?v={{ asset_v }}" defer></script>{% endblock %}
