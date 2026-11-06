@@ -6,7 +6,7 @@ import {
   GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, signOut, updateProfile, deleteUser,
   reauthenticateWithCredential, reauthenticateWithPopup, EmailAuthProvider, setPersistence, browserLocalPersistence,
 } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { snapshotFromStorage, mergeSnapshots, applySnapshotToStorage, sanitise, sameSnapshot } from './merge.js';
 import { friendly } from './errors.js';
@@ -137,4 +137,33 @@ TB.auth = {
     if (kind !== 'enquiries' && kind !== 'applications') throw new Error('bad form');
     await addDoc(collection(db, kind), { ...data, createdAt: serverTimestamp() });
   },
+};
+
+// ---- Blog administration (used only by the /admin/ page). Everything here is also enforced by firebase/firestore.rules. ----
+const POST_FIELDS = ['title', 'summary', 'body', 'date', 'published', 'coverPhoto', 'coverImage', 'coverAlt', 'thumb', 'author'];
+TB.admin = {
+  async isAdmin() {
+    const u = auth.currentUser;
+    if (!u) return false;
+    try { return (await getDoc(doc(db, 'admins', u.uid))).exists(); } catch (e) { return false; }
+  },
+  get uid() { return auth.currentUser ? auth.currentUser.uid : ''; },
+  async listPosts() {
+    return wrap(async () => (await getDocs(collection(db, 'posts'))).docs.map((d) => ({ slug: d.id, ...d.data() })));
+  },
+  async getPost(slug) {
+    return wrap(async () => { const s = await getDoc(doc(db, 'posts', slug)); return s.exists() ? { slug, ...s.data() } : null; });
+  },
+  async savePost(slug, post, isNew) {
+    return wrap(async () => {
+      const data = {};
+      POST_FIELDS.forEach((k) => { if (post[k] !== undefined) data[k] = post[k]; });
+      data.updatedAt = serverTimestamp();
+      if (isNew) data.createdAt = serverTimestamp();
+      await setDoc(doc(db, 'posts', slug), data, { merge: !isNew });
+    });
+  },
+  deletePost: (slug) => wrap(() => deleteDoc(doc(db, 'posts', slug))),
+  saveImage: (id, data, alt) => wrap(() => setDoc(doc(db, 'postImages', id), { data, alt: alt || '', createdAt: serverTimestamp() })),
+  deleteImage: (id) => wrap(() => deleteDoc(doc(db, 'postImages', id))),
 };

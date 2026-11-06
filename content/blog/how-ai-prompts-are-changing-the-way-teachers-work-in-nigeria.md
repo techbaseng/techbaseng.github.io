@@ -1,28 +1,32 @@
 ---
 title: How AI Prompts Are Changing the Way Teachers Work in Nigeria
-date: 2026-07-06
-image: blog-ai-prompts
-summary: Nigerian teachers are stretched thin. AI prompts will not fix every problem, but they are already meaningfully reducing the time teachers spend on administrative work — leaving more time for actual teaching.
+date: 2025-07-15
+image: community-guidance
+summary: Teachers are stretched thin, and paperwork takes time away from teaching. Here is how well-written AI prompts can lighten the load, and where human judgment still matters most.
 ---
 
-A typical Nigerian secondary school teacher might be responsible for four or five subject classes, with 35 to 50 students in each. They prepare lesson notes, set assessments, mark scripts, write reports, and manage a classroom — often without a teaching assistant, and sometimes without reliable internet or power.
+A secondary school teacher in Nigeria may teach four or five classes of 35 to 50 students each. On top of the teaching there are lesson notes, assessments, marking, reports and classroom management, often with no assistant and sometimes without steady power or internet.
 
-The administrative burden alone is significant. Writing a single detailed lesson note from scratch can take an hour or more. Preparing a full set of exam questions for one subject takes an afternoon. Doing both across multiple classes, every week, is genuinely exhausting — and it comes at the expense of the time teachers actually want to spend teaching.
+The paperwork alone is heavy. A detailed lesson note can take an hour. A full set of exam questions can take an afternoon. Doing that for several classes every week leaves less time for the part of the job teachers actually care about.
 
-## What AI prompts can do
+## What a good AI prompt can do
 
-A well-constructed AI prompt — a specific, structured instruction given to an AI tool like Claude or ChatGPT — can generate a curriculum-aligned lesson note in under two minutes. It can produce 20 multiple-choice questions, complete with answers and distractors, for a specific topic at a specific class level, in the time it takes to make a cup of tea.
+A prompt is simply the instruction you give an AI tool. A specific, well-structured one can produce a first draft of a curriculum-aligned lesson note in a couple of minutes, or twenty multiple-choice questions with answers and plausible wrong options for a particular topic and class level.
 
-This is not science fiction. It is what Techbase has been demonstrating to teachers across several partner schools in Ibadan. The key word is *well-constructed*. A vague prompt produces a vague output. A specific, structured prompt — specifying the subject, topic, class level, learning objectives, and preferred format — produces material that needs only light editing before use.
+The word that matters is *specific*. A vague request gets a vague result. A prompt that names the subject, topic, class level, learning objectives and the format you want produces material that usually needs only light editing.
 
-## What Techbase has built for this
+## What Techbase has built
 
-The Techbase AI Prompt Library contains 217 structured prompts across 11 categories, including a dedicated education section. These prompts have been written and tested specifically for the Nigerian classroom context — covering lesson note generation, exam question design, marking guide creation, and student feedback templates.
+The Techbase AI Prompt Library holds 217 structured prompts in 11 categories, including a section for education. The prompts were written for Nigerian classrooms and cover lesson notes, exam questions, marking guides and feedback templates for students.
 
-Beyond the library, Techbase works directly with schools to build custom prompt systems tailored to their specific curriculum and assessment formats. Teachers who go through the training are typically producing professional-quality lesson materials in a fraction of their previous time within two to three weeks of practice.
+We also work with schools to set up prompts that match their own curriculum and assessment formats. With a few weeks of practice, teachers who go through our training typically prepare lesson material in a fraction of the time it used to take.
 
-## A tool, not a replacement
+## A helper, not a replacement
 
-It is important to be clear about what AI prompts are not. They are not a replacement for a teacher's subject knowledge, classroom presence, or professional judgment. The best outputs still require a teacher who knows the subject well enough to recognise when the AI has made an error or missed a nuance.
+AI does not replace a teacher's knowledge, presence in the room or professional judgment. It can state wrong things confidently, or pitch work at the wrong level, so the teacher has to know the subject well enough to catch that.
 
-What they do is remove the most time-consuming and repetitive part of lesson preparation — the blank page problem. The teacher still edits, adapts, and approves. But they start from a strong draft rather than from nothing. In a context where teacher time is as stretched as it is in most Nigerian schools, that is not a small thing.
+What it removes is the hardest moment of preparation: the blank page. The teacher still edits, adapts and approves, but starts from a solid draft instead of nothing. When teachers' time is as limited as it is in most schools, that is a real gain.
+
+## Want to try it?
+
+Our [step-by-step guide to writing better prompts](../how-to-use-ai-to-create-better-lesson-plans-a-practical-guide-for-nigerian-teachers/index.html) shows exactly how to start. If your school would like hands-on training, [get in touch](../../contact/index.html).

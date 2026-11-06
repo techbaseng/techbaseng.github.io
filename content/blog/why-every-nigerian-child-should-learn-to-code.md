@@ -1,28 +1,44 @@
 ---
 title: Why Every Nigerian Child Should Learn to Code
-date: 2026-07-06
-image: blog-learn-to-code
-summary: Coding is no longer a specialist skill. It is fast becoming a basic literacy — and the earlier a child starts, the better placed they are to participate in the economy that is already taking shape around them.
+date: 2024-11-12
+image: girls-coding-session
+summary: Coding is becoming a basic literacy, like reading and arithmetic. Here is why it matters for Nigerian children, why starting young helps, and what a school can do this term.
 ---
 
-When we talk about literacy in Nigeria, we usually mean reading and writing. But there is a second kind of literacy that is becoming just as essential — and most of our children are being sent into the future without it.
+Ask most parents what literacy means and they will say reading and writing. There is a second kind that is quickly joining the list: the ability to tell a computer what to do.
 
-Coding, at its most basic, is the ability to give a computer a set of instructions. But in practice, learning to code teaches something far more valuable: how to think logically, break a problem into smaller pieces, test ideas, and learn from mistakes. These are skills that apply everywhere — not just in front of a screen.
+Coding sounds technical, but at its simplest it is giving clear instructions in a precise order. A child who learns it is practising something much bigger than typing code. They learn to break a problem into small steps, to test an idea, to find out why it failed, and to try again. Those habits help in a laboratory, a shop, a classroom or a hospital just as much as in a software company.
 
-## The jobs are already here
+## It is not only about becoming a programmer
 
-Nigeria's technology sector is growing faster than the educational system is producing people to fill it. Across Lagos, Ibadan, Abuja, and Port Harcourt, companies are hiring — and struggling to find enough qualified developers, data analysts, and digital professionals. The gap between what the market needs and what our schools are producing is already significant. By the time today's primary school pupils enter the workforce, that gap will be wider still.
+Most children who learn to code will not become software engineers, and that is fine. What they take away is a way of working:
 
-But this is not just a jobs argument. A child who learns to code learns to build things — apps, websites, games, tools. They learn that when something breaks, you debug it. When something does not work the way you expected, you adjust the approach and try again. These habits of mind are useful whether the child grows up to be a software engineer, a doctor, a teacher, or a business owner.
+- **Patience with mistakes.** In code, an error message is information, not a failure. Children learn that being wrong is a normal step on the way to being right.
+- **Logical thinking.** If this happens, do that. Repeat until a condition is met. These ideas show up in maths, science and everyday planning.
+- **Making things.** A child who has built a game or a simple website stops seeing technology as something other people make and starts seeing it as something they can shape.
 
-## Starting young is an advantage
+## Technology work is growing, and it needs people
 
-At Techbase, we start children as young as five with Scratch — a visual, block-based programming environment developed by MIT. There is no typing required. You drag and connect colourful blocks to make characters move, play music, and tell stories. It looks like a game. It teaches like a masterclass.
+Companies in Lagos, Ibadan, Abuja, Port Harcourt and beyond are looking for developers, data analysts and people who are comfortable with digital tools, and many say good candidates are hard to find. Even outside the technology sector, more and more jobs involve working with software, data and automated tools. A child who is comfortable with these ideas by the end of secondary school is better prepared for almost any path.
 
-Children who start with Scratch progress naturally to text-based languages. We have watched six-year-olds who began with drag-and-drop coding move to writing real HTML and CSS by age eight or nine. The progression is gradual, structured, and — critically — enjoyable.
+## Starting young makes it easier
 
-## What schools can do right now
+At Techbase we start children from age five with Scratch, a free visual programming tool from MIT. Nothing is typed. Children snap coloured blocks together to make characters move, play sounds and tell stories. It looks like play, and it teaches real programming ideas: loops, conditions, variables and events.
 
-Every school in Nigeria can take a first step toward coding education this term. You do not need a dedicated computer lab. You do not need to hire a specialist full-time. What you need is a structured curriculum, a capable instructor, and a regular weekly slot. Techbase can provide all three.
+![Pupils in a Techbase class share a laptop and talk through what they are building.](photo:kbis-young-learners)
 
-The question is not whether Nigerian children should learn to code. They should, and increasingly they will — in one context or another. The question is whether your school or your family wants to be early, or to catch up later.
+From there, learners move step by step to text-based languages. We have seen children who began with blocks at six write their own HTML and CSS pages by eight or nine. The jump feels natural because the thinking is already familiar.
+
+## What a school can do this term
+
+A school does not need a dedicated computer laboratory or a full-time specialist to begin. Three things are enough:
+
+1. A **structured curriculum** that builds from one term to the next, rather than one-off workshops.
+2. A **capable instructor** who knows when to push and when to let children explore.
+3. A **regular weekly slot**, even one hour, kept consistently.
+
+Techbase can provide all three, in your school or online. If you would like to see what that looks like, [talk to us](../../contact/index.html), or let your pupils try the free lessons on the [Techbase Academy](../../learn/index.html) first.
+
+## Early or late
+
+Children are going to meet technology either way. The real question for a family or a school is whether to build these skills now, calmly and step by step, or to catch up later under pressure. We think now is better.

@@ -1,31 +1,46 @@
 ---
 title: 5 STEM Skills Every Nigerian Child Needs for Jobs in 2030
-date: 2026-07-06
-summary: The jobs of 2030 are already taking shape. Here are the five technical and cognitive skills that will matter most — and how to start building them today.
+date: 2025-06-10
+image: instructor-teaching
+summary: Nobody can say exactly what work will look like in 2030, but five skills keep appearing in forecasts. Here is what they are and how children can start building them now.
 ---
 
-A child starting primary school today will enter the job market around 2035 or later. Predicting exactly what that market will look like is impossible, but the direction of travel is clear enough to plan around. Here are five skills that show up, in one form or another, across almost every credible forecast of where work is heading — and that a structured STEM education can build well before secondary school ends.
+A child starting primary school today will reach the job market in the mid 2030s. Nobody can say exactly what those jobs will be. But the direction is clear enough to plan around, and five skills keep showing up in almost every serious discussion of where work is heading. All five can be built well before the end of secondary school.
 
 ## 1. Computational thinking
 
-This is not the same as "coding." Computational thinking is the ability to break a large, messy problem into smaller, well-defined steps — the same skill a programmer uses to plan a piece of software, but equally useful for planning a business process, a research project, or a household budget. It is best built early, through structured programming environments like Scratch, and it transfers to every field, technical or not.
+This is not the same as coding. Computational thinking is the habit of taking a big, messy problem and breaking it into smaller steps that can each be solved. A programmer uses it to plan software, but so can a shopkeeper planning a stock list or a student planning a research project.
+
+It is best learned early, and tools like Scratch are ideal because the child focuses on the logic without worrying about spelling and punctuation.
 
 ## 2. Data literacy
 
-Every industry is generating more data than it has people to interpret it. Being able to read a chart critically, spot a misleading statistic, and use a spreadsheet or basic Python to summarise a dataset is becoming as fundamental as being able to read a paragraph of text. Nigerian learners who leave school comfortable with data — not necessarily as data scientists, but as confident data *users* — will have an edge in almost any career path they choose.
+More information is produced every day than people can read, so being able to make sense of it is valuable almost everywhere. That means reading a chart carefully, noticing when a statistic is misleading, and using a spreadsheet or a little Python to summarise a set of numbers.
 
-## 3. Working fluently with AI tools
+Children do not need to become data scientists. They need to be confident data *users*, able to ask "where did this number come from?" and to find the answer.
 
-AI tools are already embedded in how professionals across nearly every field write, research, and analyse. The advantage will not go to whoever avoids AI, and it will not automatically go to whoever uses it either — it will go to whoever knows how to direct it well: framing a clear request, checking the output critically, and combining it with their own judgment. This is a learnable, teachable skill, and the earlier a young person starts practising it responsibly, the more natural it becomes.
+## 3. Working well with AI tools
 
-## 4. Design and prototyping
+AI tools are already part of how many professionals write, research and analyse. The advantage will not go to people who avoid them, or to people who simply accept whatever they produce. It will go to people who can ask a clear question, check the answer critically and add their own judgment.
 
-The ability to take an idea — an app, a physical object, a simple website — and build a rough working version of it is a skill that spans engineering, product design, and entrepreneurship alike. Robotics kits, web development basics, and simple design tools all build this muscle: the confidence to build something imperfect first, test it, and improve it, rather than waiting for a perfect plan before starting.
+That is a teachable skill, and the earlier a young person practises it responsibly, the more natural it becomes. It also means keeping the basics strong: you can only check an answer if you understand the subject.
 
-## 5. Communicating technical ideas clearly
+## 4. Designing and prototyping
 
-A brilliant technical solution that cannot be explained to a non-technical audience — a client, a manager, an investor — loses much of its value. The ability to explain what you built and why, in plain language, is consistently rated by employers as one of the most valuable and most commonly missing skills among technically capable graduates. It is worth deliberately practising, not assuming it will develop on its own.
+Being able to turn an idea into a rough, working first version is useful in engineering, product design and business alike. Robotics kits, basic web development and simple design tools all build it.
 
-## Building these skills does not require waiting
+![A pupil and a team member work through a coding exercise side by side.](photo:bmhs-pair-coding)
 
-None of these five skills require expensive equipment or a university-level starting point. They can be introduced from as early as primary school, in age-appropriate forms, through a structured curriculum that builds steadily over several years rather than trying to cram everything into the final year of secondary school. That structured, multi-year approach is exactly what Techbase's STEM and coding programmes are designed to deliver.
+What matters is the confidence to build something imperfect, test it, and improve it, instead of waiting for a perfect plan before starting.
+
+## 5. Explaining technical ideas clearly
+
+A brilliant solution that cannot be explained to a client, a manager or an investor loses much of its value. Employers often say that explaining what you built, and why, in plain language is one of the skills they find hardest to hire for.
+
+![Techbase founder Babatunde Awoyemi speaking to an audience at Rise Conference 1.0.](photo:rise-conference-speaker)
+
+It improves with practice. Presenting a project to the class, writing a short description of how it works, or teaching a younger child are all good exercises.
+
+## You do not have to wait
+
+None of these skills needs expensive equipment. They can be introduced from primary school in age-appropriate ways, through a curriculum that builds steadily over several years rather than being squeezed into the last year of school. That steady, multi-year approach is what Techbase's [STEM and coding programmes](../../services/index.html) are built around, and you can try the free [Academy lessons](../../learn/index.html) at home.

@@ -6,6 +6,14 @@
 <img{% if cls %} class="{{ cls }}"{% endif %} src="{{ root }}assets/img/photos/{{ name }}-{{ p.default }}.webp" srcset="{% for w in p.widths %}{{ root }}assets/img/photos/{{ name }}-{{ w }}.webp {{ w }}w{{ ', ' if not loop.last }}{% endfor %}" sizes="{{ sizes }}" width="{{ p.w }}" height="{{ p.h }}" alt="{{ alt if alt is not none else p.alt }}"{% if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %} decoding="async" style="--ph:{{ p.ph }}">
 {%- endmacro %}
 
+{#- Cover image of a blog post: a site photo, or a picture uploaded in the admin area. Import "with context". -#}
+{% macro post_cover(p, sizes='100vw', eager=False) -%}
+{%- if p.image -%}{{ photo(p.image, sizes, alt=(p.cover_alt or None), eager=eager) }}
+{%- elif p.cover_file -%}<img src="{{ root }}{{ p.cover_file }}" width="{{ p.cover_w }}" height="{{ p.cover_h }}" alt="{{ p.cover_alt }}"{% if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %} decoding="async" style="--ph:{{ p.cover_ph }}">
+{%- else -%}<div class="cover-fallback" aria-hidden="true">{{ icon('book') }}</div>
+{%- endif -%}
+{%- endmacro %}
+
 {#- Section heading block used on most company pages -#}
 {% macro heading(eyebrow, title, lede='', tag='h2', cls='') -%}
 <div class="sec-head {{ cls }}">

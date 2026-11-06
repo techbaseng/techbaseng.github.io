@@ -1,5 +1,7 @@
 // Turns Firebase error codes into short, kind sentences. Wording avoids revealing whether an email has an account.
 const MESSAGES = {
+  'permission-denied': 'This account is not allowed to do that. Check that it has been set up as an administrator (see FIREBASE_LOGIN_SETUP.md, Step 8).',
+  'unavailable': 'No connection. Check your internet and try again.',
   'auth/invalid-email': 'That email address does not look right.',
   'auth/missing-password': 'Enter your password.',
   'auth/weak-password': 'Choose a password with at least 8 characters.',

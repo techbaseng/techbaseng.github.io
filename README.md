@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/img/logo-mark.svg" width="72" height="72" alt="Techbase logo">
+<img src="assets/img/logo-full.webp" width="220" alt="Techbase Consultant Services logo">
 
 # Techbase Consultant Services
 
