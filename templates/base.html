@@ -44,27 +44,38 @@
 <a class="skip-link" href="#main">Skip to content</a>
 {% include "_sprite.html" %}
 <noscript><div class="noscript-note">JavaScript is off. Pages still read in full; accounts, saved progress, search and the theme switch need JavaScript.</div></noscript>
-<header class="topbar">
+{%- if section == 'learn' %}
+<div class="portal-strip">
+  <div class="wrap portal-strip-in">
+    <span class="portal-tag">{{ icon('cap') }} Learning Portal</span>
+    <span class="portal-strip-msg">Free STEM courses, kept separate from the Techbase company website.</span>
+    <a class="portal-strip-link" href="{{ ''|u }}"><span>Techbase <span class="xs-hide">main </span>website</span> {{ icon('arrow-ur') }}</a>
+  </div>
+</div>
+<header class="topbar topbar--portal">
   <div class="wrap topbar-in">
-    <a class="brand" href="{{ ''|u }}" aria-label="Techbase Consultant Services, home">
+    <a class="brand brand--portal" href="{{ 'learn/'|u }}" aria-label="Techbase Academy learning portal, home">
       <img src="{{ root }}assets/img/logo-mark.webp" width="44" height="44" alt="">
-      <span>Tech<b>base</b> <small{% if section != 'learn' %} class="long"{% endif %}>{{ 'Academy' if section == 'learn' else 'Consultant Services' }}</small></span>
+      <span class="brand-text"><b>Techbase Academy</b><small>Learning Portal</small></span>
     </a>
-    <nav aria-label="Main">
-      <ul class="nav-links" id="site-menu">
-        {%- for item in nav %}
-        <li><a href="{{ item.href|u }}"{% if nav_active == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
-        {%- endfor %}
-        <li class="menu-extra" data-menu-auth>
+    <div class="nav-panel" id="site-menu">
+      <nav aria-label="Learning portal">
+        <ul class="nav-links">
+          {%- for item in portal_nav %}
+          <li><a href="{{ item.href|u }}"{% if nav_active == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+          {%- endfor %}
+        </ul>
+      </nav>
+      <div class="nav-panel-extra">
+        <div class="menu-extra" data-menu-auth>
           {%- if site.accounts %}
           <a href="{{ 'login/'|u }}">Log in</a>
           <a class="btn btn--sm" href="{{ 'login/#signup'|u }}">Create free account</a>
-          {%- else %}
-          <a class="btn btn--sm" href="{{ 'learn/'|u }}">Start learning</a>
           {%- endif %}
-        </li>
-      </ul>
-    </nav>
+        </div>
+        <a class="back-link" href="{{ ''|u }}">{{ icon('arrow-ur') }} Techbase main website</a>
+      </div>
+    </div>
     <div class="nav-tools">
       <button class="search-btn" type="button" data-open-search aria-label="Search the site" aria-keyshortcuts="Control+K Meta+K">{{ icon('search') }}<span>Search</span><kbd class="kbd">Ctrl K</kbd></button>
       <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="Switch between light and dark theme">{{ icon('sun','i-sun') }}{{ icon('moon','i-moon') }}</button>
@@ -72,22 +83,108 @@
         {%- if site.accounts %}
         <a class="nav-login" href="{{ 'login/'|u }}">Log in</a>
         <a class="btn btn--sm" href="{{ 'login/#signup'|u }}">Create account</a>
-        {%- else %}
-        <a class="btn btn--sm" href="{{ 'learn/'|u }}">Start learning</a>
         {%- endif %}
       </div>
       <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-label="Menu" aria-expanded="false" aria-controls="site-menu">{{ icon('menu') }}</button>
     </div>
   </div>
 </header>
+{%- else %}
+<header class="topbar topbar--site">
+  <div class="wrap topbar-in">
+    <a class="brand" href="{{ ''|u }}" aria-label="Techbase Consultant Services, home">
+      <img src="{{ root }}assets/img/logo-mark.webp" width="44" height="44" alt="">
+      <span class="brand-text"><b>Tech<i>base</i></b><small>Consultant Services</small></span>
+    </a>
+    <div class="nav-panel" id="site-menu">
+      <nav aria-label="Main">
+        <ul class="nav-links">
+          {%- for item in nav %}
+          <li><a href="{{ item.href|u }}"{% if nav_active == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a></li>
+          {%- endfor %}
+        </ul>
+      </nav>
+      <div class="nav-panel-extra">
+        <a class="portal-card" href="{{ 'learn/'|u }}">
+          <span class="portal-card-ic">{{ icon('cap') }}</span>
+          <span><b>Techbase Academy</b><small>Free learning portal · {{ total_lessons }} lessons</small></span>
+          {{ icon('arrow-ur') }}
+        </a>
+        <a class="btn" href="{{ 'contact/'|u }}">Contact us {{ icon('arrow','icon-arrow') }}</a>
+      </div>
+    </div>
+    <div class="nav-tools">
+      <button class="search-btn" type="button" data-open-search aria-label="Search the site" aria-keyshortcuts="Control+K Meta+K">{{ icon('search') }}<span>Search</span><kbd class="kbd">Ctrl K</kbd></button>
+      <button class="icon-btn theme-btn" type="button" data-theme-toggle aria-label="Switch between light and dark theme">{{ icon('sun','i-sun') }}{{ icon('moon','i-moon') }}</button>
+      <a class="portal-pill" href="{{ 'learn/'|u }}" aria-label="Open the Techbase Academy learning portal">{{ icon('cap') }}<span>Academy</span>{{ icon('arrow-ur') }}</a>
+      <a class="btn btn--sm nav-cta"{% if nav_active == 'contact' %} aria-current="page"{% endif %} href="{{ 'contact/'|u }}">Contact us</a>
+      <button class="icon-btn menu-btn" type="button" data-menu-toggle aria-label="Menu" aria-expanded="false" aria-controls="site-menu">{{ icon('menu') }}</button>
+    </div>
+  </div>
+</header>
+{%- endif %}
 {% block after_header %}{% endblock %}
 {% block body %}{% endblock %}
 
+{%- if section == 'learn' %}
+<footer class="footer footer--portal">
+  <div class="wrap">
+    <a class="portal-return" href="{{ ''|u }}">
+      <span><b>Looking for Techbase Consultant Services?</b><small>Coding and robotics training for schools, curriculum, web and app development.</small></span>
+      <span class="portal-return-go">Visit the main website {{ icon('arrow-ur') }}</span>
+    </a>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand brand--portal" href="{{ 'learn/'|u }}"><img src="{{ root }}assets/img/logo-mark.webp" width="44" height="44" alt=""><span class="brand-text"><b>Techbase Academy</b><small>Learning Portal</small></span></a>
+        <p>{{ site.tagline }}</p>
+        <ul class="social" aria-label="Techbase on social media">
+          {%- for key, url in site.company.social.items() %}
+          <li><a href="{{ url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ {'x':'X (Twitter)'}.get(key, key|capitalize) }}">{{ icon(key) }}</a></li>
+          {%- endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2>Courses</h2>
+        <ul>
+          {%- for c in courses %}
+          <li><a href="{{ (c.slug ~ '/')|u }}">{{ c.title }}</a></li>
+          {%- endfor %}
+        </ul>
+      </div>
+      <div>
+        <h2>Portal</h2>
+        <ul>
+          <li><a href="{{ 'learn/'|u }}">All courses</a></li>
+          <li><a href="{{ 'learn/#paths'|u }}">Learning paths</a></li>
+          {%- if site.accounts %}
+          <li><a href="{{ 'login/'|u }}">Log in</a></li>
+          <li><a href="{{ 'login/#signup'|u }}">Create free account</a></li>
+          <li><a href="{{ 'account/'|u }}">My account</a></li>
+          {%- endif %}
+        </ul>
+      </div>
+      <div>
+        <h2>Help and community</h2>
+        <ul>
+          <li><a href="{{ 'contact/'|u }}">Contact Techbase</a></li>
+          <li><a href="{{ site.company.whatsapp.group }}" target="_blank" rel="noopener noreferrer">Community group</a></li>
+          <li><a href="{{ site.links.youtube }}" target="_blank" rel="noopener noreferrer">Video walkthroughs</a></li>
+          <li><a href="{{ 'privacy/'|u }}">Privacy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {{ site.copyright_years }} {{ site.company.name }} · Techbase Academy learning portal</span>
+      <span>Free to use · Open source under the MIT licence</span>
+    </div>
+  </div>
+</footer>
+{%- else %}
 <footer class="footer">
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="{{ ''|u }}"><img src="{{ root }}assets/img/logo-mark.webp" width="44" height="44" alt=""><span>Tech<b>base</b> <small>Consultant Services</small></span></a>
+        <a class="brand" href="{{ ''|u }}"><img src="{{ root }}assets/img/logo-mark.webp" width="44" height="44" alt=""><span class="brand-text"><b>Tech<i>base</i></b><small>Consultant Services</small></span></a>
         <p>{{ site.company.tagline }}</p>
         <address>{{ site.company.address }}</address>
         <ul class="social" aria-label="Techbase on social media">
@@ -111,9 +208,9 @@
         </ul>
       </div>
       <div>
-        <h2>Learn</h2>
+        <h2>Techbase Academy</h2>
         <ul>
-          <li><a href="{{ 'learn/'|u }}">All courses</a></li>
+          <li><a class="footer-portal" href="{{ 'learn/'|u }}">{{ icon('cap') }} Enter the learning portal {{ icon('arrow-ur') }}</a></li>
           {%- for c in courses %}
           <li><a href="{{ (c.slug ~ '/')|u }}">{{ c.title }}</a></li>
           {%- endfor %}
@@ -138,6 +235,7 @@
     </div>
   </div>
 </footer>
+{%- endif %}
 
 <dialog class="palette" id="palette" aria-label="Search the site">
   <form method="dialog" class="palette-input">{{ icon('search') }}<input type="search" placeholder="Search lessons, services, articles…" aria-label="Search the site" autocomplete="off" spellcheck="false"><kbd class="kbd">Esc</kbd></form>

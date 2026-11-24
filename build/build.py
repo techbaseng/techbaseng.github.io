@@ -29,13 +29,18 @@ CONTENT, TEMPLATES, ASSETS, DIST = ROOT / "content", ROOT / "templates", ROOT / 
 JS_BUILD = ROOT / ".build" / "js"  # written by build/bundle.mjs (Firebase code), before this script runs
 CACHE = ROOT / ".cache" / "lessons"
 
+# The company website and the Academy learning portal are two separate spaces with their own header,
+# navigation and footer. The company site only points at the portal (see templates/base.html).
 NAV = [
     {"label": "Services", "href": "services/", "key": "services"},
-    {"label": "Learn", "href": "learn/", "key": "learn"},
     {"label": "Portfolio", "href": "portfolio/", "key": "portfolio"},
     {"label": "About", "href": "about/", "key": "about"},
     {"label": "Blog", "href": "blog/", "key": "blog"},
-    {"label": "Contact", "href": "contact/", "key": "contact"},
+]
+PORTAL_NAV = [
+    {"label": "Courses", "href": "learn/", "key": "learn"},
+    {"label": "Learning paths", "href": "learn/#paths", "key": "paths"},
+    {"label": "My account", "href": "account/", "key": "account"},
 ]
 warnings: list[str] = []
 notes: list[str] = []   # things worth knowing that must not fail a build
@@ -233,7 +238,7 @@ def main() -> int:
         canon_path = out.removesuffix("index.html")
         og_rel = og_path or f"assets/img/og/{og}.png"
         html = env.get_template(tpl).render(
-            site=site, courses=courses, paths=paths, total_lessons=total_lessons, root=root, nav=NAV, photos=photos,
+            site=site, courses=courses, paths=paths, total_lessons=total_lessons, root=root, nav=NAV, portal_nav=PORTAL_NAV, photos=photos,
             csp=csp, theme_script=theme_script, asset_v=asset_v, title=title, description=description[:300],
             fb_public=({"project": fb["projectId"], "key": fb["apiKey"]} if fb else None),
             canonical=f"{base_url}/{canon_path}", og_image=f"{base_url}/{og_rel}", og_alt=og_alt,
@@ -341,9 +346,9 @@ def main() -> int:
 
     # accounts
     render("login.html", "login/index.html", title="Log in or create a free account | Techbase Academy", description="Sign in or create a free Techbase account to save your progress across devices.",
-           index=False, section="learn", nav_active="learn", **company_ctx)
+           index=False, section="learn", nav_active="account", **company_ctx)
     render("account.html", "account/index.html", title="Your account | Techbase Academy", description="Manage your Techbase account and see your learning progress.",
-           index=False, section="learn", nav_active="learn", **company_ctx)
+           index=False, section="learn", nav_active="account", **company_ctx)
     if site["accounts"]:
         add_search("page", "Account", "Log in or create an account", "Save your progress across devices", "login/index.html")
     # blog admin + the live page for posts published since the last build (neither is listed in search engines)
