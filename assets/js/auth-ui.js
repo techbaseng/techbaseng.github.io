@@ -98,7 +98,7 @@
       $('[name="name"]', $('[data-account-form="profile"]')).value = u.displayName || '';
     }
     paintHead(user); show();
-    TB.auth.getProfile().then(function (p) { var g = $('[name="goal"]'); if (g && p.goal) g.value = p.goal; });
+    TB.auth.getProfile().then(function (p) { var g = $('[name="goal"]'); if (!g || !p.goal) return; g.value = p.goal; if (g.value !== p.goal) { var o = g.querySelector('option[data-start="' + p.goal + '"]'); if (o) g.value = o.value; } });
     $('[data-password-note]').textContent = TB.auth.usesPassword() ? 'We will email you a link to choose a new password.' : 'You sign in with Google, so there is no password to change here.';
     if (!TB.auth.usesPassword()) $('[data-reset-password]').hidden = true;
 

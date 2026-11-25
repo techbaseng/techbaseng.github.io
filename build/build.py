@@ -173,6 +173,8 @@ def main() -> int:
     course_by_slug = {c["slug"]: c for c in courses}
     for p in paths:
         p["key"] = course_by_slug[p["start"]]["key"]
+        # several paths begin with the same course, so the saved goal needs its own unique value
+        p["goal"] = re.sub(r"[^a-z0-9]+", "-", p["who"].lower()).strip("-")
     total_lessons = sum(c["total"] for c in courses)
     base_url = site["url"].rstrip("/")
     free_n = int(site.get("free_preview_lessons", 1))
