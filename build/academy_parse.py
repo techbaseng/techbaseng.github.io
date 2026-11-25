@@ -116,8 +116,40 @@ def repair_stray_markup(scope, name: str) -> None:
         REPAIRED.append(name)
 
 
+REVEAL_REPAIRED: list[str] = []
+_CUT_P = re.compile(r"^\s*(expected output|self-?check|your answer should look like)", re.I)
+
+
+def repair_reveal_blocks(scope, name: str) -> None:
+    """Some sources never close a reveal block, so it swallows every exercise after it and
+    they stay hidden until the first answer is revealed. Keep only the answer (the leading
+    code) inside the block and put the rest of the page back after it."""
+    for rc in scope.select(".reveal-content"):
+        if not rc.select("hr, h3, .task-box, .chal-box, .reveal-btn, .ub, .phase"):
+            continue
+        cut = None
+        for child in rc.find_all(recursive=False):
+            cls = child.get("class") or []
+            if (child.name in ("hr", "h2", "h3") or "task-box" in cls or "chal-box" in cls
+                    or "reveal-btn" in cls or "ub" in cls or "btn-row" in cls or "phase" in cls
+                    or child.select_one(".ub, .reveal-btn, .task-box, .chal-box, hr, h3")
+                    or (child.name == "p" and _CUT_P.match(child.get_text()))):
+                cut = child
+                break
+        if cut is None:
+            warn(f"{name}: reveal block holds later content but no split point found")
+            continue
+        tail = [cut] + list(cut.find_next_siblings())
+        anchor = rc
+        for node in tail:
+            anchor.insert_after(node.extract())
+            anchor = node
+        REVEAL_REPAIRED.append(name)
+
+
 def normalise_body(scope, name: str = "") -> None:
     repair_stray_markup(scope, name)
+    repair_reveal_blocks(scope, name)
     convert_handlers(scope)
     # tidy inline styles that existed only to colour buttons / lay out button rows
     for el in scope.select("[style]"):
