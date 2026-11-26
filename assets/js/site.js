@@ -143,6 +143,14 @@
 
   /* enquiry + application forms: stored in Firestore (create-only), see firebase/firestore.rules */
   var EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function sendMail(to, kind, data) {
+    var body = { _subject: (kind === 'applications' ? 'Instructor application' : 'Website enquiry') + ' from ' + (data.name || 'the Techbase website'), _template: 'table', _captcha: 'false', _honey: '' };
+    Object.keys(data).forEach(function (k) { body[k] = data[k]; });
+    if (data.email) body._replyto = data.email;
+    return fetch('https://formsubmit.co/ajax/' + encodeURIComponent(to), { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok; }, function () { return false; });
+  }
+
   $$('form[data-form]').forEach(function (form) {
     var status = $('[data-status]', form), btn = $('button[type="submit"]', form), label = $('[data-label]', btn);
     var say = function (msg, kind) { status.textContent = msg; status.className = 'form-status' + (kind ? ' is-' + kind : ''); };
@@ -165,14 +173,17 @@
       });
       if (bad) { bad.focus(); say('Please fix the highlighted fields.', 'err'); return; }
       delete data.website;
-      if (document.body.getAttribute('data-accounts') !== 'on') { say('Sending is not switched on yet. Please email us or use WhatsApp.', 'err'); return; }
       var last = 0; try { last = parseInt(localStorage.getItem('tb:form-last') || '0', 10); } catch (x) { /* ignore */ }
       if (Date.now() - last < 15000) { say('Please wait a few seconds before sending again.', 'err'); return; }
       btn.disabled = true; label.textContent = 'Sending…'; say('');
-      TB.loadAuth().then(function () {
-        if (!TB.auth) throw new Error('unavailable');
-        return TB.auth.submitForm(form.getAttribute('data-form'), data);
-      }).then(function () {
+      var kind = form.getAttribute('data-form'), mailTo = form.getAttribute('data-mail-to');
+      // 1) email straight to the Techbase inbox (works without accounts); 2) also keep a copy in the database when it is on
+      var mailed = mailTo ? sendMail(mailTo, kind, data) : Promise.resolve(false);
+      var saved = document.body.getAttribute('data-accounts') === 'on'
+        ? TB.loadAuth().then(function () { if (!TB.auth) throw new Error('unavailable'); return TB.auth.submitForm(kind, data); }).then(function () { return true; }, function () { return false; })
+        : Promise.resolve(false);
+      Promise.all([mailed, saved]).then(function (r) {
+        if (!r[0] && !r[1]) throw new Error('not sent');
         try { localStorage.setItem('tb:form-last', String(Date.now())); } catch (x) { /* ignore */ }
         form.reset(); say('Thank you. We have your message and will reply soon.', 'ok');
       }).catch(function () {

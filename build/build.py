@@ -69,7 +69,7 @@ def firebase_config() -> dict | None:
 
 def build_csp(theme_hash: str, fb: dict | None) -> str:
     scripts = ["'self'", f"'{theme_hash}'"]
-    connect = ["'self'"]
+    connect = ["'self'", "https://formsubmit.co"]  # contact and application forms email the Techbase inbox
     frames: list[str] = []
     if fb:
         scripts.append("https://apis.google.com")
